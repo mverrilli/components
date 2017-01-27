@@ -16,6 +16,7 @@ public class NsSearchResultSet extends ResultSet<NsObject> {
     private NsSearchResult result;
     private List<NsObject> recordList;
     private Iterator<NsObject> recordIterator;
+    private NsObject current;
 
     public NsSearchResultSet(NetSuiteConnection conn,
             Class<?> entityClass, boolean itemSearch, NsSearchResult result) {
@@ -30,23 +31,21 @@ public class NsSearchResultSet extends ResultSet<NsObject> {
     }
 
     @Override
-    public boolean hasNext() throws NetSuiteException {
-        if (recordIterator.hasNext()) {
-            return true;
-        }
-        return hasMore();
-    }
-
-    @Override
-    public NsObject getNext() throws NetSuiteException {
+    public boolean next() throws NetSuiteException {
         if (!recordIterator.hasNext() && hasMore()) {
             recordList = getMoreRecords();
             recordIterator = recordList.iterator();
         }
         if (recordIterator.hasNext()) {
-            return recordIterator.next();
+            current = recordIterator.next();
+            return true;
         }
-        throw new NetSuiteException("No more records");
+        return false;
+    }
+
+    @Override
+    public NsObject get() throws NetSuiteException {
+        return current;
     }
 
     protected boolean hasMore() {

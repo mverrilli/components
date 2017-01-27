@@ -45,7 +45,7 @@ public class CodeGenTest {
         account.setEliminate(true);
         account.setCurDocNum(123456789L);
 
-        PropertyAccessor bean = (PropertyAccessor) account;
+        PropertyAccess bean = (PropertyAccess) account;
 
         assertEquals(Boolean.TRUE, bean.get("eliminate"));
         bean.set("eliminate", Boolean.FALSE);

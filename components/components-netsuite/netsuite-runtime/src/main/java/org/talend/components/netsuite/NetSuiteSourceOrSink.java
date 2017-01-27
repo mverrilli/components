@@ -15,6 +15,7 @@ import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.api.properties.ComponentProperties;
 import org.talend.components.netsuite.client.NetSuiteConnection;
+import org.talend.components.netsuite.client.NetSuiteConnectionFactory;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
@@ -119,7 +120,7 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
     return properties.getConnectionProperties();
 }
 
-    protected NetSuiteConnection connect(RuntimeContainer container) throws NetSuiteException {
+    public NetSuiteConnection connect(RuntimeContainer container) throws NetSuiteException {
         NetSuiteConnectionProperties connProps = properties.getConnectionProperties();
 
         if (StringUtils.isEmpty(connProps.endpoint.getValue())) {
@@ -146,15 +147,11 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
 
     protected NetSuiteConnection connect(String endpointUrl, NetSuiteCredentials credentials)
             throws NetSuiteException {
-        try {
-            NetSuiteConnection conn = new NetSuiteConnection();
-            conn.setEndpointUrl(new URL(endpointUrl));
-            conn.setCredentials(credentials);
-            conn.connect();
-            return conn;
-        } catch (MalformedURLException e) {
-            throw new NetSuiteException("Invalid endpoint URL: " + endpointUrl, e);
-        }
+
+        NetSuiteConnection conn = NetSuiteConnectionFactory.getConnection(API_VERSION);
+        conn.setEndpointUrl(endpointUrl);
+        conn.setCredentials(credentials);
+        return conn;
     }
 
     protected static ValidationResult exceptionToValidationResult(Exception ex) {

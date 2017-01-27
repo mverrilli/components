@@ -3,9 +3,9 @@ package org.talend.components.netsuite;
 /**
  *
  */
-public interface PropertyAccessor {
+public interface PropertyAccessor<T> {
 
-    Object get(String name);
+    Object get(T target, String name);
 
-    void set(String name, Object value);
+    void set(T target, String name, Object value);
 }

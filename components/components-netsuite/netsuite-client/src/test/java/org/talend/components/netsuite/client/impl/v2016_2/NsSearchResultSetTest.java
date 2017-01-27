@@ -82,8 +82,8 @@ public class NsSearchResultSetTest {
                 Account.class, false, nsSearchResult1);
 
         List<NsObject> recordList = new ArrayList<>();
-        while (resultSet.hasNext()) {
-            NsObject record = resultSet.getNext();
+        while (resultSet.next()) {
+            NsObject record = resultSet.get();
             assertNotNull(record);
             recordList.add(record);
         }

@@ -9,12 +9,12 @@ import javassist.Modifier;
 
 import java.util.Set;
 
-import org.talend.components.netsuite.PrimitiveInfo;
+import org.talend.components.netsuite.beaninfo.PrimitiveInfo;
 
 /**
- * Created by ihor.istomin on 1/25/2017.
+ *
  */
-public class NsBeanClassTransformer {
+public class NsBeanClassEnhancer {
 
     public void transform(CtClass classToTransform) throws Exception {
 
@@ -32,8 +32,8 @@ public class NsBeanClassTransformer {
             classToTransform.defrost();
         }
 
-        CtClass nsObjectInterface = ClassPool.getDefault().get("org.talend.components.netsuite.PropertyAccessor");
-        classToTransform.addInterface(nsObjectInterface);
+        CtClass nsPropertyAccessInterface = ClassPool.getDefault().get("org.talend.components.netsuite.PropertyAccess");
+        classToTransform.addInterface(nsPropertyAccessInterface);
 
         genGetPropMethod(classToTransform, propertyInfoSet);
         genSetPropMethod(classToTransform, propertyInfoSet);
@@ -99,8 +99,8 @@ public class NsBeanClassTransformer {
         body.append("}");
 
         try {
-            //            System.out.println(body);
             CtMethod method = CtNewMethod.make(body.toString(), classToTransform);
+
             classToTransform.addMethod(method);
         } catch (CannotCompileException e) {
             System.out.println(body);
@@ -140,6 +140,7 @@ public class NsBeanClassTransformer {
 
         try {
             CtMethod method = CtNewMethod.make(body.toString(), classToTransform);
+
             classToTransform.addMethod(method);
         } catch (CannotCompileException e) {
             System.out.println(body);

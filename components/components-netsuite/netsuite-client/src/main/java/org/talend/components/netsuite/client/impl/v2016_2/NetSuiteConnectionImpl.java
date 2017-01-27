@@ -386,9 +386,9 @@ public class NetSuiteConnectionImpl extends NetSuiteConnection<NetSuitePortType>
         try {
 
             Header searchPreferencesHeader = new Header(new QName(NS_URI_PLATFORM_MESSAGES, "searchPreferences"),
-                    nsSearchPreferences, new JAXBDataBinding(nsSearchPreferences.getClass()));
+                    nsSearchPreferences, new JAXBDataBinding(searchPreferences.getClass()));
             Header preferencesHeader = new Header(new QName(NS_URI_PLATFORM_MESSAGES, "preferences"), nsPreferences,
-                    new JAXBDataBinding(nsPreferences.getClass()));
+                    new JAXBDataBinding(preferences.getClass()));
             list.add(searchPreferencesHeader);
             list.add(preferencesHeader);
 

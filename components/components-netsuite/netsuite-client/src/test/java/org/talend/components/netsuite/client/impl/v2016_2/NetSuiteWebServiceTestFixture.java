@@ -20,7 +20,7 @@ public class NetSuiteWebServiceTestFixture {
     private NetSuiteService service;
 
     public void setUp() throws Exception {
-//        System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
+        System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
 
         URL endpointAddress = new URL("http://localhost:8088/NetSuitePort_2016_2");
 

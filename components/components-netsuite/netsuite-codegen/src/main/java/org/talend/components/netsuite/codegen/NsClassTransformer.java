@@ -13,7 +13,7 @@ import java.util.Properties;
  */
 public class NsClassTransformer extends ClassTransformer {
 
-    private NsBeanClassTransformer transformer = new NsBeanClassTransformer();
+    private NsBeanClassEnhancer transformer = new NsBeanClassEnhancer();
 
     @Override
     protected boolean shouldTransform(CtClass candidateClass) throws Exception {

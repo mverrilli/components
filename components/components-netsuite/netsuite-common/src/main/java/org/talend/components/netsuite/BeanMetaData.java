@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import org.talend.components.netsuite.beaninfo.BeanIntrospector;
+import org.talend.components.netsuite.beaninfo.PropertyInfo;
+
 /**
  *
  */
@@ -80,5 +83,4 @@ public class BeanMetaData {
             throw new RuntimeException(e);
         }
     }
-
 }

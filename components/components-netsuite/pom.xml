@@ -19,7 +19,7 @@
         <module>netsuite-codegen</module>
         <module>netsuite-client</module>
         <module>netsuite-definition</module>
-        <!--<module>netsuite-runtime</module>-->
+        <module>netsuite-runtime</module>
     </modules>
 
 </project>

@@ -2,8 +2,6 @@ package org.talend.components.netsuite.client;
 
 import java.util.List;
 
-import org.talend.components.netsuite.client.NsObject;
-
 /**
  *
  */

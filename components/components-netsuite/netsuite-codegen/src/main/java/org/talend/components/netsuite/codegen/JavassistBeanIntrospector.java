@@ -11,7 +11,7 @@ import javassist.CtClass;
 import javassist.CtMethod;
 import javassist.Modifier;
 
-import org.talend.components.netsuite.PrimitiveInfo;
+import org.talend.components.netsuite.beaninfo.PrimitiveInfo;
 
 /**
  *
