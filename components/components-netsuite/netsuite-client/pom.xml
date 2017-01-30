@@ -5,13 +5,12 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>components-parent</artifactId>
-        <version>0.18.0-SNAPSHOT</version>
+        <version>0.17.0-SNAPSHOT</version>
         <relativePath>../../../components-parent/pom.xml</relativePath>
     </parent>
 
     <name>Components - NetSuite Client</name>
     <artifactId>netsuite-client</artifactId>
-    <version>0.18.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -104,6 +103,18 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>

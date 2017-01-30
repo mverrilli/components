@@ -55,6 +55,11 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
         mainForm.addRow(widget(password).setWidgetType(Widget.HIDDEN_TEXT_WIDGET_TYPE));
         mainForm.addRow(role);
         mainForm.addRow(account);
+
+        Form advancedForm = new Form(this, Form.ADVANCED);
+
+        // A form for a reference to a connection, used in a NetSuite Input component for example
+        Form refForm = Form.create(this, Form.REFERENCE);
     }
 
     @Override

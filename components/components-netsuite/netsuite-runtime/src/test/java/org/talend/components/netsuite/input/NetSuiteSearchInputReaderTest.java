@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.avro.Schema;
+import org.apache.avro.generic.IndexedRecord;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -11,8 +13,12 @@ import org.mockito.Answers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.talend.components.api.container.RuntimeContainer;
+import org.talend.components.netsuite.NetSuiteAvroRegistry;
+import org.talend.components.netsuite.NetSuiteSchemaProvider;
+import org.talend.components.netsuite.NetSuiteSchemaProviderImpl;
 import org.talend.components.netsuite.NetSuiteSource;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
+import org.talend.components.netsuite.client.NsObject;
 import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteWebServiceTestFixture;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.Account;
@@ -28,6 +34,7 @@ import com.netsuite.webservices.v2016_2.platform.messages.SearchRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.SearchResponse;
 import com.netsuite.webservices.v2016_2.platform.messages.SessionResponse;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -71,10 +78,15 @@ public class NetSuiteSearchInputReaderTest {
 
         NetSuiteInputProperties properties = new NetSuiteInputProperties("NetSuite");
         properties.init();
-        properties.endpoint.setValue(webServiceTestFixture.getEndpointAddress().toString());
-        properties.email.setValue("test@test.com");
-        properties.password.setValue("123");
-        properties.account.setValue("test");
+        properties.connection.endpoint.setValue(webServiceTestFixture.getEndpointAddress().toString());
+        properties.connection.email.setValue("test@test.com");
+        properties.connection.password.setValue("123");
+        properties.connection.account.setValue("test");
+        properties.module.moduleName.setValue("Account");
+        NetSuiteSchemaProvider schemaProvider = new NetSuiteSchemaProviderImpl();
+        Schema schema = schemaProvider.getSchema(container, properties.getConnectionProperties(),
+                properties.module.moduleName.getValue());
+        properties.module.main.schema.setValue(schema);
 
         NetSuiteSource source = new NetSuiteSource();
         source.initialize(container, properties);
@@ -100,6 +112,15 @@ public class NetSuiteSearchInputReaderTest {
 
         boolean started = reader.start();
         assertTrue(started);
+
+        IndexedRecord record = reader.getCurrent();
+        assertNotNull(record);
+
+        List<Schema.Field> fields = record.getSchema().getFields();
+        for (int i = 0; i < fields.size(); i++) {
+            Object value = record.get(i);
+            System.out.println(fields.get(i) + ": " + value);
+        }
     }
 
     private List<SearchResult> makeRecordPages(int count, int pageSize) {

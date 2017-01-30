@@ -1,8 +1,6 @@
 package org.talend.components.netsuite;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,39 +67,39 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
         }
     }
 
-    public static List<NamedThing> getSchemaNames(RuntimeContainer container,
-            NetSuiteProvideConnectionProperties properties) throws IOException {
-        ClassLoader classLoader = NetSuiteDefinition.class.getClassLoader();
-        RuntimeInfo runtimeInfo = NetSuiteDefinition.getCommonRuntimeInfo(classLoader, NetSuiteSourceOrSink.class);
-        try (SandboxedInstance sandboxedInstance = RuntimeUtil.createRuntimeClassWithCurrentJVMProperties(runtimeInfo,
-                classLoader)) {
-            NetSuiteSourceOrSink ss = (NetSuiteSourceOrSink) sandboxedInstance.getInstance();
-            ss.initialize(null, (ComponentProperties) properties);
-            try {
-                ss.connect(container);
-                return ss.getSchemaNames(container);
-            } catch (Exception ex) {
-                throw new ComponentException(exceptionToValidationResult(ex));
-            }
-        }
-    }
+//    public List<NamedThing> getSchemaNames(RuntimeContainer container,
+//            NetSuiteProvideConnectionProperties properties) throws IOException {
+//        ClassLoader classLoader = NetSuiteDefinition.class.getClassLoader();
+//        RuntimeInfo runtimeInfo = NetSuiteDefinition.getCommonRuntimeInfo(classLoader, NetSuiteSourceOrSink.class);
+//        try (SandboxedInstance sandboxedInstance = RuntimeUtil.createRuntimeClassWithCurrentJVMProperties(runtimeInfo,
+//                classLoader)) {
+//            NetSuiteSourceOrSink ss = (NetSuiteSourceOrSink) sandboxedInstance.getInstance();
+//            ss.initialize(null, (ComponentProperties) properties);
+//            try {
+//                ss.connect(container);
+//                return ss.getSchemaNames(container);
+//            } catch (Exception ex) {
+//                throw new ComponentException(exceptionToValidationResult(ex));
+//            }
+//        }
+//    }
 
-    public static Schema getSchema(RuntimeContainer container,
-            NetSuiteProvideConnectionProperties properties, String module) throws IOException {
-        ClassLoader classLoader = NetSuiteDefinition.class.getClassLoader();
-        RuntimeInfo runtimeInfo = NetSuiteDefinition.getCommonRuntimeInfo(classLoader, NetSuiteSourceOrSink.class);
-        try (SandboxedInstance sandboxedInstance = RuntimeUtil.createRuntimeClassWithCurrentJVMProperties(runtimeInfo,
-                classLoader)) {
-            NetSuiteSourceOrSink ss = (NetSuiteSourceOrSink) sandboxedInstance.getInstance();
-            ss.initialize(null, (ComponentProperties) properties);
-            try {
-                NetSuiteConnection conn = ss.connect(container);
-                return ss.getSchema(conn, module);
-            } catch (NetSuiteException ex) {
-                throw new ComponentException(exceptionToValidationResult(ex));
-            }
-        }
-    }
+//    public Schema getSchema(RuntimeContainer container,
+//            NetSuiteProvideConnectionProperties properties, String module) throws IOException {
+//        ClassLoader classLoader = NetSuiteDefinition.class.getClassLoader();
+//        RuntimeInfo runtimeInfo = NetSuiteDefinition.getCommonRuntimeInfo(classLoader, NetSuiteSourceOrSink.class);
+//        try (SandboxedInstance sandboxedInstance = RuntimeUtil.createRuntimeClassWithCurrentJVMProperties(runtimeInfo,
+//                classLoader)) {
+//            NetSuiteSourceOrSink ss = (NetSuiteSourceOrSink) sandboxedInstance.getInstance();
+//            ss.initialize(null, (ComponentProperties) properties);
+//            try {
+//                NetSuiteConnection conn = ss.connect(container);
+//                return ss.getSchema(conn, module);
+//            } catch (NetSuiteException ex) {
+//                throw new ComponentException(exceptionToValidationResult(ex));
+//            }
+//        }
+//    }
 
     @Override
     public Schema getEndpointSchema(RuntimeContainer container, String schemaName) throws IOException {
@@ -113,7 +111,10 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
     }
 
     protected Schema getSchema(NetSuiteConnection conn, String module) throws NetSuiteException {
-        return null;
+        NetSuiteMetaData metaData = conn.getMetaData();
+        NetSuiteMetaData.Entity entityMetaData = metaData.getEntity(module);
+        Schema schema = NetSuiteAvroRegistry.getInstance().inferSchema(entityMetaData);
+        return schema;
     }
 
     public NetSuiteConnectionProperties getConnectionProperties() {

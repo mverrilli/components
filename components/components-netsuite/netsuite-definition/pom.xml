@@ -5,12 +5,11 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>components-parent</artifactId>
-        <version>0.18.0-SNAPSHOT</version>
+        <version>0.17.0-SNAPSHOT</version>
         <relativePath>../../../components-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>netsuite-definition</artifactId>
-
     <name>Components - NetSuite Definition</name>
     <packaging>jar</packaging>
 
@@ -169,7 +168,7 @@
         <dependency>
             <groupId>org.talend.components</groupId>
             <artifactId>components-api-service-rest</artifactId>
-            <version>0.17.0-SNAPSHOT</version>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <!-- dep for OSGI tests -->
@@ -256,8 +255,8 @@
                             <instructions>
                                 <Bundle-SymbolicName>org.talend.components.netsuite</Bundle-SymbolicName>
                                 <Service-Component>*</Service-Component>
-                                <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components*
-                                </Embed-Dependency>
+                                <Import-Package>!org.apache.cxf.*,!org.springframework*,!com.sun*,!org.talend.components.netsuite*,!javax.jws*,!javax.xml*,!javax.wsdl*,!com.fasterxml.jackson*,*</Import-Package>
+                                <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components*|cxf-*|slf4j-*</Embed-Dependency>
                                 <Include-Resource>
                                     {maven-resources},META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt=target/classes/META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt
                                 </Include-Resource>

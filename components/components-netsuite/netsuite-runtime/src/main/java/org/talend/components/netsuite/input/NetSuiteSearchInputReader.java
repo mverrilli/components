@@ -121,9 +121,9 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
 
     protected Schema getSchema() throws IOException {
         if (searchSchema == null) {
-            searchSchema = properties.main.schema.getValue();
+            searchSchema = properties.module.main.schema.getValue();
             if (AvroUtils.isIncludeAllFields(searchSchema)) {
-                String moduleName = "Account";
+                String moduleName = properties.module.moduleName.getValue();
                 searchSchema = getCurrentSource().getEndpointSchema(container, moduleName);
             }
         }

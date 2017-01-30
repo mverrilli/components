@@ -92,7 +92,11 @@ public class NsObjectConverter implements IndexedRecordConverter<NsObject, Index
         @Override
         public Object get(int i) {
             Object value = record.get(names[i]);
-            return fieldConverter[i].convertToAvro(value);
+            AvroConverter converter = fieldConverter[i];
+            if (converter == null) {
+                return null;
+            }
+            return converter.convertToAvro(value);
         }
     }
 }

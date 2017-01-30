@@ -43,4 +43,5 @@ public abstract class NetSuiteDefinition extends AbstractComponentDefinition {
         return new SimpleRuntimeInfo(classLoader, DependenciesReader.computeDependenciesFilePath(
                 "org.talend.components", "components-netsuite"), className);
     }
+
 }
