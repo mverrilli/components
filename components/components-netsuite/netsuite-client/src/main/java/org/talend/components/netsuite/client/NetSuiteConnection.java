@@ -1,7 +1,15 @@
 package org.talend.components.netsuite.client;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantLock;
+
+import javax.xml.namespace.QName;
+import javax.xml.ws.BindingProvider;
+
+import org.apache.cxf.headers.Header;
 
 /**
  *
@@ -32,6 +40,8 @@ public abstract class NetSuiteConnection<P> {
     private boolean useRequestLevelCredentials = false;
 
     private boolean loggedIn = false;
+
+    private boolean messageLoggingEnabled = false;
 
     protected P port;
 
@@ -210,6 +220,45 @@ public abstract class NetSuiteConnection<P> {
     protected abstract void setPreferences(P port,
             NsPreferences preferences, NsSearchPreferences searchPreferences) throws NetSuiteException;
 
+    protected void setHeader(Header header) {
+        setHeader(port, header);
+    }
+
+    protected void setHeader(P port, Header header) {
+        BindingProvider provider = (BindingProvider) port;
+        Map<String, Object> requestContext = provider.getRequestContext();
+        List<Header> list = (List<Header>) requestContext.get(Header.HEADER_LIST);
+        if (list == null) {
+            list = new ArrayList<>();
+            requestContext.put(Header.HEADER_LIST, list);
+        }
+        removeHeader(list, header.getName());
+        list.add(header);
+    }
+
+    protected void removeHeader(QName name) {
+        removeHeader(port, name);
+    }
+
+    protected void removeHeader(P port, QName name) {
+        BindingProvider provider = (BindingProvider) port;
+        Map<String, Object> requestContext = provider.getRequestContext();
+        List<Header> list = (List<Header>) requestContext.get(Header.HEADER_LIST);
+        removeHeader(list, name);
+    }
+
+    private void removeHeader(List<Header> list, QName name) {
+        if (list != null) {
+            Iterator<Header> headerIterator = list.iterator();
+            while (headerIterator.hasNext()) {
+                Header header = headerIterator.next();
+                if (header.getName().equals(name)) {
+                    headerIterator.remove();
+                }
+            }
+        }
+    }
+
     private void relogin() throws NetSuiteException {
         login(true);
     }
@@ -272,6 +321,14 @@ public abstract class NetSuiteConnection<P> {
      */
     public void setRetryInterval(int retryInterval) {
         this.retryInterval = retryInterval;
+    }
+
+    public boolean isMessageLoggingEnabled() {
+        return messageLoggingEnabled;
+    }
+
+    public void setMessageLoggingEnabled(boolean messageLoggingEnabled) {
+        this.messageLoggingEnabled = messageLoggingEnabled;
     }
 
     protected void waitForRetryInterval() {

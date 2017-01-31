@@ -588,6 +588,7 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
             SearchDoubleCustomField.class,
             SearchDoubleField.class,
             SearchEnumMultiSelectField.class,
+            SearchMultiSelectField.class,
             SearchLongCustomField.class,
             SearchLongField.class,
             SearchMultiSelectCustomField.class,

@@ -14,9 +14,11 @@ import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.cxf.feature.LoggingFeature;
 import org.apache.cxf.headers.Header;
 import org.apache.cxf.jaxb.JAXBDataBinding;
 import org.talend.components.netsuite.client.NetSuiteConnection;
@@ -48,6 +50,7 @@ import com.netsuite.webservices.v2016_2.platform.core.SearchResult;
 import com.netsuite.webservices.v2016_2.platform.core.Status;
 import com.netsuite.webservices.v2016_2.platform.messages.AddListRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.AddRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.ApplicationInfo;
 import com.netsuite.webservices.v2016_2.platform.messages.DeleteListRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.DeleteRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.GetDataCenterUrlsRequest;
@@ -79,7 +82,7 @@ public class NetSuiteConnectionImpl extends NetSuiteConnection<NetSuitePortType>
     public static final String DEFAULT_ENDPOINT_URL =
             "https://webservices.netsuite.com/services/NetSuitePort_2016_2";
 
-    protected static final String NS_URI_PLATFORM_MESSAGES =
+    public static final String NS_URI_PLATFORM_MESSAGES =
             "urn:messages_2016_2.platform.webservices.netsuite.com";
 
     private final static NetSuiteMetaDataImpl metaData = new NetSuiteMetaDataImpl();
@@ -365,15 +368,6 @@ public class NetSuiteConnectionImpl extends NetSuiteConnection<NetSuitePortType>
     protected void setPreferences(NetSuitePortType port,
             NsPreferences nsPreferences, NsSearchPreferences nsSearchPreferences) throws NetSuiteException {
 
-        BindingProvider provider = (BindingProvider) port;
-        Map<String, Object> requestContext = provider.getRequestContext();
-
-        List<Header> list = (List<Header>) requestContext.get(Header.HEADER_LIST);
-        if (list == null) {
-            list = new ArrayList<>();
-            requestContext.put(Header.HEADER_LIST, list);
-        }
-
         SearchPreferences searchPreferences = new SearchPreferences();
         Preferences preferences = new Preferences();
         try {
@@ -384,17 +378,39 @@ public class NetSuiteConnectionImpl extends NetSuiteConnection<NetSuitePortType>
         }
 
         try {
-
             Header searchPreferencesHeader = new Header(new QName(NS_URI_PLATFORM_MESSAGES, "searchPreferences"),
-                    nsSearchPreferences, new JAXBDataBinding(searchPreferences.getClass()));
-            Header preferencesHeader = new Header(new QName(NS_URI_PLATFORM_MESSAGES, "preferences"), nsPreferences,
-                    new JAXBDataBinding(preferences.getClass()));
-            list.add(searchPreferencesHeader);
-            list.add(preferencesHeader);
+                    searchPreferences, new JAXBDataBinding(searchPreferences.getClass()));
+
+            Header preferencesHeader = new Header(new QName(NS_URI_PLATFORM_MESSAGES, "preferences"),
+                    preferences, new JAXBDataBinding(preferences.getClass()));
+
+            setHeader(port, preferencesHeader);
+            setHeader(port, searchPreferencesHeader);
 
         } catch (JAXBException e) {
             throw new NetSuiteException("XML binding error", e);
         }
+    }
+
+    protected void setLoginHeaders(NetSuitePortType port) throws NetSuiteException {
+        if (credentials.getApplicationId() != null) {
+            ApplicationInfo applicationInfo = new ApplicationInfo();
+            applicationInfo.setApplicationId(credentials.getApplicationId());
+
+            try {
+                if (applicationInfo != null) {
+                    Header appInfoHeader = new Header(new QName(NS_URI_PLATFORM_MESSAGES, "applicationInfo"),
+                            applicationInfo, new JAXBDataBinding(applicationInfo.getClass()));
+                    setHeader(port, appInfoHeader);
+                }
+            } catch (JAXBException e) {
+                throw new NetSuiteException("XML binding error", e);
+            }
+        }
+    }
+
+    protected void remoteLoginHeaders(NetSuitePortType port) throws NetSuiteException {
+        removeHeader(port, new QName(NS_URI_PLATFORM_MESSAGES, "applicationInfo"));
     }
 
     protected void doLogout() throws NetSuiteException {
@@ -408,6 +424,8 @@ public class NetSuiteConnectionImpl extends NetSuiteConnection<NetSuitePortType>
 
     protected void doLogin() throws NetSuiteException {
         port = getNetSuitePort(endpointUrl, credentials.getAccount());
+
+        setLoginHeaders(port);
 
         PortOperation<SessionResponse, NetSuitePortType> loginOp;
         if (!credentials.isUseSsoLogin()) {
@@ -460,6 +478,8 @@ public class NetSuiteConnectionImpl extends NetSuiteConnection<NetSuitePortType>
 
             throw new NetSuiteException(message);
         }
+
+        remoteLoginHeaders(port);
     }
 
     private Passport createPassport() {
@@ -480,7 +500,13 @@ public class NetSuiteConnectionImpl extends NetSuiteConnection<NetSuitePortType>
             URL wsdlLocationUrl = this.getClass().getResource("/wsdl/2016.2/netsuite.wsdl");
 
             NetSuiteService service = new NetSuiteService(wsdlLocationUrl, NetSuiteService.SERVICE);
-            NetSuitePortType port = service.getNetSuitePort();
+
+            List<WebServiceFeature> features = new ArrayList<>(2);
+            if (isMessageLoggingEnabled()) {
+                features.add(new LoggingFeature());
+            }
+            NetSuitePortType port = service.getNetSuitePort(
+                    features.toArray(new WebServiceFeature[features.size()]));
 
             BindingProvider provider = (BindingProvider) port;
             Map<String, Object> requestContext = provider.getRequestContext();

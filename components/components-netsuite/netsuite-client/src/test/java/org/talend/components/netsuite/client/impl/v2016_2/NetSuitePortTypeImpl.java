@@ -2,7 +2,12 @@ package org.talend.components.netsuite.client.impl.v2016_2;
 
 import java.net.URL;
 
+import javax.annotation.Resource;
 import javax.jws.WebService;
+import javax.xml.ws.WebServiceContext;
+import javax.xml.ws.handler.MessageContext;
+
+import org.talend.components.netsuite.client.impl.MessageContextHolder;
 
 import com.netsuite.webservices.v2016_2.platform.core.DataCenterUrls;
 import com.netsuite.webservices.v2016_2.platform.core.GetDataCenterUrlsResult;
@@ -119,6 +124,9 @@ public class NetSuitePortTypeImpl {
     private NetSuitePortType port;
 
     private URL endpointAddress;
+
+    @Resource
+    private WebServiceContext context;
 
     public URL getEndpointAddress() {
         return endpointAddress;
@@ -299,7 +307,15 @@ public class NetSuitePortTypeImpl {
     public LoginResponse login(LoginRequest parameters)
             throws InvalidSessionFault, UnexpectedErrorFault, ExceededRequestLimitFault, InvalidAccountFault,
             InsufficientPermissionFault, InvalidCredentialsFault, InvalidVersionFault {
-        return port.login(parameters);
+
+//        List<Header> headers = getHeaders();
+        try {
+            MessageContext messageContext = context.getMessageContext();
+            MessageContextHolder.set(messageContext);
+            return port.login(parameters);
+        } finally {
+            MessageContextHolder.remove();
+        }
     }
 
     public GetDataCenterUrlsResponse getDataCenterUrls(GetDataCenterUrlsRequest parameters)
@@ -467,5 +483,16 @@ public class NetSuitePortTypeImpl {
             ExceededRecordCountFault {
         return port.getDeleted(parameters);
     }
+
+//    private List<Header> getHeaders() {
+//        MessageContext messageContext = context.getMessageContext();
+//        if (messageContext == null || !(messageContext instanceof WrappedMessageContext)) {
+//            return null;
+//        }
+//
+//        Message message = ((WrappedMessageContext) messageContext).getWrappedMessage();
+//        List<Header> headers = CastUtils.cast((List<?>) message.get(Header.HEADER_LIST));
+//        return headers;
+//    }
 
 }

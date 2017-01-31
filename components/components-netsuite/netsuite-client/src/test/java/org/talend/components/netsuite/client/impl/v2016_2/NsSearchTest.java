@@ -36,8 +36,7 @@ public class NsSearchTest {
 
         NsSearch s1 = conn.newSearch();
         s1.entity("Account");
-        s1.criterion("balance", "GREATER_THAN_OR_EQUAL_TO",
-                Arrays.asList("10000.0"), "Double");
+        s1.criterion("balance", "GREATER_THAN_OR_EQUAL_TO", "Double", Arrays.asList("10000.0"));
 
         NsSearchRecord sr1 = s1.build();
         assertNotNull(sr1);

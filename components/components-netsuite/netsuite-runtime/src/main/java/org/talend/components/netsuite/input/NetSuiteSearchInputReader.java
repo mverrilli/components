@@ -113,8 +113,7 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
         NetSuiteConnection conn = getConnection();
         NsSearch search = conn.newSearch();
         search.entity("Account");
-        search.criterion("balance", "GREATER_THAN_OR_EQUAL_TO",
-                Arrays.asList("10000.0"), "Double");
+        search.criterion("balance", "GREATER_THAN_OR_EQUAL_TO", "Double", Arrays.asList("10000.0"));
         ResultSet<NsObject> resultSet = search.search();
         return resultSet;
     }

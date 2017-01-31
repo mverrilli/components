@@ -1,30 +1,27 @@
 package org.talend.components.netsuite.client.impl.v2016_2;
 
+import java.util.Arrays;
+
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.netsuite.client.NetSuiteConnection;
-import org.talend.components.netsuite.client.NetSuiteConnectionFactory;
-import org.talend.components.netsuite.client.NetSuiteCredentials;
+import org.talend.components.netsuite.client.NsObject;
+import org.talend.components.netsuite.client.NsSearchResultSet;
 
-import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
-import com.netsuite.webservices.v2016_2.platform.core.Status;
-import com.netsuite.webservices.v2016_2.platform.messages.LoginRequest;
-import com.netsuite.webservices.v2016_2.platform.messages.LoginResponse;
-import com.netsuite.webservices.v2016_2.platform.messages.SessionResponse;
+import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
  */
 public class NetSuiteConnectionITest {
 
-    private static NetSuiteWebServiceTestFixture webServiceTestFixture;
+    protected static NetSuiteWebServiceTestFixture webServiceTestFixture;
 
     @BeforeClass
     public static void classSetUp() throws Exception {
@@ -34,36 +31,38 @@ public class NetSuiteConnectionITest {
 
     @AfterClass
     public static void classTearDown() throws Exception {
-        if (webServiceTestFixture != null) {
-            webServiceTestFixture.tearDown();
-        }
+        webServiceTestFixture.tearDown();
+    }
+
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    @After
+    public void tearDown() throws Exception {
     }
 
     @Test
     public void testConnectAndLogin() throws Exception {
-        NetSuiteCredentials credentials = new NetSuiteCredentials(
-                "test@test.com", "12345", "test", "3");
+        NetSuiteConnection connection = webServiceTestFixture.getConnection();
 
-        NetSuitePortType port = mock(NetSuitePortType.class);
-        webServiceTestFixture.getPortImpl().setPort(port);
+        connection.login();
 
-        SessionResponse sessionResponse = new SessionResponse();
-        Status status = new Status();
-        status.setIsSuccess(true);
-        sessionResponse.setStatus(status);
-        LoginResponse response = new LoginResponse();
-        response.setSessionResponse(sessionResponse);
+        NsSearchResultSet rs = connection.newSearch()
+                .entity("Account")
+                .criterion("type", "String.ANY_OF", Arrays.asList("Bank"))
+                .search();
 
-        when(port.login(any(LoginRequest.class))).thenReturn(response);
+        int count = 0;
+        while (rs.next()) {
+            NsObject record = rs.get();
 
-        NetSuiteConnection conn = NetSuiteConnectionFactory.getConnection("2016.2");
-        conn.setEndpointUrl(webServiceTestFixture.getEndpointAddress().toString());
-        conn.setCredentials(credentials);
+            assertEquals(AccountType.BANK, record.get("acctType"));
 
-        conn.login();
-
-        verify(port, times(1))
-                .login(any(LoginRequest.class));
+            count++;
+        }
+        System.out.println("Retrieved records: " + count);
+        assertTrue(count > 1);
     }
 
 }

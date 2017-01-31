@@ -107,7 +107,20 @@ public class NsSearch {
         }
     }
 
-    public void criterion(String searchFieldName, String searchOperator, List<String> searchValue, String forcedType)
+    public NsSearch criterion(String searchFieldName, String searchOperator, List<String> searchValue)
+            throws NetSuiteException {
+
+        String[] operatorParts = searchOperator.split("\\.");
+        if (operatorParts.length == 2) {
+            String valueType = operatorParts[0];
+            String operatorType = operatorParts[1];
+            return criterion(searchFieldName, operatorType, valueType, searchValue);
+        } else {
+            throw new NetSuiteException("Invalid search field operator: " + searchOperator);
+        }
+    }
+
+    public NsSearch criterion(String searchFieldName, String searchOperator, String forcedType, List<String> searchValue)
             throws NetSuiteException {
 
         initSearch();
@@ -123,13 +136,12 @@ public class NsSearch {
 
                     if (forcedType.equals("String")) {
 
-                        NsObject searchArgumentType = createSearchField(
-                                "SearchStringCustomField", searchFieldName);
+                        NsObject searchArgumentType = createSearchField("SearchStringCustomField", searchFieldName);
                         if (searchValue != null && searchValue.size() != 0) {
                             searchArgumentType.set("searchValue", searchValue.get(0));
                         }
-                        searchArgumentType.set("operator", getSearchFieldOperatorEnumValue(
-                                "SearchStringFieldOperator", searchOperator));
+                        searchArgumentType
+                                .set("operator", getSearchFieldOperatorEnumValue("SearchStringFieldOperator", searchOperator));
                         customCriteria = searchArgumentType;
 
                     } else if (forcedType.equals("Long")) {
@@ -263,6 +275,8 @@ public class NsSearch {
         } catch (DatatypeConfigurationException | IllegalArgumentException e) {
             throw new NetSuiteException(e.getMessage(), e);
         }
+
+        return this;
     }
 
     private NsObject createSearchField(String searchFieldTypeName, String internalId) throws NetSuiteException {
@@ -451,7 +465,7 @@ public class NsSearch {
                         "SearchEnumMultiSelectFieldOperator", searchOperator));
                 criteria = searchArgumentType;
 
-            } else if (searchType.equals("String[]")) {
+            } else if (searchType.equals("String[]")) { // TODO Revisit. Is it really needed ?
 
                 NsObject searchArgumentType = createSearchField(
                         "SearchEnumMultiSelectField", null);

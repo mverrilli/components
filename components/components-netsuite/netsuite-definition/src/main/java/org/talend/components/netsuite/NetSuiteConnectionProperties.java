@@ -33,6 +33,8 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
 
     public Property<String> account = newString("account").setRequired();
 
+    public Property<String> applicationId = newString("applicationId").setRequired();
+
     public NetSuiteConnectionProperties(String name) {
         super(name);
     }
@@ -45,6 +47,7 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
         email.setValue("youremail@yourcompany.com");
         role.setValue(3);
         account.setValue("");
+        applicationId.setValue("");
     }
 
     @Override
@@ -57,6 +60,7 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
         mainForm.addRow(widget(password).setWidgetType(Widget.HIDDEN_TEXT_WIDGET_TYPE));
         mainForm.addRow(role);
         mainForm.addRow(account);
+        mainForm.addRow(applicationId);
 
         Form advancedForm = new Form(this, Form.ADVANCED);
 

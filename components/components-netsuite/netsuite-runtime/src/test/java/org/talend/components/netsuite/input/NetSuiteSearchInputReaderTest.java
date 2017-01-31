@@ -14,7 +14,7 @@ import org.mockito.stubbing.Answer;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteEndpoint;
 import org.talend.components.netsuite.NetSuiteSource;
-import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteWebServiceTestFixture;
+import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteWebServiceMockTestFixture;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.Account;
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
@@ -40,11 +40,11 @@ import static org.mockito.Mockito.when;
  */
 public class NetSuiteSearchInputReaderTest {
 
-    private static NetSuiteWebServiceTestFixture webServiceTestFixture;
+    private static NetSuiteWebServiceMockTestFixture webServiceTestFixture;
 
     @BeforeClass
     public static void classSetUp() throws Exception {
-        webServiceTestFixture = new NetSuiteWebServiceTestFixture();
+        webServiceTestFixture = new NetSuiteWebServiceMockTestFixture();
         webServiceTestFixture.setUp();
     }
 
@@ -76,7 +76,9 @@ public class NetSuiteSearchInputReaderTest {
         properties.connection.endpoint.setValue(webServiceTestFixture.getEndpointAddress().toString());
         properties.connection.email.setValue("test@test.com");
         properties.connection.password.setValue("123");
+        properties.connection.role.setValue(3);
         properties.connection.account.setValue("test");
+        properties.connection.applicationId.setValue("00000000-0000-0000-0000-000000000000");
         properties.module.moduleName.setValue("Account");
 
         NetSuiteEndpoint endpoint = new NetSuiteEndpoint(properties);
