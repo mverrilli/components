@@ -9,16 +9,11 @@ import org.apache.avro.generic.IndexedRecord;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Answers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.talend.components.api.container.RuntimeContainer;
-import org.talend.components.netsuite.NetSuiteAvroRegistry;
-import org.talend.components.netsuite.NetSuiteSchemaProvider;
-import org.talend.components.netsuite.NetSuiteSchemaProviderImpl;
+import org.talend.components.netsuite.NetSuiteEndpoint;
 import org.talend.components.netsuite.NetSuiteSource;
-import org.talend.components.netsuite.client.NetSuiteCredentials;
-import org.talend.components.netsuite.client.NsObject;
 import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteWebServiceTestFixture;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.Account;
@@ -83,9 +78,9 @@ public class NetSuiteSearchInputReaderTest {
         properties.connection.password.setValue("123");
         properties.connection.account.setValue("test");
         properties.module.moduleName.setValue("Account");
-        NetSuiteSchemaProvider schemaProvider = new NetSuiteSchemaProviderImpl();
-        Schema schema = schemaProvider.getSchema(container, properties.getConnectionProperties(),
-                properties.module.moduleName.getValue());
+
+        NetSuiteEndpoint endpoint = new NetSuiteEndpoint(properties);
+        Schema schema = endpoint.getSchema(properties.module.moduleName.getValue());
         properties.module.main.schema.setValue(schema);
 
         NetSuiteSource source = new NetSuiteSource();

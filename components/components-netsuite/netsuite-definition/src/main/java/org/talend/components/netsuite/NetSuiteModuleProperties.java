@@ -70,8 +70,8 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
 
     public ValidationResult beforeModuleName() throws Exception {
         try {
-            List<NamedThing> moduleNames = NetSuiteDesignSchemaManager.getInstance()
-                    .getSchemaNames(connection);
+            NetSuiteEndpoint endpoint = new NetSuiteEndpoint(this);
+            List<NamedThing> moduleNames = endpoint.getSchemaNames();
             moduleName.setPossibleNamedThingValues(moduleNames);
         } catch (ComponentException ex) {
             return ex.getValidationResult();
@@ -81,8 +81,8 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
 
     public ValidationResult afterModuleName() throws Exception {
         try {
-            main.schema.setValue(NetSuiteDesignSchemaManager.getInstance()
-                    .getSchema(connection, moduleName.getStringValue()));
+            NetSuiteEndpoint endpoint = new NetSuiteEndpoint(this);
+            main.schema.setValue(endpoint.getSchema(moduleName.getStringValue()));
         } catch (ComponentException ex) {
             return ex.getValidationResult();
         }

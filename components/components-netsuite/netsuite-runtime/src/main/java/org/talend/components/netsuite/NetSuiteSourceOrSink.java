@@ -1,11 +1,9 @@
 package org.talend.components.netsuite;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.avro.Schema;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.api.component.runtime.SourceOrSink;
@@ -13,16 +11,9 @@ import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.api.properties.ComponentProperties;
 import org.talend.components.netsuite.client.NetSuiteConnection;
-import org.talend.components.netsuite.client.NetSuiteConnectionFactory;
-import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.daikon.NamedThing;
-import org.talend.daikon.SimpleNamedThing;
 import org.talend.daikon.properties.ValidationResult;
-import org.talend.daikon.runtime.RuntimeInfo;
-import org.talend.daikon.runtime.RuntimeUtil;
-import org.talend.daikon.sandbox.SandboxedInstance;
 
 /**
  *
@@ -31,13 +22,14 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
 
     protected transient final Logger log = LoggerFactory.getLogger(getClass());
 
-    protected static final String API_VERSION = "2016.2";
-
     protected NetSuiteProvideConnectionProperties properties;
+
+    protected transient NetSuiteEndpoint endpoint;
 
     @Override
     public ValidationResult initialize(RuntimeContainer container, ComponentProperties properties) {
         this.properties = (NetSuiteProvideConnectionProperties) properties;
+        this.endpoint = new NetSuiteEndpoint(this.properties);
         return ValidationResult.OK;
     }
 
@@ -55,66 +47,19 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
     @Override
     public List<NamedThing> getSchemaNames(RuntimeContainer container) throws IOException {
         try {
-            NetSuiteConnection conn = connect(container);
-            NetSuiteMetaData metaData = conn.getMetaData();
-            List<NamedThing> schemaNames = new ArrayList<>();
-            for (String typeName : metaData.getTransactionTypes()) {
-                schemaNames.add(new SimpleNamedThing(typeName));
-            }
-            return schemaNames;
+            return endpoint.getSchemaNames();
         } catch (NetSuiteException e) {
             throw new IOException(e);
         }
     }
-
-//    public List<NamedThing> getSchemaNames(RuntimeContainer container,
-//            NetSuiteProvideConnectionProperties properties) throws IOException {
-//        ClassLoader classLoader = NetSuiteDefinition.class.getClassLoader();
-//        RuntimeInfo runtimeInfo = NetSuiteDefinition.getCommonRuntimeInfo(classLoader, NetSuiteSourceOrSink.class);
-//        try (SandboxedInstance sandboxedInstance = RuntimeUtil.createRuntimeClassWithCurrentJVMProperties(runtimeInfo,
-//                classLoader)) {
-//            NetSuiteSourceOrSink ss = (NetSuiteSourceOrSink) sandboxedInstance.getInstance();
-//            ss.initialize(null, (ComponentProperties) properties);
-//            try {
-//                ss.connect(container);
-//                return ss.getSchemaNames(container);
-//            } catch (Exception ex) {
-//                throw new ComponentException(exceptionToValidationResult(ex));
-//            }
-//        }
-//    }
-
-//    public Schema getSchema(RuntimeContainer container,
-//            NetSuiteProvideConnectionProperties properties, String module) throws IOException {
-//        ClassLoader classLoader = NetSuiteDefinition.class.getClassLoader();
-//        RuntimeInfo runtimeInfo = NetSuiteDefinition.getCommonRuntimeInfo(classLoader, NetSuiteSourceOrSink.class);
-//        try (SandboxedInstance sandboxedInstance = RuntimeUtil.createRuntimeClassWithCurrentJVMProperties(runtimeInfo,
-//                classLoader)) {
-//            NetSuiteSourceOrSink ss = (NetSuiteSourceOrSink) sandboxedInstance.getInstance();
-//            ss.initialize(null, (ComponentProperties) properties);
-//            try {
-//                NetSuiteConnection conn = ss.connect(container);
-//                return ss.getSchema(conn, module);
-//            } catch (NetSuiteException ex) {
-//                throw new ComponentException(exceptionToValidationResult(ex));
-//            }
-//        }
-//    }
 
     @Override
     public Schema getEndpointSchema(RuntimeContainer container, String schemaName) throws IOException {
         try {
-            return getSchema(connect(container), schemaName);
+            return endpoint.getSchema(schemaName);
         } catch (NetSuiteException e) {
             throw new IOException(e);
         }
-    }
-
-    protected Schema getSchema(NetSuiteConnection conn, String module) throws NetSuiteException {
-        NetSuiteMetaData metaData = conn.getMetaData();
-        NetSuiteMetaData.Entity entityMetaData = metaData.getEntity(module);
-        Schema schema = NetSuiteAvroRegistry.getInstance().inferSchema(entityMetaData);
-        return schema;
     }
 
     public NetSuiteConnectionProperties getConnectionProperties() {
@@ -122,37 +67,7 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
 }
 
     public NetSuiteConnection connect(RuntimeContainer container) throws NetSuiteException {
-        NetSuiteConnectionProperties connProps = properties.getConnectionProperties();
-
-        if (StringUtils.isEmpty(connProps.endpoint.getValue())) {
-            throw new NetSuiteException("Invalid endpoint URL");
-        }
-        if (StringUtils.isEmpty(connProps.email.getValue())) {
-            throw new NetSuiteException("Invalid email");
-        }
-        if (StringUtils.isEmpty(connProps.account.getValue())) {
-            throw new NetSuiteException("Invalid account");
-        }
-
-        String endpointUrl = StringUtils.strip(connProps.endpoint.getStringValue(), "\"");
-        String email = StringUtils.strip(connProps.email.getStringValue(), "\"");
-        String password = StringUtils.strip(connProps.password.getStringValue(), "\"");
-        Integer roleId = connProps.role.getValue();
-        String account = StringUtils.strip(connProps.account.getStringValue(), "\"");
-
-        NetSuiteCredentials credentials = new NetSuiteCredentials(
-                email, password, account, Integer.toString(roleId));
-        NetSuiteConnection conn = connect(endpointUrl, credentials);
-        return conn;
-    }
-
-    protected NetSuiteConnection connect(String endpointUrl, NetSuiteCredentials credentials)
-            throws NetSuiteException {
-
-        NetSuiteConnection conn = NetSuiteConnectionFactory.getConnection(API_VERSION);
-        conn.setEndpointUrl(endpointUrl);
-        conn.setCredentials(credentials);
-        return conn;
+        return endpoint.connect();
     }
 
     protected static ValidationResult exceptionToValidationResult(Exception ex) {

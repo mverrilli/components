@@ -20,6 +20,8 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
 
     public static final String ENDPOINT_URL = "https://webservices.netsuite.com/services/NetSuitePort_2016_2";
 
+    public static final String API_VERSION = "2016.2";
+
     public Property<String> endpoint = newString("endpoint").setRequired();
 
     public Property<String> email = newString("email").setRequired();
