@@ -52,11 +52,11 @@ public abstract class NetSuiteFactory {
     }
 
     public static Mapper<Enum, String> getEnumToStringMapper(Class<Enum> clazz) {
-        return ReflectionEnumToStringMapper.INSTANCE;
+        return new ReflectionEnumToStringMapper(clazz);
     }
 
     public static Mapper<String, Enum> getEnumFromStringMapper(Class<Enum> clazz) {
-        return ReflectionEnumFromStringMapper.INSTANCE;
+        return new ReflectionEnumFromStringMapper(clazz);
     }
 
     public static class ReflectionPropertyAccessor implements PropertyAccessor<Object> {
@@ -215,8 +215,11 @@ public abstract class NetSuiteFactory {
     }
 
     public static class ReflectionEnumToStringMapper implements Mapper<Enum, String> {
+        private Class<?> enumClass;
 
-        public static final ReflectionEnumToStringMapper INSTANCE = new ReflectionEnumToStringMapper();
+        public ReflectionEnumToStringMapper(Class<?> enumClass) {
+            this.enumClass = enumClass;
+        }
 
         @Override
         public String map(Enum input) {
@@ -231,13 +234,16 @@ public abstract class NetSuiteFactory {
     }
 
     public static class ReflectionEnumFromStringMapper implements Mapper<String, Enum> {
+        private Class<?> enumClass;
 
-        public static final ReflectionEnumFromStringMapper INSTANCE = new ReflectionEnumFromStringMapper();
+        public ReflectionEnumFromStringMapper(Class<?> enumClass) {
+            this.enumClass = enumClass;
+        }
 
         @Override
         public Enum map(String input) {
             try {
-                return (Enum) MethodUtils.invokeExactStaticMethod(input.getClass(), "fromValue", input);
+                return (Enum) MethodUtils.invokeExactStaticMethod(enumClass, "fromValue", input);
             } catch (InvocationTargetException e) {
                 throw new RuntimeException(e.getTargetException());
             } catch (NoSuchMethodException | IllegalAccessException e) {

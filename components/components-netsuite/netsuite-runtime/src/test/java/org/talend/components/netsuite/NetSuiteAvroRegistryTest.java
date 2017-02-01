@@ -72,19 +72,19 @@ public class NetSuiteAvroRegistryTest {
         AvroConverter<Enum<AccountType>, String> converter1 =
                 (AvroConverter<Enum<AccountType>, String>) registry.getConverter(f, fieldInfo.getValueType());
         assertEquals(AccountType.class, converter1.getDatumClass());
-        assertEquals(AccountType.ACCOUNTS_PAYABLE.name(),
+        assertEquals(AccountType.ACCOUNTS_PAYABLE.value(),
                 converter1.convertToAvro(AccountType.ACCOUNTS_PAYABLE));
         assertEquals(AccountType.ACCOUNTS_PAYABLE,
-                converter1.convertToDatum(AccountType.ACCOUNTS_PAYABLE.name()));
+                converter1.convertToDatum(AccountType.ACCOUNTS_PAYABLE.value()));
 
         fieldInfo = entityInfo.getField("generalRate");
         f = s.getField(fieldInfo.getName());
         AvroConverter<Enum<ConsolidatedRate>, String> converter2 =
                 (AvroConverter<Enum<ConsolidatedRate>, String>) registry.getConverter(f, fieldInfo.getValueType());
         assertEquals(ConsolidatedRate.class, converter2.getDatumClass());
-        assertEquals(ConsolidatedRate.HISTORICAL.name(),
+        assertEquals(ConsolidatedRate.HISTORICAL.value(),
                 converter2.convertToAvro(ConsolidatedRate.HISTORICAL));
         assertEquals(ConsolidatedRate.HISTORICAL,
-                converter2.convertToDatum(ConsolidatedRate.HISTORICAL.name()));
+                converter2.convertToDatum(ConsolidatedRate.HISTORICAL.value()));
     }
 }
