@@ -4,47 +4,113 @@ import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtMethod;
+import javassist.CtNewConstructor;
 import javassist.CtNewMethod;
 import javassist.Modifier;
 
 import java.util.Set;
+
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlType;
 
 import org.talend.components.netsuite.beaninfo.PrimitiveInfo;
 
 /**
  *
  */
-public class NsBeanClassEnhancer {
+public class NetSuiteClassEnhancer {
 
-    public void transform(CtClass classToTransform) throws Exception {
+    public void transform(CtClass classToTransform, String outputDir) throws Exception {
 
-        //        System.out.println("Transform: " + classToTransform.getName());
-        Set<JavassistPropertyInfo> propertyInfoSet = JavassistBeanIntrospector.getInstance()
-                .getBeanProperties(classToTransform);
-        //        for (JavassistPropertyInfo info : propertyInfoSet) {
-        //            if (info.getSetter() == null) {
-        //                System.out.println("    No setter: " + info.getType().getName() + " " + info.getName());
-        //            }
-        ////            System.out.println("    Property: " + info.getType().getName() + " " + info.getName());
-        //        }
+        if (classToTransform.isEnum() && classToTransform.hasAnnotation(XmlEnum.class)) {
+            genEnumAccessor(classToTransform, outputDir);
 
-        if (classToTransform.isFrozen()) {
-            classToTransform.defrost();
+        } else if (classToTransform.hasAnnotation(XmlType.class)) {
+            Set<JavassistPropertyInfo> propertyInfoSet = JavassistTypeIntrospector.getInstance()
+                    .getBeanProperties(classToTransform);
+
+            if (classToTransform.isFrozen()) {
+                classToTransform.defrost();
+            }
+
+            CtClass nsPropertyAccessInterface = ClassPool.getDefault()
+                    .get("org.talend.components.netsuite.PropertyAccess");
+            classToTransform.addInterface(nsPropertyAccessInterface);
+
+            genGetPropMethod(classToTransform, propertyInfoSet);
+            genSetPropMethod(classToTransform, propertyInfoSet);
+            genGetMetaDataMethod(classToTransform, propertyInfoSet);
         }
+    }
 
-        CtClass nsPropertyAccessInterface = ClassPool.getDefault().get("org.talend.components.netsuite.PropertyAccess");
-        classToTransform.addInterface(nsPropertyAccessInterface);
+    private void genEnumAccessor(CtClass ctClass, String outputDir) throws Exception {
+        CtClass nsEnumAccessorInterface = ClassPool.getDefault()
+                .get("org.talend.components.netsuite.EnumAccessor");
 
-        genGetPropMethod(classToTransform, propertyInfoSet);
-        genSetPropMethod(classToTransform, propertyInfoSet);
-        genGetMetaDataMethod(classToTransform, propertyInfoSet);
+        CtClass accessorClass = ClassPool.getDefault().makeClass(ctClass.getName() + "EnumAccessor");
+        accessorClass.addInterface(nsEnumAccessorInterface);
+        accessorClass.addConstructor(CtNewConstructor.defaultConstructor(accessorClass));
+
+        genEnumMapToStringMethod(ctClass, accessorClass);
+        genEnumMapFromStringMethod(ctClass, accessorClass);
+        genGetEnumAccessorMethod(ctClass, accessorClass);
+
+        accessorClass.writeFile(outputDir);
+    }
+
+    private void genEnumMapToStringMethod(CtClass ctClass, CtClass accessorClass) throws Exception {
+        StringBuilder body = new StringBuilder("public String mapToString(Enum enumValue) {\n");
+        body.append("return " + "((" + ctClass.getName() + ") enumValue).value();");
+        body.append("}");
+
+        try {
+            CtMethod method = CtNewMethod.make(body.toString(), accessorClass);
+
+            accessorClass.addMethod(method);
+        } catch (CannotCompileException e) {
+            System.out.println(body);
+            throw e;
+        }
+    }
+
+    private void genEnumMapFromStringMethod(CtClass ctClass, CtClass accessorClass) throws Exception {
+        StringBuilder body = new StringBuilder("public Enum mapFromString(String value) {\n");
+        body.append("return " + ctClass.getName() + ".fromValue(value);");
+        body.append("}");
+
+        try {
+            CtMethod method = CtNewMethod.make(body.toString(), accessorClass);
+
+            accessorClass.addMethod(method);
+        } catch (CannotCompileException e) {
+            System.out.println(body);
+            throw e;
+        }
+    }
+
+    private void genGetEnumAccessorMethod(CtClass targetClass, CtClass accessorClass) throws Exception {
+
+        CtClass nsEnumAccessorInterface = ClassPool.getDefault()
+                .get("org.talend.components.netsuite.EnumAccessor");
+
+        StringBuilder body = new StringBuilder("return new " + accessorClass.getName() +"();");
+
+        try {
+            CtMethod method = CtNewMethod.make(nsEnumAccessorInterface, "getEnumAccessor",
+                    new CtClass[0], new CtClass[0], body.toString(), targetClass);
+            method.setModifiers(Modifier.PUBLIC | Modifier.STATIC);
+
+            targetClass.addMethod(method);
+        } catch (CannotCompileException e) {
+            System.out.println(body);
+            throw e;
+        }
     }
 
     private void genSetPropMethod(CtClass classToTransform,
             Set<JavassistPropertyInfo> propertyInfoSet) throws Exception {
 
         StringBuilder body = new StringBuilder("public void set(String name, Object value) {\n");
-        //        body.append("throw new UnsupportedOperationException(\"setNsProperty\");");
 
         int count = 0;
         for (JavassistPropertyInfo info : propertyInfoSet) {
@@ -113,7 +179,6 @@ public class NsBeanClassEnhancer {
 
         StringBuilder body = new StringBuilder("public Object get(String name) {\n");
 
-        //        body.append("throw new UnsupportedOperationException(\"get\");");
         int count = 0;
         for (JavassistPropertyInfo info : propertyInfoSet) {
             if (info.getGetter() != null) {

@@ -10,7 +10,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.netsuite.client.NetSuiteConnection;
-import org.talend.components.netsuite.client.NetSuiteConnectionFactory;
+import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.impl.MessageContextHolder;
 import org.talend.components.netsuite.test.AssertMatcher;
@@ -87,7 +87,7 @@ public class NetSuiteConnectionTest {
             }
         }))).thenReturn(response);
 
-        NetSuiteConnection conn = NetSuiteConnectionFactory.getConnection("2016.2");
+        NetSuiteConnection conn = NetSuiteFactory.getConnection("2016.2");
         conn.setEndpointUrl(webServiceTestFixture.getEndpointAddress().toString());
         conn.setCredentials(credentials);
 

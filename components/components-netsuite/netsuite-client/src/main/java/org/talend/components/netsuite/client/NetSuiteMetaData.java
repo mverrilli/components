@@ -1,16 +1,16 @@
 package org.talend.components.netsuite.client;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
-import org.apache.commons.beanutils.MethodUtils;
 import org.talend.components.netsuite.BeanMetaData;
-import org.talend.components.netsuite.PropertyAccess;
-import org.talend.components.netsuite.PropertyAccessor;
 import org.talend.components.netsuite.PropertyMetaData;
 
 /**
@@ -18,56 +18,39 @@ import org.talend.components.netsuite.PropertyMetaData;
  */
 public abstract class NetSuiteMetaData {
 
-    protected Map<String, Entity> typeMap;
-    protected Map<String, Class<?>[]> searchMap;
+    protected Map<String, EntityInfo> typeMap;
+    protected Map<String, SearchInfo> searchMap;
     protected Map<String, Class<?>> searchFieldMap;
-    protected Map<String, Class<?>> searchFieldOperatorMap;
+    protected Map<String, SearchFieldOperatorTypeInfo> searchFieldOperatorTypeMap;
+    protected Set<String> searchFieldOperatorNames;
+    protected Map<String, String> searchFieldOperatorMappings;
 
     protected void initMetaData(
-            Class<?>[][] searchTable,
+            SearchInfo[] searchTable,
             Class<?>[] searchFieldTable,
-            Class<?>[] searchFieldOperatorTable) {
+            SearchFieldOperatorTypeInfo[] searchFieldOperatorTable) {
 
         typeMap = new HashMap<>(searchTable.length);
 
         searchMap = new HashMap<>(searchTable.length);
 
-        for (Class<?>[] entry : searchTable) {
-            Class<?> typeClass = entry[0];
-            String typeName = typeClass.getSimpleName();
+        for (SearchInfo entry : searchTable) {
+            String typeName = entry.getEntityTypeName();
 
-            registerType(typeClass, typeName);
+            registerType(entry.getEntityClass(), typeName);
+            registerType(entry.getSearchClass(), null);
+            registerType(entry.getSearchBasicClass(), null);
+            registerType(entry.getSearchAdvancedClass(), null);
 
-            Map<String, Field> fields = new HashMap<>();
-            BeanMetaData beanMetaData = BeanMetaData.forClass(typeClass);
-            Collection<PropertyMetaData> descriptors = beanMetaData.getProperties();
-            for (PropertyMetaData descriptor : descriptors) {
-                String fieldName = descriptor.getName();
-                Class fieldValueType = descriptor.getReadType();
-                if ((fieldName.equals("class") && fieldValueType == Class.class) ||
-                        (fieldName.equals("nullFieldList") && fieldValueType.getSimpleName().equals("NullField"))) {
-                    continue;
-                }
-                Field field = new Field(fieldName, fieldValueType, false, false);
-                fields.put(field.getName(), field);
-            }
-
-            Entity entity = new Entity(typeName, typeClass, Collections.unmodifiableMap(fields));
-            typeMap.put(typeName, entity);
-
-            Class<?> searchClass = entry[1];
-            Class<?> searchBasicClass = entry[2];
-            Class<?> searchAdvancedClass = entry[3];
             if (searchMap.containsKey(typeName)) {
                 throw new IllegalArgumentException(
-                        "Search entry already registered: " + typeName + ", search classes to register are "
-                                + searchClass + ", " + searchBasicClass + ", " + searchAdvancedClass);
+                        "Search entry already registered: "
+                                + typeName + ", search classes to register are "
+                                + entry.getSearchClass() + ", "
+                                + entry.getSearchBasicClass() + ", "
+                                + entry.getSearchAdvancedClass());
             }
-            searchMap.put(typeName, new Class<?>[]{
-                    searchClass,
-                    searchBasicClass,
-                    searchAdvancedClass
-            });
+            searchMap.put(typeName, entry);
         }
 
         searchFieldMap = new HashMap<>(searchFieldTable.length);
@@ -75,61 +58,105 @@ public abstract class NetSuiteMetaData {
             searchFieldMap.put(entry.getSimpleName(), entry);
         }
 
-        searchFieldOperatorMap = new HashMap<>(searchFieldOperatorTable.length);
-        for (Class<?> entry : searchFieldOperatorTable) {
-            searchFieldOperatorMap.put(entry.getSimpleName(), entry);
+        searchFieldOperatorTypeMap = new HashMap<>(searchFieldOperatorTable.length);
+        searchFieldOperatorNames = new HashSet<>();
+        for (SearchFieldOperatorTypeInfo info : searchFieldOperatorTable) {
+            searchFieldOperatorTypeMap.put(info.getTypeName(), info);
+
+            List<String> operatorNames = info.getQualifiedNames();
+            searchFieldOperatorNames.addAll(operatorNames);
         }
+
+        searchFieldOperatorMappings = new HashMap<>();
+        searchFieldOperatorMappings.put("SearchBooleanField", "SearchBooleanFieldOperator");
+        searchFieldOperatorMappings.put("SearchStringField", "SearchStringFieldOperator");
+        searchFieldOperatorMappings.put("SearchLongField", "SearchLongFieldOperator");
+        searchFieldOperatorMappings.put("SearchDoubleField", "SearchDoubleFieldOperator");
+        searchFieldOperatorMappings.put("SearchMultiSelectField", "SearchMultiSelectFieldOperator");
+        searchFieldOperatorMappings.put("SearchEnumMultiSelectField", "SearchEnumMultiSelectFieldOperator");
+        searchFieldOperatorMappings.put("SearchBooleanCustomField", "SearchBooleanFieldOperator");
+        searchFieldOperatorMappings.put("SearchStringCustomField", "SearchStringFieldOperator");
+        searchFieldOperatorMappings.put("SearchLongCustomField", "SearchLongFieldOperator");
+        searchFieldOperatorMappings.put("SearchDoubleCustomField", "SearchDoubleFieldOperator");
+        searchFieldOperatorMappings.put("SearchMultiSelectCustomField", "SearchMultiSelectFieldOperator");
+        searchFieldOperatorMappings.put("SearchEnumMultiSelectCustomField", "SearchEnumMultiSelectFieldOperator");
     }
 
     protected void registerType(Class<?> typeClass, String typeName) {
         String typeNameToRegister = typeName != null ? typeName : typeClass.getSimpleName();
         if (typeMap.containsKey(typeNameToRegister)) {
-            throw new IllegalArgumentException("Type already registered: " + typeNameToRegister +
-                    ", class to register is " + typeClass +
-                    ", registered class is " + typeMap.get(typeNameToRegister));
+            EntityInfo entityInfo = typeMap.get(typeNameToRegister);
+            if (entityInfo.getEntityClass() == typeClass) {
+                return;
+            } else {
+                throw new IllegalArgumentException("Type already registered: " + typeNameToRegister + ", class to register is " + typeClass
+                        + ", registered class is " + typeMap.get(typeNameToRegister));
+            }
         }
+
+        Map<String, FieldInfo> fields = new HashMap<>();
+        BeanMetaData beanInfo = BeanMetaData.forClass(typeClass);
+        Collection<PropertyMetaData> propertyInfos = beanInfo.getProperties();
+        for (PropertyMetaData propertyInfo : propertyInfos) {
+            String fieldName = propertyInfo.getName();
+            Class fieldValueType = propertyInfo.getReadType();
+            if ((fieldName.equals("class") && fieldValueType == Class.class) ||
+                    (fieldName.equals("nullFieldList") && fieldValueType.getSimpleName().equals("NullField"))) {
+                continue;
+            }
+            boolean isKeyField = isKeyField(typeClass, propertyInfo);
+            FieldInfo fieldInfo = new FieldInfo(fieldName, fieldValueType, isKeyField, true, propertyInfo);
+            fields.put(fieldInfo.getName(), fieldInfo);
+        }
+
+        EntityInfo entityInfo = new EntityInfo(typeName, typeClass,
+                Collections.unmodifiableMap(fields), beanInfo);
+        typeMap.put(typeNameToRegister, entityInfo);
     }
 
     public abstract Collection<String> getTransactionTypes();
 
     public abstract Collection<String> getItemTypes();
 
-    public Class<?> getEntityClass(String typeName) {
-        Entity entity = typeMap.get(typeName);
-        return entity != null ? entity.getEntityType() : null;
+    public EntityInfo getEntity(String typeName) {
+        EntityInfo entityInfo = typeMap.get(typeName);
+        return entityInfo;
     }
 
-    public Entity getEntity(String typeName) {
-        Entity entity = typeMap.get(typeName);
-        return entity;
+    public EntityInfo getEntity(Class<?> clazz) {
+        EntityInfo entityInfo = typeMap.get(clazz.getSimpleName());
+        return entityInfo;
     }
 
-    public Class<?> getSearchClass(String typeName) {
-        return getSearchClass(typeName, 0);
+    public SearchInfo getSearchInfo(String typeName) {
+        return searchMap.get(typeName);
     }
 
-    public Class<?> getSearchBasicClass(String typeName) {
-        return getSearchClass(typeName, 1);
+    public Class<?> getSearchFieldClass(String searchFieldType) {
+        return searchFieldMap.get(searchFieldType);
     }
 
-    public Class<?> getSearchAdvancedClass(String typeName) {
-        return getSearchClass(typeName, 2);
+    public SearchFieldOperatorTypeInfo getSearchFieldOperatorInfo(String operatorType) {
+        return searchFieldOperatorTypeMap.get(operatorType);
     }
 
-    private Class<?> getSearchClass(String typeName, int key) {
-        Class<?>[] entry = searchMap.get(typeName);
-        return entry[key];
+    public SearchFieldOperatorTypeInfo getSearchFieldOperatorInfoByFieldType(String searchFieldType) {
+        String operatorType = searchFieldOperatorMappings.get(searchFieldType);
+        return searchFieldOperatorTypeMap.get(operatorType);
     }
 
-    public Class<?> getSearchFieldClass(String searchFieldTypeName) {
-        return searchFieldMap.get(searchFieldTypeName);
+    public Object getSearchFieldOperator(String searchFieldType, String searchFieldOperatorName) {
+        SearchFieldOperatorTypeInfo operatorTypeInfo = getSearchFieldOperatorInfoByFieldType(searchFieldType);
+        return operatorTypeInfo.getValue(searchFieldOperatorName);
     }
 
-    public Class<?> getSearchFieldOperatorClass(String searchFieldOperatorTypeName) {
-        return searchFieldOperatorMap.get(searchFieldOperatorTypeName);
+    public Collection<String> getSearchOperatorNames() {
+        return Collections.unmodifiableSet(searchFieldOperatorNames);
     }
 
     public abstract Class<?> getListOrRecordRefClass();
+
+    protected abstract boolean isKeyField(Class<?> entityClass, PropertyMetaData propertyInfo);
 
     public static String toInitialUpper(String value) {
         return value.substring(0, 1).toUpperCase() + value.substring(1);
@@ -143,53 +170,55 @@ public abstract class NetSuiteMetaData {
         return "_" + toInitialLower(value);
     }
 
-    public static PropertyAccessor<Object> getPropertyAccessor(Object target) {
-        if (target instanceof PropertyAccess) {
-            return EnhancedPropertyAccessor.INSTANCE;
-        } else {
-            return ReflectionPropertyAccessor.INSTANCE;
-        }
-    }
-
-    public static class Entity {
+    public static class EntityInfo {
         private String name;
-        private Class<?> entityType;
-        private Map<String, NetSuiteMetaData.Field> fields;
+        private Class<?> entityClass;
+        private Map<String, FieldInfo> fields;
+        private BeanMetaData beanInfo;
 
-        public Entity(String name, Class<?> entityType, Map<String, NetSuiteMetaData.Field> fields) {
+        public EntityInfo(String name, Class<?> entityClass, Map<String, FieldInfo> fields,
+                BeanMetaData beanInfo) {
             this.name = name;
-            this.entityType = entityType;
+            this.entityClass = entityClass;
             this.fields = fields;
+            this.beanInfo = beanInfo;
         }
 
         public String getName() {
             return name;
         }
 
-        public Class<?> getEntityType() {
-            return entityType;
+        public Class<?> getEntityClass() {
+            return entityClass;
         }
 
-        public NetSuiteMetaData.Field getField(String name) {
+        public FieldInfo getField(String name) {
             return fields.get(name);
         }
 
-        public Map<String, NetSuiteMetaData.Field> getFields() {
+        public Map<String, FieldInfo> getFields() {
             return fields;
+        }
+
+        public BeanMetaData getBeanInfo() {
+            return beanInfo;
         }
     }
 
-    public static class Field {
+    public static class FieldInfo {
         private String name;
         private Class valueType;
         private boolean key;
         private boolean nullable;
+        private PropertyMetaData propertyInfo;
 
-        public Field(String name, Class valueType, boolean key, boolean nullable) {
+        public FieldInfo(String name, Class valueType, boolean key, boolean nullable,
+                PropertyMetaData propertyInfo) {
             this.name = name;
             this.valueType = valueType;
             this.key = key;
             this.nullable = nullable;
+            this.propertyInfo = propertyInfo;
         }
 
         public String getName() {
@@ -211,161 +240,164 @@ public abstract class NetSuiteMetaData {
         public boolean isNullable() {
             return nullable;
         }
-    }
 
-    public static class ReflectionPropertyAccessor implements PropertyAccessor<Object> {
-
-        public static final ReflectionPropertyAccessor INSTANCE = new ReflectionPropertyAccessor();
-
-        /** An empty class array */
-        private static final Class[] EMPTY_CLASS_PARAMETERS = new Class[0];
-        /** An empty object array */
-        private static final Object[] EMPTY_OBJECT_ARRAY = new Object[0];
-
-        public Object get(Object target, String name) {
-            if (name == null) {
-                throw new IllegalArgumentException("No name specified for bean class '" +
-                        target.getClass() + "'");
-            }
-
-            // Retrieve the property getter method for the specified property
-            BeanMetaData metaData = BeanMetaData.forClass(target.getClass());
-            PropertyMetaData descriptor = metaData.getProperty(name);
-            if (descriptor == null) {
-                throw new IllegalArgumentException("Unknown property '" +
-                        name + "' on class '" + target.getClass() + "'");
-            }
-            Method readMethod = getReadMethod(target.getClass(), descriptor);
-            if (readMethod == null) {
-                throw new IllegalArgumentException("Property '" + name +
-                        "' has no getter method in class '" + target.getClass() + "'");
-            }
-
-            // Call the property getter and return the value
-            try {
-                Object value = invokeMethod(readMethod, target, EMPTY_OBJECT_ARRAY);
-                return (value);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        public void set(Object target, String name, Object value) {
-            if (name == null) {
-                throw new IllegalArgumentException("No name specified for bean class '" +
-                        target.getClass() + "'");
-            }
-
-            // Retrieve the property setter method for the specified property
-            BeanMetaData metaData = BeanMetaData.forClass(target.getClass());
-            PropertyMetaData descriptor = metaData.getProperty(name);
-            if (descriptor == null) {
-                throw new IllegalArgumentException("Unknown property '" +
-                        name + "' on class '" + target.getClass() + "'" );
-            }
-            Method writeMethod = getWriteMethod(target.getClass(), descriptor);
-            if (writeMethod == null) {
-                throw new IllegalArgumentException("Property '" + name +
-                        "' has no setter method in class '" + target.getClass() + "'");
-            }
-
-            // Call the property setter method
-            Object[] values = new Object[1];
-            values[0] = value;
-
-            try {
-                invokeMethod(writeMethod, target, values);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        /** This just catches and wraps IllegalArgumentException. */
-        private Object invokeMethod(
-                Method method,
-                Object bean,
-                Object[] values)
-                throws
-                IllegalAccessException,
-                InvocationTargetException {
-
-            try {
-                return method.invoke(bean, values);
-            } catch (IllegalArgumentException cause) {
-                if(bean == null) {
-                    throw new IllegalArgumentException("No bean specified " +
-                            "- this should have been checked before reaching this method");
-                }
-                String valueString = "";
-                if (values != null) {
-                    for (int i = 0; i < values.length; i++) {
-                        if (i>0) {
-                            valueString += ", " ;
-                        }
-                        valueString += (values[i]).getClass().getName();
-                    }
-                }
-                String expectedString = "";
-                Class[] parTypes = method.getParameterTypes();
-                if (parTypes != null) {
-                    for (int i = 0; i < parTypes.length; i++) {
-                        if (i > 0) {
-                            expectedString += ", ";
-                        }
-                        expectedString += parTypes[i].getName();
-                    }
-                }
-                IllegalArgumentException e = new IllegalArgumentException(
-                        "Cannot invoke " + method.getDeclaringClass().getName() + "."
-                                + method.getName() + " on bean class '" + bean.getClass() +
-                                "' - " + cause.getMessage()
-                                + " - had objects of type \"" + valueString
-                                + "\" but expected signature \""
-                                +   expectedString + "\""
-                );
-                throw e;
-            }
-        }
-
-        /**
-         * <p>Return an accessible property getter method for this property,
-         * if there is one; otherwise return <code>null</code>.</p>
-         *
-         * @param clazz The class of the read method will be invoked on
-         * @param descriptor Property descriptor to return a getter for
-         * @return The read method
-         */
-        Method getReadMethod(Class clazz, PropertyMetaData descriptor) {
-            return (MethodUtils.getAccessibleMethod(clazz, descriptor.getReadMethodName(), EMPTY_CLASS_PARAMETERS));
-        }
-
-        /**
-         * <p>Return an accessible property setter method for this property,
-         * if there is one; otherwise return <code>null</code>.</p>
-         *
-         * @param clazz The class of the read method will be invoked on
-         * @param descriptor Property descriptor to return a setter for
-         * @return The write method
-         */
-        Method getWriteMethod(Class clazz, PropertyMetaData descriptor) {
-            return (MethodUtils.getAccessibleMethod(clazz, descriptor.getWriteMethodName(),
-                    new Class[]{descriptor.getWriteType()}));
+        public PropertyMetaData getPropertyInfo() {
+            return propertyInfo;
         }
     }
 
-    public static class EnhancedPropertyAccessor implements PropertyAccessor<Object> {
+    public static class SearchInfo {
+        private String entityTypeName;
+        private Class<?> entityClass;
+        private Class<?> searchClass;
+        private Class<?> searchBasicClass;
+        private Class<?> searchAdvancedClass;
 
-        public static final EnhancedPropertyAccessor INSTANCE = new EnhancedPropertyAccessor();
-
-        @Override
-        public Object get(Object target, String name) {
-            return ((PropertyAccess) target).get(name);
+        public SearchInfo(String entityTypeName, Class<?> entityClass,
+                Class<?> searchClass, Class<?> searchBasicClass,
+                Class<?> searchAdvancedClass) {
+            this.entityTypeName = entityTypeName;
+            this.entityClass = entityClass;
+            this.searchClass = searchClass;
+            this.searchBasicClass = searchBasicClass;
+            this.searchAdvancedClass = searchAdvancedClass;
         }
 
-        @Override
-        public void set(Object target, String name, Object value) {
-            ((PropertyAccess) target).set(name, value);
+        public SearchInfo(Class<?> entityClass,
+                Class<?> searchClass, Class<?> searchBasicClass, Class<?> searchAdvancedClass) {
+            this.entityClass = entityClass;
+            this.entityTypeName = entityClass.getSimpleName();
+            this.searchClass = searchClass;
+            this.searchBasicClass = searchBasicClass;
+            this.searchAdvancedClass = searchAdvancedClass;
         }
+
+        public String getEntityTypeName() {
+            return entityTypeName;
+        }
+
+        public Class<?> getEntityClass() {
+            return entityClass;
+        }
+
+        public Class<?> getSearchClass() {
+            return searchClass;
+        }
+
+        public Class<?> getSearchBasicClass() {
+            return searchBasicClass;
+        }
+
+        public Class<?> getSearchAdvancedClass() {
+            return searchAdvancedClass;
+        }
+
+        public boolean isItemSearch() {
+            return entityTypeName.equals("ItemSearch");
+        }
+    }
+
+    public static class SearchFieldOperatorTypeInfo<T> {
+        private String dataType;
+        private String typeName;
+        private Class<T> operatorClass;
+        private Mapper<T, String> mapper;
+        private Mapper<String, T> reverseMapper;
+
+        public SearchFieldOperatorTypeInfo(String dataType, Class<T> operatorClass,
+                Mapper<T, String> mapper, Mapper<String, T> reverseMapper) {
+
+            this.dataType = dataType;
+            this.operatorClass = operatorClass;
+            this.typeName = operatorClass.getSimpleName();
+            this.mapper = mapper;
+            this.reverseMapper = reverseMapper;
+        }
+
+        public String getTypeName() {
+            return typeName;
+        }
+
+        public Class<T> getOperatorClass() {
+            return operatorClass;
+        }
+
+        public Mapper<T, String> getMapper() {
+            return mapper;
+        }
+
+        public Mapper<String, T> getReverseMapper() {
+            return reverseMapper;
+        }
+
+        public String mapToString(T stringValue) {
+            return mapper.map(stringValue);
+        }
+
+        public Object mapFromString(String stringValue) {
+            return reverseMapper.map(stringValue);
+        }
+
+        public String getQualifiedName(Object value) {
+            if (operatorClass == SearchBooleanFieldOperator.class) {
+                return dataType;
+            } else {
+                return dataType + "." + mapToString((T) value);
+            }
+        }
+
+        public Object getValue(String qualifiedName) {
+            if (operatorClass == SearchBooleanFieldOperator.class) {
+                if (!qualifiedName.equals(dataType)) {
+                    throw new IllegalArgumentException("Invalid operator data type: "
+                            + "'" + qualifiedName + "' != '" + dataType + "'");
+                }
+                return SearchBooleanFieldOperator.INSTANCE;
+            } else {
+                int i = qualifiedName.indexOf(".");
+                if (i == -1) {
+                    throw new IllegalArgumentException("Invalid operator name: " + qualifiedName);
+                }
+                String thatDataType = qualifiedName.substring(0, i);
+                if (!thatDataType.equals(dataType)) {
+                    throw new IllegalArgumentException("Invalid operator data type: "
+                            + "'" + thatDataType + "' != '" + dataType + "'");
+                }
+                String thatValue = qualifiedName.substring(i + 1);
+                return mapFromString(thatValue);
+            }
+        }
+
+        public List<String> getQualifiedNames() {
+            if (operatorClass.isEnum()) {
+                Enum[] values = ((Class<? extends Enum>) getOperatorClass()).getEnumConstants();
+                List<String> names = new ArrayList<>(values.length);
+                for (Enum value : values) {
+                    names.add(getQualifiedName(value));
+                }
+                return names;
+            } else if (operatorClass == SearchBooleanFieldOperator.class) {
+                return Arrays.asList(dataType);
+            } else {
+                throw new IllegalStateException("Unsupported operator type: " + operatorClass);
+            }
+        }
+
+        public List<?> getValues() {
+            if (operatorClass.isEnum()) {
+                Enum[] values = ((Class<? extends Enum>) getOperatorClass()).getEnumConstants();
+                return Arrays.asList(values);
+            } else if (operatorClass == SearchBooleanFieldOperator.class) {
+                return Arrays.asList(SearchBooleanFieldOperator.INSTANCE);
+            } else {
+                throw new IllegalStateException("Unsupported operator type: " + operatorClass);
+            }
+        }
+    }
+
+    public static class SearchBooleanFieldOperator {
+
+        public static final SearchBooleanFieldOperator INSTANCE = new SearchBooleanFieldOperator();
     }
 
 }

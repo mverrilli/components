@@ -51,13 +51,13 @@ public class NsObjectConverter implements IndexedRecordConverter<NsObject, Index
     public IndexedRecord convertToAvro(NsObject data) {
         if (names == null) {
             Schema schema = getSchema();
-            NetSuiteMetaData.Entity entityMetaData = metaData.getEntity(getSchema().getName());
+            NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity(getSchema().getName());
             fieldConverters = new HashMap<>(schema.getFields().size());
             for (Schema.Field field : schema.getFields()) {
                 String fieldName = field.name();
-                NetSuiteMetaData.Field fieldMetaData = entityMetaData.getField(fieldName);
+                NetSuiteMetaData.FieldInfo fieldInfo = entityInfo.getField(fieldName);
                 fieldConverters.put(fieldName, NetSuiteAvroRegistry.getInstance()
-                        .getConverter(field, fieldMetaData.getValueType()));
+                        .getConverter(field, fieldInfo.getValueType()));
             }
 
             names = new String[getSchema().getFields().size()];

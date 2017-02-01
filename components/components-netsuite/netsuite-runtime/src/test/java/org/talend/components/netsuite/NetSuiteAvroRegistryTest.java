@@ -27,34 +27,34 @@ public class NetSuiteAvroRegistryTest {
 
     @Test
     public void testInferSchemaForEntity() throws Exception {
-        NetSuiteMetaData.Entity entity = metaData.getEntity("Account");
+        NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity("Account");
 
-        Schema s = registry.inferSchema(entity);
+        Schema s = registry.inferSchema(entityInfo);
 
         System.out.println(s);
 
         assertThat(s.getType(), is(Schema.Type.RECORD));
         assertThat(s.getName(), is("Account"));
-        assertThat(s.getFields(), hasSize(entity.getFields().size()));
+        assertThat(s.getFields(), hasSize(entityInfo.getFields().size()));
         assertThat(s.getObjectProps().keySet(), empty());
 
-        NetSuiteMetaData.Field field = entity.getField("acctType");
-        Schema.Field f = s.getField(field.getName());
+        NetSuiteMetaData.FieldInfo fieldInfo = entityInfo.getField("acctType");
+        Schema.Field f = s.getField(fieldInfo.getName());
         assertThat(f.schema().getType(), is(Schema.Type.STRING));
         assertThat(f.schema().getObjectProps().keySet(), empty());
 
-        field = entity.getField("acctName");
-        f = s.getField(field.getName());
+        fieldInfo = entityInfo.getField("acctName");
+        f = s.getField(fieldInfo.getName());
         assertThat(f.schema().getType(), is(Schema.Type.STRING));
         assertThat(f.schema().getObjectProps().keySet(), empty());
 
-        field = entity.getField("inventory");
-        f = s.getField(field.getName());
+        fieldInfo = entityInfo.getField("inventory");
+        f = s.getField(fieldInfo.getName());
         assertThat(f.schema().getType(), is(Schema.Type.BOOLEAN));
         assertThat(f.schema().getObjectProps().keySet(), empty());
 
-        field = entity.getField("tranDate");
-        f = s.getField(field.getName());
+        fieldInfo = entityInfo.getField("tranDate");
+        f = s.getField(fieldInfo.getName());
         assertThat(f.schema().getType(), is(Schema.Type.STRING));
         assertThat(f.getObjectProps().keySet(), containsInAnyOrder(
                 SchemaConstants.TALEND_COLUMN_PATTERN));
@@ -63,24 +63,24 @@ public class NetSuiteAvroRegistryTest {
 
     @Test
     public void testEnumConverter() throws Exception {
-        NetSuiteMetaData.Entity entity = metaData.getEntity("Account");
+        NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity("Account");
 
-        Schema s = registry.inferSchema(entity);
+        Schema s = registry.inferSchema(entityInfo);
 
-        NetSuiteMetaData.Field field = entity.getField("acctType");
-        Schema.Field f = s.getField(field.getName());
+        NetSuiteMetaData.FieldInfo fieldInfo = entityInfo.getField("acctType");
+        Schema.Field f = s.getField(fieldInfo.getName());
         AvroConverter<Enum<AccountType>, String> converter1 =
-                (AvroConverter<Enum<AccountType>, String>) registry.getConverter(f, field.getValueType());
+                (AvroConverter<Enum<AccountType>, String>) registry.getConverter(f, fieldInfo.getValueType());
         assertEquals(AccountType.class, converter1.getDatumClass());
         assertEquals(AccountType.ACCOUNTS_PAYABLE.name(),
                 converter1.convertToAvro(AccountType.ACCOUNTS_PAYABLE));
         assertEquals(AccountType.ACCOUNTS_PAYABLE,
                 converter1.convertToDatum(AccountType.ACCOUNTS_PAYABLE.name()));
 
-        field = entity.getField("generalRate");
-        f = s.getField(field.getName());
+        fieldInfo = entityInfo.getField("generalRate");
+        f = s.getField(fieldInfo.getName());
         AvroConverter<Enum<ConsolidatedRate>, String> converter2 =
-                (AvroConverter<Enum<ConsolidatedRate>, String>) registry.getConverter(f, field.getValueType());
+                (AvroConverter<Enum<ConsolidatedRate>, String>) registry.getConverter(f, fieldInfo.getValueType());
         assertEquals(ConsolidatedRate.class, converter2.getDatumClass());
         assertEquals(ConsolidatedRate.HISTORICAL.name(),
                 converter2.convertToAvro(ConsolidatedRate.HISTORICAL));

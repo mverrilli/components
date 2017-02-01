@@ -2,6 +2,7 @@ package org.talend.components.netsuite.input;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -111,9 +112,23 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
 
     protected ResultSet<NsObject> search() throws NetSuiteException {
         NetSuiteConnection conn = getConnection();
+
         NsSearch search = conn.newSearch();
-        search.entity("Account");
-        search.criterion("balance", "GREATER_THAN_OR_EQUAL_TO", "Double", Arrays.asList("10000.0"));
+        search.entity(properties.module.moduleName.getValue());
+
+        List<String> fieldNames = properties.searchConditionTable.field.getValue();
+        if (fieldNames != null && !fieldNames.isEmpty()) {
+            for (int i = 0; i < fieldNames.size(); i++) {
+                String fieldName = fieldNames.get(i);
+                String operator = properties.searchConditionTable.operator.getValue().get(i);
+                String value1 = properties.searchConditionTable.value1.getValue().get(i);
+                String value2 = properties.searchConditionTable.value2.getValue().get(i);
+                List<String> values = value2 != null ? Arrays.asList(value1, value2) : Arrays.asList(value1);
+
+                search.criteria(fieldName, operator, null, values);
+            }
+        }
+
         ResultSet<NsObject> resultSet = search.search();
         return resultSet;
     }

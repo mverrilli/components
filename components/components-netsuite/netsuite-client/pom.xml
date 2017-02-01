@@ -187,13 +187,13 @@
                     <includeTestClasses>false</includeTestClasses>
                     <transformerClasses>
                         <transformerClass>
-                            <className>org.talend.components.netsuite.codegen.NsClassTransformer</className>
-                            <!--<properties>-->
-                                <!--<property>-->
-                                    <!--<name>some.property</name>-->
-                                    <!--<value>some value</value>-->
-                                <!--</property>-->
-                            <!--</properties>-->
+                            <className>org.talend.components.netsuite.codegen.NetSuiteClassTransformer</className>
+                            <properties>
+                                <property>
+                                    <name>output.dir</name>
+                                    <value>${project.build.outputDirectory}</value>
+                                </property>
+                            </properties>
                         </transformerClass>
                     </transformerClasses>
                 </configuration>

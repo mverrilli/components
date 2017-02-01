@@ -16,13 +16,13 @@ import static org.junit.Assert.assertNotNull;
 /**
  *
  */
-public class JavassistBeanIntrospectorTest {
+public class JavassistTypeIntrospectorTest {
 
     @Test
     public void testSetterForGetterWithPrimitiveWrapperReturnType() throws Exception {
         ClassPool pool = ClassPool.getDefault();
         CtClass ctClass = pool.getCtClass(BeanA.class.getName());
-        Set<JavassistPropertyInfo> propertyInfoSet = JavassistBeanIntrospector.getInstance().getBeanProperties(ctClass);
+        Set<JavassistPropertyInfo> propertyInfoSet = JavassistTypeIntrospector.getInstance().getBeanProperties(ctClass);
 
         Map<String, JavassistPropertyInfo> propertyInfoMap = new HashMap<>();
         for (JavassistPropertyInfo info : propertyInfoSet) {
@@ -44,7 +44,7 @@ public class JavassistBeanIntrospectorTest {
     public void testGetterSetterForNonPrimitivePropertyType() throws Exception {
         ClassPool pool = ClassPool.getDefault();
         CtClass ctClass = pool.getCtClass(BeanB.class.getName());
-        Set<JavassistPropertyInfo> propertyInfoSet = JavassistBeanIntrospector.getInstance().getBeanProperties(ctClass);
+        Set<JavassistPropertyInfo> propertyInfoSet = JavassistTypeIntrospector.getInstance().getBeanProperties(ctClass);
 
         Map<String, JavassistPropertyInfo> propertyInfoMap = new HashMap<>();
         for (JavassistPropertyInfo info : propertyInfoSet) {

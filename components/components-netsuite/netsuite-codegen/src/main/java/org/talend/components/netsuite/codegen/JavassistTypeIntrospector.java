@@ -16,11 +16,11 @@ import org.talend.components.netsuite.beaninfo.PrimitiveInfo;
 /**
  *
  */
-public class JavassistBeanIntrospector {
+public class JavassistTypeIntrospector {
 
-    private static final JavassistBeanIntrospector instance = new JavassistBeanIntrospector();
+    private static final JavassistTypeIntrospector instance = new JavassistTypeIntrospector();
 
-    public static JavassistBeanIntrospector getInstance() {
+    public static JavassistTypeIntrospector getInstance() {
         return instance;
     }
 

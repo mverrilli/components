@@ -25,7 +25,7 @@ public class NsObject implements PropertyAccess {
             throw new IllegalArgumentException("Target object already is NsObject: " + target);
         }
         this.target = target;
-        this.propertyAccessor = NetSuiteMetaData.getPropertyAccessor(target);
+        this.propertyAccessor = NetSuiteFactory.getPropertyAccessor(target);
     }
 
     public Object getTarget() {

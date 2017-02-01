@@ -1,9 +1,11 @@
 package org.talend.components.netsuite.input;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.apache.avro.Schema;
@@ -15,6 +17,8 @@ import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteEndpoint;
 import org.talend.components.netsuite.NetSuiteSource;
 import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteWebServiceTestFixture;
+
+import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
 
 /**
  *
@@ -54,6 +58,12 @@ public class NetSuiteSearchInputReaderITest {
         Schema schema = endpoint.getSchema(properties.module.moduleName.getValue());
         properties.module.main.schema.setValue(schema);
 
+        properties.module.afterModuleName();
+        properties.searchConditionTable.field.setValue(Arrays.asList("type"));
+        properties.searchConditionTable.operator.setValue(Arrays.asList("List.anyOf"));
+        properties.searchConditionTable.value1.setValue(Arrays.asList("Bank"));
+        properties.searchConditionTable.value2.setValue(Arrays.asList((String) null));
+
         NetSuiteSource source = new NetSuiteSource();
         source.initialize(container, properties);
 
@@ -67,9 +77,22 @@ public class NetSuiteSearchInputReaderITest {
 
         List<Schema.Field> fields = record.getSchema().getFields();
         for (int i = 0; i < fields.size(); i++) {
-            Object value = record.get(i);
-            System.out.println(fields.get(i) + ": " + value);
+            Schema.Field typeField = getFieldByName(fields, "acctType");
+            Object value = record.get(typeField.pos());
+            assertNotNull(value);
+            assertEquals(AccountType.BANK.value(), value);
+
+            System.out.println(fields.get(i) + ": " + record.get(i));
         }
+    }
+
+    private static Schema.Field getFieldByName(List<Schema.Field> fields, String name) {
+        for (Schema.Field field : fields) {
+            if (field.name().equals(name)) {
+                return field;
+            }
+        }
+        return null;
     }
 
 }

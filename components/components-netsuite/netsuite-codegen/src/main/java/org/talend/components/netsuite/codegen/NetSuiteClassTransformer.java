@@ -4,6 +4,7 @@ import de.icongmbh.oss.maven.plugin.javassist.ClassTransformer;
 import javassist.CtClass;
 import javassist.Modifier;
 
+import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
 import java.util.Properties;
@@ -11,16 +12,18 @@ import java.util.Properties;
 /**
  *
  */
-public class NsClassTransformer extends ClassTransformer {
+public class NetSuiteClassTransformer extends ClassTransformer {
 
-    private NsBeanClassEnhancer transformer = new NsBeanClassEnhancer();
+    private NetSuiteClassEnhancer transformer = new NetSuiteClassEnhancer();
+    private String outputDir;
 
     @Override
     protected boolean shouldTransform(CtClass candidateClass) throws Exception {
-        if (!candidateClass.isEnum() && !candidateClass.isAnnotation() && !candidateClass.isInterface() &&
+        if (!candidateClass.isAnnotation() && !candidateClass.isInterface() &&
                 !Modifier.isAbstract(candidateClass.getModifiers()) &&
                 !Modifier.isPrivate(candidateClass.getModifiers()) &&
-                candidateClass.hasAnnotation(XmlType.class) &&
+                (candidateClass.hasAnnotation(XmlType.class) ||
+                        candidateClass.hasAnnotation(XmlEnum.class)) &&
                 candidateClass.getPackageName().startsWith("com.netsuite.webservices.")) {
             // System.out.println("Candidate: " + candidateClass.getName());
             return true;
@@ -29,11 +32,11 @@ public class NsClassTransformer extends ClassTransformer {
     }
 
     /**
-     * Hack the toString() method.
+     *
      */
     @Override
     protected void applyTransformations(CtClass classToTransform) throws Exception {
-        transformer.transform(classToTransform);
+        transformer.transform(classToTransform, outputDir);
     }
 
     /**
@@ -44,6 +47,8 @@ public class NsClassTransformer extends ClassTransformer {
         if (null == properties) {
             return;
         }
+        outputDir = properties.getProperty("output.dir");
+        System.out.println("Output directory: " + outputDir);
     }
 
 }

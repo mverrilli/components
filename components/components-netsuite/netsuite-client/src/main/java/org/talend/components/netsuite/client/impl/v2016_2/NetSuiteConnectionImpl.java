@@ -85,7 +85,7 @@ public class NetSuiteConnectionImpl extends NetSuiteConnection<NetSuitePortType>
     public static final String NS_URI_PLATFORM_MESSAGES =
             "urn:messages_2016_2.platform.webservices.netsuite.com";
 
-    private final static NetSuiteMetaDataImpl metaData = new NetSuiteMetaDataImpl();
+    private final static NetSuiteMetaDataImpl metaData = NetSuiteMetaDataImpl.getInstance();
 
     public NetSuiteConnectionImpl() {
     }

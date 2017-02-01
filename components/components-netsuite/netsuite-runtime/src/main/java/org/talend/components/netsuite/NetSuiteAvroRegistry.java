@@ -12,6 +12,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.avro.Schema;
 import org.talend.components.api.exception.ComponentException;
+import org.talend.components.netsuite.client.Mapper;
+import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.daikon.avro.AvroRegistry;
 import org.talend.daikon.avro.SchemaConstants;
@@ -32,22 +34,22 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
     private NetSuiteAvroRegistry() {
 
         // Ensure that we know how to get Schemas for these objects.
-        registerSchemaInferrer(NetSuiteMetaData.Entity.class, new SerializableFunction<NetSuiteMetaData.Entity, Schema>() {
+        registerSchemaInferrer(NetSuiteMetaData.EntityInfo.class, new SerializableFunction<NetSuiteMetaData.EntityInfo, Schema>() {
             /** Default serial version UID. */
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Schema apply(NetSuiteMetaData.Entity t) {
+            public Schema apply(NetSuiteMetaData.EntityInfo t) {
                 return NetSuiteSchemaManager.getInstance().inferSchemaForEntity(t);
             }
         });
 
-        registerSchemaInferrer(NetSuiteMetaData.Field.class, new SerializableFunction<NetSuiteMetaData.Field, Schema>() {
+        registerSchemaInferrer(NetSuiteMetaData.FieldInfo.class, new SerializableFunction<NetSuiteMetaData.FieldInfo, Schema>() {
             /** Default serial version UID. */
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Schema apply(NetSuiteMetaData.Field t) {
+            public Schema apply(NetSuiteMetaData.FieldInfo t) {
                 return NetSuiteSchemaManager.getInstance().inferSchemaForField(t);
             }
         });
@@ -65,7 +67,10 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
 
     public AvroConverter<?, ?> getConverter(Schema.Field field, Class<?> datumClass) {
         if (datumClass.isEnum()) {
-            return new EnumToStringConverter<>(field, (Class<? extends Enum>) datumClass);
+            Class<Enum> enumClass = (Class<Enum>) datumClass;
+            return new EnumToStringConverter<>(field, enumClass,
+                    NetSuiteFactory.getEnumToStringMapper(enumClass),
+                    NetSuiteFactory.getEnumFromStringMapper(enumClass));
         }
         if (datumClass == XMLGregorianCalendar.class) {
             return new XMLGregorianCalendarToStringConverter(field, datatypeFactory);
@@ -84,10 +89,15 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
 
         private final Schema.Field field;
         private final Class<T> clazz;
+        private final Mapper<Enum, String> enumToStringMapper;
+        private final Mapper<String, Enum> enumFromStringMapper;
 
-        public EnumToStringConverter(Schema.Field field, Class<T> clazz) {
+        public EnumToStringConverter(Schema.Field field, Class<T> clazz,
+                Mapper<Enum, String> enumToStringMapper, Mapper<String, Enum> enumFromStringMapper) {
             this.field = field;
             this.clazz = clazz;
+            this.enumToStringMapper = enumToStringMapper;
+            this.enumFromStringMapper = enumFromStringMapper;
         }
 
         @Override
@@ -102,7 +112,7 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
 
         @Override
         public T convertToDatum(String value) {
-            return value == null ? null : Enum.valueOf(clazz, value);
+            return value == null ? null : (T) enumFromStringMapper.map(value);
         }
 
         @Override
@@ -110,7 +120,7 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
             if (anEnum == null) {
                 return null;
             }
-            return anEnum.name();
+            return enumToStringMapper.map(anEnum);
         }
     }
 

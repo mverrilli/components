@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.avro.Schema;
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.netsuite.client.NetSuiteConnection;
-import org.talend.components.netsuite.client.NetSuiteConnectionFactory;
+import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
@@ -61,7 +61,7 @@ public class NetSuiteEndpoint {
     protected NetSuiteConnection connect(String endpointUrl, NetSuiteCredentials credentials)
             throws NetSuiteException {
 
-        NetSuiteConnection conn = NetSuiteConnectionFactory.getConnection(NetSuiteConnectionProperties.API_VERSION);
+        NetSuiteConnection conn = NetSuiteFactory.getConnection(NetSuiteConnectionProperties.API_VERSION);
         conn.setEndpointUrl(endpointUrl);
         conn.setCredentials(credentials);
         return conn;
@@ -82,9 +82,13 @@ public class NetSuiteEndpoint {
         NetSuiteConnection connection = connect();
 
         NetSuiteMetaData metaData = connection.getMetaData();
-        NetSuiteMetaData.Entity entityMetaData = metaData.getEntity(module);
+        NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity(module);
 
-        Schema schema = NetSuiteSchemaManager.getInstance().inferSchemaForEntity(entityMetaData);
+        Schema schema = NetSuiteSchemaManager.getInstance().inferSchemaForEntity(entityInfo);
         return schema;
+    }
+
+    public NetSuiteMetaData getMetaData() throws NetSuiteException {
+        return NetSuiteFactory.getMetaData(NetSuiteConnectionProperties.API_VERSION);
     }
 }

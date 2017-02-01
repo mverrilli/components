@@ -28,12 +28,12 @@ public class NetSuiteSchemaManager {
      * @param in the <code>NsObject</code> to analyse.
      * @return the schema for data given from the object.
      */
-    public Schema inferSchemaForEntity(NetSuiteMetaData.Entity in) {
+    public Schema inferSchemaForEntity(NetSuiteMetaData.EntityInfo in) {
         List<Schema.Field> fields = new ArrayList<>();
 
-        for (NetSuiteMetaData.Field field : in.getFields().values()) {
+        for (NetSuiteMetaData.FieldInfo fieldInfo : in.getFields().values()) {
 
-            Schema.Field avroField = new Schema.Field(field.getName(), inferSchemaForField(field), null, (Object) null);
+            Schema.Field avroField = new Schema.Field(fieldInfo.getName(), inferSchemaForField(fieldInfo), null, (Object) null);
             // Add some Talend6 custom properties to the schema.
             Schema avroFieldSchema = avroField.schema();
             if (avroFieldSchema.getType() == Schema.Type.UNION) {
@@ -46,12 +46,12 @@ public class NetSuiteSchemaManager {
             }
 
             if (AvroUtils.isSameType(avroFieldSchema, AvroUtils._string())) {
-                if (field.getLength() != 0) {
-                    avroField.addProp(SchemaConstants.TALEND_COLUMN_DB_LENGTH, String.valueOf(field.getLength()));
+                if (fieldInfo.getLength() != 0) {
+                    avroField.addProp(SchemaConstants.TALEND_COLUMN_DB_LENGTH, String.valueOf(fieldInfo.getLength()));
                 }
             }
 
-            Class<?> fieldType = field.getValueType();
+            Class<?> fieldType = fieldInfo.getValueType();
             if (fieldType == XMLGregorianCalendar.class) {
                 avroField.addProp(SchemaConstants.TALEND_COLUMN_PATTERN, "yyyy-MM-dd'T'HH:mm:ss'.000Z'");
             }
@@ -67,17 +67,17 @@ public class NetSuiteSchemaManager {
     }
 
     /**
-     * Infers an Avro schema for the given Field. This can be an expensive operation so the schema should be
-     * cached where possible. The return type will be the Avro Schema that can contain the field data without loss of
+     * Infers an Avro schema for the given FieldInfo. This can be an expensive operation so the schema should be
+     * cached where possible. The return type will be the Avro Schema that can contain the fieldInfo data without loss of
      * precision.
      *
-     * @param field the Field to analyse.
-     * @return the schema for data that the field describes.
+     * @param fieldInfo the FieldInfo to analyse.
+     * @return the schema for data that the fieldInfo describes.
      */
-    public Schema inferSchemaForField(NetSuiteMetaData.Field field) {
+    public Schema inferSchemaForField(NetSuiteMetaData.FieldInfo fieldInfo) {
         Schema base;
 
-        Class<?> fieldType = field.getValueType();
+        Class<?> fieldType = fieldInfo.getValueType();
 
         if (fieldType == Boolean.TYPE || fieldType == Boolean.class) {
             base = AvroUtils._boolean();
@@ -99,7 +99,7 @@ public class NetSuiteSchemaManager {
             base = AvroUtils._string();
         }
 
-        base = field.isNullable() ? AvroUtils.wrapAsNullable(base) : base;
+        base = fieldInfo.isNullable() ? AvroUtils.wrapAsNullable(base) : base;
 
         return base;
     }

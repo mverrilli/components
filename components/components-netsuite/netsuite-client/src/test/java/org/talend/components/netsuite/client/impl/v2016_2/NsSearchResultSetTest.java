@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.talend.components.netsuite.client.NetSuiteConnection;
+import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.components.netsuite.client.NsObject;
 import org.talend.components.netsuite.client.NsSearchRecord;
 import org.talend.components.netsuite.client.NsSearchResult;
@@ -78,8 +79,10 @@ public class NsSearchResultSetTest {
         when(conn.search(eq(nsSearchRecord1))).thenReturn(nsSearchResult1);
         when(conn.searchMoreWithId(eq("abc123"), eq(2))).thenReturn(nsSearchResult2);
 
-        NsSearchResultSet resultSet = new NsSearchResultSet(conn,
-                Account.class, false, nsSearchResult1);
+        NetSuiteMetaData metaData = NetSuiteMetaDataImpl.getInstance();
+        NetSuiteMetaData.SearchInfo searchInfo = metaData.getSearchInfo("Account");
+
+        NsSearchResultSet resultSet = new NsSearchResultSet(conn, searchInfo, nsSearchResult1);
 
         List<NsObject> recordList = new ArrayList<>();
         while (resultSet.next()) {

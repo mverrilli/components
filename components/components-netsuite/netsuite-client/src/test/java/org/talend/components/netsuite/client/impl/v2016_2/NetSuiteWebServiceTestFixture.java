@@ -3,7 +3,7 @@ package org.talend.components.netsuite.client.impl.v2016_2;
 import java.util.Properties;
 
 import org.talend.components.netsuite.client.NetSuiteConnection;
-import org.talend.components.netsuite.client.NetSuiteConnectionFactory;
+import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.test.TestUtils;
 
@@ -19,7 +19,7 @@ public class NetSuiteWebServiceTestFixture {
     public void setUp() throws Exception {
         System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
 
-        NetSuiteConnectionFactory.setMessageLoggingEnabled(true);
+        NetSuiteFactory.setMessageLoggingEnabled(true);
 
         String configurationLocation = System.getProperty(
                 "netsuite.configuration.location", "/sandbox.properties");
@@ -27,7 +27,7 @@ public class NetSuiteWebServiceTestFixture {
 
         credentials = NetSuiteCredentials.loadFromProperties(properties, "credentials.");
 
-        connection = NetSuiteConnectionFactory.getConnection("2016.2");
+        connection = NetSuiteFactory.getConnection("2016.2");
         connection.setEndpointUrl(getEndpointUrl());
         connection.setCredentials(credentials);
     }

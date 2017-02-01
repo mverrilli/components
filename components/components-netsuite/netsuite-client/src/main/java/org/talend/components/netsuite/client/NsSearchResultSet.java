@@ -10,8 +10,7 @@ import java.util.List;
 public class NsSearchResultSet extends ResultSet<NsObject> {
 
     private NetSuiteConnection conn;
-    private Class<?> entityClass;
-    private boolean itemSearch;
+    private NetSuiteMetaData.SearchInfo searchInfo;
     private String searchId;
     private NsSearchResult result;
     private List<NsObject> recordList;
@@ -19,10 +18,10 @@ public class NsSearchResultSet extends ResultSet<NsObject> {
     private NsObject current;
 
     public NsSearchResultSet(NetSuiteConnection conn,
-            Class<?> entityClass, boolean itemSearch, NsSearchResult result) {
+            NetSuiteMetaData.SearchInfo searchInfo, NsSearchResult result) {
+
         this.conn = conn;
-        this.entityClass = entityClass;
-        this.itemSearch = itemSearch;
+        this.searchInfo = searchInfo;
         this.result = result;
 
         searchId = result.getSearchId();
@@ -78,11 +77,11 @@ public class NsSearchResultSet extends ResultSet<NsObject> {
             recordList = Collections.emptyList();
         }
         if (!recordList.isEmpty()) {
-            if (itemSearch) {
+            if (searchInfo.isItemSearch()) {
                 Iterator<NsObject> recordIterator = recordList.iterator();
                 while (recordIterator.hasNext()) {
                     NsObject record = recordIterator.next();
-                    if (!record.getClass().equals(entityClass)) {
+                    if (!record.getClass().equals(searchInfo.getEntityClass())) {
                         recordIterator.remove();
                     }
                 }

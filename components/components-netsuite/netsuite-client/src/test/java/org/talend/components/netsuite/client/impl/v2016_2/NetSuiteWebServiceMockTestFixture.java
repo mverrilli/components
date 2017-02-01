@@ -7,7 +7,7 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.Endpoint;
 
 import org.apache.cxf.headers.Header;
-import org.talend.components.netsuite.client.NetSuiteConnectionFactory;
+import org.talend.components.netsuite.client.NetSuiteFactory;
 
 import com.netsuite.webservices.v2016_2.platform.NetSuiteService;
 
@@ -27,7 +27,7 @@ public class NetSuiteWebServiceMockTestFixture {
     public void setUp() throws Exception {
         System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
 
-        NetSuiteConnectionFactory.setMessageLoggingEnabled(true);
+        NetSuiteFactory.setMessageLoggingEnabled(true);
 
         URL endpointAddress = new URL("http://localhost:8088/NetSuitePort_2016_2");
 
