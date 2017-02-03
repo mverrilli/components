@@ -1,25 +1,25 @@
-package org.talend.components.netsuite;
+package org.talend.components.netsuite.model;
 
 import java.lang.reflect.Method;
 
 /**
  *
  */
-public class PropertyMetaData {
+public class PropertyInfo {
     private String name;
     private Class<?> readType;
     private Class<?> writeType;
     private String readMethodName;
     private String writeMethodName;
 
-    public PropertyMetaData(String name, Class<?> readType, Class<?> writeType,
+    public PropertyInfo(String name, Class<?> readType, Class<?> writeType,
             Method readMethod, Method writeMethod) {
         this(name, readType, writeType,
                 readMethod != null ? readMethod.getName() : null,
                 writeMethod != null ? writeMethod.getName() : null);
     }
 
-    public PropertyMetaData(String name, Class<?> readType, Class<?> writeType,
+    public PropertyInfo(String name, Class<?> readType, Class<?> writeType,
             String readMethodName, String writeMethodName) {
         this.name = name;
         this.readType = readType;

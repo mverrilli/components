@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.codegen;
+package org.talend.components.netsuite.model.javassist;
 
 import javassist.CtClass;
 import javassist.CtMethod;
@@ -10,15 +10,15 @@ public class JavassistPropertyInfo {
     private String name;
     private CtClass readType;
     private CtClass writeType;
-    private CtMethod getter;
-    private CtMethod setter;
+    private CtMethod readMethod;
+    private CtMethod writeMethod;
 
-    public JavassistPropertyInfo(String name, CtClass readType, CtClass writeType, CtMethod getter, CtMethod setter) {
+    public JavassistPropertyInfo(String name, CtClass readType, CtClass writeType, CtMethod readMethod, CtMethod writeMethod) {
         this.name = name;
         this.readType = readType;
         this.writeType = writeType;
-        this.getter = getter;
-        this.setter = setter;
+        this.readMethod = readMethod;
+        this.writeMethod = writeMethod;
     }
 
     public String getName() {
@@ -33,11 +33,11 @@ public class JavassistPropertyInfo {
         return writeType;
     }
 
-    public CtMethod getGetter() {
-        return getter;
+    public CtMethod getReadMethod() {
+        return readMethod;
     }
 
-    public CtMethod getSetter() {
-        return setter;
+    public CtMethod getWriteMethod() {
+        return writeMethod;
     }
 }

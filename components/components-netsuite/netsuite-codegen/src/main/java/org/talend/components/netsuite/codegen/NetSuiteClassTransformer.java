@@ -21,12 +21,11 @@ public class NetSuiteClassTransformer extends ClassTransformer {
     protected boolean shouldTransform(CtClass candidateClass) throws Exception {
         if (!candidateClass.isAnnotation() && !candidateClass.isInterface() &&
                 !Modifier.isAbstract(candidateClass.getModifiers()) &&
-                !Modifier.isPrivate(candidateClass.getModifiers()) &&
-                (candidateClass.hasAnnotation(XmlType.class) ||
-                        candidateClass.hasAnnotation(XmlEnum.class)) &&
-                candidateClass.getPackageName().startsWith("com.netsuite.webservices.")) {
-            // System.out.println("Candidate: " + candidateClass.getName());
-            return true;
+                !Modifier.isPrivate(candidateClass.getModifiers())) {
+            if ((candidateClass.hasAnnotation(XmlType.class) || candidateClass.hasAnnotation(XmlEnum.class)) &&
+                    candidateClass.getPackageName().startsWith("com.netsuite.webservices.")) {
+                return true;
+            }
         }
         return false;
     }

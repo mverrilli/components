@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.client;
+package org.talend.components.netsuite.model;
 
 /**
  *

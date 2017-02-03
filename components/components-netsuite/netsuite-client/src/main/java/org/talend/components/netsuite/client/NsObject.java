@@ -1,7 +1,6 @@
 package org.talend.components.netsuite.client;
 
-import org.talend.components.netsuite.PropertyAccess;
-import org.talend.components.netsuite.PropertyAccessor;
+import org.talend.components.netsuite.model.PropertyAccess;
 
 /**
  *
@@ -25,7 +24,7 @@ public class NsObject implements PropertyAccess {
             throw new IllegalArgumentException("Target object already is NsObject: " + target);
         }
         this.target = target;
-        this.propertyAccessor = NetSuiteFactory.getPropertyAccessor(target);
+        this.propertyAccessor = NetSuiteFactory.getPropertyAccessor(target.getClass());
     }
 
     public Object getTarget() {

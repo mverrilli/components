@@ -1,18 +1,17 @@
 package org.talend.components.netsuite;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.TimeZone;
-
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.avro.Schema;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.MutableDateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.talend.components.api.exception.ComponentException;
-import org.talend.components.netsuite.client.Mapper;
+import org.talend.components.netsuite.model.Mapper;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.daikon.avro.AvroRegistry;
@@ -63,6 +62,10 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
 
     public static NetSuiteAvroRegistry getInstance() {
         return instance;
+    }
+
+    public DatatypeFactory getDatatypeFactory() {
+        return datatypeFactory;
     }
 
     public AvroConverter<?, ?> getConverter(Schema.Field field, Class<?> datumClass) {
@@ -127,7 +130,7 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
     public static class XMLGregorianCalendarToStringConverter implements AvroConverter<XMLGregorianCalendar, String> {
 
         private final Schema.Field field;
-        private final DateFormat format;
+        private final DateTimeFormatter format;
 
         private DatatypeFactory datatypeFactory;
 
@@ -135,7 +138,7 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
             this.field = field;
             this.datatypeFactory = datatypeFactory;
 
-            format = new SimpleDateFormat(field.getProp(SchemaConstants.TALEND_COLUMN_PATTERN));
+            format = DateTimeFormat.forPattern(field.getProp(SchemaConstants.TALEND_COLUMN_PATTERN));
         }
 
         @Override
@@ -154,22 +157,22 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
                 return null;
             }
 
-            Calendar calValue = Calendar.getInstance();
+            DateTime dateTime;
             try {
-                calValue.setTime(format.parse(s));
-            } catch (ParseException e) {
+                dateTime = format.parseDateTime(s);
+            } catch (IllegalArgumentException e) {
                 throw new ComponentException(e);
             }
 
             XMLGregorianCalendar xts = datatypeFactory.newXMLGregorianCalendar();
-            xts.setYear(calValue.get(Calendar.YEAR));
-            xts.setMonth(calValue.get(Calendar.MONTH) + 1);
-            xts.setDay(calValue.get(Calendar.DAY_OF_MONTH));
-            xts.setHour(calValue.get(Calendar.HOUR_OF_DAY));
-            xts.setMinute(calValue.get(Calendar.MINUTE));
-            xts.setSecond(calValue.get(Calendar.SECOND));
-            xts.setMillisecond(calValue.get(Calendar.MILLISECOND));
-            xts.setTimezone(calValue.get(Calendar.ZONE_OFFSET) / 60000);
+            xts.setYear(dateTime.getYear());
+            xts.setMonth(dateTime.getMonthOfYear());
+            xts.setDay(dateTime.getDayOfMonth());
+            xts.setHour(dateTime.getHourOfDay());
+            xts.setMinute(dateTime.getMinuteOfHour());
+            xts.setSecond(dateTime.getSecondOfMinute());
+            xts.setMillisecond(dateTime.getMillisOfSecond());
+            xts.setTimezone(dateTime.getZone().toTimeZone().getRawOffset() / 60000);
 
             return xts;
         }
@@ -180,23 +183,22 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
                 return null;
             }
 
-            Calendar calValue = Calendar.getInstance();
+            MutableDateTime dateTime = new MutableDateTime();
             try {
-                calValue.set(Calendar.YEAR, xts.getYear());
-                calValue.set(Calendar.MONTH, xts.getMonth() - 1);
-                calValue.set(Calendar.DAY_OF_MONTH, xts.getDay());
-                calValue.set(Calendar.HOUR_OF_DAY, xts.getHour());
-                calValue.set(Calendar.MINUTE, xts.getMinute());
-                calValue.set(Calendar.SECOND, xts.getSecond());
-                calValue.set(Calendar.MILLISECOND, xts.getMillisecond());
+                dateTime.setYear(xts.getYear());
+                dateTime.setMonthOfYear(xts.getMonth());
+                dateTime.setDayOfMonth(xts.getDay());
+                dateTime.setHourOfDay(xts.getHour());
+                dateTime.setMinuteOfHour(xts.getMinute());
+                dateTime.setSecondOfMinute(xts.getSecond());
+                dateTime.setMillisOfSecond(xts.getMillisecond());
 
-                String[] tzIds = TimeZone.getAvailableIDs(xts.getTimezone() * 60000);
-                if (tzIds.length > 0) {
-                    TimeZone tz = TimeZone.getTimeZone(tzIds[0]);
-                    calValue.setTimeZone(tz);
+                DateTimeZone tz = DateTimeZone.forOffsetMillis(xts.getTimezone() * 60000);
+                if (tz != null) {
+                    dateTime.setZoneRetainFields(tz);
                 }
 
-                return format.format(calValue);
+                return format.print(dateTime);
             } catch (IllegalArgumentException e) {
                 throw new ComponentException(e);
             }

@@ -3,11 +3,16 @@ package org.talend.components.netsuite.client;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.apache.commons.beanutils.MethodUtils;
-import org.talend.components.netsuite.BeanMetaData;
-import org.talend.components.netsuite.PropertyAccess;
-import org.talend.components.netsuite.PropertyAccessor;
-import org.talend.components.netsuite.PropertyMetaData;
+import org.talend.components.netsuite.model.EnumAccessor;
+import org.talend.components.netsuite.model.Mapper;
+import org.talend.components.netsuite.model.PropertyAccess;
+import org.talend.components.netsuite.model.TypeInfo;
+import org.talend.components.netsuite.model.PropertyInfo;
+import org.talend.components.netsuite.model.TypeManager;
 
 /**
  *
@@ -15,6 +20,8 @@ import org.talend.components.netsuite.PropertyMetaData;
 public abstract class NetSuiteFactory {
 
     private static boolean messageLoggingEnabled;
+
+    private transient static final Logger LOG = LoggerFactory.getLogger(NetSuiteFactory.class);
 
     public static boolean isMessageLoggingEnabled() {
         return messageLoggingEnabled;
@@ -43,20 +50,46 @@ public abstract class NetSuiteFactory {
         }
     }
 
-    public static PropertyAccessor<Object> getPropertyAccessor(Object target) {
-        if (target instanceof PropertyAccess) {
+    public static PropertyAccessor<Object> getPropertyAccessor(Class<?> clazz) {
+        if (PropertyAccess.class.isAssignableFrom(clazz)) {
             return OptimizedPropertyAccessor.INSTANCE;
         } else {
             return ReflectionPropertyAccessor.INSTANCE;
         }
     }
 
+    public static EnumAccessor getEnumAccessor(Class<? extends Enum> clazz) {
+        return getEnumAccessorImpl(clazz);
+    }
+
+    private static AbstractEnumAccessor getEnumAccessorImpl(Class<? extends Enum> clazz) {
+        EnumAccessor accessor = null;
+        Method m;
+        try {
+            m = clazz.getDeclaredMethod("getEnumAccessor", new Class[0]);
+            if (!m.getReturnType().equals(EnumAccessor.class)) {
+                throw new NoSuchMethodException();
+            }
+            try {
+                accessor = (EnumAccessor) m.invoke(new Object[0]);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                LOG.error("Failed to get optimized EnumAccessor: enum class " + clazz.getName(), e);
+            }
+        } catch (NoSuchMethodException e) {
+        }
+        if (accessor != null) {
+            return new OptimizedEnumAccessor(clazz, accessor);
+        } else {
+            return new ReflectionEnumAccessor(clazz);
+        }
+    }
+
     public static Mapper<Enum, String> getEnumToStringMapper(Class<Enum> clazz) {
-        return new ReflectionEnumToStringMapper(clazz);
+        return getEnumAccessorImpl(clazz).getToStringMapper();
     }
 
     public static Mapper<String, Enum> getEnumFromStringMapper(Class<Enum> clazz) {
-        return new ReflectionEnumFromStringMapper(clazz);
+        return getEnumAccessorImpl(clazz).getFromStringMapper();
     }
 
     public static class ReflectionPropertyAccessor implements PropertyAccessor<Object> {
@@ -75,8 +108,8 @@ public abstract class NetSuiteFactory {
             }
 
             // Retrieve the property getter method for the specified property
-            BeanMetaData metaData = BeanMetaData.forClass(target.getClass());
-            PropertyMetaData descriptor = metaData.getProperty(name);
+            TypeInfo metaData = TypeManager.forClass(target.getClass());
+            PropertyInfo descriptor = metaData.getProperty(name);
             if (descriptor == null) {
                 throw new IllegalArgumentException("Unknown property '" +
                         name + "' on class '" + target.getClass() + "'");
@@ -103,8 +136,8 @@ public abstract class NetSuiteFactory {
             }
 
             // Retrieve the property setter method for the specified property
-            BeanMetaData metaData = BeanMetaData.forClass(target.getClass());
-            PropertyMetaData descriptor = metaData.getProperty(name);
+            TypeInfo metaData = TypeManager.forClass(target.getClass());
+            PropertyInfo descriptor = metaData.getProperty(name);
             if (descriptor == null) {
                 throw new IllegalArgumentException("Unknown property '" +
                         name + "' on class '" + target.getClass() + "'" );
@@ -181,7 +214,7 @@ public abstract class NetSuiteFactory {
          * @param descriptor Property descriptor to return a getter for
          * @return The read method
          */
-        Method getReadMethod(Class clazz, PropertyMetaData descriptor) {
+        Method getReadMethod(Class clazz, PropertyInfo descriptor) {
             return (MethodUtils.getAccessibleMethod(clazz, descriptor.getReadMethodName(), EMPTY_CLASS_PARAMETERS));
         }
 
@@ -193,7 +226,7 @@ public abstract class NetSuiteFactory {
          * @param descriptor Property descriptor to return a setter for
          * @return The write method
          */
-        Method getWriteMethod(Class clazz, PropertyMetaData descriptor) {
+        Method getWriteMethod(Class clazz, PropertyInfo descriptor) {
             return (MethodUtils.getAccessibleMethod(clazz, descriptor.getWriteMethodName(),
                     new Class[]{descriptor.getWriteType()}));
         }
@@ -214,17 +247,65 @@ public abstract class NetSuiteFactory {
         }
     }
 
-    public static class ReflectionEnumToStringMapper implements Mapper<Enum, String> {
-        private Class<?> enumClass;
+    protected static abstract class AbstractEnumAccessor implements EnumAccessor {
+        protected Class<?> enumClass;
+        protected Mapper<Enum, String> toStringMapper;
+        protected Mapper<String, Enum> fromStringMapper;
 
-        public ReflectionEnumToStringMapper(Class<?> enumClass) {
+        protected AbstractEnumAccessor(Class<?> enumClass) {
             this.enumClass = enumClass;
+            toStringMapper = new ToStringMapper();
+            fromStringMapper = new FromStringMapper();
+        }
+
+        public Class<?> getEnumClass() {
+            return enumClass;
+        }
+
+        public Mapper<Enum, String> getToStringMapper() {
+            return toStringMapper;
+        }
+
+        public Mapper<String, Enum> getFromStringMapper() {
+            return fromStringMapper;
+        }
+
+        protected class ToStringMapper implements Mapper<Enum, String> {
+            @Override
+            public String map(Enum input) {
+                return mapToString(input);
+            }
+        }
+
+        protected class FromStringMapper implements Mapper<String, Enum> {
+            @Override
+            public Enum map(String input) {
+                return mapFromString(input);
+            }
+        }
+    }
+
+    public static class ReflectionEnumAccessor extends AbstractEnumAccessor {
+
+        public ReflectionEnumAccessor(Class<?> enumClass) {
+            super(enumClass);
         }
 
         @Override
-        public String map(Enum input) {
+        public String mapToString(Enum enumValue) {
             try {
-                return (String) MethodUtils.invokeExactMethod(input, "value", null);
+                return (String) MethodUtils.invokeExactMethod(enumValue, "value", null);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e.getTargetException());
+            } catch (NoSuchMethodException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public Enum mapFromString(String value) {
+            try {
+                return (Enum) MethodUtils.invokeExactStaticMethod(enumClass, "fromValue", value);
             } catch (InvocationTargetException e) {
                 throw new RuntimeException(e.getTargetException());
             } catch (NoSuchMethodException | IllegalAccessException e) {
@@ -233,22 +314,22 @@ public abstract class NetSuiteFactory {
         }
     }
 
-    public static class ReflectionEnumFromStringMapper implements Mapper<String, Enum> {
-        private Class<?> enumClass;
+    public static class OptimizedEnumAccessor extends AbstractEnumAccessor {
+        private EnumAccessor accessor;
 
-        public ReflectionEnumFromStringMapper(Class<?> enumClass) {
-            this.enumClass = enumClass;
+        public OptimizedEnumAccessor(Class<?> enumClass, EnumAccessor accessor) {
+            super(enumClass);
+            this.accessor = accessor;
         }
 
         @Override
-        public Enum map(String input) {
-            try {
-                return (Enum) MethodUtils.invokeExactStaticMethod(enumClass, "fromValue", input);
-            } catch (InvocationTargetException e) {
-                throw new RuntimeException(e.getTargetException());
-            } catch (NoSuchMethodException | IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
+        public String mapToString(Enum enumValue) {
+            return accessor.mapToString(enumValue);
+        }
+
+        @Override
+        public Enum mapFromString(String value) {
+            return accessor.mapFromString(value);
         }
     }
 }

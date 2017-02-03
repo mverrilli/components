@@ -81,8 +81,11 @@ public class NetSuiteInputProperties extends ComponentPropertiesImpl implements 
             NetSuiteMetaData metaData = NetSuiteFactory.getMetaData(NetSuiteConnectionProperties.API_VERSION);
             NetSuiteMetaData.SearchInfo searchInfo = metaData.getSearchInfo(typeName);
             NetSuiteMetaData.EntityInfo searchRecordInfo = metaData.getEntity(searchInfo.getSearchBasicClass());
-            List<String> fieldNames = new ArrayList<>(searchRecordInfo.getFields().keySet());
-            Collections.sort(fieldNames);
+            List<NetSuiteMetaData.FieldInfo> searchFieldInfos = searchRecordInfo.getFields();
+            List<String> fieldNames = new ArrayList<>(searchFieldInfos.size());
+            for (NetSuiteMetaData.FieldInfo fieldInfo : searchFieldInfos) {
+                fieldNames.add(fieldInfo.getName());
+            }
             return fieldNames;
         } catch (NetSuiteException e) {
             throw new ComponentException(e);

@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.beaninfo;
+package org.talend.components.netsuite.model;
 
 import java.util.HashMap;
 

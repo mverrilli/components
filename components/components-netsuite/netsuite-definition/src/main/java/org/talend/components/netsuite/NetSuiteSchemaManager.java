@@ -31,9 +31,10 @@ public class NetSuiteSchemaManager {
     public Schema inferSchemaForEntity(NetSuiteMetaData.EntityInfo in) {
         List<Schema.Field> fields = new ArrayList<>();
 
-        for (NetSuiteMetaData.FieldInfo fieldInfo : in.getFields().values()) {
+        for (NetSuiteMetaData.FieldInfo fieldInfo : in.getFields()) {
 
-            Schema.Field avroField = new Schema.Field(fieldInfo.getName(), inferSchemaForField(fieldInfo), null, (Object) null);
+            Schema.Field avroField = new Schema.Field(fieldInfo.getName(),
+                    inferSchemaForField(fieldInfo), null, (Object) null);
             // Add some Talend6 custom properties to the schema.
             Schema avroFieldSchema = avroField.schema();
             if (avroFieldSchema.getType() == Schema.Type.UNION) {

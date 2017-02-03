@@ -3,17 +3,24 @@ package org.talend.components.netsuite.codegen;
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
+import javassist.CtField;
 import javassist.CtMethod;
 import javassist.CtNewConstructor;
 import javassist.CtNewMethod;
 import javassist.Modifier;
 
-import java.util.Set;
+import java.util.Collection;
 
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
-import org.talend.components.netsuite.beaninfo.PrimitiveInfo;
+import org.talend.components.netsuite.model.EnumAccessor;
+import org.talend.components.netsuite.model.PropertyAccess;
+import org.talend.components.netsuite.model.PropertyInfo;
+import org.talend.components.netsuite.model.TypeInfo;
+import org.talend.components.netsuite.model.javassist.JavassistPropertyInfo;
+import org.talend.components.netsuite.model.javassist.JavassistTypeIntrospector;
+import org.talend.components.netsuite.model.PrimitiveInfo;
 
 /**
  *
@@ -26,26 +33,30 @@ public class NetSuiteClassEnhancer {
             genEnumAccessor(classToTransform, outputDir);
 
         } else if (classToTransform.hasAnnotation(XmlType.class)) {
-            Set<JavassistPropertyInfo> propertyInfoSet = JavassistTypeIntrospector.getInstance()
-                    .getBeanProperties(classToTransform);
+            Collection<JavassistPropertyInfo> propertyInfoSet = JavassistTypeIntrospector.getInstance()
+                    .getProperties(classToTransform);
 
-            if (classToTransform.isFrozen()) {
-                classToTransform.defrost();
+            if (propertyInfoSet.isEmpty()) {
+                System.out.println("No properties found for " + classToTransform.getName());
             }
 
-            CtClass nsPropertyAccessInterface = ClassPool.getDefault()
-                    .get("org.talend.components.netsuite.PropertyAccess");
+//            if (classToTransform.isFrozen()) {
+//                classToTransform.defrost();
+//            }
+
+            CtClass nsPropertyAccessInterface = ClassPool.getDefault().get(PropertyAccess.class.getName());
             classToTransform.addInterface(nsPropertyAccessInterface);
 
             genGetPropMethod(classToTransform, propertyInfoSet);
             genSetPropMethod(classToTransform, propertyInfoSet);
             genGetMetaDataMethod(classToTransform, propertyInfoSet);
         }
+
+        System.out.println("Transformed: " + classToTransform.getName());
     }
 
     private void genEnumAccessor(CtClass ctClass, String outputDir) throws Exception {
-        CtClass nsEnumAccessorInterface = ClassPool.getDefault()
-                .get("org.talend.components.netsuite.EnumAccessor");
+        CtClass nsEnumAccessorInterface = ClassPool.getDefault().get(EnumAccessor.class.getName());
 
         CtClass accessorClass = ClassPool.getDefault().makeClass(ctClass.getName() + "EnumAccessor");
         accessorClass.addInterface(nsEnumAccessorInterface);
@@ -53,6 +64,7 @@ public class NetSuiteClassEnhancer {
 
         genEnumMapToStringMethod(ctClass, accessorClass);
         genEnumMapFromStringMethod(ctClass, accessorClass);
+        genGetEnumAccessorField(ctClass, accessorClass);
         genGetEnumAccessorMethod(ctClass, accessorClass);
 
         accessorClass.writeFile(outputDir);
@@ -88,10 +100,22 @@ public class NetSuiteClassEnhancer {
         }
     }
 
+    private void genGetEnumAccessorField(CtClass targetClass, CtClass accessorClass) throws Exception {
+
+        try {
+            CtField field = new CtField(accessorClass, "ENUM_ACCESSOR", targetClass);
+            field.setModifiers(Modifier.PUBLIC | Modifier.STATIC | Modifier.FINAL);
+
+            targetClass.addField(field, CtField.Initializer.byNew(accessorClass));
+        } catch (CannotCompileException e) {
+            System.out.println("EnumAccessor field: " + accessorClass);
+            throw e;
+        }
+    }
+
     private void genGetEnumAccessorMethod(CtClass targetClass, CtClass accessorClass) throws Exception {
 
-        CtClass nsEnumAccessorInterface = ClassPool.getDefault()
-                .get("org.talend.components.netsuite.EnumAccessor");
+        CtClass nsEnumAccessorInterface = ClassPool.getDefault().get(EnumAccessor.class.getName());
 
         StringBuilder body = new StringBuilder("return new " + accessorClass.getName() +"();");
 
@@ -108,14 +132,14 @@ public class NetSuiteClassEnhancer {
     }
 
     private void genSetPropMethod(CtClass classToTransform,
-            Set<JavassistPropertyInfo> propertyInfoSet) throws Exception {
+            Collection<JavassistPropertyInfo> propertyInfoSet) throws Exception {
 
         StringBuilder body = new StringBuilder("public void set(String name, Object value) {\n");
 
         int count = 0;
         for (JavassistPropertyInfo info : propertyInfoSet) {
-            if (info.getSetter() != null) {
-                CtMethod setter = info.getSetter();
+            if (info.getWriteMethod() != null) {
+                CtMethod setter = info.getWriteMethod();
                 CtClass paramType = setter.getParameterTypes()[0];
                 if (count > 0) {
                     body.append("\nelse ");
@@ -175,14 +199,14 @@ public class NetSuiteClassEnhancer {
     }
 
     private void genGetPropMethod(CtClass classToTransform,
-            Set<JavassistPropertyInfo> propertyInfoSet) throws Exception {
+            Collection<JavassistPropertyInfo> propertyInfoSet) throws Exception {
 
         StringBuilder body = new StringBuilder("public Object get(String name) {\n");
 
         int count = 0;
         for (JavassistPropertyInfo info : propertyInfoSet) {
-            if (info.getGetter() != null) {
-                CtMethod getter = info.getGetter();
+            if (info.getReadMethod() != null) {
+                CtMethod getter = info.getReadMethod();
                 CtClass returnType = getter.getReturnType();
                 if (count > 0) {
                     body.append("\n");
@@ -214,55 +238,62 @@ public class NetSuiteClassEnhancer {
     }
 
     private void genGetMetaDataMethod(CtClass targetClass,
-            Set<JavassistPropertyInfo> propertyInfoSet) throws Exception {
+            Collection<JavassistPropertyInfo> propertyInfoSet) throws Exception {
 
-        CtClass beanMetaDataClass = ClassPool.getDefault().get("org.talend.components.netsuite.BeanMetaData");
-        CtClass propMetaDataClass = ClassPool.getDefault().get("org.talend.components.netsuite.PropertyMetaData");
+        CtClass beanMetaDataClass = ClassPool.getDefault().get(TypeInfo.class.getName());
+        CtClass propMetaDataClass = ClassPool.getDefault().get(PropertyInfo.class.getName());
 
         StringBuilder body = new StringBuilder("return new " + beanMetaDataClass.getName() +"(");
-        body.append("new " + propMetaDataClass.getName() + "[]{");
 
-        int count = 0;
-        for (JavassistPropertyInfo info : propertyInfoSet) {
-            if (count > 0) {
+        if (propertyInfoSet.isEmpty()) {
+            body.append("new " + propMetaDataClass.getName() + "[0]");
+        } else {
+            body.append("new " + propMetaDataClass.getName() + "[]{");
+
+            int count = 0;
+            for (JavassistPropertyInfo info : propertyInfoSet) {
+                if (count > 0) {
+                    body.append(", ");
+                }
+
+                // PropertyMetaData constructor
+                body.append("new " + propMetaDataClass.getName() + "(");
+                // property name
+                body.append("\"" + info.getName() + "\"");
                 body.append(", ");
+                // property read type (class)
+                body.append("" + info.getReadType().getName() + ".class");
+                body.append(", ");
+                // property write type (class)
+                if (info.getWriteType() != null) {
+                    body.append("" + info.getWriteType().getName() + ".class");
+                } else {
+                    body.append("null");
+                }
+                body.append(", ");
+                // read method name
+                if (info.getReadMethod() != null) {
+                    body.append("\"" + info.getReadMethod().getName() + "\"");
+                } else {
+                    body.append("null");
+                }
+                body.append(", ");
+                // write method name
+                if (info.getWriteMethod() != null) {
+                    body.append("\"" + info.getWriteMethod().getName() + "\"");
+                } else {
+                    body.append("null");
+                }
+                // End of PropertyMetaData constructor
+                body.append(")");
+
+                count++;
             }
 
-            // PropertyMetaData constructor
-            body.append("new " + propMetaDataClass.getName() + "(");
-            // property name
-            body.append("\"" + info.getName() + "\"");
-            body.append(", ");
-            // property read type (class)
-            body.append("" + info.getReadType().getName() + ".class");
-            body.append(", ");
-            // property write type (class)
-            if (info.getWriteType() != null) {
-                body.append("" + info.getWriteType().getName() + ".class");
-            } else {
-                body.append("null");
-            }
-            body.append(", ");
-            // read method name
-            if (info.getGetter() != null) {
-                body.append("\"" + info.getGetter().getName() + "\"");
-            } else {
-                body.append("null");
-            }
-            body.append(", ");
-            // write method name
-            if (info.getSetter() != null) {
-                body.append("\"" + info.getSetter().getName() + "\"");
-            } else {
-                body.append("null");
-            }
-            // End of PropertyMetaData constructor
-            body.append(")");
-
-            count++;
+            // End of PropertyMetaData array
+            body.append("}");
         }
-        // End of PropertyMetaData array
-        body.append("}");
+
         // End of BodyMetaData constructor
         body.append(");");
 

@@ -12,8 +12,9 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.talend.components.netsuite.BeanMetaData;
-import org.talend.components.netsuite.PropertyMetaData;
+import org.talend.components.netsuite.model.TypeInfo;
+import org.talend.components.netsuite.model.PropertyInfo;
+import org.talend.components.netsuite.model.TypeManager;
 
 import static org.talend.components.netsuite.client.NsObject.asNsObject;
 
@@ -92,13 +93,13 @@ public class NsSearch {
 
         initSearch();
 
-        BeanMetaData searchMetaData = BeanMetaData.forClass(searchInfo.getSearchBasicClass());
+        TypeInfo searchMetaData = TypeManager.forClass(searchInfo.getSearchBasicClass());
 
         if (searchValue.get(0) == null && searchFieldName == null) {
             return this;
         }
 
-        PropertyMetaData fieldMetaData = searchMetaData.getProperty(searchFieldName);
+        PropertyInfo fieldMetaData = searchMetaData.getProperty(searchFieldName);
 
         if (dataType != null) {
             String searchFieldType = null;
@@ -141,7 +142,7 @@ public class NsSearch {
     private NsObject createCriteria(
             Class<?> searchFieldClass, String internalId) throws NetSuiteException {
         try {
-            BeanMetaData fieldTypeMetaData = BeanMetaData.forClass(searchFieldClass);
+            TypeInfo fieldTypeMetaData = TypeManager.forClass(searchFieldClass);
             NsObject searchField = asNsObject(searchFieldClass.newInstance());
             if (fieldTypeMetaData.getProperty("internalId") != null && internalId != null) {
                 searchField.set("internalId", internalId);
@@ -155,7 +156,7 @@ public class NsSearch {
     private NsObject createCriteria(NsObject search,
             String searchFieldName, String searchOperator, List<String> searchValue) throws NetSuiteException {
 
-        BeanMetaData searchMetaData = BeanMetaData.forClass(search.getTarget().getClass());
+        TypeInfo searchMetaData = TypeManager.forClass(search.getTarget().getClass());
         Class<?> searchFieldClass = searchMetaData.getProperty(searchFieldName).getWriteType();
 
         NsObject criteria = createCriteria(searchFieldClass, searchFieldName, searchOperator, searchValue);

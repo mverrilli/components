@@ -10,8 +10,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.talend.components.netsuite.BeanMetaData;
-import org.talend.components.netsuite.PropertyMetaData;
+import org.talend.components.netsuite.model.Mapper;
+import org.talend.components.netsuite.model.TypeInfo;
+import org.talend.components.netsuite.model.PropertyInfo;
+import org.talend.components.netsuite.model.TypeManager;
 
 /**
  *
@@ -94,10 +96,10 @@ public abstract class NetSuiteMetaData {
             }
         }
 
-        Map<String, FieldInfo> fields = new HashMap<>();
-        BeanMetaData beanInfo = BeanMetaData.forClass(typeClass);
-        Collection<PropertyMetaData> propertyInfos = beanInfo.getProperties();
-        for (PropertyMetaData propertyInfo : propertyInfos) {
+        TypeInfo beanInfo = TypeManager.forClass(typeClass);
+        List<PropertyInfo> propertyInfos = beanInfo.getProperties();
+        List<FieldInfo> fields = new ArrayList<>(propertyInfos.size());
+        for (PropertyInfo propertyInfo : propertyInfos) {
             String fieldName = propertyInfo.getName();
             Class fieldValueType = propertyInfo.getReadType();
             if ((fieldName.equals("class") && fieldValueType == Class.class) ||
@@ -106,11 +108,10 @@ public abstract class NetSuiteMetaData {
             }
             boolean isKeyField = isKeyField(typeClass, propertyInfo);
             FieldInfo fieldInfo = new FieldInfo(fieldName, fieldValueType, isKeyField, true, propertyInfo);
-            fields.put(fieldInfo.getName(), fieldInfo);
+            fields.add(fieldInfo);
         }
 
-        EntityInfo entityInfo = new EntityInfo(typeName, typeClass,
-                Collections.unmodifiableMap(fields), beanInfo);
+        EntityInfo entityInfo = new EntityInfo(typeName, typeClass, fields, beanInfo);
         typeMap.put(typeNameToRegister, entityInfo);
     }
 
@@ -156,7 +157,7 @@ public abstract class NetSuiteMetaData {
 
     public abstract Class<?> getListOrRecordRefClass();
 
-    protected abstract boolean isKeyField(Class<?> entityClass, PropertyMetaData propertyInfo);
+    protected abstract boolean isKeyField(Class<?> entityClass, PropertyInfo propertyInfo);
 
     public static String toInitialUpper(String value) {
         return value.substring(0, 1).toUpperCase() + value.substring(1);
@@ -173,15 +174,22 @@ public abstract class NetSuiteMetaData {
     public static class EntityInfo {
         private String name;
         private Class<?> entityClass;
-        private Map<String, FieldInfo> fields;
-        private BeanMetaData beanInfo;
+        private List<FieldInfo> fields;
+        private Map<String, FieldInfo> fieldMap;
+        private TypeInfo typeInfo;
 
-        public EntityInfo(String name, Class<?> entityClass, Map<String, FieldInfo> fields,
-                BeanMetaData beanInfo) {
+        public EntityInfo(String name, Class<?> entityClass, List<FieldInfo> fields,
+                TypeInfo typeInfo) {
             this.name = name;
             this.entityClass = entityClass;
             this.fields = fields;
-            this.beanInfo = beanInfo;
+
+            fieldMap = new HashMap<>(fields.size());
+            for (FieldInfo fieldInfo : fields) {
+                fieldMap.put(fieldInfo.getName(), fieldInfo);
+            }
+
+            this.typeInfo = typeInfo;
         }
 
         public String getName() {
@@ -193,15 +201,19 @@ public abstract class NetSuiteMetaData {
         }
 
         public FieldInfo getField(String name) {
-            return fields.get(name);
+            return fieldMap.get(name);
         }
 
-        public Map<String, FieldInfo> getFields() {
-            return fields;
+        public Map<String, FieldInfo> getFieldMap() {
+            return Collections.unmodifiableMap(fieldMap);
         }
 
-        public BeanMetaData getBeanInfo() {
-            return beanInfo;
+        public List<FieldInfo> getFields() {
+            return Collections.unmodifiableList(fields);
+        }
+
+        public TypeInfo getTypeInfo() {
+            return typeInfo;
         }
     }
 
@@ -210,10 +222,10 @@ public abstract class NetSuiteMetaData {
         private Class valueType;
         private boolean key;
         private boolean nullable;
-        private PropertyMetaData propertyInfo;
+        private PropertyInfo propertyInfo;
 
         public FieldInfo(String name, Class valueType, boolean key, boolean nullable,
-                PropertyMetaData propertyInfo) {
+                PropertyInfo propertyInfo) {
             this.name = name;
             this.valueType = valueType;
             this.key = key;
@@ -241,7 +253,7 @@ public abstract class NetSuiteMetaData {
             return nullable;
         }
 
-        public PropertyMetaData getPropertyInfo() {
+        public PropertyInfo getPropertyInfo() {
             return propertyInfo;
         }
     }

@@ -3,8 +3,8 @@ package org.talend.components.netsuite.client.impl.v2016_2;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.talend.components.netsuite.PropertyMetaData;
-import org.talend.components.netsuite.client.Mapper;
+import org.talend.components.netsuite.model.PropertyInfo;
+import org.talend.components.netsuite.model.Mapper;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
 
 import com.netsuite.webservices.v2016_2.activities.scheduling.CalendarEvent;
@@ -704,7 +704,7 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
         return ListOrRecordRef.class;
     }
 
-    protected boolean isKeyField(Class<?> entityClass, PropertyMetaData propertyInfo) {
+    protected boolean isKeyField(Class<?> entityClass, PropertyInfo propertyInfo) {
         if (Record.class.isAssignableFrom(entityClass) &&
                 (propertyInfo.getName().equals("internalId") || propertyInfo.getName().equals("externalId"))) {
             return true;

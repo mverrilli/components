@@ -1,12 +1,14 @@
-package org.talend.components.netsuite;
+package org.talend.components.netsuite.client;
 
 import java.util.Collection;
 
 import org.apache.commons.beanutils.MethodUtils;
 import org.junit.Test;
-import org.talend.components.netsuite.BeanMetaData;
-import org.talend.components.netsuite.PropertyAccessor;
-import org.talend.components.netsuite.PropertyMetaData;
+import org.talend.components.netsuite.model.EnumAccessor;
+import org.talend.components.netsuite.model.PropertyAccess;
+import org.talend.components.netsuite.model.PropertyInfo;
+import org.talend.components.netsuite.model.TypeInfo;
+import org.talend.components.netsuite.model.TypeManager;
 
 import com.netsuite.webservices.v2014_2.lists.accounting.types.AccountType;
 import com.netsuite.webservices.v2016_2.lists.accounting.Account;
@@ -22,14 +24,14 @@ public class CodeGenTest {
 
     @Test
     public void testMetaData() throws Exception {
-        BeanMetaData md = BeanMetaData.forClass(Account.class);
+        TypeInfo md = TypeManager.forClass(Account.class);
 
-        Collection<PropertyMetaData> properties = md.getProperties();
+        Collection<PropertyInfo> properties = md.getProperties();
 
         assertNotNull(properties);
         assertFalse(properties.isEmpty());
 
-        for (PropertyMetaData pmd : properties) {
+        for (PropertyInfo pmd : properties) {
             assertNotNull(pmd);
             assertNotNull(pmd.getName());
             assertNotNull(pmd.getReadType());
@@ -57,7 +59,7 @@ public class CodeGenTest {
     }
 
     @Test
-    public void testEnumAccessorAccess() throws Exception {
+    public void testEnumAccessor() throws Exception {
         EnumAccessor accessor = (EnumAccessor) MethodUtils.invokeExactStaticMethod(
                 AccountType.class, "getEnumAccessor", null);
 
