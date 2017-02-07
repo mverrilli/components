@@ -7,6 +7,7 @@ import org.talend.components.api.component.ConnectorTopology;
 import org.talend.components.api.component.runtime.ExecutionEngine;
 import org.talend.components.api.properties.ComponentProperties;
 import org.talend.components.netsuite.NetSuiteDefinition;
+import org.talend.components.netsuite.NetSuiteModuleProperties;
 import org.talend.daikon.runtime.RuntimeInfo;
 
 /**
@@ -28,12 +29,11 @@ public class NetSuiteInputDefinition extends NetSuiteDefinition {
     @Override
     public RuntimeInfo getRuntimeInfo(ExecutionEngine engine, ComponentProperties properties,
             ConnectorTopology connectorTopology) {
-        if (connectorTopology == ConnectorTopology.OUTGOING) {
-            return getCommonRuntimeInfo(this.getClass().getClassLoader(),
-                    "org.talend.components.netsuite.input.NetSuiteSource");
-        } else {
-            return null;
-        }
+//        if (connectorTopology == ConnectorTopology.OUTGOING) {
+            return getRuntimeInfo("org.talend.components.netsuite.input.NetSuiteSource");
+//        } else {
+//            return null;
+//        }
     }
 
     @Override
@@ -41,8 +41,14 @@ public class NetSuiteInputDefinition extends NetSuiteDefinition {
         return EnumSet.of(ConnectorTopology.OUTGOING);
     }
 
+    public Class<? extends ComponentProperties>[] getNestedCompatibleComponentPropertiesClass() {
+        return concatPropertiesClasses(super.getNestedCompatibleComponentPropertiesClass(),
+                new Class[] { NetSuiteModuleProperties.class });
+    }
+
     @Override
     public Class<? extends ComponentProperties> getPropertyClass() {
         return NetSuiteInputProperties.class;
     }
+
 }

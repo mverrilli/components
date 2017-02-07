@@ -39,8 +39,7 @@ public class NetSuiteConnectionDefinition extends NetSuiteDefinition {
     public RuntimeInfo getRuntimeInfo(ExecutionEngine engine, ComponentProperties properties, ConnectorTopology componentType) {
         assertEngineCompatibility(engine);
         if (componentType == ConnectorTopology.NONE) {
-            return getCommonRuntimeInfo(this.getClass().getClassLoader(),
-                    "org.talend.components.netsuite.NetSuiteSourceOrSink");
+            return getRuntimeInfo("org.talend.components.netsuite.NetSuiteSourceOrSink");
         } else {
             return null;
         }

@@ -17,9 +17,19 @@
     <modules>
         <module>netsuite-common</module>
         <module>netsuite-codegen</module>
-        <module>netsuite-client</module>
+        <!--<module>netsuite-client</module>-->
         <module>netsuite-definition</module>
         <module>netsuite-runtime</module>
     </modules>
+
+    <!--<profiles>-->
+        <!--<profile>-->
+            <!--<id>tos-di-dev-local</id>-->
+            <!--<properties>-->
+                <!--<tos-di.plugins.dir>${env.TOS_DI_HOME}/plugins</tos-di.plugins.dir>-->
+                <!--<tos-di.mvn.repo.dir>${env.TOS_DI_HOME}/configuration/.m2/repository</tos-di.mvn.repo.dir>-->
+            <!--</properties>-->
+        <!--</profile>-->
+    <!--</profiles>-->
 
 </project>

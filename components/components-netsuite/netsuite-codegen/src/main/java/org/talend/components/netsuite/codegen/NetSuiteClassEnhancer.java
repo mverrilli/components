@@ -27,6 +27,16 @@ import org.talend.components.netsuite.model.PrimitiveInfo;
  */
 public class NetSuiteClassEnhancer {
 
+    private boolean debugEnabled;
+
+    public boolean isDebugEnabled() {
+        return debugEnabled;
+    }
+
+    public void setDebugEnabled(boolean debugEnabled) {
+        this.debugEnabled = debugEnabled;
+    }
+
     public void transform(CtClass classToTransform, String outputDir) throws Exception {
 
         if (classToTransform.isEnum() && classToTransform.hasAnnotation(XmlEnum.class)) {
@@ -37,7 +47,9 @@ public class NetSuiteClassEnhancer {
                     .getProperties(classToTransform);
 
             if (propertyInfoSet.isEmpty()) {
-                System.out.println("No properties found for " + classToTransform.getName());
+                if (isDebugEnabled()) {
+                    System.out.println("No properties found for " + classToTransform.getName());
+                }
             }
 
 //            if (classToTransform.isFrozen()) {
@@ -52,7 +64,9 @@ public class NetSuiteClassEnhancer {
             genGetMetaDataMethod(classToTransform, propertyInfoSet);
         }
 
-        System.out.println("Transformed: " + classToTransform.getName());
+        if (isDebugEnabled()) {
+            System.out.println("Transformed: " + classToTransform.getName());
+        }
     }
 
     private void genEnumAccessor(CtClass ctClass, String outputDir) throws Exception {
@@ -117,7 +131,7 @@ public class NetSuiteClassEnhancer {
 
         CtClass nsEnumAccessorInterface = ClassPool.getDefault().get(EnumAccessor.class.getName());
 
-        StringBuilder body = new StringBuilder("return new " + accessorClass.getName() +"();");
+        StringBuilder body = new StringBuilder("return " + targetClass.getName() +".ENUM_ACCESSOR;");
 
         try {
             CtMethod method = CtNewMethod.make(nsEnumAccessorInterface, "getEnumAccessor",

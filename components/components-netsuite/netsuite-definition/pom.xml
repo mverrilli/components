@@ -34,75 +34,31 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.talend.components</groupId>
-            <artifactId>components-common</artifactId>
-            <version>${project.version}</version>
-            <classifier>bundle</classifier>
-            <scope>test</scope>
-        </dependency>
-
         <!--<dependency>-->
             <!--<groupId>org.talend.components</groupId>-->
             <!--<artifactId>netsuite-common</artifactId>-->
             <!--<version>${project.version}</version>-->
         <!--</dependency>-->
-        <dependency>
-            <groupId>org.talend.components</groupId>
-            <artifactId>netsuite-client</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-core</artifactId>
-            <version>3.1.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-databinding-jaxb</artifactId>
-            <version>3.1.4</version>
-        </dependency>
         <!--<dependency>-->
-            <!--<groupId>org.codehaus.woodstox</groupId>-->
-            <!--<artifactId>woodstox-core-asl</artifactId>-->
-            <!--<version>4.4.1</version>-->
+            <!--<groupId>org.talend.components</groupId>-->
+            <!--<artifactId>netsuite-client</artifactId>-->
+            <!--<version>${project.version}</version>-->
         <!--</dependency>-->
         <!--<dependency>-->
-            <!--<groupId>org.codehaus.woodstox</groupId>-->
-            <!--<artifactId>stax2-api</artifactId>-->
+            <!--<groupId>org.apache.cxf</groupId>-->
+            <!--<artifactId>cxf-core</artifactId>-->
             <!--<version>3.1.4</version>-->
         <!--</dependency>-->
         <!--<dependency>-->
-            <!--<groupId>org.apache.ws.xmlschema</groupId>-->
-            <!--<artifactId>xmlschema-core</artifactId>-->
-            <!--<version>2.2.1</version>-->
+            <!--<groupId>org.apache.cxf</groupId>-->
+            <!--<artifactId>cxf-rt-databinding-jaxb</artifactId>-->
+            <!--<version>3.1.4</version>-->
         <!--</dependency>-->
         <!--<dependency>-->
-            <!--<groupId>msv</groupId>-->
-            <!--<artifactId>msv</artifactId>-->
-            <!--<version>20050913</version>-->
+            <!--<groupId>org.javassist</groupId>-->
+            <!--<artifactId>javassist</artifactId>-->
+            <!--<version>3.19.0-GA</version>-->
         <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>com.sun.msv.datatype.xsd</groupId>-->
-            <!--<artifactId>xsdlib</artifactId>-->
-            <!--<version>2013.2</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>isorelax</groupId>-->
-            <!--<artifactId>isorelax</artifactId>-->
-            <!--<version>20030108</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>relaxngDatatype</groupId>-->
-            <!--<artifactId>relaxngDatatype</artifactId>-->
-            <!--<version>20020414</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>com.sun.xml.bind</groupId>-->
-            <!--<artifactId>jaxb-impl</artifactId>-->
-            <!--<version>2.2.3</version>-->
-        <!--</dependency>-->
-
 
         <!-- Tests -->
         <dependency>
@@ -125,6 +81,13 @@
         </dependency>
 
         <!-- Jar containing Test utils methods -->
+        <dependency>
+            <groupId>org.talend.components</groupId>
+            <artifactId>components-common</artifactId>
+            <version>${project.version}</version>
+            <classifier>bundle</classifier>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.talend.components</groupId>
             <artifactId>components-api</artifactId>
@@ -253,10 +216,10 @@
                         <configuration>
                             <classifier>bundle</classifier>
                             <instructions>
-                                <Bundle-SymbolicName>org.talend.components.netsuite</Bundle-SymbolicName>
+                                <Bundle-SymbolicName>org.talend.components.netsuite.definition</Bundle-SymbolicName>
                                 <Service-Component>*</Service-Component>
-                                <Import-Package>!org.apache.cxf.*,!org.springframework*,!com.sun*,!org.talend.components.netsuite*,!javax.jws*,!javax.xml*,!javax.wsdl*,!com.fasterxml.jackson*,*</Import-Package>
-                                <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components*|cxf-*|slf4j-*</Embed-Dependency>
+                                <Import-Package>!*internal,*</Import-Package>
+                                <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*</Embed-Dependency>
                                 <Include-Resource>
                                     {maven-resources},META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt=target/classes/META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt
                                 </Include-Resource>
@@ -268,5 +231,67 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>tos-di-dev-local</id>
+            <activation>
+                <property><name>tos-di.home</name></property>
+            </activation>
+            <properties>
+                <tos-di.plugins.dir>${tos-di.home}/plugins</tos-di.plugins.dir>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.8</version>
+                        <executions>
+                            <execution>
+                                <id>copy-to-plugins</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>${project.artifactId}</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>${project.packaging}</type>
+                                            <classifier>bundle</classifier>
+                                            <outputDirectory>${tos-di.plugins.dir}</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                            <!--<execution>-->
+                                <!--<id>copy-to-repo</id>-->
+                                <!--<phase>install</phase>-->
+                                <!--<goals>-->
+                                    <!--<goal>copy</goal>-->
+                                <!--</goals>-->
+                                <!--<configuration>-->
+                                    <!--<artifactItems>-->
+                                        <!--<artifactItem>-->
+                                            <!--<groupId>${project.groupId}</groupId>-->
+                                            <!--<artifactId>${project.artifactId}</artifactId>-->
+                                            <!--<version>${project.version}</version>-->
+                                            <!--<type>${project.packaging}</type>-->
+                                            <!--<classifier>bundle</classifier>-->
+                                            <!--<outputDirectory>${tos-di.mvn.repo.dir}/org/talend/components/${project.artifactId}/${project.version}</outputDirectory>-->
+                                            <!--<destFileName>${project.artifactId}-${project.version}.${project.packaging}</destFileName>-->
+                                        <!--</artifactItem>-->
+                                    <!--</artifactItems>-->
+                                <!--</configuration>-->
+                            <!--</execution>-->
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 
 </project>

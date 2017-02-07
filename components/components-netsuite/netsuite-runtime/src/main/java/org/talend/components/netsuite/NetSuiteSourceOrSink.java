@@ -24,12 +24,12 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
 
     protected NetSuiteProvideConnectionProperties properties;
 
-    protected transient NetSuiteEndpoint endpoint;
+    protected transient NetSuiteEndpointService endpoint;
 
     @Override
     public ValidationResult initialize(RuntimeContainer container, ComponentProperties properties) {
         this.properties = (NetSuiteProvideConnectionProperties) properties;
-        this.endpoint = new NetSuiteEndpoint(this.properties);
+        this.endpoint = new NetSuiteEndpointService(getConnectionProperties());
         return ValidationResult.OK;
     }
 
@@ -46,20 +46,12 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
 
     @Override
     public List<NamedThing> getSchemaNames(RuntimeContainer container) throws IOException {
-        try {
-            return endpoint.getSchemaNames();
-        } catch (NetSuiteException e) {
-            throw new IOException(e);
-        }
+        return endpoint.getSchemaNames();
     }
 
     @Override
     public Schema getEndpointSchema(RuntimeContainer container, String schemaName) throws IOException {
-        try {
-            return endpoint.getSchema(schemaName);
-        } catch (NetSuiteException e) {
-            throw new IOException(e);
-        }
+        return endpoint.getSchema(schemaName);
     }
 
     public NetSuiteConnectionProperties getConnectionProperties() {

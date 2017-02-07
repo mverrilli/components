@@ -33,7 +33,7 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
 
     public Property<String> account = newString("account").setRequired();
 
-    public Property<String> applicationId = newString("applicationId").setRequired();
+    public Property<String> applicationId = newString("applicationId");
 
     public NetSuiteConnectionProperties(String name) {
         super(name);
@@ -66,6 +66,12 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
 
         // A form for a reference to a connection, used in a NetSuite Input component for example
         Form refForm = Form.create(this, Form.REFERENCE);
+        refForm.addRow(endpoint);
+        refForm.addRow(email);
+        refForm.addRow(widget(password).setWidgetType(Widget.HIDDEN_TEXT_WIDGET_TYPE));
+        refForm.addRow(role);
+        refForm.addRow(account);
+        refForm.addRow(applicationId);
     }
 
     @Override

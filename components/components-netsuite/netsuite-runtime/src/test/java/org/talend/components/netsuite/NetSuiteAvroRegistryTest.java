@@ -39,7 +39,7 @@ public class NetSuiteAvroRegistryTest {
     public void testInferSchemaForEntity() throws Exception {
         NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity("Account");
 
-        Schema s = registry.inferSchema(entityInfo);
+        Schema s = NetSuiteEndpointService.inferSchemaForEntity(entityInfo);
 
         System.out.println(s);
 
@@ -75,7 +75,7 @@ public class NetSuiteAvroRegistryTest {
     public void testEnumConverter() throws Exception {
         NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity("Account");
 
-        Schema s = registry.inferSchema(entityInfo);
+        Schema s = NetSuiteEndpointService.inferSchemaForEntity(entityInfo);
 
         NetSuiteMetaData.FieldInfo fieldInfo = entityInfo.getField("acctType");
         Schema.Field f = s.getField(fieldInfo.getName());

@@ -13,11 +13,9 @@ import org.joda.time.format.DateTimeFormatter;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.model.Mapper;
 import org.talend.components.netsuite.client.NetSuiteFactory;
-import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.daikon.avro.AvroRegistry;
 import org.talend.daikon.avro.SchemaConstants;
 import org.talend.daikon.avro.converter.AvroConverter;
-import org.talend.daikon.java8.SerializableFunction;
 
 /**
  *
@@ -31,28 +29,6 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
     private final DatatypeFactory datatypeFactory;
 
     private NetSuiteAvroRegistry() {
-
-        // Ensure that we know how to get Schemas for these objects.
-        registerSchemaInferrer(NetSuiteMetaData.EntityInfo.class, new SerializableFunction<NetSuiteMetaData.EntityInfo, Schema>() {
-            /** Default serial version UID. */
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Schema apply(NetSuiteMetaData.EntityInfo t) {
-                return NetSuiteSchemaManager.getInstance().inferSchemaForEntity(t);
-            }
-        });
-
-        registerSchemaInferrer(NetSuiteMetaData.FieldInfo.class, new SerializableFunction<NetSuiteMetaData.FieldInfo, Schema>() {
-            /** Default serial version UID. */
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Schema apply(NetSuiteMetaData.FieldInfo t) {
-                return NetSuiteSchemaManager.getInstance().inferSchemaForField(t);
-            }
-        });
-
         try {
             datatypeFactory = DatatypeFactory.newInstance();
         } catch (DatatypeConfigurationException e) {
