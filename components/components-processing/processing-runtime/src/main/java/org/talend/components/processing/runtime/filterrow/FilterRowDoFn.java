@@ -21,13 +21,14 @@ import org.apache.avro.generic.GenericData.Record;
 import org.apache.avro.generic.GenericRecordBuilder;
 import org.apache.avro.generic.IndexedRecord;
 import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.commons.lang3.StringUtils;
 import org.talend.components.processing.filterrow.ConditionsRowConstant;
 import org.talend.components.processing.filterrow.FilterRowProperties;
 import org.talend.daikon.avro.AvroRegistry;
 import org.talend.daikon.avro.AvroUtils;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
-
-import io.netty.util.internal.StringUtil;
+import org.talend.daikon.exception.TalendRuntimeException;
+import org.talend.daikon.exception.error.CommonErrorCodes;
 
 public class FilterRowDoFn extends DoFn<Object, IndexedRecord> {
 
@@ -61,7 +62,7 @@ public class FilterRowDoFn extends DoFn<Object, IndexedRecord> {
         String columnName = properties.columnName.getValue();
 
         // If there is no defined input, we filter nothing
-        if (!StringUtil.isNullOrEmpty(columnName)) {
+        if (!StringUtils.isEmpty(columnName)) {
             List<Object> inputValues = getInputFields(inputRecord, columnName);
             if (inputValues.size() == 0) {
                 // no valid field: reject the input
@@ -98,24 +99,13 @@ public class FilterRowDoFn extends DoFn<Object, IndexedRecord> {
         inputValue = FilterRowUtils.applyFunction(inputValue, function);
 
         if (referenceValue != null) {
-            // Start the comparison with the referenceValue
-            if (ConditionsRowConstant.Function.MATCH.equals(function)) {
-                if (ConditionsRowConstant.Operator.EQUAL.equals(conditionOperator)) {
-                    return inputValue.toString().matches(referenceValue);
-                } else { // Not Equals
-                    return !inputValue.toString().matches(referenceValue);
-                }
-            } else if (ConditionsRowConstant.Function.CONTAINS.equals(function)) {
-                if (ConditionsRowConstant.Operator.EQUAL.equals(conditionOperator)) {
-                    return inputValue.toString().contains(referenceValue);
-                } else { // Contains not
-                    return !inputValue.toString().contains(referenceValue);
-                }
-            } else {
-                // TODO: do not cast the reference value at each comparison
-                Class<T> inputValueClass = TypeConverterUtils.getComparableClass(inputValue);
+            // TODO: do not cast the reference value at each comparison
+            Class<T> inputValueClass = TypeConverterUtils.getComparableClass(inputValue);
+            if (inputValueClass != null) {
                 T convertedReferenceValue = TypeConverterUtils.parseTo(referenceValue, inputValueClass);
                 return FilterRowUtils.compare(inputValueClass.cast(inputValue), conditionOperator, convertedReferenceValue);
+            } else {
+                return FilterRowUtils.compare(inputValue.toString(), conditionOperator, referenceValue.toString());
             }
         } else {
             if (ConditionsRowConstant.Operator.EQUAL.equals(conditionOperator)) {
@@ -136,6 +126,9 @@ public class FilterRowDoFn extends DoFn<Object, IndexedRecord> {
         for (Integer i = 0; i < path.length; i++) {
             // The column was existing on the input record, we forward it to the
             // output record.
+            if (schema.getField(path[i]) == null) {
+                throw new TalendRuntimeException(CommonErrorCodes.UNEXPECTED_ARGUMENT, new Throwable(String.format("The field %s is not present on the input record", columnName)));
+            }
             Object inputValue = inputRecord.get(schema.getField(path[i]).pos());
 
             // The current column can be a Record (an hierarchical sub-object)
