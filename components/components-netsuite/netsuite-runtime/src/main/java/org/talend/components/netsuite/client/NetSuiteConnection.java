@@ -119,31 +119,31 @@ public abstract class NetSuiteConnection<P> {
         return new NsSearch(this);
     }
 
-    public abstract NsSearchResult search(NsSearchRecord searchRecord) throws NetSuiteException;
+    public abstract <RecT, SearchRecT> NsSearchResult<RecT> search(SearchRecT searchRecord) throws NetSuiteException;
 
-    public abstract NsSearchResult searchMore(int pageIndex) throws NetSuiteException;
+    public abstract <RecT> NsSearchResult<RecT> searchMore(int pageIndex) throws NetSuiteException;
 
-    public abstract NsSearchResult searchMoreWithId(String searchId, int pageIndex) throws NetSuiteException;
+    public abstract <RecT> NsSearchResult<RecT> searchMoreWithId(String searchId, int pageIndex) throws NetSuiteException;
 
-    public abstract NsSearchResult searchNext() throws NetSuiteException;
+    public abstract <RecT> NsSearchResult<RecT> searchNext() throws NetSuiteException;
 
-    public abstract NsWriteResponse add(NsObject record) throws NetSuiteException;
+    public abstract <RecT, RefT> NsWriteResponse<RefT> add(RecT record) throws NetSuiteException;
 
-    public abstract NsWriteResponseList addList(List<NsObject> records) throws NetSuiteException;
+    public abstract <RecT, RefT> NsWriteResponseList<RefT> addList(List<RecT> records) throws NetSuiteException;
 
-    public abstract NsWriteResponse update(NsObject record) throws NetSuiteException;
+    public abstract <RecT, RefT> NsWriteResponse<RefT> update(RecT record) throws NetSuiteException;
 
-    public abstract NsWriteResponseList updateList(List<NsObject> records) throws NetSuiteException;
+    public abstract <RecT, RefT> NsWriteResponseList<RefT> updateList(List<RecT> records) throws NetSuiteException;
 
-    public abstract NsWriteResponse upsert(NsObject record) throws NetSuiteException;
+    public abstract <RecT, RefT> NsWriteResponse<RefT> upsert(RecT record) throws NetSuiteException;
 
-    public abstract NsWriteResponseList upsertList(List<NsObject> records) throws NetSuiteException;
+    public abstract <RecT, RefT> NsWriteResponseList<RefT> upsertList(List<RecT> records) throws NetSuiteException;
 
-    public abstract NsWriteResponse delete(NsRef ref) throws NetSuiteException;
+    public abstract <RefT> NsWriteResponse<RefT> delete(RefT ref) throws NetSuiteException;
 
-    public abstract NsWriteResponseList deleteList(List<NsRef> refList) throws NetSuiteException;
+    public abstract <RefT> NsWriteResponseList<RefT> deleteList(List<RefT> refList) throws NetSuiteException;
 
-//    public GetSelectValueResult getSelectValue(final GetSelectValueRequest request) throws NetSuiteException {
+    //    public GetSelectValueResult getSelectValue(final GetSelectValueRequest request) throws NetSuiteException {
 //        return execute(new PortOp<GetSelectValueResult>() {
 //            @Override public GetSelectValueResult execute(NetSuitePortType port) throws Exception {
 //                return port.getSelectValue(request).getGetSelectValueResult();

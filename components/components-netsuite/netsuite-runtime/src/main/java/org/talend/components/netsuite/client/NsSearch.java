@@ -16,14 +16,12 @@ import org.talend.components.netsuite.model.TypeInfo;
 import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.model.TypeManager;
 
-import static org.talend.components.netsuite.client.NsObject.asNsObject;
-
 /**
  *
  */
-public class NsSearch {
+public class NsSearch<RecT, SearchRecT> {
 
-    protected NetSuiteConnection<?> connection;
+    protected NetSuiteConnection connection;
     protected NetSuiteMetaData metaData;
 
     protected String entityTypeName;
@@ -38,7 +36,7 @@ public class NsSearch {
     // no use for now
     private List<NsObject> customCriteriaList = new ArrayList<>();
 
-    public NsSearch(NetSuiteConnection<?> connection) throws NetSuiteException {
+    public NsSearch(NetSuiteConnection connection) throws NetSuiteException {
         this.connection = connection;
         this.metaData = connection.getMetaData();
     }
@@ -66,12 +64,12 @@ public class NsSearch {
         }
         try {
             // get a search class instance
-            search = asNsObject(searchInfo.getSearchClass().newInstance());
+            search = NsObject.wrap(searchInfo.getSearchClass().newInstance());
 
             // get a advanced search class instance and set 'savedSearchId' into it
             searchAdvanced = null;
             if (savedSearchId != null && savedSearchId.length() > 0) {
-                searchAdvanced = asNsObject(searchInfo.getSearchAdvancedClass().newInstance());
+                searchAdvanced = NsObject.wrap(searchInfo.getSearchAdvancedClass().newInstance());
                 searchAdvanced.set("savedSearchId", savedSearchId);
             }
 
@@ -81,7 +79,7 @@ public class NsSearch {
             }
 
             // get a basic search class instance
-            searchBasic = asNsObject(searchInfo.getSearchBasicClass().newInstance());
+            searchBasic = NsObject.wrap(searchInfo.getSearchBasicClass().newInstance());
 
         } catch (InstantiationException | IllegalAccessException e) {
             throw new NetSuiteException(e.getMessage(), e);
@@ -143,7 +141,7 @@ public class NsSearch {
             Class<?> searchFieldClass, String internalId) throws NetSuiteException {
         try {
             TypeInfo fieldTypeMetaData = TypeManager.forClass(searchFieldClass);
-            NsObject searchField = asNsObject(searchFieldClass.newInstance());
+            NsObject searchField = NsObject.wrap(searchFieldClass.newInstance());
             if (fieldTypeMetaData.getProperty("internalId") != null && internalId != null) {
                 searchField.set("internalId", internalId);
             }
@@ -312,7 +310,7 @@ public class NsSearch {
 
     private NsObject createListOrRecordRef() throws NetSuiteException {
         try {
-            NsObject obj = asNsObject(
+            NsObject obj = NsObject.wrap(
                     metaData.getListOrRecordRefClass().newInstance());
             return obj;
         } catch (IllegalAccessException | IllegalArgumentException | InstantiationException e) {
@@ -320,7 +318,7 @@ public class NsSearch {
         }
     }
 
-    public NsSearchRecord build() throws NetSuiteException {
+    public SearchRecT build() throws NetSuiteException {
         initSearch();
 
         Collection<String> transactionTypes = metaData.getTransactionTypes();
@@ -353,13 +351,13 @@ public class NsSearch {
             s = searchAdvanced;
         }
 
-        return new NsSearchRecord(s.getTarget());
+        return (SearchRecT) s.getTarget();
     }
 
-    public NsSearchResultSet search() throws NetSuiteException {
-        NsSearchRecord searchRecord = build();
+    public NsSearchResultSet<RecT> search() throws NetSuiteException {
+        SearchRecT searchRecord = build();
         NsSearchResult result = connection.search(searchRecord);
-        NsSearchResultSet resultSet = new NsSearchResultSet(connection, searchInfo, result);
+        NsSearchResultSet<RecT> resultSet = new NsSearchResultSet<>(connection, searchInfo, result);
         return resultSet;
     }
 }

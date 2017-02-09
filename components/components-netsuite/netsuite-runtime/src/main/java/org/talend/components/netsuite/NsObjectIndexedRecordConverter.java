@@ -13,7 +13,7 @@ import org.talend.daikon.avro.converter.IndexedRecordConverter;
 /**
  *
  */
-public class NsObjectConverter implements IndexedRecordConverter<NsObject, IndexedRecord> {
+public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<NsObject, IndexedRecord> {
 
     private Schema schema;
     private NetSuiteMetaData metaData;
@@ -23,7 +23,7 @@ public class NsObjectConverter implements IndexedRecordConverter<NsObject, Index
     private transient String names[];
     private transient AvroConverter[] fieldConverter;
 
-    public NsObjectConverter(NetSuiteMetaData metaData) {
+    public NsObjectIndexedRecordConverter(NetSuiteMetaData metaData) {
         this.metaData = metaData;
     }
 
@@ -81,7 +81,7 @@ public class NsObjectConverter implements IndexedRecordConverter<NsObject, Index
 
         @Override
         public Schema getSchema() {
-            return NsObjectConverter.this.getSchema();
+            return NsObjectIndexedRecordConverter.this.getSchema();
         }
 
         @Override

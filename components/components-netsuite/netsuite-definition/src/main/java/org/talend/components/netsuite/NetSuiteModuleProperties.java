@@ -7,6 +7,8 @@ import org.talend.components.api.component.ISchemaListener;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.api.properties.ComponentPropertiesImpl;
 import org.talend.components.common.SchemaProperties;
+import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
+import org.talend.components.netsuite.runtime.SchemaService;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.java8.Function;
 import org.talend.daikon.properties.ValidationResult;
@@ -50,19 +52,19 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
     public void setupLayout() {
         super.setupLayout();
 
-        Form moduleForm = Form.create(this, Form.MAIN);
-        moduleForm.addRow(widget(moduleName)
+        Form mainForm = Form.create(this, Form.MAIN);
+        mainForm.addRow(widget(moduleName)
                 .setWidgetType(Widget.NAME_SELECTION_AREA_WIDGET_TYPE)
                 .setLongRunning(true));
-        refreshLayout(moduleForm);
+        refreshLayout(mainForm);
 
-        Form moduleRefForm = Form.create(this, Form.REFERENCE);
-        moduleRefForm.addRow(widget(moduleName)
+        Form refForm = Form.create(this, Form.REFERENCE);
+        refForm.addRow(widget(moduleName)
                 .setWidgetType(Widget.NAME_SELECTION_REFERENCE_WIDGET_TYPE)
                 .setLongRunning(true));
 
-        moduleRefForm.addRow(main.getForm(Form.REFERENCE));
-        refreshLayout(moduleRefForm);
+        refForm.addRow(main.getForm(Form.REFERENCE));
+        refreshLayout(refForm);
     }
 
     public void setSchemaListener(ISchemaListener schemaListener) {
@@ -97,17 +99,17 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
     }
 
     protected List<NamedThing> getSchemaNames() {
-        return NetSuiteDefinition.withMetaDataService(new Function<NetSuiteMetaDataService, List<NamedThing>>() {
-            @Override public List<NamedThing> apply(NetSuiteMetaDataService metaData) {
-                return metaData.getSchemaNames();
+        return TNetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, List<NamedThing>>() {
+            @Override public List<NamedThing> apply(SchemaService schemaService) {
+                return schemaService.getSchemaNames();
             }
         }, this);
     }
 
     protected Schema getSchema(final String typeName) {
-        return NetSuiteDefinition.withMetaDataService(new Function<NetSuiteMetaDataService, Schema>() {
-            @Override public Schema apply(NetSuiteMetaDataService metaData) {
-                return metaData.getSchema(typeName);
+        return TNetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, Schema>() {
+            @Override public Schema apply(SchemaService schemaService) {
+                return schemaService.getSchema(typeName);
             }
         }, this);
     }

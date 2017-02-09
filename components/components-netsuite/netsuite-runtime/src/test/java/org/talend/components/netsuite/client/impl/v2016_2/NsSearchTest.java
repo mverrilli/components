@@ -9,16 +9,17 @@ import org.junit.Test;
 import org.talend.components.netsuite.client.NetSuiteConnection;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NsSearch;
-import org.talend.components.netsuite.client.NsSearchRecord;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.AccountSearch;
 import com.netsuite.webservices.v2016_2.platform.common.AccountSearchBasic;
+import com.netsuite.webservices.v2016_2.platform.core.Record;
 import com.netsuite.webservices.v2016_2.platform.core.SearchBooleanCustomField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchBooleanField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchCustomFieldList;
 import com.netsuite.webservices.v2016_2.platform.core.SearchDoubleField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchEnumMultiSelectField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchLongCustomField;
+import com.netsuite.webservices.v2016_2.platform.core.SearchRecord;
 import com.netsuite.webservices.v2016_2.platform.core.SearchStringCustomField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchStringField;
 import com.netsuite.webservices.v2016_2.platform.core.types.SearchDoubleFieldOperator;
@@ -35,7 +36,7 @@ public class NsSearchTest {
     public void testSearchBuilding() throws Exception {
         NetSuiteConnection conn = NetSuiteFactory.getConnection("2016.2");
 
-        NsSearch s1 = conn.newSearch();
+        NsSearch<Record, SearchRecord> s1 = conn.newSearch();
         s1.entity("Account");
         s1.criteria("type", "List.anyOf", null, Arrays.asList("Bank"));
         s1.criteria("balance", "Double.greaterThanOrEqualTo", null, Arrays.asList("10000.0"));
@@ -46,12 +47,11 @@ public class NsSearchTest {
         s1.criteria("customStringField1", "String.doesNotContain", "String", Arrays.asList("Foo"));
         s1.criteria("customLongField1", "Numeric.lessThan", "Long", Arrays.asList("100"));
 
-        NsSearchRecord sr1 = s1.build();
+        SearchRecord sr1 = s1.build();
         assertNotNull(sr1);
-        assertNotNull(sr1.getTarget());
-        assertEquals(AccountSearch.class, sr1.getTarget().getClass());
+        assertEquals(AccountSearch.class, sr1.getClass());
 
-        AccountSearch search = (AccountSearch) sr1.getTarget();
+        AccountSearch search = (AccountSearch) sr1;
         assertNotNull(search.getBasic());
 
         AccountSearchBasic searchBasic = search.getBasic();

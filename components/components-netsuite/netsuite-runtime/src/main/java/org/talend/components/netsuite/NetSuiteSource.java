@@ -10,6 +10,7 @@ import org.talend.components.api.component.runtime.BoundedSource;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.input.NetSuiteInputProperties;
 import org.talend.components.netsuite.input.NetSuiteSearchInputReader;
+import org.talend.daikon.properties.ValidationResult;
 
 /**
  *
@@ -43,5 +44,10 @@ public class NetSuiteSource extends NetSuiteSourceOrSink implements BoundedSourc
             return new NetSuiteSearchInputReader(container, this, nsProperties);
         }
         return null;
+    }
+
+    @Override
+    public ValidationResult validate(RuntimeContainer container) {
+        return super.validate(container);
     }
 }

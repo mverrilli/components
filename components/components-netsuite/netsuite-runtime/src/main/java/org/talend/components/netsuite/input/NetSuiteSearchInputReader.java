@@ -13,7 +13,7 @@ import org.talend.components.api.component.runtime.Result;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.NetSuiteSource;
-import org.talend.components.netsuite.NsObjectConverter;
+import org.talend.components.netsuite.NsObjectIndexedRecordConverter;
 import org.talend.components.netsuite.client.NetSuiteConnection;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
@@ -26,7 +26,7 @@ import org.talend.daikon.avro.converter.IndexedRecordConverter;
 /**
  *
  */
-public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedRecord> {
+public class NetSuiteSearchInputReader<RecT, SearchRecT> extends AbstractBoundedReader<IndexedRecord> {
 
     private transient NetSuiteConnection connection;
     private transient NetSuiteMetaData metaData;
@@ -41,9 +41,9 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
 
     protected RuntimeContainer container;
 
-    protected ResultSet<NsObject> resultSet;
+    protected ResultSet<RecT> resultSet;
 
-    protected NsObject currentRecord;
+    protected RecT currentRecord;
 
     public NetSuiteSearchInputReader(RuntimeContainer container,
             NetSuiteSource source, NetSuiteInputProperties properties) {
@@ -98,7 +98,7 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
         return result.toMap();
     }
 
-    public NsObject getCurrentRecord() throws NoSuchElementException {
+    public RecT getCurrentRecord() throws NoSuchElementException {
         return currentRecord;
     }
 
@@ -110,10 +110,10 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
         return connection;
     }
 
-    protected ResultSet<NsObject> search() throws NetSuiteException {
+    protected ResultSet<RecT> search() throws NetSuiteException {
         NetSuiteConnection conn = getConnection();
 
-        NsSearch search = conn.newSearch();
+        NsSearch<RecT, SearchRecT> search = conn.newSearch();
         search.entity(properties.module.moduleName.getValue());
 
         List<String> fieldNames = properties.searchConditionTable.field.getValue();
@@ -129,7 +129,7 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
             }
         }
 
-        ResultSet<NsObject> resultSet = search.search();
+        ResultSet<RecT> resultSet = search.search();
         return resultSet;
     }
 
@@ -144,13 +144,13 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
         return searchSchema;
     }
 
-    protected IndexedRecord convertRecord(NsObject record) throws IOException {
-        return getConverter().convertToAvro(record);
+    protected IndexedRecord convertRecord(RecT record) throws IOException {
+        return getConverter().convertToAvro(NsObject.wrap(record));
     }
 
     protected IndexedRecordConverter<NsObject, IndexedRecord> getConverter() throws IOException {
         if (converter == null) {
-            converter = new NsObjectConverter(metaData);
+            converter = new NsObjectIndexedRecordConverter(metaData);
             converter.setSchema(getSchema());
         }
         return converter;

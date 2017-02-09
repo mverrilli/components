@@ -14,6 +14,10 @@ import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
+import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
+import org.talend.components.netsuite.schema.NsSchema;
+import org.talend.components.netsuite.schema.NsSchemaImpl;
+import org.talend.components.netsuite.runtime.SchemaService;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.SimpleNamedThing;
 import org.talend.daikon.avro.AvroUtils;
@@ -22,11 +26,11 @@ import org.talend.daikon.avro.SchemaConstants;
 /**
  *
  */
-public class NetSuiteEndpointService implements NetSuiteMetaDataService {
+public class NetSuiteEndpoint implements SchemaService {
 
     private NetSuiteConnectionProperties properties;
 
-    public NetSuiteEndpointService(NetSuiteConnectionProperties properties) {
+    public NetSuiteEndpoint(NetSuiteConnectionProperties properties) {
         this.properties = properties;
     }
 
@@ -47,6 +51,7 @@ public class NetSuiteEndpointService implements NetSuiteMetaDataService {
 //        }
 
         String endpointUrl = StringUtils.strip(connProps.endpoint.getStringValue(), "\"");
+        String apiVersion = StringUtils.strip(connProps.apiVersion.getStringValue(), "\"");
         String email = StringUtils.strip(connProps.email.getStringValue(), "\"");
         String password = StringUtils.strip(connProps.password.getStringValue(), "\"");
         Integer roleId = connProps.role.getValue();
@@ -60,14 +65,14 @@ public class NetSuiteEndpointService implements NetSuiteMetaDataService {
         credentials.setAccount(account);
         credentials.setApplicationId(applicationId);
 
-        NetSuiteConnection conn = connect(endpointUrl, credentials);
+        NetSuiteConnection conn = connect(endpointUrl, apiVersion, credentials);
         return conn;
     }
 
-    protected NetSuiteConnection connect(String endpointUrl, NetSuiteCredentials credentials)
+    protected NetSuiteConnection connect(String endpointUrl, String apiVersion, NetSuiteCredentials credentials)
             throws NetSuiteException {
 
-        NetSuiteConnection conn = NetSuiteFactory.getConnection(NetSuiteConnectionProperties.API_VERSION);
+        NetSuiteConnection conn = NetSuiteFactory.getConnection(apiVersion);
         conn.setEndpointUrl(endpointUrl);
         conn.setCredentials(credentials);
         return conn;
@@ -76,7 +81,7 @@ public class NetSuiteEndpointService implements NetSuiteMetaDataService {
     @Override
     public List<NamedThing> getSchemaNames() {
         try {
-            NetSuiteMetaData metaData = NetSuiteFactory.getMetaData(NetSuiteConnectionProperties.API_VERSION);
+            NetSuiteMetaData metaData = NetSuiteFactory.getMetaData(properties.getApiVersion());
 
             List<String> recordTypes = new ArrayList<>(metaData.getRecordTypes());
             // Sort alphabetically
@@ -94,10 +99,10 @@ public class NetSuiteEndpointService implements NetSuiteMetaDataService {
     }
 
     @Override
-    public Schema getSchema(String module) {
+    public Schema getSchema(String typeName) {
         try {
-            NetSuiteMetaData metaData = NetSuiteFactory.getMetaData(NetSuiteConnectionProperties.API_VERSION);
-            NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity(module);
+            NetSuiteMetaData metaData = NetSuiteFactory.getMetaData(properties.getApiVersion());
+            NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity(typeName);
 
             Schema schema = inferSchemaForEntity(entityInfo);
             return schema;
@@ -107,17 +112,17 @@ public class NetSuiteEndpointService implements NetSuiteMetaDataService {
     }
 
     @Override
-    public List<String> getSearchFieldNames(String typeName) {
+    public NsSchema getSearchSchema(String typeName) {
         try {
-            NetSuiteMetaData metaData = NetSuiteFactory.getMetaData(NetSuiteConnectionProperties.API_VERSION);
-            NetSuiteMetaData.SearchInfo searchInfo = metaData.getSearchInfo(typeName);
-            NetSuiteMetaData.EntityInfo searchRecordInfo = metaData.getEntity(searchInfo.getSearchBasicClass());
+            NetSuiteMetaData metaData = NetSuiteFactory.getMetaData(properties.getApiVersion());
+            final NetSuiteMetaData.SearchInfo searchInfo = metaData.getSearchInfo(typeName);
+            final NetSuiteMetaData.EntityInfo searchRecordInfo = metaData.getEntity(searchInfo.getSearchBasicClass());
             List<NetSuiteMetaData.FieldInfo> searchFieldInfos = searchRecordInfo.getFields();
             List<String> fieldNames = new ArrayList<>(searchFieldInfos.size());
             for (NetSuiteMetaData.FieldInfo fieldInfo : searchFieldInfos) {
                 fieldNames.add(fieldInfo.getName());
             }
-            return fieldNames;
+            return new NsSchemaImpl(searchRecordInfo.getName(), searchFieldInfos);
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }
@@ -126,7 +131,7 @@ public class NetSuiteEndpointService implements NetSuiteMetaDataService {
     @Override
     public List<String> getSearchFieldOperators() {
         try {
-            NetSuiteMetaData metaData = NetSuiteFactory.getMetaData(NetSuiteConnectionProperties.API_VERSION);
+            NetSuiteMetaData metaData = NetSuiteFactory.getMetaData(properties.getApiVersion());
             List<NetSuiteMetaData.SearchFieldOperatorName> operatorList =
                     new ArrayList<>(metaData.getSearchOperatorNames());
             List<String> operatorNames = new ArrayList<>(operatorList.size());
@@ -173,6 +178,8 @@ public class NetSuiteEndpointService implements NetSuiteMetaDataService {
             Class<?> fieldType = fieldInfo.getValueType();
             if (fieldType == XMLGregorianCalendar.class) {
                 avroField.addProp(SchemaConstants.TALEND_COLUMN_PATTERN, "yyyy-MM-dd'T'HH:mm:ss'.000Z'");
+            } else if (fieldType.isEnum()) {
+                avroField.addProp(SchemaConstants.TALEND_COLUMN_DB_TYPE, fieldType.getName());
             }
 
             if (avroField.defaultVal() != null) {
@@ -209,7 +216,7 @@ public class NetSuiteEndpointService implements NetSuiteMetaDataService {
         } else if (fieldType == Double.TYPE || fieldType == Double.class) {
             base = AvroUtils._double();
         } else if (fieldType == XMLGregorianCalendar.class) {
-            base = AvroUtils._string();
+            base = AvroUtils._logicalTimestamp();
         } else if (fieldType == String.class) {
             base = AvroUtils._string();
         } else if (fieldType.isEnum()) {

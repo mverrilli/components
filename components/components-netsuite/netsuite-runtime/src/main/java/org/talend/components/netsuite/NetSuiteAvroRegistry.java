@@ -5,16 +5,12 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.avro.Schema;
-import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.model.Mapper;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.daikon.avro.AvroRegistry;
-import org.talend.daikon.avro.SchemaConstants;
 import org.talend.daikon.avro.converter.AvroConverter;
 
 /**
@@ -52,7 +48,7 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
                     NetSuiteFactory.getEnumFromStringMapper(enumClass));
         }
         if (datumClass == XMLGregorianCalendar.class) {
-            return new XMLGregorianCalendarToStringConverter(field, datatypeFactory);
+            return new XMLGregorianCalendarToTimestampConverter(field, datatypeFactory);
         }
         return super.getConverter(datumClass);
     }
@@ -103,18 +99,15 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
         }
     }
 
-    public static class XMLGregorianCalendarToStringConverter implements AvroConverter<XMLGregorianCalendar, String> {
+    public static class XMLGregorianCalendarToTimestampConverter implements AvroConverter<XMLGregorianCalendar, Long> {
 
         private final Schema.Field field;
-        private final DateTimeFormatter format;
 
         private DatatypeFactory datatypeFactory;
 
-        public XMLGregorianCalendarToStringConverter(Schema.Field field, DatatypeFactory datatypeFactory) {
+        public XMLGregorianCalendarToTimestampConverter(Schema.Field field, DatatypeFactory datatypeFactory) {
             this.field = field;
             this.datatypeFactory = datatypeFactory;
-
-            format = DateTimeFormat.forPattern(field.getProp(SchemaConstants.TALEND_COLUMN_PATTERN));
         }
 
         @Override
@@ -128,17 +121,13 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
         }
 
         @Override
-        public XMLGregorianCalendar convertToDatum(String s) {
-            if (s == null) {
+        public XMLGregorianCalendar convertToDatum(Long timestamp) {
+            if (timestamp == null) {
                 return null;
             }
 
-            DateTime dateTime;
-            try {
-                dateTime = format.parseDateTime(s);
-            } catch (IllegalArgumentException e) {
-                throw new ComponentException(e);
-            }
+            MutableDateTime dateTime = new MutableDateTime();
+            dateTime.setMillis(timestamp);
 
             XMLGregorianCalendar xts = datatypeFactory.newXMLGregorianCalendar();
             xts.setYear(dateTime.getYear());
@@ -154,7 +143,7 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
         }
 
         @Override
-        public String convertToAvro(XMLGregorianCalendar xts) {
+        public Long convertToAvro(XMLGregorianCalendar xts) {
             if (xts == null) {
                 return null;
             }
@@ -174,7 +163,7 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
                     dateTime.setZoneRetainFields(tz);
                 }
 
-                return format.print(dateTime);
+                return dateTime.getMillis();
             } catch (IllegalArgumentException e) {
                 throw new ComponentException(e);
             }

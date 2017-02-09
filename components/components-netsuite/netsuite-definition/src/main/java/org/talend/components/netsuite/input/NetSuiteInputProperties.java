@@ -3,23 +3,23 @@ package org.talend.components.netsuite.input;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.avro.Schema;
 import org.talend.components.api.component.Connector;
 import org.talend.components.api.component.PropertyPathConnector;
 import org.talend.components.api.properties.ComponentPropertiesImpl;
-import org.talend.components.netsuite.NetSuiteConnectionProperties;
-import org.talend.components.netsuite.NetSuiteDefinition;
-import org.talend.components.netsuite.NetSuiteMetaDataService;
+import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.components.netsuite.NetSuiteModuleProperties;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
+import org.talend.components.netsuite.schema.NsField;
+import org.talend.components.netsuite.schema.NsSchema;
+import org.talend.components.netsuite.runtime.SchemaService;
 import org.talend.daikon.java8.Function;
 import org.talend.daikon.properties.ValidationResult;
 import org.talend.daikon.properties.presentation.Form;
 import org.talend.daikon.properties.presentation.Widget;
-import org.talend.daikon.properties.property.Property;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import static org.talend.components.netsuite.TNetSuiteComponentDefinition.withSchemaService;
 import static org.talend.daikon.properties.presentation.Widget.widget;
 
 /**
@@ -58,9 +58,6 @@ public class NetSuiteInputProperties extends ComponentPropertiesImpl implements 
         mainForm.addRow(connection.getForm(Form.REFERENCE));
         mainForm.addRow(module.getForm(Form.REFERENCE));
         mainForm.addRow(widget(searchConditionTable).setWidgetType(Widget.TABLE_WIDGET_TYPE));
-
-        Form advancedForm = new Form(this, Form.ADVANCED);
-//        advancedForm.addRow(connection.getForm(Form.ADVANCED));
     }
 
     @Override
@@ -83,29 +80,20 @@ public class NetSuiteInputProperties extends ComponentPropertiesImpl implements 
         }
     }
 
-    protected List<String> getSearchFieldNames(final String typeName) {
-        return NetSuiteDefinition.withMetaDataService(new Function<NetSuiteMetaDataService, List<String>>() {
-            @Override public List<String> apply(NetSuiteMetaDataService metaData) {
-                return metaData.getSearchFieldNames(typeName);
+    protected NsSchema<NsField> getSearchSchema(final String typeName) {
+        return withSchemaService(new Function<SchemaService, NsSchema>() {
+            @Override public NsSchema apply(SchemaService schemaService) {
+                return schemaService.getSearchSchema(typeName);
             }
         }, this);
     }
 
     protected List<String> getSearchFieldOperators() {
-        return NetSuiteDefinition.withMetaDataService(new Function<NetSuiteMetaDataService, List<String>>() {
-            @Override public List<String> apply(NetSuiteMetaDataService metaData) {
-                return metaData.getSearchFieldOperators();
+        return withSchemaService(new Function<SchemaService, List<String>>() {
+            @Override public List<String> apply(SchemaService schemaService) {
+                return schemaService.getSearchFieldOperators();
             }
         }, this);
-    }
-
-    protected List<String> getFieldNames(Property schema) {
-        Schema s = (Schema) schema.getValue();
-        List<String> fieldNames = new ArrayList<>();
-        for (Schema.Field f : s.getFields()) {
-            fieldNames.add(f.name());
-        }
-        return fieldNames;
     }
 
     public class ModuleProperties extends NetSuiteModuleProperties {
@@ -118,7 +106,11 @@ public class NetSuiteInputProperties extends ComponentPropertiesImpl implements 
         public ValidationResult afterModuleName() throws Exception {
             ValidationResult validationResult = super.afterModuleName();
 
-            List<String> fieldNames = getSearchFieldNames(moduleName.getValue());
+            NsSchema<?> searchSchema = getSearchSchema(moduleName.getValue());
+            List<String> fieldNames = new ArrayList<>(searchSchema.getFields().size());
+            for (NsField field : searchSchema.getFields()) {
+                fieldNames.add(field.getName());
+            }
             searchConditionTable.field.setPossibleValues(fieldNames);
 
             searchConditionTable.operator.setPossibleValues(getSearchFieldOperators());

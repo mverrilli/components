@@ -17,6 +17,11 @@ public abstract class TypeManager {
 
     private static final TypeIntrospector TYPE_INTROSPECTOR = new JavassistTypeIntrospector();
 
+    public static PropertyInfo getPropertyInfo(Object target, String name) {
+        TypeInfo metaData = forClass(target.getClass());
+        return metaData != null ? metaData.getProperty(name) : null;
+    }
+
     public static TypeInfo forClass(Class<?> clazz) {
         TypeInfo metaData = cache.get(clazz);
         if (metaData == null) {

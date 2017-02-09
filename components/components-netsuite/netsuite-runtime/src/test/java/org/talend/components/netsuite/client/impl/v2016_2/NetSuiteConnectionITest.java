@@ -12,6 +12,7 @@ import org.talend.components.netsuite.client.NsObject;
 import org.talend.components.netsuite.client.NsSearchResultSet;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
+import com.netsuite.webservices.v2016_2.platform.core.Record;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -48,16 +49,17 @@ public class NetSuiteConnectionITest {
 
         connection.login();
 
-        NsSearchResultSet rs = connection.newSearch()
+        NsSearchResultSet<Record> rs = connection.newSearch()
                 .entity("Account")
                 .criteria("type", "List.anyOf", null, Arrays.asList("Bank"))
                 .search();
 
         int count = 0;
         while (rs.next()) {
-            NsObject record = rs.get();
+            Record record = rs.get();
+            NsObject nsRecord = NsObject.wrap(record);
 
-            assertEquals(AccountType.BANK, record.get("acctType"));
+            assertEquals(AccountType.BANK, nsRecord.get("acctType"));
 
             count++;
         }

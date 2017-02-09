@@ -6,8 +6,6 @@ import java.util.List;
 import org.junit.Test;
 import org.talend.components.netsuite.client.NetSuiteConnection;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
-import org.talend.components.netsuite.client.NsObject;
-import org.talend.components.netsuite.client.NsSearchRecord;
 import org.talend.components.netsuite.client.NsSearchResult;
 import org.talend.components.netsuite.client.NsSearchResultSet;
 
@@ -25,7 +23,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.talend.components.netsuite.client.NsObject.asNsObject;
 
 /**
  *
@@ -72,7 +69,7 @@ public class NsSearchResultSetTest {
         SearchMoreWithIdResponse response2 = new SearchMoreWithIdResponse();
         response2.setSearchResult(result2);
 
-        NsSearchRecord nsSearchRecord1 = new NsSearchRecord(new AccountSearch());
+        AccountSearch nsSearchRecord1 = new AccountSearch();
         NsSearchResult nsSearchResult1 = toNsSearchResult(result1);
         NsSearchResult nsSearchResult2 = toNsSearchResult(result2);
 
@@ -84,9 +81,9 @@ public class NsSearchResultSetTest {
 
         NsSearchResultSet resultSet = new NsSearchResultSet(conn, searchInfo, nsSearchResult1);
 
-        List<NsObject> recordList = new ArrayList<>();
+        List<Object> recordList = new ArrayList<>();
         while (resultSet.next()) {
-            NsObject record = resultSet.get();
+            Object record = resultSet.get();
             assertNotNull(record);
             recordList.add(record);
         }
@@ -94,8 +91,8 @@ public class NsSearchResultSetTest {
         assertEquals(page1.size() + page2.size(), recordList.size());
     }
 
-    protected NsSearchResult toNsSearchResult(SearchResult result) {
-        NsSearchResult nsResult = new NsSearchResult();
+    protected NsSearchResult<Record> toNsSearchResult(SearchResult result) {
+        NsSearchResult<Record> nsResult = new NsSearchResult<>();
         if (result.getStatus().getIsSuccess()) {
             nsResult.setSuccess(true);
         }
@@ -104,10 +101,9 @@ public class NsSearchResultSetTest {
         nsResult.setTotalRecords(result.getTotalRecords());
         nsResult.setPageIndex(result.getPageIndex());
         nsResult.setPageSize(result.getPageSize());
-        List<NsObject> nsRecordList = new ArrayList<>(result.getRecordList().getRecord().size());
+        List<Record> nsRecordList = new ArrayList<>(result.getRecordList().getRecord().size());
         for (Record record : result.getRecordList().getRecord()) {
-            NsObject nsRecord = asNsObject(record);
-            nsRecordList.add(nsRecord);
+            nsRecordList.add(record);
         }
         nsResult.setRecordList(nsRecordList);
         return nsResult;

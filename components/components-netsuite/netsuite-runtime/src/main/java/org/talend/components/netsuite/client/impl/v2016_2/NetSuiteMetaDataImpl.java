@@ -704,6 +704,11 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
         return ListOrRecordRef.class;
     }
 
+    @Override
+    public Class<?> getRecordRefClass() {
+        return RecordRef.class;
+    }
+
     protected boolean isKeyField(Class<?> entityClass, PropertyInfo propertyInfo) {
         if (Record.class.isAssignableFrom(entityClass) &&
                 (propertyInfo.getName().equals("internalId") || propertyInfo.getName().equals("externalId"))) {

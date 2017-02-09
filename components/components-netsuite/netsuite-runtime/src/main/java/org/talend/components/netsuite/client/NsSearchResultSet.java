@@ -7,15 +7,15 @@ import java.util.List;
 /**
  *
  */
-public class NsSearchResultSet extends ResultSet<NsObject> {
+public class NsSearchResultSet<RecT> extends ResultSet<RecT> {
 
     private NetSuiteConnection conn;
     private NetSuiteMetaData.SearchInfo searchInfo;
     private String searchId;
     private NsSearchResult result;
-    private List<NsObject> recordList;
-    private Iterator<NsObject> recordIterator;
-    private NsObject current;
+    private List<RecT> recordList;
+    private Iterator<RecT> recordIterator;
+    private RecT current;
 
     public NsSearchResultSet(NetSuiteConnection conn,
             NetSuiteMetaData.SearchInfo searchInfo, NsSearchResult result) {
@@ -43,7 +43,7 @@ public class NsSearchResultSet extends ResultSet<NsObject> {
     }
 
     @Override
-    public NsObject get() throws NetSuiteException {
+    public RecT get() throws NetSuiteException {
         return current;
     }
 
@@ -60,7 +60,7 @@ public class NsSearchResultSet extends ResultSet<NsObject> {
         return result.getPageIndex().intValue() < result.getTotalPages().intValue();
     }
 
-    protected List<NsObject> getMoreRecords() throws NetSuiteException {
+    protected List<RecT> getMoreRecords() throws NetSuiteException {
         if (searchId != null) {
             int nextPageIndex = result.getPageIndex().intValue() + 1;
             result = conn.searchMoreWithId(searchId, nextPageIndex);
@@ -71,16 +71,16 @@ public class NsSearchResultSet extends ResultSet<NsObject> {
         return Collections.emptyList();
     }
 
-    protected List<NsObject> filterRecordList() {
-        List<NsObject> recordList = result.getRecordList();
+    protected List<RecT> filterRecordList() {
+        List<RecT> recordList = result.getRecordList();
         if (recordList == null) {
             recordList = Collections.emptyList();
         }
         if (!recordList.isEmpty()) {
             if (searchInfo.isItemSearch()) {
-                Iterator<NsObject> recordIterator = recordList.iterator();
+                Iterator<RecT> recordIterator = recordList.iterator();
                 while (recordIterator.hasNext()) {
-                    NsObject record = recordIterator.next();
+                    RecT record = recordIterator.next();
                     if (!record.getClass().equals(searchInfo.getEntityClass())) {
                         recordIterator.remove();
                     }

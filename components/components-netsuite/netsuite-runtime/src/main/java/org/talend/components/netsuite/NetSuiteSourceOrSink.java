@@ -12,6 +12,7 @@ import org.talend.components.api.exception.ComponentException;
 import org.talend.components.api.properties.ComponentProperties;
 import org.talend.components.netsuite.client.NetSuiteConnection;
 import org.talend.components.netsuite.client.NetSuiteException;
+import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.properties.ValidationResult;
 
@@ -24,12 +25,12 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
 
     protected NetSuiteProvideConnectionProperties properties;
 
-    protected transient NetSuiteEndpointService endpoint;
+    protected transient NetSuiteEndpoint endpoint;
 
     @Override
     public ValidationResult initialize(RuntimeContainer container, ComponentProperties properties) {
         this.properties = (NetSuiteProvideConnectionProperties) properties;
-        this.endpoint = new NetSuiteEndpointService(getConnectionProperties());
+        this.endpoint = new NetSuiteEndpoint(getConnectionProperties());
         return ValidationResult.OK;
     }
 
@@ -57,6 +58,10 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
     public NetSuiteConnectionProperties getConnectionProperties() {
     return properties.getConnectionProperties();
 }
+
+    public NetSuiteProvideConnectionProperties getProperties() {
+        return properties;
+    }
 
     public NetSuiteConnection connect(RuntimeContainer container) throws NetSuiteException {
         return endpoint.connect();

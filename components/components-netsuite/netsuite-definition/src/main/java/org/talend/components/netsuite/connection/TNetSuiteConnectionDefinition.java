@@ -1,4 +1,4 @@
-package org.talend.components.netsuite;
+package org.talend.components.netsuite.connection;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -6,17 +6,19 @@ import java.util.Set;
 import org.talend.components.api.component.ConnectorTopology;
 import org.talend.components.api.component.runtime.ExecutionEngine;
 import org.talend.components.api.properties.ComponentProperties;
+import org.talend.components.netsuite.runtime.RuntimeInfoFactory;
+import org.talend.components.netsuite.TNetSuiteComponentDefinition;
 import org.talend.daikon.properties.property.Property;
 import org.talend.daikon.runtime.RuntimeInfo;
 
 /**
  *
  */
-public class NetSuiteConnectionDefinition extends NetSuiteDefinition {
+public class TNetSuiteConnectionDefinition extends TNetSuiteComponentDefinition {
 
-    public static final String COMPONENT_NAME = "NetSuiteConnection"; //$NON-NLS-1$
+    public static final String COMPONENT_NAME = "tNetSuiteConnection_DEV"; //$NON-NLS-1$
 
-    public NetSuiteConnectionDefinition() {
+    public TNetSuiteConnectionDefinition() {
         super(COMPONENT_NAME, ExecutionEngine.DI);
     }
 
@@ -36,13 +38,12 @@ public class NetSuiteConnectionDefinition extends NetSuiteDefinition {
     }
 
     @Override
-    public RuntimeInfo getRuntimeInfo(ExecutionEngine engine, ComponentProperties properties, ConnectorTopology componentType) {
+    public RuntimeInfo getRuntimeInfo(ExecutionEngine engine, ComponentProperties properties,
+            ConnectorTopology connectorTopology) {
         assertEngineCompatibility(engine);
-        if (componentType == ConnectorTopology.NONE) {
-            return getRuntimeInfo("org.talend.components.netsuite.NetSuiteSourceOrSink");
-        } else {
-            return null;
-        }
+        assertConnectorTopologyCompatibility(connectorTopology);
+        return RuntimeInfoFactory.getInstance()
+                .getRuntimeInfo(RuntimeInfoFactory.SOURCE_OR_SINK_CLASS);
     }
 
     @Override

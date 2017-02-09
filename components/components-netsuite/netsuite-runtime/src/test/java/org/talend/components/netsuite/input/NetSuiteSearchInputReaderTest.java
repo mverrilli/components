@@ -19,7 +19,7 @@ import org.mockito.stubbing.Answer;
 import org.talend.components.api.component.ComponentDefinition;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteAvroRegistry;
-import org.talend.components.netsuite.NetSuiteEndpointService;
+import org.talend.components.netsuite.NetSuiteEndpoint;
 import org.talend.components.netsuite.NetSuiteSource;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
@@ -98,7 +98,7 @@ public class NetSuiteSearchInputReaderTest {
         properties.connection.applicationId.setValue("00000000-0000-0000-0000-000000000000");
         properties.module.moduleName.setValue("Account");
 
-        NetSuiteEndpointService endpoint = new NetSuiteEndpointService(properties.getConnectionProperties());
+        NetSuiteEndpoint endpoint = new NetSuiteEndpoint(properties.getConnectionProperties());
         Schema schema = endpoint.getSchema(properties.module.moduleName.getValue());
         properties.module.main.schema.setValue(schema);
 

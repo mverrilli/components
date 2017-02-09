@@ -39,7 +39,7 @@ public class NetSuiteAvroRegistryTest {
     public void testInferSchemaForEntity() throws Exception {
         NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity("Account");
 
-        Schema s = NetSuiteEndpointService.inferSchemaForEntity(entityInfo);
+        Schema s = NetSuiteEndpoint.inferSchemaForEntity(entityInfo);
 
         System.out.println(s);
 
@@ -65,9 +65,8 @@ public class NetSuiteAvroRegistryTest {
 
         fieldInfo = entityInfo.getField("tranDate");
         f = s.getField(fieldInfo.getName());
-        assertUnionType(f.schema(), Arrays.asList(Schema.Type.STRING, Schema.Type.NULL));
-        assertThat(f.getObjectProps().keySet(), containsInAnyOrder(
-                SchemaConstants.TALEND_COLUMN_PATTERN));
+        assertUnionType(f.schema(), Arrays.asList(Schema.Type.LONG, Schema.Type.NULL));
+        assertThat(f.getObjectProps().keySet(), containsInAnyOrder(SchemaConstants.TALEND_COLUMN_PATTERN));
         assertThat(f.getProp(SchemaConstants.TALEND_COLUMN_PATTERN), is("yyyy-MM-dd'T'HH:mm:ss'.000Z'"));
     }
 
@@ -75,7 +74,7 @@ public class NetSuiteAvroRegistryTest {
     public void testEnumConverter() throws Exception {
         NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity("Account");
 
-        Schema s = NetSuiteEndpointService.inferSchemaForEntity(entityInfo);
+        Schema s = NetSuiteEndpoint.inferSchemaForEntity(entityInfo);
 
         NetSuiteMetaData.FieldInfo fieldInfo = entityInfo.getField("acctType");
         Schema.Field f = s.getField(fieldInfo.getName());
@@ -102,7 +101,7 @@ public class NetSuiteAvroRegistryTest {
     public void testXMLGregorianCalendarConverter() throws Exception {
         NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity("Account");
 
-        Schema s = registry.inferSchema(entityInfo);
+        Schema s = NetSuiteEndpoint.inferSchemaForEntity(entityInfo);
 
         DateTimeZone tz1 = DateTimeZone.forID("EET");
 
@@ -116,20 +115,25 @@ public class NetSuiteAvroRegistryTest {
         xmlCalendar1.setHour(dateTime1.getHourOfDay());
         xmlCalendar1.setMinute(dateTime1.getMinuteOfHour());
         xmlCalendar1.setSecond(dateTime1.getSecondOfMinute());
-        xmlCalendar1.setMillisecond(0);
+        xmlCalendar1.setMillisecond(dateTime1.getMillisOfSecond());
         xmlCalendar1.setTimezone(tz1.toTimeZone().getRawOffset() / 60000);
 
         NetSuiteMetaData.FieldInfo fieldInfo = entityInfo.getField("tranDate");
         Schema.Field f = s.getField(fieldInfo.getName());
 
-        DateTimeFormatter dateFormat = DateTimeFormat
-                .forPattern(f.getProp(SchemaConstants.TALEND_COLUMN_PATTERN))
-                .withZone(tz1);
+//        DateTimeFormatter dateFormat = DateTimeFormat
+//                .forPattern(f.getProp(SchemaConstants.TALEND_COLUMN_PATTERN))
+//                .withZone(tz1);
 
-        AvroConverter<XMLGregorianCalendar, String> converter1 =
-                (AvroConverter<XMLGregorianCalendar, String>) registry.getConverter(f, fieldInfo.getValueType());
+        Long controlValue1 = dateTime1.getMillis();
+
+//        // The same calendar but with second precision
+//        XMLGregorianCalendar controlXmlCalendar1 = (XMLGregorianCalendar) xmlCalendar1.clone();
+//        controlXmlCalendar1.setMillisecond(0);
+
+        AvroConverter<XMLGregorianCalendar, Long> converter1 =
+                (AvroConverter<XMLGregorianCalendar, Long>) registry.getConverter(f, fieldInfo.getValueType());
         assertEquals(XMLGregorianCalendar.class, converter1.getDatumClass());
-        String controlValue1 = dateFormat.print(dateTime1);
         System.out.println(controlValue1);
         assertEquals(controlValue1,
                 converter1.convertToAvro(xmlCalendar1));

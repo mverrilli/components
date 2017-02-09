@@ -15,6 +15,8 @@ import org.talend.components.netsuite.model.Mapper;
 import org.talend.components.netsuite.model.TypeInfo;
 import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.model.TypeManager;
+import org.talend.components.netsuite.schema.NsField;
+import org.talend.components.netsuite.schema.NsSchema;
 
 /**
  *
@@ -162,6 +164,18 @@ public abstract class NetSuiteMetaData {
 
     public abstract Class<?> getListOrRecordRefClass();
 
+    public abstract Class<?> getRecordRefClass();
+
+    public <T> T createRecordRef() throws NetSuiteException {
+        Class<?> clazz = getRecordRefClass();
+        try {
+            T target = (T) clazz.newInstance();
+            return target;
+        } catch (IllegalAccessException | InstantiationException e) {
+            throw new NetSuiteException("Failed to instantiate record ref: " + clazz, e);
+        }
+    }
+
     protected abstract boolean isKeyField(Class<?> entityClass, PropertyInfo propertyInfo);
 
     public static String toInitialUpper(String value) {
@@ -176,7 +190,7 @@ public abstract class NetSuiteMetaData {
         return "_" + toInitialLower(value);
     }
 
-    public static class EntityInfo {
+    public static class EntityInfo implements NsSchema<FieldInfo> {
         private String name;
         private Class<?> entityClass;
         private List<FieldInfo> fields;
@@ -222,7 +236,7 @@ public abstract class NetSuiteMetaData {
         }
     }
 
-    public static class FieldInfo {
+    public static class FieldInfo implements NsField {
         private String name;
         private Class valueType;
         private boolean key;

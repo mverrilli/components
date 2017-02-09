@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.talend.components</groupId>
         <artifactId>components-parent</artifactId>
-        <version>0.17.0-SNAPSHOT</version>
+        <version>0.18.0-SNAPSHOT</version>
         <relativePath>../../../components-parent/pom.xml</relativePath>
     </parent>
 
@@ -207,26 +207,26 @@
                             </instructions>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>osgi-bundle</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>bundle</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>bundle</classifier>
-                            <instructions>
-                                <Bundle-SymbolicName>org.talend.components.netsuite.definition</Bundle-SymbolicName>
-                                <Service-Component>*</Service-Component>
-                                <Import-Package>!*internal,*</Import-Package>
-                                <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*</Embed-Dependency>
-                                <Include-Resource>
-                                    {maven-resources},META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt=target/classes/META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt
-                                </Include-Resource>
-                                <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
-                            </instructions>
-                        </configuration>
-                    </execution>
+                    <!--<execution>-->
+                        <!--<id>osgi-bundle</id>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>bundle</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<classifier>bundle</classifier>-->
+                            <!--<instructions>-->
+                                <!--<Bundle-SymbolicName>org.talend.components.netsuite.definition</Bundle-SymbolicName>-->
+                                <!--<Service-Component>*</Service-Component>-->
+                                <!--<Import-Package>!*internal,*</Import-Package>-->
+                                <!--<Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*</Embed-Dependency>-->
+                                <!--<Include-Resource>-->
+                                    <!--{maven-resources},META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt=target/classes/META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt-->
+                                <!--</Include-Resource>-->
+                                <!--<Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>-->
+                            <!--</instructions>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
                 </executions>
             </plugin>
         </plugins>
@@ -239,6 +239,7 @@
                 <property><name>tos-di.home</name></property>
             </activation>
             <properties>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
                 <tos-di.plugins.dir>${tos-di.home}/plugins</tos-di.plugins.dir>
             </properties>
             <build>
