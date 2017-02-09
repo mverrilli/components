@@ -5,9 +5,7 @@ import java.util.EnumSet;
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.api.properties.ComponentPropertiesImpl;
 import org.talend.components.api.properties.ComponentReferenceProperties;
-import org.talend.components.api.properties.ComponentReferencePropertiesEnclosing;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
-import org.talend.components.netsuite.TNetSuiteComponentDefinition;
 import org.talend.components.netsuite.runtime.RuntimeService;
 import org.talend.daikon.java8.Function;
 import org.talend.daikon.properties.PresentationItem;
@@ -26,7 +24,7 @@ import static org.talend.daikon.properties.property.PropertyFactory.newString;
  *
  */
 public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
-        implements NetSuiteProvideConnectionProperties, ComponentReferencePropertiesEnclosing {
+        implements NetSuiteProvideConnectionProperties {
 
     public static final String FORM_WIZARD = "Wizard";
 
@@ -54,8 +52,8 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
 
     public PresentationItem testConnection = new PresentationItem("testConnection", "Test connection");
 
-    public ComponentReferenceProperties referencedComponent =
-            new ComponentReferenceProperties("referencedComponent", this);
+    public ComponentReferenceProperties<NetSuiteConnectionProperties> referencedComponent =
+            new ComponentReferenceProperties("referencedComponent", TNetSuiteConnectionDefinition.COMPONENT_NAME);
 
     public NetSuiteConnectionProperties(String name) {
         super(name);
@@ -90,7 +88,6 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
         Form refForm = Form.create(this, Form.REFERENCE);
         Widget compListWidget = widget(referencedComponent)
                 .setWidgetType(Widget.COMPONENT_REFERENCE_WIDGET_TYPE);
-        referencedComponent.componentType.setValue(TNetSuiteConnectionDefinition.COMPONENT_NAME);
         refForm.addRow(compListWidget);
         refForm.addRow(mainForm);
 
@@ -140,14 +137,13 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
     }
 
     public NetSuiteConnectionProperties getReferencedConnectionProperties() {
-        NetSuiteConnectionProperties refProps = (NetSuiteConnectionProperties) referencedComponent.componentProperties;
+        NetSuiteConnectionProperties refProps = referencedComponent.getReference();
         if (refProps != null) {
             return refProps;
         }
         return null;
     }
 
-    @Override
     public void afterReferencedComponent() {
         refreshLayout(getForm(Form.MAIN));
         refreshLayout(getForm(Form.REFERENCE));
