@@ -31,7 +31,7 @@ public abstract class NetSuiteFactory {
         NetSuiteFactory.messageLoggingEnabled = messageLoggingEnabled;
     }
 
-    public static NetSuiteConnection getConnection(String apiVersion) throws NetSuiteException {
+    public static <P> NetSuiteConnection<P> getConnection(String apiVersion) throws NetSuiteException {
         NetSuiteConnection connection;
         if (apiVersion.equals("2016.2")) {
             connection = new org.talend.components.netsuite.client.impl.v2016_2.NetSuiteConnectionImpl();

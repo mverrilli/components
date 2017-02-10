@@ -125,7 +125,7 @@ public class NetSuiteSearchInputReader<RecT, SearchRecT> extends AbstractBounded
                 String value2 = properties.searchConditionTable.value2.getValue().get(i);
                 List<String> values = value2 != null ? Arrays.asList(value1, value2) : Arrays.asList(value1);
 
-                search.criteria(fieldName, operator, null, values);
+                search.criteria(fieldName, operator, values);
             }
         }
 

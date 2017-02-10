@@ -51,7 +51,7 @@ public class NetSuiteConnectionITest {
 
         NsSearchResultSet<Record> rs = connection.newSearch()
                 .entity("Account")
-                .criteria("type", "List.anyOf", null, Arrays.asList("Bank"))
+                .criteria("type", "List.anyOf", Arrays.asList("Bank"))
                 .search();
 
         int count = 0;

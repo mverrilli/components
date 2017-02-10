@@ -10,6 +10,7 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 
 import org.apache.cxf.headers.Header;
+import org.talend.daikon.java8.Function;
 
 /**
  *
@@ -179,7 +180,7 @@ public abstract class NetSuiteConnection<P> {
 //        });
 //    }
 
-    protected <R> R execute(PortOperation<R, P> op) throws NetSuiteException {
+    public <R> R execute(PortOperation<R, P> op) throws NetSuiteException {
         if (useRequestLevelCredentials) {
             return executeUsingRequestLevelCredentials(op);
         } else {
@@ -349,7 +350,7 @@ public abstract class NetSuiteConnection<P> {
 //        return false;
 //    }
 
-    protected interface PortOperation<R, P> {
+    public interface PortOperation<R, P> {
         R execute(P port) throws Exception;
     }
 }

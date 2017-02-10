@@ -3,6 +3,9 @@ package org.talend.components.netsuite.client.impl.v2016_2;
 import java.util.Arrays;
 import java.util.Collection;
 
+import org.talend.components.netsuite.client.NetSuiteException;
+import org.talend.components.netsuite.client.metadata.NsSearchFieldOperatorTypeDef;
+import org.talend.components.netsuite.client.metadata.NsSearchDef;
 import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.model.Mapper;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
@@ -281,6 +284,7 @@ import com.netsuite.webservices.v2016_2.platform.core.SearchMultiSelectField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchRecord;
 import com.netsuite.webservices.v2016_2.platform.core.SearchStringCustomField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchStringField;
+import com.netsuite.webservices.v2016_2.platform.core.types.SearchDate;
 import com.netsuite.webservices.v2016_2.setup.customization.CustomList;
 import com.netsuite.webservices.v2016_2.setup.customization.CustomListSearch;
 import com.netsuite.webservices.v2016_2.setup.customization.CustomListSearchAdvanced;
@@ -471,129 +475,122 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
     };
 
     public NetSuiteMetaDataImpl() {
-        init();
-    }
+        NsSearchDef[] searchTable = {
+                new NsSearchDef(Account.class, AccountSearch.class, AccountSearchBasic.class, AccountSearchAdvanced.class),
+                new NsSearchDef(AccountingPeriod.class, AccountingPeriodSearch.class, AccountingPeriodSearchBasic.class, AccountingPeriodSearchAdvanced.class),
+                new NsSearchDef(BillingSchedule.class, BillingScheduleSearch.class, BillingScheduleSearchBasic.class, BillingScheduleSearchAdvanced.class),
+                new NsSearchDef(Bin.class, BinSearch.class, BinSearchBasic.class, BinSearchAdvanced.class),
+                new NsSearchDef(Budget.class, BudgetSearch.class, BudgetSearchBasic.class, BudgetSearchAdvanced.class),
+                new NsSearchDef(CalendarEvent.class, CalendarEventSearch.class, CalendarEventSearchBasic.class, CalendarEventSearchAdvanced.class),
+                new NsSearchDef(Campaign.class, CampaignSearch.class, CampaignSearchBasic.class, CampaignSearchAdvanced.class),
+                new NsSearchDef(Charge.class, ChargeSearch.class, ChargeSearchBasic.class, ChargeSearchAdvanced.class),
+                new NsSearchDef(Classification.class, ClassificationSearch.class, ClassificationSearchBasic.class, ClassificationSearchAdvanced.class),
+                new NsSearchDef(Contact.class, ContactSearch.class, ContactSearchBasic.class, ContactSearchAdvanced.class),
+                new NsSearchDef(ContactCategory.class, ContactCategorySearch.class, ContactCategorySearchBasic.class, ContactCategorySearchAdvanced.class),
+                new NsSearchDef(ContactRole.class, ContactRoleSearch.class, ContactRoleSearchBasic.class, ContactRoleSearchAdvanced.class),
+                new NsSearchDef(CouponCode.class, CouponCodeSearch.class, CouponCodeSearchBasic.class, CouponCodeSearchAdvanced.class),
+                new NsSearchDef(CurrencyRate.class, CurrencyRateSearch.class, CurrencyRateSearchBasic.class, CurrencyRateSearchAdvanced.class),
+                new NsSearchDef(Customer.class, CustomerSearch.class, CustomerSearchBasic.class, CustomerSearchAdvanced.class),
+                new NsSearchDef(CustomerCategory.class, CustomerCategorySearch.class, CustomerCategorySearchBasic.class, CustomerCategorySearchAdvanced.class),
+                new NsSearchDef(CustomerMessage.class, CustomerMessageSearch.class, CustomerMessageSearchBasic.class, CustomerMessageSearchAdvanced.class),
+                new NsSearchDef(CustomerStatus.class, CustomerStatusSearch.class, CustomerStatusSearchBasic.class, CustomerStatusSearchAdvanced.class),
+                new NsSearchDef(CustomList.class, CustomListSearch.class, CustomListSearchBasic.class, CustomListSearchAdvanced.class),
+                new NsSearchDef(Department.class, DepartmentSearch.class, DepartmentSearchBasic.class, DepartmentSearchAdvanced.class),
+                new NsSearchDef(Employee.class, EmployeeSearch.class, EmployeeSearchBasic.class, EmployeeSearchAdvanced.class),
+                new NsSearchDef(EntityGroup.class, EntityGroupSearch.class, EntityGroupSearchBasic.class, EntityGroupSearchAdvanced.class),
+                new NsSearchDef(ExpenseCategory.class, ExpenseCategorySearch.class, ExpenseCategorySearchBasic.class, ExpenseCategorySearchAdvanced.class),
+                new NsSearchDef(com.netsuite.webservices.v2016_2.documents.filecabinet.File.class, FileSearch.class, FileSearchBasic.class, FileSearchAdvanced.class),
+                new NsSearchDef(com.netsuite.webservices.v2016_2.documents.filecabinet.Folder.class, FolderSearch.class, FolderSearchBasic.class, FolderSearchAdvanced.class),
+                new NsSearchDef(GiftCertificate.class, GiftCertificateSearch.class, GiftCertificateSearchBasic.class, GiftCertificateSearchAdvanced.class),
+                new NsSearchDef(GlobalAccountMapping.class, GlobalAccountMappingSearch.class, GlobalAccountMappingSearchBasic.class, GlobalAccountMappingSearchAdvanced.class),
+                new NsSearchDef(InventoryNumber.class, InventoryNumberSearch.class, InventoryNumberSearchBasic.class, InventoryNumberSearchAdvanced.class),
+                new NsSearchDef(Issue.class, IssueSearch.class, IssueSearchBasic.class, IssueSearchAdvanced.class),
+                new NsSearchDef(ItemAccountMapping.class, ItemAccountMappingSearch.class, ItemAccountMappingSearchBasic.class, ItemAccountMappingSearchAdvanced.class),
+                new NsSearchDef(ItemDemandPlan.class, ItemDemandPlanSearch.class, ItemDemandPlanSearchBasic.class, ItemDemandPlanSearchAdvanced.class),
+                new NsSearchDef(ItemRevision.class, ItemRevisionSearch.class, ItemRevisionSearchBasic.class, ItemRevisionSearchAdvanced.class),
+                new NsSearchDef(ItemSupplyPlan.class, ItemSupplyPlanSearch.class, ItemSupplyPlanSearchBasic.class, ItemSupplyPlanSearchAdvanced.class),
+                new NsSearchDef(com.netsuite.webservices.v2016_2.lists.relationships.Job.class, JobSearch.class, JobSearchBasic.class, JobSearchAdvanced.class),
+                new NsSearchDef(com.netsuite.webservices.v2016_2.lists.relationships.JobStatus.class, JobStatusSearch.class, JobStatusSearchBasic.class, JobStatusSearchAdvanced.class),
+                new NsSearchDef(com.netsuite.webservices.v2016_2.lists.relationships.JobType.class, JobTypeSearch.class, JobTypeSearchBasic.class, JobTypeSearchAdvanced.class),
+                new NsSearchDef(com.netsuite.webservices.v2016_2.lists.accounting.Location.class, LocationSearch.class, LocationSearchBasic.class, LocationSearchAdvanced.class),
+                new NsSearchDef(ManufacturingCostTemplate.class, ManufacturingCostTemplateSearch.class, ManufacturingCostTemplateSearchBasic.class, ManufacturingCostTemplateSearchAdvanced.class),
+                new NsSearchDef(ManufacturingOperationTask.class, ManufacturingOperationTaskSearch.class, ManufacturingOperationTaskSearchBasic.class, ManufacturingOperationTaskSearchAdvanced.class),
+                new NsSearchDef(ManufacturingRouting.class, ManufacturingRoutingSearch.class, ManufacturingRoutingSearchBasic.class, ManufacturingRoutingSearchAdvanced.class),
+                new NsSearchDef(com.netsuite.webservices.v2016_2.general.communication.Message.class, MessageSearch.class, MessageSearchBasic.class, MessageSearchAdvanced.class),
+                new NsSearchDef(Nexus.class, NexusSearch.class, NexusSearchBasic.class, NexusSearchAdvanced.class),
+                new NsSearchDef(com.netsuite.webservices.v2016_2.general.communication.Note.class, NoteSearch.class, NoteSearchBasic.class, NoteSearchAdvanced.class),
+                new NsSearchDef(NoteType.class, NoteTypeSearch.class, NoteTypeSearchBasic.class, NoteTypeSearchAdvanced.class),
+                new NsSearchDef(OtherNameCategory.class, OtherNameCategorySearch.class, OtherNameCategorySearchBasic.class, OtherNameCategorySearchAdvanced.class),
+                new NsSearchDef(Partner.class, PartnerSearch.class, PartnerSearchBasic.class, PartnerSearchAdvanced.class),
+                new NsSearchDef(PartnerCategory.class, PartnerCategorySearch.class, PartnerCategorySearchBasic.class, PartnerCategorySearchAdvanced.class),
+                new NsSearchDef(PaymentMethod.class, PaymentMethodSearch.class, PaymentMethodSearchBasic.class, PaymentMethodSearchAdvanced.class),
+                new NsSearchDef(PayrollItem.class, PayrollItemSearch.class, PayrollItemSearchBasic.class, PayrollItemSearchAdvanced.class),
+                new NsSearchDef(PhoneCall.class, PhoneCallSearch.class, PhoneCallSearchBasic.class, PhoneCallSearchAdvanced.class),
+                new NsSearchDef(PriceLevel.class, PriceLevelSearch.class, PriceLevelSearchBasic.class, PriceLevelSearchAdvanced.class),
+                new NsSearchDef(PricingGroup.class, PricingGroupSearch.class, PricingGroupSearchBasic.class, PricingGroupSearchAdvanced.class),
+                new NsSearchDef(ProjectTask.class, ProjectTaskSearch.class, ProjectTaskSearchBasic.class, ProjectTaskSearchAdvanced.class),
+                new NsSearchDef(PromotionCode.class, PromotionCodeSearch.class, PromotionCodeSearchBasic.class, PromotionCodeSearchAdvanced.class),
+                new NsSearchDef(ResourceAllocation.class, ResourceAllocationSearch.class, ResourceAllocationSearchBasic.class, ResourceAllocationSearchAdvanced.class),
+                new NsSearchDef(RevRecSchedule.class, RevRecScheduleSearch.class, RevRecScheduleSearchBasic.class, RevRecScheduleSearchAdvanced.class),
+                new NsSearchDef(RevRecTemplate.class, RevRecTemplateSearch.class, RevRecTemplateSearchBasic.class, RevRecTemplateSearchAdvanced.class),
+                new NsSearchDef(SalesRole.class, SalesRoleSearch.class, SalesRoleSearchBasic.class, SalesRoleSearchAdvanced.class),
+                new NsSearchDef(com.netsuite.webservices.v2016_2.lists.website.SiteCategory.class, SiteCategorySearch.class, SiteCategorySearchBasic.class, SiteCategorySearchAdvanced.class),
+                new NsSearchDef(Solution.class, SolutionSearch.class, SolutionSearchBasic.class, SolutionSearchAdvanced.class),
+                new NsSearchDef(Subsidiary.class, SubsidiarySearch.class, SubsidiarySearchBasic.class, SubsidiarySearchAdvanced.class),
+                new NsSearchDef(SupportCase.class, SupportCaseSearch.class, SupportCaseSearchBasic.class, SupportCaseSearchAdvanced.class),
+                new NsSearchDef(com.netsuite.webservices.v2016_2.activities.scheduling.Task.class, TaskSearch.class, TaskSearchBasic.class, TaskSearchAdvanced.class),
+                new NsSearchDef(com.netsuite.webservices.v2016_2.lists.accounting.Term.class, TermSearch.class, TermSearchBasic.class, TermSearchAdvanced.class),
+                new NsSearchDef(TimeBill.class, TimeBillSearch.class, TimeBillSearchBasic.class, TimeBillSearchAdvanced.class),
+                new NsSearchDef(TimeEntry.class, TimeEntrySearch.class, TimeEntrySearchBasic.class, TimeEntrySearchAdvanced.class),
+                new NsSearchDef(TimeSheet.class, TimeSheetSearch.class, TimeSheetSearchBasic.class, TimeSheetSearchAdvanced.class),
+                new NsSearchDef(com.netsuite.webservices.v2016_2.lists.support.Topic.class, TopicSearch.class, TopicSearchBasic.class, TopicSearchAdvanced.class),
+                new NsSearchDef(UnitsType.class, UnitsTypeSearch.class, UnitsTypeSearchBasic.class, UnitsTypeSearchAdvanced.class),
+                new NsSearchDef(Vendor.class, VendorSearch.class, VendorSearchBasic.class, VendorSearchAdvanced.class),
+                new NsSearchDef(VendorCategory.class, VendorCategorySearch.class, VendorCategorySearchBasic.class, VendorCategorySearchAdvanced.class),
+                new NsSearchDef(WinLossReason.class, WinLossReasonSearch.class, WinLossReasonSearchBasic.class, WinLossReasonSearchAdvanced.class),
 
-    private void init() {
+                new NsSearchDef(AssemblyBuild.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(AssemblyUnbuild.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(BinTransfer.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(BinWorksheet.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(CashRefund.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(CashSale.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(Check.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(CreditMemo.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(CustomerDeposit.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(CustomerPayment.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(CustomerRefund.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(Deposit.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(DepositApplication.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(Estimate.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(ExpenseReport.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(InterCompanyJournalEntry.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(InventoryAdjustment.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(InventoryCostRevaluation.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(InventoryTransfer.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(Invoice.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(ItemFulfillment.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(ItemReceipt.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(JournalEntry.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(Opportunity.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(PaycheckJournal.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(PurchaseOrder.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(ReturnAuthorization.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(SalesOrder.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(com.netsuite.webservices.v2016_2.lists.accounting.State.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(TransferOrder.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(VendorBill.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(VendorCredit.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(VendorPayment.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(VendorReturnAuthorization.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(WorkOrder.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(WorkOrderClose.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(WorkOrderCompletion.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+                new NsSearchDef(WorkOrderIssue.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
 
-        /**
-         *
-         */
-        SearchInfo[] searchTable = {
-                new SearchInfo(Account.class, AccountSearch.class, AccountSearchBasic.class, AccountSearchAdvanced.class),
-                new SearchInfo(AccountingPeriod.class, AccountingPeriodSearch.class, AccountingPeriodSearchBasic.class, AccountingPeriodSearchAdvanced.class),
-                new SearchInfo(BillingSchedule.class, BillingScheduleSearch.class, BillingScheduleSearchBasic.class, BillingScheduleSearchAdvanced.class),
-                new SearchInfo(Bin.class, BinSearch.class, BinSearchBasic.class, BinSearchAdvanced.class),
-                new SearchInfo(Budget.class, BudgetSearch.class, BudgetSearchBasic.class, BudgetSearchAdvanced.class),
-                new SearchInfo(CalendarEvent.class, CalendarEventSearch.class, CalendarEventSearchBasic.class, CalendarEventSearchAdvanced.class),
-                new SearchInfo(Campaign.class, CampaignSearch.class, CampaignSearchBasic.class, CampaignSearchAdvanced.class),
-                new SearchInfo(Charge.class, ChargeSearch.class, ChargeSearchBasic.class, ChargeSearchAdvanced.class),
-                new SearchInfo(Classification.class, ClassificationSearch.class, ClassificationSearchBasic.class, ClassificationSearchAdvanced.class),
-                new SearchInfo(Contact.class, ContactSearch.class, ContactSearchBasic.class, ContactSearchAdvanced.class),
-                new SearchInfo(ContactCategory.class, ContactCategorySearch.class, ContactCategorySearchBasic.class, ContactCategorySearchAdvanced.class),
-                new SearchInfo(ContactRole.class, ContactRoleSearch.class, ContactRoleSearchBasic.class, ContactRoleSearchAdvanced.class),
-                new SearchInfo(CouponCode.class, CouponCodeSearch.class, CouponCodeSearchBasic.class, CouponCodeSearchAdvanced.class),
-                new SearchInfo(CurrencyRate.class, CurrencyRateSearch.class, CurrencyRateSearchBasic.class, CurrencyRateSearchAdvanced.class),
-                new SearchInfo(Customer.class, CustomerSearch.class, CustomerSearchBasic.class, CustomerSearchAdvanced.class),
-                new SearchInfo(CustomerCategory.class, CustomerCategorySearch.class, CustomerCategorySearchBasic.class, CustomerCategorySearchAdvanced.class),
-                new SearchInfo(CustomerMessage.class, CustomerMessageSearch.class, CustomerMessageSearchBasic.class, CustomerMessageSearchAdvanced.class),
-                new SearchInfo(CustomerStatus.class, CustomerStatusSearch.class, CustomerStatusSearchBasic.class, CustomerStatusSearchAdvanced.class),
-                new SearchInfo(CustomList.class, CustomListSearch.class, CustomListSearchBasic.class, CustomListSearchAdvanced.class),
-                new SearchInfo(Department.class, DepartmentSearch.class, DepartmentSearchBasic.class, DepartmentSearchAdvanced.class),
-                new SearchInfo(Employee.class, EmployeeSearch.class, EmployeeSearchBasic.class, EmployeeSearchAdvanced.class),
-                new SearchInfo(EntityGroup.class, EntityGroupSearch.class, EntityGroupSearchBasic.class, EntityGroupSearchAdvanced.class),
-                new SearchInfo(ExpenseCategory.class, ExpenseCategorySearch.class, ExpenseCategorySearchBasic.class, ExpenseCategorySearchAdvanced.class),
-                new SearchInfo(com.netsuite.webservices.v2016_2.documents.filecabinet.File.class, FileSearch.class, FileSearchBasic.class, FileSearchAdvanced.class),
-                new SearchInfo(com.netsuite.webservices.v2016_2.documents.filecabinet.Folder.class, FolderSearch.class, FolderSearchBasic.class, FolderSearchAdvanced.class),
-                new SearchInfo(GiftCertificate.class, GiftCertificateSearch.class, GiftCertificateSearchBasic.class, GiftCertificateSearchAdvanced.class),
-                new SearchInfo(GlobalAccountMapping.class, GlobalAccountMappingSearch.class, GlobalAccountMappingSearchBasic.class, GlobalAccountMappingSearchAdvanced.class),
-                new SearchInfo(InventoryNumber.class, InventoryNumberSearch.class, InventoryNumberSearchBasic.class, InventoryNumberSearchAdvanced.class),
-                new SearchInfo(Issue.class, IssueSearch.class, IssueSearchBasic.class, IssueSearchAdvanced.class),
-                new SearchInfo(ItemAccountMapping.class, ItemAccountMappingSearch.class, ItemAccountMappingSearchBasic.class, ItemAccountMappingSearchAdvanced.class),
-                new SearchInfo(ItemDemandPlan.class, ItemDemandPlanSearch.class, ItemDemandPlanSearchBasic.class, ItemDemandPlanSearchAdvanced.class),
-                new SearchInfo(ItemRevision.class, ItemRevisionSearch.class, ItemRevisionSearchBasic.class, ItemRevisionSearchAdvanced.class),
-                new SearchInfo(ItemSupplyPlan.class, ItemSupplyPlanSearch.class, ItemSupplyPlanSearchBasic.class, ItemSupplyPlanSearchAdvanced.class),
-                new SearchInfo(com.netsuite.webservices.v2016_2.lists.relationships.Job.class, JobSearch.class, JobSearchBasic.class, JobSearchAdvanced.class),
-                new SearchInfo(com.netsuite.webservices.v2016_2.lists.relationships.JobStatus.class, JobStatusSearch.class, JobStatusSearchBasic.class, JobStatusSearchAdvanced.class),
-                new SearchInfo(com.netsuite.webservices.v2016_2.lists.relationships.JobType.class, JobTypeSearch.class, JobTypeSearchBasic.class, JobTypeSearchAdvanced.class),
-                new SearchInfo(com.netsuite.webservices.v2016_2.lists.accounting.Location.class, LocationSearch.class, LocationSearchBasic.class, LocationSearchAdvanced.class),
-                new SearchInfo(ManufacturingCostTemplate.class, ManufacturingCostTemplateSearch.class, ManufacturingCostTemplateSearchBasic.class, ManufacturingCostTemplateSearchAdvanced.class),
-                new SearchInfo(ManufacturingOperationTask.class, ManufacturingOperationTaskSearch.class, ManufacturingOperationTaskSearchBasic.class, ManufacturingOperationTaskSearchAdvanced.class),
-                new SearchInfo(ManufacturingRouting.class, ManufacturingRoutingSearch.class, ManufacturingRoutingSearchBasic.class, ManufacturingRoutingSearchAdvanced.class),
-                new SearchInfo(com.netsuite.webservices.v2016_2.general.communication.Message.class, MessageSearch.class, MessageSearchBasic.class, MessageSearchAdvanced.class),
-                new SearchInfo(Nexus.class, NexusSearch.class, NexusSearchBasic.class, NexusSearchAdvanced.class),
-                new SearchInfo(com.netsuite.webservices.v2016_2.general.communication.Note.class, NoteSearch.class, NoteSearchBasic.class, NoteSearchAdvanced.class),
-                new SearchInfo(NoteType.class, NoteTypeSearch.class, NoteTypeSearchBasic.class, NoteTypeSearchAdvanced.class),
-                new SearchInfo(OtherNameCategory.class, OtherNameCategorySearch.class, OtherNameCategorySearchBasic.class, OtherNameCategorySearchAdvanced.class),
-                new SearchInfo(Partner.class, PartnerSearch.class, PartnerSearchBasic.class, PartnerSearchAdvanced.class),
-                new SearchInfo(PartnerCategory.class, PartnerCategorySearch.class, PartnerCategorySearchBasic.class, PartnerCategorySearchAdvanced.class),
-                new SearchInfo(PaymentMethod.class, PaymentMethodSearch.class, PaymentMethodSearchBasic.class, PaymentMethodSearchAdvanced.class),
-                new SearchInfo(PayrollItem.class, PayrollItemSearch.class, PayrollItemSearchBasic.class, PayrollItemSearchAdvanced.class),
-                new SearchInfo(PhoneCall.class, PhoneCallSearch.class, PhoneCallSearchBasic.class, PhoneCallSearchAdvanced.class),
-                new SearchInfo(PriceLevel.class, PriceLevelSearch.class, PriceLevelSearchBasic.class, PriceLevelSearchAdvanced.class),
-                new SearchInfo(PricingGroup.class, PricingGroupSearch.class, PricingGroupSearchBasic.class, PricingGroupSearchAdvanced.class),
-                new SearchInfo(ProjectTask.class, ProjectTaskSearch.class, ProjectTaskSearchBasic.class, ProjectTaskSearchAdvanced.class),
-                new SearchInfo(PromotionCode.class, PromotionCodeSearch.class, PromotionCodeSearchBasic.class, PromotionCodeSearchAdvanced.class),
-                new SearchInfo(ResourceAllocation.class, ResourceAllocationSearch.class, ResourceAllocationSearchBasic.class, ResourceAllocationSearchAdvanced.class),
-                new SearchInfo(RevRecSchedule.class, RevRecScheduleSearch.class, RevRecScheduleSearchBasic.class, RevRecScheduleSearchAdvanced.class),
-                new SearchInfo(RevRecTemplate.class, RevRecTemplateSearch.class, RevRecTemplateSearchBasic.class, RevRecTemplateSearchAdvanced.class),
-                new SearchInfo(SalesRole.class, SalesRoleSearch.class, SalesRoleSearchBasic.class, SalesRoleSearchAdvanced.class),
-                new SearchInfo(com.netsuite.webservices.v2016_2.lists.website.SiteCategory.class, SiteCategorySearch.class, SiteCategorySearchBasic.class, SiteCategorySearchAdvanced.class),
-                new SearchInfo(Solution.class, SolutionSearch.class, SolutionSearchBasic.class, SolutionSearchAdvanced.class),
-                new SearchInfo(Subsidiary.class, SubsidiarySearch.class, SubsidiarySearchBasic.class, SubsidiarySearchAdvanced.class),
-                new SearchInfo(SupportCase.class, SupportCaseSearch.class, SupportCaseSearchBasic.class, SupportCaseSearchAdvanced.class),
-                new SearchInfo(com.netsuite.webservices.v2016_2.activities.scheduling.Task.class, TaskSearch.class, TaskSearchBasic.class, TaskSearchAdvanced.class),
-                new SearchInfo(com.netsuite.webservices.v2016_2.lists.accounting.Term.class, TermSearch.class, TermSearchBasic.class, TermSearchAdvanced.class),
-                new SearchInfo(TimeBill.class, TimeBillSearch.class, TimeBillSearchBasic.class, TimeBillSearchAdvanced.class),
-                new SearchInfo(TimeEntry.class, TimeEntrySearch.class, TimeEntrySearchBasic.class, TimeEntrySearchAdvanced.class),
-                new SearchInfo(TimeSheet.class, TimeSheetSearch.class, TimeSheetSearchBasic.class, TimeSheetSearchAdvanced.class),
-                new SearchInfo(com.netsuite.webservices.v2016_2.lists.support.Topic.class, TopicSearch.class, TopicSearchBasic.class, TopicSearchAdvanced.class),
-                new SearchInfo(UnitsType.class, UnitsTypeSearch.class, UnitsTypeSearchBasic.class, UnitsTypeSearchAdvanced.class),
-                new SearchInfo(Vendor.class, VendorSearch.class, VendorSearchBasic.class, VendorSearchAdvanced.class),
-                new SearchInfo(VendorCategory.class, VendorCategorySearch.class, VendorCategorySearchBasic.class, VendorCategorySearchAdvanced.class),
-                new SearchInfo(WinLossReason.class, WinLossReasonSearch.class, WinLossReasonSearchBasic.class, WinLossReasonSearchAdvanced.class),
-
-                new SearchInfo(AssemblyBuild.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(AssemblyUnbuild.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(BinTransfer.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(BinWorksheet.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(CashRefund.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(CashSale.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(Check.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(CreditMemo.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(CustomerDeposit.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(CustomerPayment.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(CustomerRefund.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(Deposit.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(DepositApplication.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(Estimate.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(ExpenseReport.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(InterCompanyJournalEntry.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(InventoryAdjustment.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(InventoryCostRevaluation.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(InventoryTransfer.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(Invoice.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(ItemFulfillment.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(ItemReceipt.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(JournalEntry.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(Opportunity.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(PaycheckJournal.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(PurchaseOrder.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(ReturnAuthorization.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(SalesOrder.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(com.netsuite.webservices.v2016_2.lists.accounting.State.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(TransferOrder.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(VendorBill.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(VendorCredit.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(VendorPayment.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(VendorReturnAuthorization.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(WorkOrder.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(WorkOrderClose.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(WorkOrderCompletion.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-                new SearchInfo(WorkOrderIssue.class, TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-
-                new SearchInfo(CustomRecord.class, CustomRecordSearch.class, CustomRecordSearchBasic.class, CustomRecordSearchAdvanced.class)
+                new NsSearchDef(CustomRecord.class, CustomRecordSearch.class, CustomRecordSearchBasic.class, CustomRecordSearchAdvanced.class)
         };
+        registerSearchDefs(searchTable);
 
         Class<?>[] searchFieldTable = {
                 SearchCustomFieldList.class,
@@ -615,10 +612,11 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
                 SearchStringCustomField.class,
                 SearchStringField.class
         };
+        registerSearchFieldDefs(searchFieldTable);
 
-        SearchFieldOperatorTypeInfo<?>[] searchFieldOperatorTable = {
+        NsSearchFieldOperatorTypeDef<?>[] searchFieldOperatorTable = {
                 // Date
-                new SearchFieldOperatorTypeInfo<>("Date",
+                new NsSearchFieldOperatorTypeDef<>("Date",
                         SearchDateFieldOperator.class, new Mapper<SearchDateFieldOperator, String>() {
                     @Override public String map(SearchDateFieldOperator input) {
                         return input.value();
@@ -628,8 +626,19 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
                         return SearchDateFieldOperator.fromValue(input);
                     }
                 }),
+                // Predefined Date
+                new NsSearchFieldOperatorTypeDef<>("PredefinedDate",
+                        SearchDate.class, new Mapper<SearchDate, String>() {
+                    @Override public String map(SearchDate input) {
+                        return input.value();
+                    }
+                }, new Mapper<String, SearchDate>() {
+                    @Override public SearchDate map(String input) {
+                        return SearchDate.fromValue(input);
+                    }
+                }),
                 // Double
-                new SearchFieldOperatorTypeInfo<>("Double",
+                new NsSearchFieldOperatorTypeDef<>("Double",
                         SearchDoubleFieldOperator.class, new Mapper<SearchDoubleFieldOperator, String>() {
                     @Override public String map(SearchDoubleFieldOperator input) {
                         return input.value();
@@ -640,7 +649,7 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
                     }
                 }),
                 // Date
-                new SearchFieldOperatorTypeInfo<>("Numeric",
+                new NsSearchFieldOperatorTypeDef<>("Numeric",
                         SearchLongFieldOperator.class, new Mapper<SearchLongFieldOperator, String>() {
                     @Override public String map(SearchLongFieldOperator input) {
                         return input.value();
@@ -651,7 +660,7 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
                     }
                 }),
                 // String
-                new SearchFieldOperatorTypeInfo<>("String",
+                new NsSearchFieldOperatorTypeDef<>("String",
                         SearchStringFieldOperator.class, new Mapper<SearchStringFieldOperator, String>() {
                     @Override public String map(SearchStringFieldOperator input) {
                         return input.value();
@@ -662,7 +671,7 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
                     }
                 }),
                 // List of values
-                new SearchFieldOperatorTypeInfo<>("List",
+                new NsSearchFieldOperatorTypeDef<>("List",
                         SearchMultiSelectFieldOperator.class, new Mapper<SearchMultiSelectFieldOperator, String>() {
                     @Override public String map(SearchMultiSelectFieldOperator input) {
                         return input.value();
@@ -673,7 +682,7 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
                     }
                 }),
                 // List of predefined values
-                new SearchFieldOperatorTypeInfo<>("List",
+                new NsSearchFieldOperatorTypeDef<>("List",
                         SearchEnumMultiSelectFieldOperator.class, new Mapper<SearchEnumMultiSelectFieldOperator, String>() {
                     @Override public String map(SearchEnumMultiSelectFieldOperator input) {
                         return input.value();
@@ -684,11 +693,10 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
                     }
                 }),
                 // Boolean (Synthetic)
-                new SearchFieldOperatorTypeInfo<>("Boolean",
-                        SearchBooleanFieldOperator.class, null, null)
+                new NsSearchFieldOperatorTypeDef<>("Boolean",
+                        NsSearchFieldOperatorTypeDef.SearchBooleanFieldOperator.class, null, null)
         };
-
-        initMetaData(searchTable, searchFieldTable, searchFieldOperatorTable);
+        registerSearchFieldOperatorTypeDefs(searchFieldOperatorTable);
     }
 
     public Collection<String> getTransactionTypes() {
@@ -700,13 +708,13 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
     }
 
     @Override
-    public Class<?> getListOrRecordRefClass() {
-        return ListOrRecordRef.class;
+    public ListOrRecordRef createListOrRecordRef() throws NetSuiteException {
+        return createInstance(ListOrRecordRef.class);
     }
 
     @Override
-    public Class<?> getRecordRefClass() {
-        return RecordRef.class;
+    public RecordRef createRecordRef() throws NetSuiteException {
+        return createInstance(RecordRef.class);
     }
 
     protected boolean isKeyField(Class<?> entityClass, PropertyInfo propertyInfo) {

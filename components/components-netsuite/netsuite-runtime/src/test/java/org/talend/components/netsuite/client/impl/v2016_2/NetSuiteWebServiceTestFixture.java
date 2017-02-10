@@ -10,11 +10,11 @@ import org.talend.components.netsuite.test.TestUtils;
 /**
  *
  */
-public class NetSuiteWebServiceTestFixture {
+public class NetSuiteWebServiceTestFixture<P> {
 
     protected Properties properties;
     protected NetSuiteCredentials credentials;
-    protected NetSuiteConnection connection;
+    protected NetSuiteConnection<P> connection;
 
     public void setUp() throws Exception {
         System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
@@ -48,7 +48,7 @@ public class NetSuiteWebServiceTestFixture {
         return properties.getProperty("endpoint.url");
     }
 
-    public NetSuiteConnection getConnection() {
+    public NetSuiteConnection<P> getConnection() {
         return connection;
     }
 }

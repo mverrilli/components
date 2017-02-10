@@ -14,7 +14,7 @@ public class NetSuiteFactoryTest {
     @Test
     public void testGetMetaData() throws Exception {
         NetSuiteMetaData metaData = NetSuiteFactory.getMetaData("2016.2");
-        assertNotNull(metaData.getEntity(Account.class));
+        assertNotNull(metaData.getTypeDef(Account.class));
     }
 
 }

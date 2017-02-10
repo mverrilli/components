@@ -14,6 +14,10 @@ import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
+import org.talend.components.netsuite.client.metadata.NsTypeDef;
+import org.talend.components.netsuite.client.metadata.NsFieldDef;
+import org.talend.components.netsuite.client.metadata.NsSearchFieldOperatorTypeDef;
+import org.talend.components.netsuite.client.metadata.NsSearchDef;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.components.netsuite.schema.NsSchema;
 import org.talend.components.netsuite.schema.NsSchemaImpl;
@@ -102,7 +106,7 @@ public class NetSuiteEndpoint implements SchemaService {
     public Schema getSchema(String typeName) {
         try {
             NetSuiteMetaData metaData = NetSuiteFactory.getMetaData(properties.getApiVersion());
-            NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity(typeName);
+            NsTypeDef entityInfo = metaData.getTypeDef(typeName);
 
             Schema schema = inferSchemaForEntity(entityInfo);
             return schema;
@@ -115,11 +119,11 @@ public class NetSuiteEndpoint implements SchemaService {
     public NsSchema getSearchSchema(String typeName) {
         try {
             NetSuiteMetaData metaData = NetSuiteFactory.getMetaData(properties.getApiVersion());
-            final NetSuiteMetaData.SearchInfo searchInfo = metaData.getSearchInfo(typeName);
-            final NetSuiteMetaData.EntityInfo searchRecordInfo = metaData.getEntity(searchInfo.getSearchBasicClass());
-            List<NetSuiteMetaData.FieldInfo> searchFieldInfos = searchRecordInfo.getFields();
+            final NsSearchDef searchInfo = metaData.getSearchDef(typeName);
+            final NsTypeDef searchRecordInfo = metaData.getTypeDef(searchInfo.getSearchBasicClass());
+            List<NsFieldDef> searchFieldInfos = searchRecordInfo.getFields();
             List<String> fieldNames = new ArrayList<>(searchFieldInfos.size());
-            for (NetSuiteMetaData.FieldInfo fieldInfo : searchFieldInfos) {
+            for (NsFieldDef fieldInfo : searchFieldInfos) {
                 fieldNames.add(fieldInfo.getName());
             }
             return new NsSchemaImpl(searchRecordInfo.getName(), searchFieldInfos);
@@ -132,10 +136,10 @@ public class NetSuiteEndpoint implements SchemaService {
     public List<String> getSearchFieldOperators() {
         try {
             NetSuiteMetaData metaData = NetSuiteFactory.getMetaData(properties.getApiVersion());
-            List<NetSuiteMetaData.SearchFieldOperatorName> operatorList =
+            List<NsSearchFieldOperatorTypeDef.QualifiedName> operatorList =
                     new ArrayList<>(metaData.getSearchOperatorNames());
             List<String> operatorNames = new ArrayList<>(operatorList.size());
-            for (NetSuiteMetaData.SearchFieldOperatorName operatorName : operatorList) {
+            for (NsSearchFieldOperatorTypeDef.QualifiedName operatorName : operatorList) {
                 operatorNames.add(operatorName.getQualifiedName());
             }
             return operatorNames;
@@ -151,10 +155,10 @@ public class NetSuiteEndpoint implements SchemaService {
      * @param in the <code>EntityInfo</code> to analyse.
      * @return the schema for data given from the object.
      */
-    public static Schema inferSchemaForEntity(NetSuiteMetaData.EntityInfo in) {
+    public static Schema inferSchemaForEntity(NsTypeDef in) {
         List<Schema.Field> fields = new ArrayList<>();
 
-        for (NetSuiteMetaData.FieldInfo fieldInfo : in.getFields()) {
+        for (NsFieldDef fieldInfo : in.getFields()) {
 
             Schema.Field avroField = new Schema.Field(fieldInfo.getName(),
                     inferSchemaForField(fieldInfo), null, (Object) null);
@@ -200,7 +204,7 @@ public class NetSuiteEndpoint implements SchemaService {
      * @param fieldInfo the <code>FieldInfo</code> to analyse.
      * @return the schema for data that the fieldInfo describes.
      */
-    public static Schema inferSchemaForField(NetSuiteMetaData.FieldInfo fieldInfo) {
+    public static Schema inferSchemaForField(NsFieldDef fieldInfo) {
         Schema base;
 
         Class<?> fieldType = fieldInfo.getValueType();

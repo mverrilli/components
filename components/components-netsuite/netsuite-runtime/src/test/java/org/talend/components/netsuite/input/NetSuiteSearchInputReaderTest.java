@@ -23,6 +23,8 @@ import org.talend.components.netsuite.NetSuiteEndpoint;
 import org.talend.components.netsuite.NetSuiteSource;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
+import org.talend.components.netsuite.client.metadata.NsTypeDef;
+import org.talend.components.netsuite.client.metadata.NsFieldDef;
 import org.talend.components.netsuite.client.PropertyAccessor;
 import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteWebServiceMockTestFixture;
 import org.talend.components.netsuite.model.Mapper;
@@ -123,7 +125,7 @@ public class NetSuiteSearchInputReaderTest {
         });
 
         NetSuiteMetaData metaData = NetSuiteFactory.getMetaData("2016.2");
-        NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity(Account.class);
+        NsTypeDef entityInfo = metaData.getTypeDef(Account.class);
 
         NetSuiteSearchInputReader reader = (NetSuiteSearchInputReader) source.createReader(container);
 
@@ -140,7 +142,7 @@ public class NetSuiteSearchInputReaderTest {
             List<Schema.Field> fields = record.getSchema().getFields();
             for (int i = 0; i < fields.size(); i++) {
                 Schema.Field field = fields.get(i);
-                NetSuiteMetaData.FieldInfo fieldInfo = entityInfo.getField(field.name());
+                NsFieldDef fieldInfo = entityInfo.getField(field.name());
                 Class<?> datumClass = fieldInfo.getValueType();
 
                 Object value = record.get(i);

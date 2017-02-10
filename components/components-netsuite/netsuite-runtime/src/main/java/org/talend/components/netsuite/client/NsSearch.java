@@ -12,6 +12,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.talend.components.netsuite.client.metadata.NsSearchDef;
+import org.talend.components.netsuite.client.metadata.NsSearchFieldOperatorTypeDef;
 import org.talend.components.netsuite.model.TypeInfo;
 import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.model.TypeManager;
@@ -25,7 +27,7 @@ public class NsSearch<RecT, SearchRecT> {
     protected NetSuiteMetaData metaData;
 
     protected String entityTypeName;
-    protected NetSuiteMetaData.SearchInfo searchInfo;
+    protected NsSearchDef searchInfo;
 
     protected NsObject search;             // search class' instance
     protected NsObject searchBasic;        // search basic class' instance
@@ -43,7 +45,7 @@ public class NsSearch<RecT, SearchRecT> {
 
     public NsSearch entity(final String typeName) throws NetSuiteException {
         entityTypeName = typeName;
-        searchInfo = metaData.getSearchInfo(typeName);
+        searchInfo = metaData.getSearchDef(typeName);
 
         // search not found or not supported
         if (searchInfo == null) {
@@ -86,30 +88,38 @@ public class NsSearch<RecT, SearchRecT> {
         }
     }
 
-    public NsSearch criteria(String searchFieldName, String searchOperator,
-            String dataType, List<String> searchValue) throws NetSuiteException {
+    public NsSearch criteria(String searchFieldName, String searchOperator, List<String> searchValue)
+            throws NetSuiteException {
 
         initSearch();
 
         TypeInfo searchMetaData = TypeManager.forClass(searchInfo.getSearchBasicClass());
 
-        if (searchValue.get(0) == null && searchFieldName == null) {
-            return this;
-        }
-
         PropertyInfo fieldMetaData = searchMetaData.getProperty(searchFieldName);
 
-        if (dataType != null) {
+        NsSearchFieldOperatorTypeDef.QualifiedName operatorQName =
+                new NsSearchFieldOperatorTypeDef.QualifiedName(searchOperator);
+
+        if (fieldMetaData != null) {
+
+            NsObject criteria = createCriteria(searchBasic,
+                    searchFieldName, searchOperator, searchValue);
+
+            searchBasic.set(searchFieldName, criteria);
+
+        } else {
+
+            String dataType = operatorQName.getDataType();
             String searchFieldType = null;
             if ("String".equals(dataType)) {
                 searchFieldType = "SearchStringCustomField";
             } else if ("Boolean".equals(dataType)) {
                 searchFieldType = "SearchBooleanCustomField";
-            } else if ("Long".equals(dataType)) {
+            } else if ("Numeric".equals(dataType)) {
                 searchFieldType = "SearchLongCustomField";
             } else if ("Double".equals(dataType)) {
                 searchFieldType = "SearchDoubleCustomField";
-            } else if ("Date".equals(dataType)) {
+            } else if ("Date".equals(dataType) || "PredefinedDate".equals(dataType)) {
                 searchFieldType = "SearchDateCustomField";
             } else if ("List".equals(dataType)) {
                 searchFieldType = "SearchMultiSelectCustomField";
@@ -118,27 +128,15 @@ public class NsSearch<RecT, SearchRecT> {
             }
 
             Class<?> fieldClass = metaData.getSearchFieldClass(searchFieldType);
-
             NsObject criteria = createCriteria(fieldClass, searchFieldName, searchOperator, searchValue);
-
-            if (fieldMetaData != null) {
-                searchBasic.set(searchFieldName, criteria);
-            } else {
-                customCriteriaList.add(criteria);
-            }
-
-        } else {
-            NsObject criteria = createCriteria(searchBasic,
-                    searchFieldName, searchOperator, searchValue);
-
-            searchBasic.set(searchFieldName, criteria);
+            customCriteriaList.add(criteria);
         }
 
         return this;
     }
 
-    private NsObject createCriteria(
-            Class<?> searchFieldClass, String internalId) throws NetSuiteException {
+    private NsObject createCriteria(Class<?> searchFieldClass, String internalId)
+            throws NetSuiteException {
         try {
             TypeInfo fieldTypeMetaData = TypeManager.forClass(searchFieldClass);
             NsObject searchField = NsObject.wrap(searchFieldClass.newInstance());
@@ -175,7 +173,7 @@ public class NsSearch<RecT, SearchRecT> {
                 if (searchValue != null && searchValue.size() != 0) {
                     searchArgumentType.set("searchValue", searchValue.get(0));
                 }
-                searchArgumentType.set("operator", metaData.getSearchFieldOperator(fieldType, searchOperator));
+                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(searchOperator));
                 searchField = searchArgumentType;
 
             } else if (fieldType.equals("SearchLongField") || fieldType.equals("SearchLongCustomField")) {
@@ -187,71 +185,83 @@ public class NsSearch<RecT, SearchRecT> {
                         searchArgumentType.set("searchValue2", Long.valueOf(Long.parseLong(searchValue.get(1))));
                     }
                 }
-                searchArgumentType.set("operator", metaData.getSearchFieldOperator(fieldType, searchOperator));
+                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(searchOperator));
                 searchField = searchArgumentType;
 
             } else if (fieldType.equals("SearchDateField") || fieldType.equals("SearchDateCustomField")) {
 
                 NsObject searchArgumentType = createCriteria(searchFieldClass, searchFieldName);
-                if (searchValue != null && searchValue.size() != 0) {
-                    Calendar calValue = Calendar.getInstance();
 
-                    String dateFormat = "yyyy-MM-dd";
-                    String timeFormat = "HH:mm:ss";
+                NsSearchFieldOperatorTypeDef.QualifiedName operatorQName =
+                        new NsSearchFieldOperatorTypeDef.QualifiedName(searchOperator);
 
-                    String format = dateFormat + " " + timeFormat;
+                if (operatorQName.getDataType().equals("PredefinedDate")) {
 
-                    if (searchValue.get(0).length() == dateFormat.length()) {
-                        format = dateFormat;
-                    }
+                    searchArgumentType.set("predefinedSearchValue",
+                            metaData.getSearchFieldOperatorByName(searchOperator));
 
-                    if (searchValue.get(0).length() == timeFormat.length()) {
-                        searchValue.set(0, new SimpleDateFormat(dateFormat)
-                                .format(calValue.getTime()) + " " + searchValue.get(0));
-                    }
+                } else {
+                    if (searchValue != null && searchValue.size() != 0) {
+                        Calendar calValue = Calendar.getInstance();
 
-                    DateFormat df = new SimpleDateFormat(format);
+                        String dateFormat = "yyyy-MM-dd";
+                        String timeFormat = "HH:mm:ss";
 
-                    try {
-                        calValue.setTime(df.parse(searchValue.get(0)));
-                    } catch (ParseException e) {
-                        e.printStackTrace();
-                    }
+                        String format = dateFormat + " " + timeFormat;
 
-                    XMLGregorianCalendar xts = DatatypeFactory.newInstance().newXMLGregorianCalendar();
-                    xts.setYear(calValue.get(Calendar.YEAR));
-                    xts.setMonth(calValue.get(Calendar.MONTH) + 1);
-                    xts.setDay(calValue.get(Calendar.DAY_OF_MONTH));
-                    xts.setHour(calValue.get(Calendar.HOUR_OF_DAY));
-                    xts.setMinute(calValue.get(Calendar.MINUTE));
-                    xts.setSecond(calValue.get(Calendar.SECOND));
-                    xts.setMillisecond(calValue.get(Calendar.MILLISECOND));
-                    xts.setTimezone(calValue.get(Calendar.ZONE_OFFSET) / 60000);
+                        if (searchValue.get(0).length() == dateFormat.length()) {
+                            format = dateFormat;
+                        }
 
-                    searchArgumentType.set("searchValue", xts);
+                        if (searchValue.get(0).length() == timeFormat.length()) {
+                            searchValue.set(0, new SimpleDateFormat(dateFormat)
+                                    .format(calValue.getTime()) + " " + searchValue.get(0));
+                        }
 
-                    if (searchValue.size() > 1) {
+                        DateFormat df = new SimpleDateFormat(format);
+
                         try {
-                            calValue.setTime(df.parse(searchValue.get(1)));
+                            calValue.setTime(df.parse(searchValue.get(0)));
                         } catch (ParseException e) {
                             e.printStackTrace();
                         }
 
-                        XMLGregorianCalendar xts2 = DatatypeFactory.newInstance().newXMLGregorianCalendar();
-                        xts2.setYear(calValue.get(Calendar.YEAR));
-                        xts2.setMonth(calValue.get(Calendar.MONTH) + 1);
-                        xts2.setDay(calValue.get(Calendar.DAY_OF_MONTH));
-                        xts2.setHour(calValue.get(Calendar.HOUR_OF_DAY));
-                        xts2.setMinute(calValue.get(Calendar.MINUTE));
-                        xts2.setSecond(calValue.get(Calendar.SECOND));
-                        xts2.setMillisecond(calValue.get(Calendar.MILLISECOND));
-                        xts2.setTimezone(calValue.get(Calendar.ZONE_OFFSET) / 60000);
+                        XMLGregorianCalendar xts = DatatypeFactory.newInstance().newXMLGregorianCalendar();
+                        xts.setYear(calValue.get(Calendar.YEAR));
+                        xts.setMonth(calValue.get(Calendar.MONTH) + 1);
+                        xts.setDay(calValue.get(Calendar.DAY_OF_MONTH));
+                        xts.setHour(calValue.get(Calendar.HOUR_OF_DAY));
+                        xts.setMinute(calValue.get(Calendar.MINUTE));
+                        xts.setSecond(calValue.get(Calendar.SECOND));
+                        xts.setMillisecond(calValue.get(Calendar.MILLISECOND));
+                        xts.setTimezone(calValue.get(Calendar.ZONE_OFFSET) / 60000);
 
-                        searchArgumentType.set("searchValue2", xts2);
+                        searchArgumentType.set("searchValue", xts);
+
+                        if (searchValue.size() > 1) {
+                            try {
+                                calValue.setTime(df.parse(searchValue.get(1)));
+                            } catch (ParseException e) {
+                                e.printStackTrace();
+                            }
+
+                            XMLGregorianCalendar xts2 = DatatypeFactory.newInstance().newXMLGregorianCalendar();
+                            xts2.setYear(calValue.get(Calendar.YEAR));
+                            xts2.setMonth(calValue.get(Calendar.MONTH) + 1);
+                            xts2.setDay(calValue.get(Calendar.DAY_OF_MONTH));
+                            xts2.setHour(calValue.get(Calendar.HOUR_OF_DAY));
+                            xts2.setMinute(calValue.get(Calendar.MINUTE));
+                            xts2.setSecond(calValue.get(Calendar.SECOND));
+                            xts2.setMillisecond(calValue.get(Calendar.MILLISECOND));
+                            xts2.setTimezone(calValue.get(Calendar.ZONE_OFFSET) / 60000);
+
+                            searchArgumentType.set("searchValue2", xts2);
+                        }
                     }
-                }
 
-                searchArgumentType.set("operator", metaData.getSearchFieldOperator(fieldType, searchOperator));
+                    searchArgumentType.set("operator",
+                            metaData.getSearchFieldOperatorByName(searchOperator));
+                }
 
                 searchField = searchArgumentType;
 
@@ -270,7 +280,7 @@ public class NsSearch<RecT, SearchRecT> {
                         searchArgumentType.set("searchValue2", Double.valueOf(Double.parseDouble(searchValue.get(1))));
                     }
                 }
-                searchArgumentType.set("operator", metaData.getSearchFieldOperator(fieldType, searchOperator));
+                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(searchOperator));
                 searchField = searchArgumentType;
 
             } else if (fieldType.equals("SearchMultiSelectField") || fieldType.equals("SearchMultiSelectCustomField")) {
@@ -279,7 +289,7 @@ public class NsSearch<RecT, SearchRecT> {
 
                 List<Object> values = (List<Object>) searchArgumentType.get("searchValue");
                 for (int i = 0; i < searchValue.size(); i++) {
-                    NsObject item = createListOrRecordRef();
+                    NsObject item = NsObject.wrap(metaData.createListOrRecordRef());
                     item.set("name", searchValue.get(i));
                     item.set("internalId", searchValue.get(i));
                     item.set("externalId", null);
@@ -287,7 +297,7 @@ public class NsSearch<RecT, SearchRecT> {
                     values.add(item);
                 }
 
-                searchArgumentType.set("operator", metaData.getSearchFieldOperator(fieldType, searchOperator));
+                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(searchOperator));
                 searchField = searchArgumentType;
 
             } else if (fieldType.equals("SearchEnumMultiSelectField") || fieldType.equals("SearchEnumMultiSelectCustomField")) {
@@ -295,7 +305,7 @@ public class NsSearch<RecT, SearchRecT> {
                 NsObject searchArgumentType = createCriteria(searchFieldClass, searchFieldName);
                 List<String> searchValues = (List<String>) searchArgumentType.get("searchValue");
                 searchValues.addAll(searchValue);
-                searchArgumentType.set("operator", metaData.getSearchFieldOperator(fieldType, searchOperator));
+                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(searchOperator));
                 searchField = searchArgumentType;
 
             } else {
@@ -308,29 +318,18 @@ public class NsSearch<RecT, SearchRecT> {
         }
     }
 
-    private NsObject createListOrRecordRef() throws NetSuiteException {
-        try {
-            NsObject obj = NsObject.wrap(
-                    metaData.getListOrRecordRefClass().newInstance());
-            return obj;
-        } catch (IllegalAccessException | IllegalArgumentException | InstantiationException e) {
-            throw new NetSuiteException(e.getMessage(), e);
-        }
-    }
-
     public SearchRecT build() throws NetSuiteException {
         initSearch();
 
         Collection<String> transactionTypes = metaData.getTransactionTypes();
 
-        if (transactionTypes.contains(searchInfo.getEntityClass().getSimpleName())) {
+        if (transactionTypes.contains(searchInfo.getRecordClass().getSimpleName())) {
             Class<?> fieldClass = metaData.getSearchFieldClass("SearchEnumMultiSelectField");
             NsObject searchTypeField = createCriteria(fieldClass, null);
             List<String> searchValues = (List<String>) searchTypeField.get("searchValue");
-            searchValues.add(NetSuiteMetaData.toInitialLower(searchInfo.getEntityClass().getSimpleName()));
-            searchTypeField.set("operator", metaData.getSearchFieldOperator(
-                    fieldClass.getSimpleName(), "List.anyOf"));
-            search.set("type", searchTypeField.getTarget());
+            searchValues.add(NetSuiteMetaData.toInitialLower(searchInfo.getRecordClass().getSimpleName()));
+            searchTypeField.set("operator", metaData.getSearchFieldOperatorByName("List.anyOf"));
+            searchBasic.set("type", searchTypeField.getTarget());
         }
 
         if (!customCriteriaList.isEmpty()) {

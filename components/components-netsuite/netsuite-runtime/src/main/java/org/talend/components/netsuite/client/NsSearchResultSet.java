@@ -4,13 +4,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import org.talend.components.netsuite.client.metadata.NsSearchDef;
+
 /**
  *
  */
 public class NsSearchResultSet<RecT> extends ResultSet<RecT> {
 
     private NetSuiteConnection conn;
-    private NetSuiteMetaData.SearchInfo searchInfo;
+    private NsSearchDef searchInfo;
     private String searchId;
     private NsSearchResult result;
     private List<RecT> recordList;
@@ -18,7 +20,7 @@ public class NsSearchResultSet<RecT> extends ResultSet<RecT> {
     private RecT current;
 
     public NsSearchResultSet(NetSuiteConnection conn,
-            NetSuiteMetaData.SearchInfo searchInfo, NsSearchResult result) {
+            NsSearchDef searchInfo, NsSearchResult result) {
 
         this.conn = conn;
         this.searchInfo = searchInfo;
@@ -81,7 +83,7 @@ public class NsSearchResultSet<RecT> extends ResultSet<RecT> {
                 Iterator<RecT> recordIterator = recordList.iterator();
                 while (recordIterator.hasNext()) {
                     RecT record = recordIterator.next();
-                    if (!record.getClass().equals(searchInfo.getEntityClass())) {
+                    if (!record.getClass().equals(searchInfo.getRecordClass())) {
                         recordIterator.remove();
                     }
                 }

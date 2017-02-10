@@ -6,6 +6,8 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
+import org.talend.components.netsuite.client.metadata.NsTypeDef;
+import org.talend.components.netsuite.client.metadata.NsFieldDef;
 import org.talend.components.netsuite.client.NsObject;
 import org.talend.daikon.avro.converter.AvroConverter;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
@@ -51,11 +53,11 @@ public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<Ns
     public IndexedRecord convertToAvro(NsObject data) {
         if (names == null) {
             Schema schema = getSchema();
-            NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity(getSchema().getName());
+            NsTypeDef entityInfo = metaData.getTypeDef(getSchema().getName());
             fieldConverters = new HashMap<>(schema.getFields().size());
             for (Schema.Field field : schema.getFields()) {
                 String fieldName = field.name();
-                NetSuiteMetaData.FieldInfo fieldInfo = entityInfo.getField(fieldName);
+                NsFieldDef fieldInfo = entityInfo.getField(fieldName);
                 fieldConverters.put(fieldName, NetSuiteAvroRegistry.getInstance()
                         .getConverter(field, fieldInfo.getValueType()));
             }

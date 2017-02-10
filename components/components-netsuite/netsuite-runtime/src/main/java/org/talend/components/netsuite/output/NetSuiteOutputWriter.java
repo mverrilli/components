@@ -12,6 +12,7 @@ import org.talend.components.api.component.runtime.WriterWithFeedback;
 import org.talend.components.netsuite.client.NetSuiteConnection;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
+import org.talend.components.netsuite.client.metadata.NsTypeDef;
 
 /**
  *
@@ -92,7 +93,7 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
     protected <T> T createObject(IndexedRecord record) throws IOException {
         Schema schema = record.getSchema();
         String typeName = schema.getName();
-        NetSuiteMetaData.EntityInfo entityInfo = metaData.getEntity(typeName);
+        NsTypeDef entityInfo = metaData.getTypeDef(typeName);
         if (entityInfo == null) {
             throw new IOException("No metadata for type: " + typeName);
         }
