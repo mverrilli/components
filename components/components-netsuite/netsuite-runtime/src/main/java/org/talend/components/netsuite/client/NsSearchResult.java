@@ -6,7 +6,7 @@ import java.util.List;
  *
  */
 public class NsSearchResult<RecordT> {
-    protected boolean success;
+    protected NsStatus status;
     protected Integer totalRecords;
     protected Integer pageSize;
     protected Integer totalPages;
@@ -14,12 +14,16 @@ public class NsSearchResult<RecordT> {
     protected String searchId;
     protected List<RecordT> recordList;
 
-    public boolean isSuccess() {
-        return success;
+    public NsStatus getStatus() {
+        return status;
     }
 
-    public void setSuccess(boolean success) {
-        this.success = success;
+    public void setStatus(NsStatus status) {
+        this.status = status;
+    }
+
+    public boolean isSuccess() {
+        return status.isSuccess();
     }
 
     public Integer getTotalRecords() {

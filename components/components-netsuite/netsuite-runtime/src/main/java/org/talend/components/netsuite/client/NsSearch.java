@@ -173,7 +173,7 @@ public class NsSearch<RecT, SearchRecT> {
                 if (searchValue != null && searchValue.size() != 0) {
                     searchArgumentType.set("searchValue", searchValue.get(0));
                 }
-                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(searchOperator));
+                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(fieldType, searchOperator));
                 searchField = searchArgumentType;
 
             } else if (fieldType.equals("SearchLongField") || fieldType.equals("SearchLongCustomField")) {
@@ -185,7 +185,7 @@ public class NsSearch<RecT, SearchRecT> {
                         searchArgumentType.set("searchValue2", Long.valueOf(Long.parseLong(searchValue.get(1))));
                     }
                 }
-                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(searchOperator));
+                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(fieldType, searchOperator));
                 searchField = searchArgumentType;
 
             } else if (fieldType.equals("SearchDateField") || fieldType.equals("SearchDateCustomField")) {
@@ -198,7 +198,7 @@ public class NsSearch<RecT, SearchRecT> {
                 if (operatorQName.getDataType().equals("PredefinedDate")) {
 
                     searchArgumentType.set("predefinedSearchValue",
-                            metaData.getSearchFieldOperatorByName(searchOperator));
+                            metaData.getSearchFieldOperatorByName(fieldType, searchOperator));
 
                 } else {
                     if (searchValue != null && searchValue.size() != 0) {
@@ -260,7 +260,7 @@ public class NsSearch<RecT, SearchRecT> {
                     }
 
                     searchArgumentType.set("operator",
-                            metaData.getSearchFieldOperatorByName(searchOperator));
+                            metaData.getSearchFieldOperatorByName(fieldType, searchOperator));
                 }
 
                 searchField = searchArgumentType;
@@ -280,7 +280,7 @@ public class NsSearch<RecT, SearchRecT> {
                         searchArgumentType.set("searchValue2", Double.valueOf(Double.parseDouble(searchValue.get(1))));
                     }
                 }
-                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(searchOperator));
+                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(fieldType, searchOperator));
                 searchField = searchArgumentType;
 
             } else if (fieldType.equals("SearchMultiSelectField") || fieldType.equals("SearchMultiSelectCustomField")) {
@@ -297,7 +297,7 @@ public class NsSearch<RecT, SearchRecT> {
                     values.add(item);
                 }
 
-                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(searchOperator));
+                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(fieldType, searchOperator));
                 searchField = searchArgumentType;
 
             } else if (fieldType.equals("SearchEnumMultiSelectField") || fieldType.equals("SearchEnumMultiSelectCustomField")) {
@@ -305,7 +305,7 @@ public class NsSearch<RecT, SearchRecT> {
                 NsObject searchArgumentType = createCriteria(searchFieldClass, searchFieldName);
                 List<String> searchValues = (List<String>) searchArgumentType.get("searchValue");
                 searchValues.addAll(searchValue);
-                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(searchOperator));
+                searchArgumentType.set("operator", metaData.getSearchFieldOperatorByName(fieldType, searchOperator));
                 searchField = searchArgumentType;
 
             } else {
@@ -328,7 +328,8 @@ public class NsSearch<RecT, SearchRecT> {
             NsObject searchTypeField = createCriteria(fieldClass, null);
             List<String> searchValues = (List<String>) searchTypeField.get("searchValue");
             searchValues.add(NetSuiteMetaData.toInitialLower(searchInfo.getRecordClass().getSimpleName()));
-            searchTypeField.set("operator", metaData.getSearchFieldOperatorByName("List.anyOf"));
+            searchTypeField.set("operator", metaData.getSearchFieldOperatorByName(
+                    "SearchEnumMultiSelectField", "List.anyOf"));
             searchBasic.set("type", searchTypeField.getTarget());
         }
 

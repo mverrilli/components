@@ -1,5 +1,6 @@
 package org.talend.components.netsuite.runtime;
 
+import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.NetSuiteEndpoint;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
@@ -12,7 +13,12 @@ public class RuntimeServiceImpl implements RuntimeService {
 
     @Override
     public SchemaService getSchemaService(NetSuiteConnectionProperties properties) {
-        return new NetSuiteEndpoint(properties);
+        try {
+            NetSuiteEndpoint endpoint = new NetSuiteEndpoint(properties);
+            return new SchemaServiceImpl(endpoint.connect());
+        } catch (NetSuiteException e) {
+            throw new ComponentException(e);
+        }
     }
 
     @Override

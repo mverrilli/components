@@ -26,12 +26,24 @@ public abstract class NetSuiteMetaData {
     protected Map<String, NsSearchDef> searchMap = new HashMap<>();
     protected Map<String, Class<?>> searchFieldMap = new HashMap<>();
     protected Map<String, NsSearchFieldOperatorTypeDef> searchFieldOperatorTypeMap = new HashMap<>();
+    protected Map<String, String> searchFieldOperatorMap = new HashMap<>();
+
+    public NetSuiteMetaData() {
+    }
+
+    public NetSuiteMetaData(NetSuiteMetaData master) {
+        typeMap.putAll(master.typeMap);
+        searchMap.putAll(master.searchMap);
+        searchFieldMap.putAll(master.searchFieldMap);
+        searchFieldOperatorTypeMap.putAll(master.searchFieldOperatorTypeMap);
+        searchFieldOperatorMap.putAll(master.searchFieldOperatorMap);
+    }
 
     protected void registerType(Class<?> typeClass, String typeName) {
         String typeNameToRegister = typeName != null ? typeName : typeClass.getSimpleName();
         if (typeMap.containsKey(typeNameToRegister)) {
             NsTypeDef entityInfo = typeMap.get(typeNameToRegister);
-            if (entityInfo.getEntityClass() == typeClass) {
+            if (entityInfo.getTypeClass() == typeClass) {
                 return;
             } else {
                 throw new IllegalArgumentException("Type already registered: " +
@@ -93,6 +105,11 @@ public abstract class NetSuiteMetaData {
         for (NsSearchFieldOperatorTypeDef info : searchFieldOperatorTable) {
             searchFieldOperatorTypeMap.put(info.getTypeName(), info);
         }
+
+        searchFieldOperatorMap.put("SearchMultiSelectField", "SearchMultiSelectFieldOperator");
+        searchFieldOperatorMap.put("SearchMultiSelectCustomField", "SearchMultiSelectFieldOperator");
+        searchFieldOperatorMap.put("SearchEnumMultiSelectField", "SearchEnumMultiSelectFieldOperator");
+        searchFieldOperatorMap.put("SearchEnumMultiSelectCustomField", "SearchEnumMultiSelectFieldOperator");
     }
 
     public abstract Collection<String> getTransactionTypes();
@@ -119,9 +136,14 @@ public abstract class NetSuiteMetaData {
         return searchFieldMap.get(searchFieldType);
     }
 
-    public Object getSearchFieldOperatorByName(String searchFieldOperatorName) {
+    public Object getSearchFieldOperatorByName(String searchFieldType, String searchFieldOperatorName) {
         NsSearchFieldOperatorTypeDef.QualifiedName operatorQName =
                 new NsSearchFieldOperatorTypeDef.QualifiedName(searchFieldOperatorName);
+        String searchFieldOperatorType = searchFieldOperatorMap.get(searchFieldType);
+        if (searchFieldOperatorType != null) {
+            NsSearchFieldOperatorTypeDef def = searchFieldOperatorTypeMap.get(searchFieldOperatorType);
+            return def.getOperator(searchFieldOperatorName);
+        }
         for (NsSearchFieldOperatorTypeDef def : searchFieldOperatorTypeMap.values()) {
             if (def.hasOperatorName(operatorQName)) {
                 return def.getOperator(searchFieldOperatorName);
@@ -141,6 +163,14 @@ public abstract class NetSuiteMetaData {
     public abstract <T> T createListOrRecordRef() throws NetSuiteException;
 
     public abstract <T> T createRecordRef() throws NetSuiteException;
+
+    public <T> T createType(String typeName) throws NetSuiteException {
+        NsTypeDef typeDef = getTypeDef(typeName);
+        if (typeDef == null) {
+            throw new NetSuiteException("Unknown type: " + typeName);
+        }
+        return (T) createInstance(typeDef.getTypeClass());
+    }
 
     protected <T> T createInstance(Class<T> clazz) throws NetSuiteException {
         try {

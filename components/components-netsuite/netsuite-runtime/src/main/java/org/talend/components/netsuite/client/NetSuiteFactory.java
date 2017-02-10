@@ -42,14 +42,6 @@ public abstract class NetSuiteFactory {
         return connection;
     }
 
-    public static NetSuiteMetaData getMetaData(String apiVersion) throws NetSuiteException {
-        if (apiVersion.equals("2016.2")) {
-            return org.talend.components.netsuite.client.impl.v2016_2.NetSuiteMetaDataImpl.getInstance();
-        } else {
-            throw new IllegalArgumentException("Invalid api version: " + apiVersion);
-        }
-    }
-
     public static PropertyAccessor<Object> getPropertyAccessor(Class<?> clazz) {
         if (PropertyAccess.class.isAssignableFrom(clazz)) {
             return OptimizedPropertyAccessor.INSTANCE;

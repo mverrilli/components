@@ -7,15 +7,10 @@ import org.talend.components.netsuite.schema.NsField;
  *
  */
 public class NsFieldDef implements NsField {
-
     private String name;
-
     private Class valueType;
-
     private boolean key;
-
     private boolean nullable;
-
     private PropertyInfo propertyInfo;
 
     public NsFieldDef(String name, Class valueType, boolean key, boolean nullable, PropertyInfo propertyInfo) {

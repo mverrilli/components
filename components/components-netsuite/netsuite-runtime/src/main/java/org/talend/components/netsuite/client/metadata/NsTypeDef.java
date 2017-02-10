@@ -12,20 +12,15 @@ import org.talend.components.netsuite.schema.NsSchema;
  *
  */
 public class NsTypeDef implements NsSchema<NsFieldDef> {
-
-    private String name;
-
-    private Class<?> entityClass;
-
+    private String typeName;
+    private Class<?> typeClass;
     private List<NsFieldDef> fields;
-
     private Map<String, NsFieldDef> fieldMap;
-
     private TypeInfo typeInfo;
 
-    public NsTypeDef(String name, Class<?> entityClass, List<NsFieldDef> fields, TypeInfo typeInfo) {
-        this.name = name;
-        this.entityClass = entityClass;
+    public NsTypeDef(String typeName, Class<?> typeClass, List<NsFieldDef> fields, TypeInfo typeInfo) {
+        this.typeName = typeName;
+        this.typeClass = typeClass;
         this.fields = fields;
 
         fieldMap = new HashMap<>(fields.size());
@@ -36,12 +31,12 @@ public class NsTypeDef implements NsSchema<NsFieldDef> {
         this.typeInfo = typeInfo;
     }
 
-    public String getName() {
-        return name;
+    public String getTypeName() {
+        return typeName;
     }
 
-    public Class<?> getEntityClass() {
-        return entityClass;
+    public Class<?> getTypeClass() {
+        return typeClass;
     }
 
     public NsFieldDef getField(String name) {

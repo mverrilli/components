@@ -20,7 +20,7 @@ public class NsObject<T> {
         this.target = target;
     }
 
-    public Object getTarget() {
+    public T getTarget() {
         return target;
     }
 

@@ -83,13 +83,26 @@ public class NetSuiteConnectionImpl extends NetSuiteConnection<NetSuitePortType>
     public static final String NS_URI_PLATFORM_MESSAGES =
             "urn:messages_2016_2.platform.webservices.netsuite.com";
 
-    private final static NetSuiteMetaDataImpl metaData = NetSuiteMetaDataImpl.getInstance();
+    private NetSuiteMetaDataImpl metaData;
 
     public NetSuiteConnectionImpl() {
     }
 
     public NetSuiteMetaData getMetaData() throws NetSuiteException {
-        return metaData;
+        lock.lock();
+        try {
+            if (metaData == null) {
+                metaData = execute(new PortOperation<NetSuiteMetaDataImpl, NetSuitePortType>() {
+                    @Override public NetSuiteMetaDataImpl execute(NetSuitePortType port) throws Exception {
+                        NetSuiteMetaDataImpl metaData = new NetSuiteMetaDataImpl(NetSuiteMetaDataImpl.getInstance());
+                        return metaData;
+                    }
+                });
+            }
+            return metaData;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
@@ -291,19 +304,19 @@ public class NetSuiteConnectionImpl extends NetSuiteConnection<NetSuitePortType>
 
     protected <RecT> NsSearchResult<RecT> toNsSearchResult(SearchResult result) {
         NsSearchResult nsResult = new NsSearchResult();
-        if (result.getStatus().getIsSuccess()) {
-            nsResult.setSuccess(true);
-        }
+        nsResult.setStatus(toNsStatus(result.getStatus()));
         nsResult.setSearchId(result.getSearchId());
         nsResult.setTotalPages(result.getTotalPages());
         nsResult.setTotalRecords(result.getTotalRecords());
         nsResult.setPageIndex(result.getPageIndex());
         nsResult.setPageSize(result.getPageSize());
-        List<Record> nsRecordList = new ArrayList<>(result.getRecordList().getRecord().size());
-        for (Record record : result.getRecordList().getRecord()) {
-            nsRecordList.add(record);
+        if (result.getRecordList() != null && result.getRecordList().getRecord() != null) {
+            List<Record> nsRecordList = new ArrayList<>(result.getRecordList().getRecord().size());
+            for (Record record : result.getRecordList().getRecord()) {
+                nsRecordList.add(record);
+            }
+            nsResult.setRecordList(nsRecordList);
         }
-        nsResult.setRecordList(nsRecordList);
         return nsResult;
     }
 
@@ -361,42 +374,6 @@ public class NetSuiteConnectionImpl extends NetSuiteConnection<NetSuitePortType>
         nsDetail.setMessage(detail.getMessage());
         return nsDetail;
     }
-
-    //    public GetSelectValueResult getSelectValue(final GetSelectValueRequest request) throws NetSuiteException {
-//        return execute(new PortOp<GetSelectValueResult>() {
-//            @Override public GetSelectValueResult execute(NetSuitePortType port) throws Exception {
-//                return port.getSelectValue(request).getGetSelectValueResult();
-//            }
-//        });
-//    }
-//
-//    public GetCustomizationIdResult getCustomizationId(final GetCustomizationIdRequest request) throws NetSuiteException {
-//        return execute(new PortOp<GetCustomizationIdResult>() {
-//            @Override public GetCustomizationIdResult execute(NetSuitePortType port) throws Exception {
-//                return port.getCustomizationId(request).getGetCustomizationIdResult();
-//            }
-//        });
-//    }
-//
-//    public GetSavedSearchResult getSavedSearch(final GetSavedSearchRecord record) throws NetSuiteException {
-//        return execute(new PortOp<GetSavedSearchResult>() {
-//            @Override public GetSavedSearchResult execute(NetSuitePortType port) throws Exception {
-//                GetSavedSearchRequest request = new GetSavedSearchRequest();
-//                request.setRecord(record);
-//                return port.getSavedSearch(request).getGetSavedSearchResult();
-//            }
-//        });
-//    }
-//
-//    public GetItemAvailabilityResult getItemAvailability(final ItemAvailabilityFilter filter) throws NetSuiteException {
-//        return execute(new PortOp<GetItemAvailabilityResult>() {
-//            @Override public GetItemAvailabilityResult execute(NetSuitePortType port) throws Exception {
-//                GetItemAvailabilityRequest request = new GetItemAvailabilityRequest();
-//                request.setItemAvailabilityFilter(filter);
-//                return port.getItemAvailability(request).getGetItemAvailabilityResult();
-//            }
-//        });
-//    }
 
     protected void setPreferences(NetSuitePortType port,
             NsPreferences nsPreferences, NsSearchPreferences nsSearchPreferences) throws NetSuiteException {

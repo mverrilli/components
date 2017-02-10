@@ -16,9 +16,15 @@ import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
 import com.netsuite.webservices.v2016_2.platform.core.CustomizationRef;
 import com.netsuite.webservices.v2016_2.platform.core.CustomizationType;
 import com.netsuite.webservices.v2016_2.platform.core.GetCustomizationIdResult;
+import com.netsuite.webservices.v2016_2.platform.core.GetSavedSearchRecord;
+import com.netsuite.webservices.v2016_2.platform.core.GetSavedSearchResult;
+import com.netsuite.webservices.v2016_2.platform.core.RecordRef;
 import com.netsuite.webservices.v2016_2.platform.core.types.GetCustomizationType;
+import com.netsuite.webservices.v2016_2.platform.core.types.RecordType;
+import com.netsuite.webservices.v2016_2.platform.core.types.SearchRecordType;
 import com.netsuite.webservices.v2016_2.platform.messages.GetCustomizationIdRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.GetListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetSavedSearchRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.ReadResponseList;
 
 /**
@@ -81,4 +87,39 @@ public class NetSuiteGetCustomizationsITest {
         }
     }
 
+    @Test
+    public void testGetSavedSearch() throws Exception {
+        NetSuiteConnection<NetSuitePortType> connection = webServiceTestFixture.getConnection();
+
+        connection.login();
+
+        final GetSavedSearchRecord savedSearchRecord = new GetSavedSearchRecord();
+        savedSearchRecord.setSearchType(SearchRecordType.OPPORTUNITY);
+
+        GetSavedSearchResult result = connection.execute(
+                new NetSuiteConnection.PortOperation<GetSavedSearchResult, NetSuitePortType>() {
+                    @Override public GetSavedSearchResult execute(NetSuitePortType port) throws Exception {
+                        final GetSavedSearchRequest request = new GetSavedSearchRequest();
+                        request.setRecord(savedSearchRecord);
+                        return port.getSavedSearch(request).getGetSavedSearchResult();
+                    }
+                });
+
+        for (final RecordRef ref : result.getRecordRefList().getRecordRef()) {
+            if (ref instanceof CustomizationRef) {
+                CustomizationRef customizationRef = (CustomizationRef) ref;
+                customizationRef.setType(RecordType.CUSTOM_RECORD);
+                System.out.println(customizationRef.getScriptId() + ", " + ref.getInternalId() + ", " + ref.getExternalId());
+                ReadResponseList result2 = connection.execute(new NetSuiteConnection.PortOperation<ReadResponseList, NetSuitePortType>() {
+
+                    @Override public ReadResponseList execute(NetSuitePortType port) throws Exception {
+                                final GetListRequest request = new GetListRequest();
+                                request.getBaseRef().add(ref);
+                                return port.getList(request).getReadResponseList();
+                            }
+                        });
+                System.out.println(result2);
+            }
+        }
+    }
 }

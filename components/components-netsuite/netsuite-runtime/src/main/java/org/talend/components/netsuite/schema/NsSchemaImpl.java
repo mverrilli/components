@@ -23,8 +23,7 @@ public class NsSchemaImpl<F extends NsField> implements NsSchema<F> {
         }
     }
 
-    @Override
-    public String getName() {
+    public String getTypeName() {
         return name;
     }
 

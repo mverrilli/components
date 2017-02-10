@@ -364,10 +364,10 @@ import com.netsuite.webservices.v2016_2.platform.core.types.SearchStringFieldOpe
  */
 public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
 
-    private static final NetSuiteMetaDataImpl instance = new NetSuiteMetaDataImpl();
+    private static final NetSuiteMetaDataImpl META_DATA = new NetSuiteMetaDataImpl();
 
     public static NetSuiteMetaDataImpl getInstance() {
-        return instance;
+        return META_DATA;
     }
 
     private static final String[] transactionTypeList = {
@@ -473,6 +473,10 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
             "TransactionBodyCustomField",
             "TransactionColumnCustomField"
     };
+
+    public NetSuiteMetaDataImpl(NetSuiteMetaDataImpl master) {
+        super(master);
+    }
 
     public NetSuiteMetaDataImpl() {
         NsSearchDef[] searchTable = {
@@ -727,9 +731,5 @@ public class NetSuiteMetaDataImpl extends NetSuiteMetaData {
             return true;
         }
         return false;
-    }
-
-    public static void main(String... args) throws Exception {
-        new NetSuiteMetaDataImpl();
     }
 }

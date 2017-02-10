@@ -21,6 +21,7 @@ import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteAvroRegistry;
 import org.talend.components.netsuite.NetSuiteEndpoint;
 import org.talend.components.netsuite.NetSuiteSource;
+import org.talend.components.netsuite.client.NetSuiteConnection;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.components.netsuite.client.metadata.NsTypeDef;
@@ -31,6 +32,10 @@ import org.talend.components.netsuite.model.Mapper;
 import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.model.TypeInfo;
 import org.talend.components.netsuite.model.TypeManager;
+import org.talend.components.netsuite.runtime.RuntimeService;
+import org.talend.components.netsuite.runtime.RuntimeServiceImpl;
+import org.talend.components.netsuite.runtime.SchemaService;
+import org.talend.components.netsuite.runtime.SchemaServiceImpl;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.Account;
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
@@ -100,8 +105,11 @@ public class NetSuiteSearchInputReaderTest {
         properties.connection.applicationId.setValue("00000000-0000-0000-0000-000000000000");
         properties.module.moduleName.setValue("Account");
 
-        NetSuiteEndpoint endpoint = new NetSuiteEndpoint(properties.getConnectionProperties());
-        Schema schema = endpoint.getSchema(properties.module.moduleName.getValue());
+        RuntimeService runtimeService = new RuntimeServiceImpl();
+        SchemaService schemaService = runtimeService.getSchemaService(properties.getConnectionProperties());
+
+        Schema schema = schemaService.getSchema(properties.module.moduleName.getValue());
+
         properties.module.main.schema.setValue(schema);
 
         NetSuiteSource source = new NetSuiteSource();
@@ -124,7 +132,7 @@ public class NetSuiteSearchInputReaderTest {
             }
         });
 
-        NetSuiteMetaData metaData = NetSuiteFactory.getMetaData("2016.2");
+        NetSuiteMetaData metaData = source.getConnection().getMetaData();
         NsTypeDef entityInfo = metaData.getTypeDef(Account.class);
 
         NetSuiteSearchInputReader reader = (NetSuiteSearchInputReader) source.createReader(container);

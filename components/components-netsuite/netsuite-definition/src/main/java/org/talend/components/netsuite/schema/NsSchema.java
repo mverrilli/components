@@ -7,7 +7,7 @@ import java.util.List;
  */
 public interface NsSchema<F extends NsField> {
 
-    String getName();
+    String getTypeName();
 
     List<F> getFields();
 

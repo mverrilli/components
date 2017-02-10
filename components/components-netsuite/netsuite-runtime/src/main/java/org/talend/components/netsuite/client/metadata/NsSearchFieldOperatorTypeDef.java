@@ -8,18 +8,13 @@ import java.util.Objects;
 import org.talend.components.netsuite.model.Mapper;
 
 /**
- * Created by ihor.istomin on 2/10/2017.
+ *
  */
 public class NsSearchFieldOperatorTypeDef<T> {
-
     private String dataType;
-
     private String typeName;
-
     private Class<T> operatorClass;
-
     private Mapper<T, String> mapper;
-
     private Mapper<String, T> reverseMapper;
 
     public NsSearchFieldOperatorTypeDef(String dataType, Class<T> operatorClass,
@@ -68,7 +63,8 @@ public class NsSearchFieldOperatorTypeDef<T> {
         QualifiedName opName = new QualifiedName(qualifiedName);
         if (operatorClass == SearchBooleanFieldOperator.class) {
             if (!opName.equals(SearchBooleanFieldOperator.QUALIFIED_NAME)) {
-                throw new IllegalArgumentException("Invalid operator type: " + "'" + qualifiedName + "' != '" + dataType + "'");
+                throw new IllegalArgumentException(
+                        "Invalid operator type: " + "'" + qualifiedName + "' != '" + dataType + "'");
             }
             return SearchBooleanFieldOperator.INSTANCE;
         } else {

@@ -13,6 +13,8 @@ import org.talend.components.api.properties.ComponentProperties;
 import org.talend.components.netsuite.client.NetSuiteConnection;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
+import org.talend.components.netsuite.runtime.SchemaService;
+import org.talend.components.netsuite.runtime.SchemaServiceImpl;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.properties.ValidationResult;
 
@@ -47,12 +49,22 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
 
     @Override
     public List<NamedThing> getSchemaNames(RuntimeContainer container) throws IOException {
-        return endpoint.getSchemaNames();
+        try {
+            SchemaService schemaService = new SchemaServiceImpl(endpoint.getConnection());
+            return schemaService.getSchemaNames();
+        } catch (NetSuiteException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
     public Schema getEndpointSchema(RuntimeContainer container, String schemaName) throws IOException {
-        return endpoint.getSchema(schemaName);
+        try {
+            SchemaService schemaService = new SchemaServiceImpl(endpoint.getConnection());
+            return schemaService.getSchema(schemaName);
+        } catch (NetSuiteException e) {
+            throw new IOException(e);
+        }
     }
 
     public NetSuiteConnectionProperties getConnectionProperties() {
@@ -65,6 +77,10 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
 
     public NetSuiteConnection connect(RuntimeContainer container) throws NetSuiteException {
         return endpoint.connect();
+    }
+
+    public NetSuiteConnection getConnection() throws NetSuiteException {
+        return endpoint.getConnection();
     }
 
     protected static ValidationResult exceptionToValidationResult(Exception ex) {

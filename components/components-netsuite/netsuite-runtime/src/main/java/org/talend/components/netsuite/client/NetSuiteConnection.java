@@ -26,7 +26,7 @@ public abstract class NetSuiteConnection<P> {
     protected NsSearchPreferences searchPreferences;
     protected NsPreferences preferences;
 
-    private ReentrantLock lock = new ReentrantLock();
+    protected ReentrantLock lock = new ReentrantLock();
 
     private int retryCount = 3;
     private int retriesBeforeLogin = 2;
@@ -143,42 +143,6 @@ public abstract class NetSuiteConnection<P> {
     public abstract <RefT> NsWriteResponse<RefT> delete(RefT ref) throws NetSuiteException;
 
     public abstract <RefT> NsWriteResponseList<RefT> deleteList(List<RefT> refList) throws NetSuiteException;
-
-    //    public GetSelectValueResult getSelectValue(final GetSelectValueRequest request) throws NetSuiteException {
-//        return execute(new PortOp<GetSelectValueResult>() {
-//            @Override public GetSelectValueResult execute(NetSuitePortType port) throws Exception {
-//                return port.getSelectValue(request).getGetSelectValueResult();
-//            }
-//        });
-//    }
-//
-//    public GetCustomizationIdResult getCustomizationId(final GetCustomizationIdRequest request) throws NetSuiteException {
-//        return execute(new PortOp<GetCustomizationIdResult>() {
-//            @Override public GetCustomizationIdResult execute(NetSuitePortType port) throws Exception {
-//                return port.getCustomizationId(request).getGetCustomizationIdResult();
-//            }
-//        });
-//    }
-//
-//    public GetSavedSearchResult getSavedSearch(final GetSavedSearchRecord record) throws NetSuiteException {
-//        return execute(new PortOp<GetSavedSearchResult>() {
-//            @Override public GetSavedSearchResult execute(NetSuitePortType port) throws Exception {
-//                GetSavedSearchRequest request = new GetSavedSearchRequest();
-//                request.setRecord(record);
-//                return port.getSavedSearch(request).getGetSavedSearchResult();
-//            }
-//        });
-//    }
-//
-//    public GetItemAvailabilityResult getItemAvailability(final ItemAvailabilityFilter filter) throws NetSuiteException {
-//        return execute(new PortOp<GetItemAvailabilityResult>() {
-//            @Override public GetItemAvailabilityResult execute(NetSuitePortType port) throws Exception {
-//                GetItemAvailabilityRequest request = new GetItemAvailabilityRequest();
-//                request.setItemAvailabilityFilter(filter);
-//                return port.getItemAvailability(request).getGetItemAvailabilityResult();
-//            }
-//        });
-//    }
 
     public <R> R execute(PortOperation<R, P> op) throws NetSuiteException {
         if (useRequestLevelCredentials) {

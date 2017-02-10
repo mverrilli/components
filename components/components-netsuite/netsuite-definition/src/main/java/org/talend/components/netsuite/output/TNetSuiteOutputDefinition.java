@@ -32,9 +32,11 @@ public class TNetSuiteOutputDefinition extends TNetSuiteComponentDefinition {
     public RuntimeInfo getRuntimeInfo(ExecutionEngine engine, ComponentProperties properties,
             ConnectorTopology connectorTopology) {
         assertEngineCompatibility(engine);
-        assertConnectorTopologyCompatibility(connectorTopology);
-        return RuntimeInfoFactory.getInstance()
-                .getRuntimeInfo(RuntimeInfoFactory.SINK_CLASS);
+        if (connectorTopology != null && connectorTopology != ConnectorTopology.NONE) {
+            assertConnectorTopologyCompatibility(connectorTopology);
+            return RuntimeInfoFactory.getInstance().getRuntimeInfo(RuntimeInfoFactory.SINK_CLASS);
+        }
+        return null;
     }
 
     @Override

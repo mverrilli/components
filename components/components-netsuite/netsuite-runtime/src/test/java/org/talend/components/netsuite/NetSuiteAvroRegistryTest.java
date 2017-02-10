@@ -14,6 +14,7 @@ import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.components.netsuite.client.metadata.NsTypeDef;
 import org.talend.components.netsuite.client.metadata.NsFieldDef;
 import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteMetaDataImpl;
+import org.talend.components.netsuite.runtime.SchemaServiceImpl;
 import org.talend.daikon.avro.SchemaConstants;
 import org.talend.daikon.avro.converter.AvroConverter;
 
@@ -39,7 +40,7 @@ public class NetSuiteAvroRegistryTest {
     public void testInferSchemaForEntity() throws Exception {
         NsTypeDef entityInfo = metaData.getTypeDef("Account");
 
-        Schema s = NetSuiteEndpoint.inferSchemaForEntity(entityInfo);
+        Schema s = SchemaServiceImpl.inferSchemaForEntity(entityInfo);
 
         System.out.println(s);
 
@@ -74,7 +75,7 @@ public class NetSuiteAvroRegistryTest {
     public void testEnumConverter() throws Exception {
         NsTypeDef entityInfo = metaData.getTypeDef("Account");
 
-        Schema s = NetSuiteEndpoint.inferSchemaForEntity(entityInfo);
+        Schema s = SchemaServiceImpl.inferSchemaForEntity(entityInfo);
 
         NsFieldDef fieldInfo = entityInfo.getField("acctType");
         Schema.Field f = s.getField(fieldInfo.getName());
@@ -101,7 +102,7 @@ public class NetSuiteAvroRegistryTest {
     public void testXMLGregorianCalendarConverter() throws Exception {
         NsTypeDef entityInfo = metaData.getTypeDef("Account");
 
-        Schema s = NetSuiteEndpoint.inferSchemaForEntity(entityInfo);
+        Schema s = SchemaServiceImpl.inferSchemaForEntity(entityInfo);
 
         DateTimeZone tz1 = DateTimeZone.forID("EET");
 

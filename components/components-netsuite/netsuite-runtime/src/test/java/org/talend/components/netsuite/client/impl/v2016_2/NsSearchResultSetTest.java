@@ -6,6 +6,7 @@ import java.util.List;
 import org.junit.Test;
 import org.talend.components.netsuite.client.NetSuiteConnection;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
+import org.talend.components.netsuite.client.NsStatus;
 import org.talend.components.netsuite.client.metadata.NsSearchDef;
 import org.talend.components.netsuite.client.NsSearchResult;
 import org.talend.components.netsuite.client.NsSearchResultSet;
@@ -94,9 +95,8 @@ public class NsSearchResultSetTest {
 
     protected NsSearchResult<Record> toNsSearchResult(SearchResult result) {
         NsSearchResult<Record> nsResult = new NsSearchResult<>();
-        if (result.getStatus().getIsSuccess()) {
-            nsResult.setSuccess(true);
-        }
+        NsStatus nsStatus = new NsStatus(true, null);
+        nsResult.setStatus(nsStatus);
         nsResult.setSearchId(result.getSearchId());
         nsResult.setTotalPages(result.getTotalPages());
         nsResult.setTotalRecords(result.getTotalRecords());
