@@ -10,8 +10,8 @@ import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.model.TypeInfo;
 import org.talend.components.netsuite.model.TypeManager;
 
-import com.netsuite.webservices.v2014_2.lists.accounting.types.AccountType;
-import com.netsuite.webservices.v2016_2.lists.accounting.Account;
+import com.netsuite.webservices.lists.accounting.types.AccountType;
+import com.netsuite.webservices.lists.accounting.Account;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

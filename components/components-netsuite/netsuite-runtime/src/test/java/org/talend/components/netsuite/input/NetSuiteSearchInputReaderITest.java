@@ -15,11 +15,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteSource;
-import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteWebServiceTestFixture;
+import org.talend.components.netsuite.client.NetSuiteWebServiceTestFixture;
 import org.talend.components.netsuite.runtime.SchemaService;
 import org.talend.components.netsuite.runtime.RuntimeServiceImpl;
 
-import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
+import com.netsuite.webservices.lists.accounting.types.AccountType;
 
 /**
  *

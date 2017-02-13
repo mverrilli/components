@@ -3,7 +3,7 @@ package org.talend.components.netsuite.client;
 /**
  *
  */
-public class NetSuiteException extends Exception {
+public class NetSuiteException extends RuntimeException {
 
     public NetSuiteException(String message) {
         super(message);

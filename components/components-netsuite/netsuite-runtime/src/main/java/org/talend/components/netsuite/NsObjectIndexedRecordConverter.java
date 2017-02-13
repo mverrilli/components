@@ -8,8 +8,8 @@ import java.util.Map;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
 import org.talend.components.api.exception.ComponentException;
+import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.components.netsuite.client.NsObject;
 import org.talend.components.netsuite.client.schema.NsTypeDef;
 import org.talend.components.netsuite.client.schema.NsFieldDef;
@@ -22,15 +22,15 @@ import org.talend.daikon.avro.converter.IndexedRecordConverter;
 public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<NsObject, IndexedRecord> {
 
     private Schema schema;
-    private NetSuiteMetaData metaData;
+    private NetSuiteClientService clientService;
 
     protected transient Map<String, AvroConverter> fieldConverters;
 
     private transient String names[];
     private transient AvroConverter[] fieldConverter;
 
-    public NsObjectIndexedRecordConverter(NetSuiteMetaData metaData) {
-        this.metaData = metaData;
+    public NsObjectIndexedRecordConverter(NetSuiteClientService clientService) {
+        this.clientService = clientService;
     }
 
     @Override
@@ -54,10 +54,10 @@ public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<Ns
 
         String typeName = schema.getName();
         try {
-            Object object = metaData.createType(typeName);
+            Object object = clientService.createType(typeName);
             NsObject nsObject = NsObject.wrap(object);
 
-            NsTypeDef typeDef = metaData.getTypeDef(typeName);
+            NsTypeDef typeDef = clientService.getTypeDef(typeName);
 
             List<String> nullFieldList = new ArrayList<>();
 
@@ -98,7 +98,7 @@ public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<Ns
 
     protected void initMapping(Schema schema) {
         if (names == null) {
-            NsTypeDef typeDef = metaData.getTypeDef(getSchema().getName());
+            NsTypeDef typeDef = clientService.getTypeDef(getSchema().getName());
             fieldConverters = new HashMap<>(schema.getFields().size());
             for (Schema.Field field : schema.getFields()) {
                 String fieldName = field.name();

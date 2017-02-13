@@ -20,13 +20,12 @@ import org.talend.components.api.component.ComponentDefinition;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteAvroRegistry;
 import org.talend.components.netsuite.NetSuiteSource;
-import org.talend.components.netsuite.client.NetSuiteCredentials;
+import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteFactory;
-import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.components.netsuite.client.schema.NsTypeDef;
 import org.talend.components.netsuite.client.schema.NsFieldDef;
 import org.talend.components.netsuite.client.PropertyAccessor;
-import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteWebServiceMockTestFixture;
+import org.talend.components.netsuite.client.NetSuiteWebServiceMockTestFixture;
 import org.talend.components.netsuite.model.Mapper;
 import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.model.TypeInfo;
@@ -35,18 +34,18 @@ import org.talend.components.netsuite.runtime.RuntimeService;
 import org.talend.components.netsuite.runtime.RuntimeServiceImpl;
 import org.talend.components.netsuite.runtime.SchemaService;
 
-import com.netsuite.webservices.v2016_2.lists.accounting.Account;
-import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
-import com.netsuite.webservices.v2016_2.platform.core.RecordList;
-import com.netsuite.webservices.v2016_2.platform.core.SearchResult;
-import com.netsuite.webservices.v2016_2.platform.core.Status;
-import com.netsuite.webservices.v2016_2.platform.messages.LoginRequest;
-import com.netsuite.webservices.v2016_2.platform.messages.LoginResponse;
-import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreWithIdRequest;
-import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreWithIdResponse;
-import com.netsuite.webservices.v2016_2.platform.messages.SearchRequest;
-import com.netsuite.webservices.v2016_2.platform.messages.SearchResponse;
-import com.netsuite.webservices.v2016_2.platform.messages.SessionResponse;
+import com.netsuite.webservices.lists.accounting.Account;
+import com.netsuite.webservices.platform.NetSuitePortType;
+import com.netsuite.webservices.platform.core.RecordList;
+import com.netsuite.webservices.platform.core.SearchResult;
+import com.netsuite.webservices.platform.core.Status;
+import com.netsuite.webservices.platform.messages.LoginRequest;
+import com.netsuite.webservices.platform.messages.LoginResponse;
+import com.netsuite.webservices.platform.messages.SearchMoreWithIdRequest;
+import com.netsuite.webservices.platform.messages.SearchMoreWithIdResponse;
+import com.netsuite.webservices.platform.messages.SearchRequest;
+import com.netsuite.webservices.platform.messages.SearchResponse;
+import com.netsuite.webservices.platform.messages.SessionResponse;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -129,8 +128,8 @@ public class NetSuiteSearchInputReaderTest {
             }
         });
 
-        NetSuiteMetaData metaData = source.getConnection().getMetaData();
-        NsTypeDef entityInfo = metaData.getTypeDef(Account.class);
+        NetSuiteClientService clientService = source.getConnection();
+        NsTypeDef entityInfo = clientService.getTypeDef(Account.class);
 
         NetSuiteSearchInputReader reader = (NetSuiteSearchInputReader) source.createReader(container);
 

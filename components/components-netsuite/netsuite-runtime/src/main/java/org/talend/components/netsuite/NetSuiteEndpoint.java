@@ -2,7 +2,6 @@ package org.talend.components.netsuite;
 
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.netsuite.client.NetSuiteClientService;
-import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
@@ -50,7 +49,7 @@ public class NetSuiteEndpoint {
         credentials.setAccount(account);
         credentials.setApplicationId(applicationId);
 
-        connection = connect(endpointUrl, apiVersion, credentials);
+        connection = connect(endpointUrl, credentials);
         return connection;
     }
 
@@ -61,10 +60,10 @@ public class NetSuiteEndpoint {
         return connection;
     }
 
-    protected NetSuiteClientService connect(String endpointUrl, String apiVersion, NetSuiteCredentials credentials)
+    protected NetSuiteClientService connect(String endpointUrl, NetSuiteCredentials credentials)
             throws NetSuiteException {
 
-        NetSuiteClientService clientService = NetSuiteClientService.getClientService(apiVersion);
+        NetSuiteClientService clientService = new NetSuiteClientService();
         clientService.setEndpointUrl(endpointUrl);
         clientService.setCredentials(credentials);
         return clientService;

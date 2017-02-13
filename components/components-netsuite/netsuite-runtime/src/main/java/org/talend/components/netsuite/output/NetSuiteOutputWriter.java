@@ -11,12 +11,14 @@ import org.talend.components.api.component.runtime.WriterWithFeedback;
 import org.talend.components.netsuite.NsObjectIndexedRecordConverter;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.components.netsuite.client.NsObject;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
 
+import com.netsuite.webservices.platform.core.BaseRef;
+import com.netsuite.webservices.platform.core.Record;
+
 /**
- *
+ * TODO Implement bulk Add/Update/Upsert/Delete
  */
 public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedRecord, IndexedRecord> {
 
@@ -26,9 +28,8 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
 
     protected final List<IndexedRecord> rejectedWrites = new ArrayList<>();
 
-    protected NetSuiteClientService connection;
-    protected NetSuiteMetaData metaData;
-    protected Operation<?> operation;
+    protected NetSuiteClientService clientService;
+    protected NetSuiteOutputProperties.OutputAction action;
     protected IndexedRecordConverter<NsObject, IndexedRecord> converter;
     protected int dataCount = 0;
 
@@ -49,18 +50,8 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
     @Override
     public void open(String uId) throws IOException {
         try {
-            connection = writeOperation.getSink().connect(writeOperation.getRuntimeContainer());
-            metaData = connection.getMetaData();
-            NetSuiteOutputProperties.OutputAction action = writeOperation.getProperties().action.getValue();
-            if (action == NetSuiteOutputProperties.OutputAction.ADD) {
-                operation = new AddOperation<>();
-            } else if (action == NetSuiteOutputProperties.OutputAction.UPDATE) {
-                operation = new UpdateOperation<>();
-            } else if (action == NetSuiteOutputProperties.OutputAction.UPSERT) {
-                operation = new UpsertOperation<>();
-            } else if (action == NetSuiteOutputProperties.OutputAction.DELETE) {
-                operation = new DeleteOperation<>();
-            }
+            clientService = writeOperation.getSink().connect(writeOperation.getRuntimeContainer());
+            action = writeOperation.getProperties().action.getValue();
         } catch (NetSuiteException e) {
             throw new IOException(e);
         }
@@ -70,7 +61,15 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
     public void write(Object object) throws IOException {
         IndexedRecord record = (IndexedRecord) object;
         try {
-            operation.write(record);
+            if (action == NetSuiteOutputProperties.OutputAction.ADD) {
+                clientService.add(createObject(record, Record.class));
+            } else if (action == NetSuiteOutputProperties.OutputAction.UPDATE) {
+                clientService.update(createObject(record, Record.class));
+            } else if (action == NetSuiteOutputProperties.OutputAction.UPSERT) {
+                clientService.upsert(createObject(record, Record.class));
+            } else if (action == NetSuiteOutputProperties.OutputAction.DELETE) {
+                clientService.delete(createObject(record, BaseRef.class));
+            }
             successfulWrites.add(record);
         } catch (IOException e) {
             rejectedWrites.add(record);
@@ -92,61 +91,16 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
         return writeOperation;
     }
 
-    protected <T> T createObject(IndexedRecord record) throws IOException {
+    protected <T> T createObject(IndexedRecord record, Class<T> clazz) throws IOException {
         NsObject<T> nsObject = getConverter().convertToDatum(record);
-        return nsObject.getTarget();
+        return clazz.cast(nsObject.getTarget());
     }
 
     protected IndexedRecordConverter<NsObject, IndexedRecord> getConverter() throws IOException {
         if (converter == null) {
-            converter = new NsObjectIndexedRecordConverter(metaData);
+            converter = new NsObjectIndexedRecordConverter(clientService);
         }
         return converter;
     }
 
-    protected abstract class Operation<T> {
-
-        void write(IndexedRecord record) throws IOException {
-            T nsObject = createObject(record);
-            try {
-                doWrite(nsObject);
-            } catch (NetSuiteException e) {
-                throw new IOException(e);
-            }
-        }
-
-        abstract void doWrite(T nsObject) throws NetSuiteException;
-    }
-
-    protected class AddOperation<RecT> extends Operation<RecT> {
-
-        @Override
-        void doWrite(RecT nsObject) throws NetSuiteException {
-            connection.add(nsObject);
-        }
-    }
-
-    protected class UpdateOperation<RecT> extends Operation<RecT> {
-
-        @Override
-        void doWrite(RecT nsObject) throws NetSuiteException {
-            connection.update(nsObject);
-        }
-    }
-
-    protected class UpsertOperation<RecT> extends Operation<RecT> {
-
-        @Override
-        void doWrite(RecT nsObject) throws NetSuiteException {
-            connection.upsert(nsObject);
-        }
-    }
-
-    protected class DeleteOperation<RefT> extends Operation<RefT> {
-
-        @Override
-        void doWrite(RefT nsRef) throws NetSuiteException {
-            connection.delete(nsRef);
-        }
-    }
 }

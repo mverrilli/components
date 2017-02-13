@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.commons.beanutils.MethodUtils;
-import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteClientServiceImpl;
 import org.talend.components.netsuite.model.EnumAccessor;
 import org.talend.components.netsuite.model.Mapper;
 import org.talend.components.netsuite.model.PropertyAccess;

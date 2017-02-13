@@ -10,7 +10,6 @@ import org.apache.avro.Schema;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.components.netsuite.client.schema.NsFieldDef;
 import org.talend.components.netsuite.client.schema.NsSearchDef;
 import org.talend.components.netsuite.client.schema.NsSearchFieldOperatorTypeDef;
@@ -35,9 +34,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public List<NamedThing> getSchemaNames() {
         try {
-            NetSuiteMetaData metaData = clientService.getMetaData();
-
-            List<String> recordTypes = new ArrayList<>(metaData.getRecordTypes());
+            List<String> recordTypes = new ArrayList<>(clientService.getRecordTypes());
             // Sort alphabetically
             Collections.sort(recordTypes);
 
@@ -55,9 +52,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public Schema getSchema(String typeName) {
         try {
-            NetSuiteMetaData metaData = clientService.getMetaData();
-
-            NsTypeDef entityInfo = metaData.getTypeDef(typeName);
+            NsTypeDef entityInfo = clientService.getTypeDef(typeName);
 
             Schema schema = inferSchemaForType(entityInfo);
             return schema;
@@ -69,15 +64,9 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public NsSchema getSearchRecordSchema(String typeName) {
         try {
-            NetSuiteMetaData metaData = clientService.getMetaData();
-
-            final NsSearchDef searchInfo = metaData.getSearchDef(typeName);
-            final NsTypeDef searchRecordInfo = metaData.getTypeDef(searchInfo.getSearchBasicClass());
+            final NsSearchDef searchInfo = clientService.getSearchDef(typeName);
+            final NsTypeDef searchRecordInfo = clientService.getTypeDef(searchInfo.getSearchBasicClass());
             List<NsFieldDef> searchFieldInfos = searchRecordInfo.getFields();
-            List<String> fieldNames = new ArrayList<>(searchFieldInfos.size());
-            for (NsFieldDef fieldInfo : searchFieldInfos) {
-                fieldNames.add(fieldInfo.getName());
-            }
             return new NsSchemaImpl(searchRecordInfo.getTypeName(), searchFieldInfos);
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
@@ -87,15 +76,9 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public NsSchema getDeleteRecordSchema(String typeName) {
         try {
-            NetSuiteMetaData metaData = clientService.getMetaData();
-
-            final NsSearchDef searchInfo = metaData.getSearchDef(typeName);
-            final NsTypeDef searchRecordInfo = metaData.getTypeDef(searchInfo.getSearchBasicClass());
+            final NsSearchDef searchInfo = clientService.getSearchDef(typeName);
+            final NsTypeDef searchRecordInfo = clientService.getTypeDef(searchInfo.getSearchBasicClass());
             List<NsFieldDef> searchFieldInfos = searchRecordInfo.getFields();
-            List<String> fieldNames = new ArrayList<>(searchFieldInfos.size());
-            for (NsFieldDef fieldInfo : searchFieldInfos) {
-                fieldNames.add(fieldInfo.getName());
-            }
             return new NsSchemaImpl(searchRecordInfo.getTypeName(), searchFieldInfos);
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
@@ -104,19 +87,13 @@ public class SchemaServiceImpl implements SchemaService {
 
     @Override
     public List<String> getSearchFieldOperators() {
-        try {
-            NetSuiteMetaData metaData = clientService.getMetaData();
-
-            List<NsSearchFieldOperatorTypeDef.QualifiedName> operatorList =
-                    new ArrayList<>(metaData.getSearchOperatorNames());
-            List<String> operatorNames = new ArrayList<>(operatorList.size());
-            for (NsSearchFieldOperatorTypeDef.QualifiedName operatorName : operatorList) {
-                operatorNames.add(operatorName.getQualifiedName());
-            }
-            return operatorNames;
-        } catch (NetSuiteException e) {
-            throw new ComponentException(e);
+        List<NsSearchFieldOperatorTypeDef.QualifiedName> operatorList =
+                new ArrayList<>(clientService.getSearchOperatorNames());
+        List<String> operatorNames = new ArrayList<>(operatorList.size());
+        for (NsSearchFieldOperatorTypeDef.QualifiedName operatorName : operatorList) {
+            operatorNames.add(operatorName.getQualifiedName());
         }
+        return operatorNames;
     }
 
     /**

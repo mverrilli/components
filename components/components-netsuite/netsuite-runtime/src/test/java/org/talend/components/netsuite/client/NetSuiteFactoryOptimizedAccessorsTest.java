@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 import org.talend.components.netsuite.model.EnumAccessor;
 
-import com.netsuite.webservices.v2016_2.lists.accounting.Account;
-import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
+import com.netsuite.webservices.lists.accounting.Account;
+import com.netsuite.webservices.lists.accounting.types.AccountType;
 
 /**
  *

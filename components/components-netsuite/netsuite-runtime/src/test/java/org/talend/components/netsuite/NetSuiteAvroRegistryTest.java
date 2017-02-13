@@ -10,16 +10,15 @@ import org.apache.avro.Schema;
 import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
 import org.junit.Test;
-import org.talend.components.netsuite.client.NetSuiteMetaData;
-import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteClientServiceImpl;
+import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.schema.NsTypeDef;
 import org.talend.components.netsuite.client.schema.NsFieldDef;
 import org.talend.components.netsuite.runtime.SchemaServiceImpl;
 import org.talend.daikon.avro.SchemaConstants;
 import org.talend.daikon.avro.converter.AvroConverter;
 
-import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
-import com.netsuite.webservices.v2016_2.lists.accounting.types.ConsolidatedRate;
+import com.netsuite.webservices.lists.accounting.types.AccountType;
+import com.netsuite.webservices.lists.accounting.types.ConsolidatedRate;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
@@ -33,12 +32,12 @@ import static org.junit.Assert.assertThat;
  */
 public class NetSuiteAvroRegistryTest {
 
-    private NetSuiteMetaData metaData = new NetSuiteClientServiceImpl.NetSuiteMetaDataImpl();
+    private NetSuiteClientService clientService = new NetSuiteClientService();
     private NetSuiteAvroRegistry registry = NetSuiteAvroRegistry.getInstance();
 
     @Test
     public void testInferSchemaForEntity() throws Exception {
-        NsTypeDef entityInfo = metaData.getTypeDef("Account");
+        NsTypeDef entityInfo = clientService.getTypeDef("Account");
 
         Schema s = SchemaServiceImpl.inferSchemaForType(entityInfo);
 
@@ -73,7 +72,7 @@ public class NetSuiteAvroRegistryTest {
 
     @Test
     public void testEnumConverter() throws Exception {
-        NsTypeDef typeDef = metaData.getTypeDef("Account");
+        NsTypeDef typeDef = clientService.getTypeDef("Account");
 
         Schema s = SchemaServiceImpl.inferSchemaForType(typeDef);
 
@@ -100,7 +99,7 @@ public class NetSuiteAvroRegistryTest {
 
     @Test
     public void testXMLGregorianCalendarConverter() throws Exception {
-        NsTypeDef entityInfo = metaData.getTypeDef("Account");
+        NsTypeDef entityInfo = clientService.getTypeDef("Account");
 
         Schema s = SchemaServiceImpl.inferSchemaForType(entityInfo);
 
