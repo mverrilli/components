@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.commons.beanutils.MethodUtils;
+import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteClientServiceImpl;
 import org.talend.components.netsuite.model.EnumAccessor;
 import org.talend.components.netsuite.model.Mapper;
 import org.talend.components.netsuite.model.PropertyAccess;
@@ -19,28 +20,7 @@ import org.talend.components.netsuite.model.TypeManager;
  */
 public abstract class NetSuiteFactory {
 
-    private static boolean messageLoggingEnabled;
-
     private transient static final Logger LOG = LoggerFactory.getLogger(NetSuiteFactory.class);
-
-    public static boolean isMessageLoggingEnabled() {
-        return messageLoggingEnabled;
-    }
-
-    public static void setMessageLoggingEnabled(boolean messageLoggingEnabled) {
-        NetSuiteFactory.messageLoggingEnabled = messageLoggingEnabled;
-    }
-
-    public static <P> NetSuiteConnection<P> getConnection(String apiVersion) throws NetSuiteException {
-        NetSuiteConnection connection;
-        if (apiVersion.equals("2016.2")) {
-            connection = new org.talend.components.netsuite.client.impl.v2016_2.NetSuiteConnectionImpl();
-        } else {
-            throw new IllegalArgumentException("Invalid api version: " + apiVersion);
-        }
-        connection.setMessageLoggingEnabled(messageLoggingEnabled);
-        return connection;
-    }
 
     public static PropertyAccessor<Object> getPropertyAccessor(Class<?> clazz) {
         if (PropertyAccess.class.isAssignableFrom(clazz)) {

@@ -7,7 +7,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.talend.components.netsuite.client.NetSuiteConnection;
+import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NsObject;
 import org.talend.components.netsuite.client.NsSearchResultSet;
 
@@ -20,7 +20,7 @@ import static org.junit.Assert.assertTrue;
 /**
  *
  */
-public class NetSuiteConnectionITest {
+public class NetSuiteClientServiceITest {
 
     protected static NetSuiteWebServiceTestFixture webServiceTestFixture;
 
@@ -45,7 +45,7 @@ public class NetSuiteConnectionITest {
 
     @Test
     public void testConnectAndLogin() throws Exception {
-        NetSuiteConnection connection = webServiceTestFixture.getConnection();
+        NetSuiteClientService connection = webServiceTestFixture.getClientService();
 
         connection.login();
 

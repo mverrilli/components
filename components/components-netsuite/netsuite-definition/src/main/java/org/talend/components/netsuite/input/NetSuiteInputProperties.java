@@ -83,7 +83,7 @@ public class NetSuiteInputProperties extends ComponentPropertiesImpl implements 
     protected NsSchema<NsField> getSearchSchema(final String typeName) {
         return withSchemaService(new Function<SchemaService, NsSchema>() {
             @Override public NsSchema apply(SchemaService schemaService) {
-                return schemaService.getSearchSchema(typeName);
+                return schemaService.getSearchRecordSchema(typeName);
             }
         }, this);
     }

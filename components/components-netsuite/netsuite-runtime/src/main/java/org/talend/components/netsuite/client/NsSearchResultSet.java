@@ -4,14 +4,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.talend.components.netsuite.client.metadata.NsSearchDef;
+import org.talend.components.netsuite.client.schema.NsSearchDef;
 
 /**
  *
  */
 public class NsSearchResultSet<RecT> extends ResultSet<RecT> {
 
-    private NetSuiteConnection conn;
+    private NetSuiteClientService conn;
     private NsSearchDef searchInfo;
     private String searchId;
     private NsSearchResult result;
@@ -19,7 +19,7 @@ public class NsSearchResultSet<RecT> extends ResultSet<RecT> {
     private Iterator<RecT> recordIterator;
     private RecT current;
 
-    public NsSearchResultSet(NetSuiteConnection conn,
+    public NsSearchResultSet(NetSuiteClientService conn,
             NsSearchDef searchInfo, NsSearchResult result) {
 
         this.conn = conn;

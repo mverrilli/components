@@ -12,8 +12,8 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.talend.components.netsuite.client.metadata.NsSearchDef;
-import org.talend.components.netsuite.client.metadata.NsSearchFieldOperatorTypeDef;
+import org.talend.components.netsuite.client.schema.NsSearchDef;
+import org.talend.components.netsuite.client.schema.NsSearchFieldOperatorTypeDef;
 import org.talend.components.netsuite.model.TypeInfo;
 import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.model.TypeManager;
@@ -23,7 +23,7 @@ import org.talend.components.netsuite.model.TypeManager;
  */
 public class NsSearch<RecT, SearchRecT> {
 
-    protected NetSuiteConnection connection;
+    protected NetSuiteClientService connection;
     protected NetSuiteMetaData metaData;
 
     protected String entityTypeName;
@@ -38,7 +38,7 @@ public class NsSearch<RecT, SearchRecT> {
     // no use for now
     private List<NsObject> customCriteriaList = new ArrayList<>();
 
-    public NsSearch(NetSuiteConnection connection) throws NetSuiteException {
+    public NsSearch(NetSuiteClientService connection) throws NetSuiteException {
         this.connection = connection;
         this.metaData = connection.getMetaData();
     }
@@ -327,7 +327,7 @@ public class NsSearch<RecT, SearchRecT> {
             Class<?> fieldClass = metaData.getSearchFieldClass("SearchEnumMultiSelectField");
             NsObject searchTypeField = createCriteria(fieldClass, null);
             List<String> searchValues = (List<String>) searchTypeField.get("searchValue");
-            searchValues.add(NetSuiteMetaData.toInitialLower(searchInfo.getRecordClass().getSimpleName()));
+            searchValues.add(NetSuiteClientService.toInitialLower(searchInfo.getRecordClass().getSimpleName()));
             searchTypeField.set("operator", metaData.getSearchFieldOperatorByName(
                     "SearchEnumMultiSelectField", "List.anyOf"));
             searchBasic.set("type", searchTypeField.getTarget());

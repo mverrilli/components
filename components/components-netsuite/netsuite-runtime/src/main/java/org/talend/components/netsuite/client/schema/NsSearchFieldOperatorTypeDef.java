@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.client.metadata;
+package org.talend.components.netsuite.client.schema;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -15,7 +15,9 @@ public class NsStatus {
 
     public NsStatus(boolean success, List<Detail> details) {
         this.success = success;
-        this.details = new ArrayList<>(details);
+        if (details != null) {
+            this.details = new ArrayList<>(details);
+        }
     }
 
     public boolean isSuccess() {

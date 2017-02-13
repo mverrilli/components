@@ -31,6 +31,7 @@ import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteAvroRegistry;
 import org.talend.components.netsuite.NetSuiteSink;
 import org.talend.components.netsuite.NsObjectIndexedRecordConverter;
+import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.components.netsuite.client.NsObject;
@@ -79,8 +80,7 @@ public class NetSuiteSearchOutputWriterTest {
 
     @Test
     public void testUpdate() throws Exception {
-        NetSuitePortType port = mock(NetSuitePortType.class);
-        webServiceTestFixture.getPortImpl().setPort(port);
+        final NetSuitePortType port = webServiceTestFixture.getPortMock();
 
         final Status statusSuccess = new Status();
         statusSuccess.setIsSuccess(true);

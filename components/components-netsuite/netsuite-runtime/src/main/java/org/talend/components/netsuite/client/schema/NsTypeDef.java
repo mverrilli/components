@@ -1,11 +1,10 @@
-package org.talend.components.netsuite.client.metadata;
+package org.talend.components.netsuite.client.schema;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.talend.components.netsuite.model.TypeInfo;
 import org.talend.components.netsuite.schema.NsSchema;
 
 /**
@@ -16,9 +15,8 @@ public class NsTypeDef implements NsSchema<NsFieldDef> {
     private Class<?> typeClass;
     private List<NsFieldDef> fields;
     private Map<String, NsFieldDef> fieldMap;
-    private TypeInfo typeInfo;
 
-    public NsTypeDef(String typeName, Class<?> typeClass, List<NsFieldDef> fields, TypeInfo typeInfo) {
+    public NsTypeDef(String typeName, Class<?> typeClass, List<NsFieldDef> fields) {
         this.typeName = typeName;
         this.typeClass = typeClass;
         this.fields = fields;
@@ -27,8 +25,6 @@ public class NsTypeDef implements NsSchema<NsFieldDef> {
         for (NsFieldDef fieldInfo : fields) {
             fieldMap.put(fieldInfo.getName(), fieldInfo);
         }
-
-        this.typeInfo = typeInfo;
     }
 
     public String getTypeName() {
@@ -49,9 +45,5 @@ public class NsTypeDef implements NsSchema<NsFieldDef> {
 
     public List<NsFieldDef> getFields() {
         return Collections.unmodifiableList(fields);
-    }
-
-    public TypeInfo getTypeInfo() {
-        return typeInfo;
     }
 }

@@ -11,9 +11,9 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
 import org.junit.Test;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
-import org.talend.components.netsuite.client.metadata.NsTypeDef;
-import org.talend.components.netsuite.client.metadata.NsFieldDef;
-import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteMetaDataImpl;
+import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteClientServiceImpl;
+import org.talend.components.netsuite.client.schema.NsTypeDef;
+import org.talend.components.netsuite.client.schema.NsFieldDef;
 import org.talend.components.netsuite.runtime.SchemaServiceImpl;
 import org.talend.daikon.avro.SchemaConstants;
 import org.talend.daikon.avro.converter.AvroConverter;
@@ -33,14 +33,14 @@ import static org.junit.Assert.assertThat;
  */
 public class NetSuiteAvroRegistryTest {
 
-    private NetSuiteMetaData metaData = new NetSuiteMetaDataImpl();
+    private NetSuiteMetaData metaData = new NetSuiteClientServiceImpl.NetSuiteMetaDataImpl();
     private NetSuiteAvroRegistry registry = NetSuiteAvroRegistry.getInstance();
 
     @Test
     public void testInferSchemaForEntity() throws Exception {
         NsTypeDef entityInfo = metaData.getTypeDef("Account");
 
-        Schema s = SchemaServiceImpl.inferSchemaForEntity(entityInfo);
+        Schema s = SchemaServiceImpl.inferSchemaForType(entityInfo);
 
         System.out.println(s);
 
@@ -73,11 +73,11 @@ public class NetSuiteAvroRegistryTest {
 
     @Test
     public void testEnumConverter() throws Exception {
-        NsTypeDef entityInfo = metaData.getTypeDef("Account");
+        NsTypeDef typeDef = metaData.getTypeDef("Account");
 
-        Schema s = SchemaServiceImpl.inferSchemaForEntity(entityInfo);
+        Schema s = SchemaServiceImpl.inferSchemaForType(typeDef);
 
-        NsFieldDef fieldInfo = entityInfo.getField("acctType");
+        NsFieldDef fieldInfo = typeDef.getField("acctType");
         Schema.Field f = s.getField(fieldInfo.getName());
         AvroConverter<Enum<AccountType>, String> converter1 =
                 (AvroConverter<Enum<AccountType>, String>) registry.getConverter(f, fieldInfo.getValueType());
@@ -87,7 +87,7 @@ public class NetSuiteAvroRegistryTest {
         assertEquals(AccountType.ACCOUNTS_PAYABLE,
                 converter1.convertToDatum(AccountType.ACCOUNTS_PAYABLE.value()));
 
-        fieldInfo = entityInfo.getField("generalRate");
+        fieldInfo = typeDef.getField("generalRate");
         f = s.getField(fieldInfo.getName());
         AvroConverter<Enum<ConsolidatedRate>, String> converter2 =
                 (AvroConverter<Enum<ConsolidatedRate>, String>) registry.getConverter(f, fieldInfo.getValueType());
@@ -102,7 +102,7 @@ public class NetSuiteAvroRegistryTest {
     public void testXMLGregorianCalendarConverter() throws Exception {
         NsTypeDef entityInfo = metaData.getTypeDef("Account");
 
-        Schema s = SchemaServiceImpl.inferSchemaForEntity(entityInfo);
+        Schema s = SchemaServiceImpl.inferSchemaForType(entityInfo);
 
         DateTimeZone tz1 = DateTimeZone.forID("EET");
 

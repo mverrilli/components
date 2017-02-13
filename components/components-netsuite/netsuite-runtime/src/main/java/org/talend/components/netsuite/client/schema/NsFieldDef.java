@@ -1,6 +1,5 @@
-package org.talend.components.netsuite.client.metadata;
+package org.talend.components.netsuite.client.schema;
 
-import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.schema.NsField;
 
 /**
@@ -11,14 +10,12 @@ public class NsFieldDef implements NsField {
     private Class valueType;
     private boolean key;
     private boolean nullable;
-    private PropertyInfo propertyInfo;
 
-    public NsFieldDef(String name, Class valueType, boolean key, boolean nullable, PropertyInfo propertyInfo) {
+    public NsFieldDef(String name, Class valueType, boolean key, boolean nullable) {
         this.name = name;
         this.valueType = valueType;
         this.key = key;
         this.nullable = nullable;
-        this.propertyInfo = propertyInfo;
     }
 
     public String getName() {
@@ -39,9 +36,5 @@ public class NsFieldDef implements NsField {
 
     public boolean isNullable() {
         return nullable;
-    }
-
-    public PropertyInfo getPropertyInfo() {
-        return propertyInfo;
     }
 }

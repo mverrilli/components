@@ -15,7 +15,6 @@ public class NsSchemaImpl<F extends NsField> implements NsSchema<F> {
     public NsSchemaImpl(String name, List<F> fields) {
         this.name = name;
         this.fields = fields;
-        this.fields = fields;
 
         fieldMap = new HashMap<>(fields.size());
         for (F field : fields) {

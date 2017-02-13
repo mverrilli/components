@@ -8,13 +8,13 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.avro.Schema;
 import org.talend.components.api.exception.ComponentException;
-import org.talend.components.netsuite.client.NetSuiteConnection;
+import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
-import org.talend.components.netsuite.client.metadata.NsFieldDef;
-import org.talend.components.netsuite.client.metadata.NsSearchDef;
-import org.talend.components.netsuite.client.metadata.NsSearchFieldOperatorTypeDef;
-import org.talend.components.netsuite.client.metadata.NsTypeDef;
+import org.talend.components.netsuite.client.schema.NsFieldDef;
+import org.talend.components.netsuite.client.schema.NsSearchDef;
+import org.talend.components.netsuite.client.schema.NsSearchFieldOperatorTypeDef;
+import org.talend.components.netsuite.client.schema.NsTypeDef;
 import org.talend.components.netsuite.schema.NsSchema;
 import org.talend.components.netsuite.schema.NsSchemaImpl;
 import org.talend.daikon.NamedThing;
@@ -26,16 +26,16 @@ import org.talend.daikon.avro.SchemaConstants;
  *
  */
 public class SchemaServiceImpl implements SchemaService {
-    private NetSuiteConnection connection;
+    private NetSuiteClientService clientService;
 
-    public SchemaServiceImpl(NetSuiteConnection connection) throws NetSuiteException {
-        this.connection = connection;
+    public SchemaServiceImpl(NetSuiteClientService clientService) throws NetSuiteException {
+        this.clientService = clientService;
     }
 
     @Override
     public List<NamedThing> getSchemaNames() {
         try {
-            NetSuiteMetaData metaData = connection.getMetaData();
+            NetSuiteMetaData metaData = clientService.getMetaData();
 
             List<String> recordTypes = new ArrayList<>(metaData.getRecordTypes());
             // Sort alphabetically
@@ -55,11 +55,11 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public Schema getSchema(String typeName) {
         try {
-            NetSuiteMetaData metaData = connection.getMetaData();
+            NetSuiteMetaData metaData = clientService.getMetaData();
 
             NsTypeDef entityInfo = metaData.getTypeDef(typeName);
 
-            Schema schema = inferSchemaForEntity(entityInfo);
+            Schema schema = inferSchemaForType(entityInfo);
             return schema;
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
@@ -67,9 +67,27 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
-    public NsSchema getSearchSchema(String typeName) {
+    public NsSchema getSearchRecordSchema(String typeName) {
         try {
-            NetSuiteMetaData metaData = connection.getMetaData();
+            NetSuiteMetaData metaData = clientService.getMetaData();
+
+            final NsSearchDef searchInfo = metaData.getSearchDef(typeName);
+            final NsTypeDef searchRecordInfo = metaData.getTypeDef(searchInfo.getSearchBasicClass());
+            List<NsFieldDef> searchFieldInfos = searchRecordInfo.getFields();
+            List<String> fieldNames = new ArrayList<>(searchFieldInfos.size());
+            for (NsFieldDef fieldInfo : searchFieldInfos) {
+                fieldNames.add(fieldInfo.getName());
+            }
+            return new NsSchemaImpl(searchRecordInfo.getTypeName(), searchFieldInfos);
+        } catch (NetSuiteException e) {
+            throw new ComponentException(e);
+        }
+    }
+
+    @Override
+    public NsSchema getDeleteRecordSchema(String typeName) {
+        try {
+            NetSuiteMetaData metaData = clientService.getMetaData();
 
             final NsSearchDef searchInfo = metaData.getSearchDef(typeName);
             final NsTypeDef searchRecordInfo = metaData.getTypeDef(searchInfo.getSearchBasicClass());
@@ -87,7 +105,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public List<String> getSearchFieldOperators() {
         try {
-            NetSuiteMetaData metaData = connection.getMetaData();
+            NetSuiteMetaData metaData = clientService.getMetaData();
 
             List<NsSearchFieldOperatorTypeDef.QualifiedName> operatorList =
                     new ArrayList<>(metaData.getSearchOperatorNames());
@@ -108,7 +126,7 @@ public class SchemaServiceImpl implements SchemaService {
      * @param in the <code>EntityInfo</code> to analyse.
      * @return the schema for data given from the object.
      */
-    public static Schema inferSchemaForEntity(NsTypeDef in) {
+    public static Schema inferSchemaForType(NsTypeDef in) {
         List<Schema.Field> fields = new ArrayList<>();
 
         for (NsFieldDef fieldInfo : in.getFields()) {

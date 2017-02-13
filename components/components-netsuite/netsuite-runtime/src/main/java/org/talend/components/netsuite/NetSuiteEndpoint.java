@@ -1,7 +1,7 @@
 package org.talend.components.netsuite;
 
 import org.apache.commons.lang3.StringUtils;
-import org.talend.components.netsuite.client.NetSuiteConnection;
+import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.NetSuiteException;
@@ -13,13 +13,13 @@ import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 public class NetSuiteEndpoint {
 
     private NetSuiteConnectionProperties properties;
-    private NetSuiteConnection connection;
+    private NetSuiteClientService connection;
 
     public NetSuiteEndpoint(NetSuiteConnectionProperties properties) {
         this.properties = properties;
     }
 
-    public NetSuiteConnection connect() throws NetSuiteException {
+    public NetSuiteClientService connect() throws NetSuiteException {
         NetSuiteConnectionProperties connProps = properties.getConnectionProperties();
 
         if (StringUtils.isEmpty(connProps.endpoint.getValue())) {
@@ -54,20 +54,20 @@ public class NetSuiteEndpoint {
         return connection;
     }
 
-    public NetSuiteConnection getConnection() throws NetSuiteException {
+    public NetSuiteClientService getConnection() throws NetSuiteException {
         if (connection == null) {
             connect();
         }
         return connection;
     }
 
-    protected NetSuiteConnection connect(String endpointUrl, String apiVersion, NetSuiteCredentials credentials)
+    protected NetSuiteClientService connect(String endpointUrl, String apiVersion, NetSuiteCredentials credentials)
             throws NetSuiteException {
 
-        NetSuiteConnection conn = NetSuiteFactory.getConnection(apiVersion);
-        conn.setEndpointUrl(endpointUrl);
-        conn.setCredentials(credentials);
-        return conn;
+        NetSuiteClientService clientService = NetSuiteClientService.getClientService(apiVersion);
+        clientService.setEndpointUrl(endpointUrl);
+        clientService.setCredentials(credentials);
+        return clientService;
     }
 
 }

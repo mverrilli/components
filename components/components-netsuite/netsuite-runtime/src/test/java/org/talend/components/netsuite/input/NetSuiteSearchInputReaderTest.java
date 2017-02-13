@@ -19,13 +19,12 @@ import org.mockito.stubbing.Answer;
 import org.talend.components.api.component.ComponentDefinition;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteAvroRegistry;
-import org.talend.components.netsuite.NetSuiteEndpoint;
 import org.talend.components.netsuite.NetSuiteSource;
-import org.talend.components.netsuite.client.NetSuiteConnection;
+import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
-import org.talend.components.netsuite.client.metadata.NsTypeDef;
-import org.talend.components.netsuite.client.metadata.NsFieldDef;
+import org.talend.components.netsuite.client.schema.NsTypeDef;
+import org.talend.components.netsuite.client.schema.NsFieldDef;
 import org.talend.components.netsuite.client.PropertyAccessor;
 import org.talend.components.netsuite.client.impl.v2016_2.NetSuiteWebServiceMockTestFixture;
 import org.talend.components.netsuite.model.Mapper;
@@ -35,7 +34,6 @@ import org.talend.components.netsuite.model.TypeManager;
 import org.talend.components.netsuite.runtime.RuntimeService;
 import org.talend.components.netsuite.runtime.RuntimeServiceImpl;
 import org.talend.components.netsuite.runtime.SchemaService;
-import org.talend.components.netsuite.runtime.SchemaServiceImpl;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.Account;
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
@@ -81,8 +79,7 @@ public class NetSuiteSearchInputReaderTest {
 
     @Test
     public void testInput() throws Exception {
-        NetSuitePortType port = mock(NetSuitePortType.class);
-        webServiceTestFixture.getPortImpl().setPort(port);
+        final NetSuitePortType port = webServiceTestFixture.getPortMock();
 
         SessionResponse sessionResponse = new SessionResponse();
         Status status = new Status();

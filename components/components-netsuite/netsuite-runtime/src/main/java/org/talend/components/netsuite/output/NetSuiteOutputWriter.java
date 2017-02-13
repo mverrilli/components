@@ -4,17 +4,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
 import org.talend.components.api.component.runtime.Result;
 import org.talend.components.api.component.runtime.WriteOperation;
 import org.talend.components.api.component.runtime.WriterWithFeedback;
 import org.talend.components.netsuite.NsObjectIndexedRecordConverter;
-import org.talend.components.netsuite.client.NetSuiteConnection;
+import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.components.netsuite.client.NsObject;
-import org.talend.components.netsuite.client.metadata.NsTypeDef;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
 
 /**
@@ -28,7 +26,7 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
 
     protected final List<IndexedRecord> rejectedWrites = new ArrayList<>();
 
-    protected NetSuiteConnection connection;
+    protected NetSuiteClientService connection;
     protected NetSuiteMetaData metaData;
     protected Operation<?> operation;
     protected IndexedRecordConverter<NsObject, IndexedRecord> converter;

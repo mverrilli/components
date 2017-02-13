@@ -11,8 +11,8 @@ import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.components.netsuite.client.NsObject;
-import org.talend.components.netsuite.client.metadata.NsTypeDef;
-import org.talend.components.netsuite.client.metadata.NsFieldDef;
+import org.talend.components.netsuite.client.schema.NsTypeDef;
+import org.talend.components.netsuite.client.schema.NsFieldDef;
 import org.talend.daikon.avro.converter.AvroConverter;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
 

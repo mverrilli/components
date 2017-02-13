@@ -3,14 +3,12 @@ package org.talend.components.netsuite.client.impl.v2016_2;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
-
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.talend.components.netsuite.client.NetSuiteConnection;
+import org.talend.components.netsuite.client.NetSuiteClientService;
 
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
 import com.netsuite.webservices.v2016_2.platform.core.CustomizationRef;
@@ -55,14 +53,14 @@ public class NetSuiteGetCustomizationsITest {
 
     @Test
     public void testGetCustomizations() throws Exception {
-        NetSuiteConnection<NetSuitePortType> connection = webServiceTestFixture.getConnection();
+        NetSuiteClientService<NetSuitePortType> connection = webServiceTestFixture.getClientService();
 
         connection.login();
 
         final GetCustomizationType getCustomizationType = GetCustomizationType.CUSTOM_LIST;
 
         GetCustomizationIdResult result = connection.execute(
-                new NetSuiteConnection.PortOperation<GetCustomizationIdResult, NetSuitePortType>() {
+                new NetSuiteClientService.PortOperation<GetCustomizationIdResult, NetSuitePortType>() {
             @Override public GetCustomizationIdResult execute(NetSuitePortType port) throws Exception {
                 final GetCustomizationIdRequest request = new GetCustomizationIdRequest();
                 request.setIncludeInactives(true);
@@ -76,7 +74,7 @@ public class NetSuiteGetCustomizationsITest {
         for (final CustomizationRef ref : result.getCustomizationRefList().getCustomizationRef()) {
             System.out.println(ref.getScriptId() + ", " + ref.getInternalId() + ", " + ref.getExternalId());
             ReadResponseList result2 = connection.execute(
-                    new NetSuiteConnection.PortOperation<ReadResponseList, NetSuitePortType>() {
+                    new NetSuiteClientService.PortOperation<ReadResponseList, NetSuitePortType>() {
                         @Override public ReadResponseList execute(NetSuitePortType port) throws Exception {
                             final GetListRequest request = new GetListRequest();
                             request.getBaseRef().add(ref);
@@ -89,7 +87,7 @@ public class NetSuiteGetCustomizationsITest {
 
     @Test
     public void testGetSavedSearch() throws Exception {
-        NetSuiteConnection<NetSuitePortType> connection = webServiceTestFixture.getConnection();
+        NetSuiteClientService<NetSuitePortType> connection = webServiceTestFixture.getClientService();
 
         connection.login();
 
@@ -97,7 +95,7 @@ public class NetSuiteGetCustomizationsITest {
         savedSearchRecord.setSearchType(SearchRecordType.OPPORTUNITY);
 
         GetSavedSearchResult result = connection.execute(
-                new NetSuiteConnection.PortOperation<GetSavedSearchResult, NetSuitePortType>() {
+                new NetSuiteClientService.PortOperation<GetSavedSearchResult, NetSuitePortType>() {
                     @Override public GetSavedSearchResult execute(NetSuitePortType port) throws Exception {
                         final GetSavedSearchRequest request = new GetSavedSearchRequest();
                         request.setRecord(savedSearchRecord);
@@ -110,7 +108,7 @@ public class NetSuiteGetCustomizationsITest {
                 CustomizationRef customizationRef = (CustomizationRef) ref;
                 customizationRef.setType(RecordType.CUSTOM_RECORD);
                 System.out.println(customizationRef.getScriptId() + ", " + ref.getInternalId() + ", " + ref.getExternalId());
-                ReadResponseList result2 = connection.execute(new NetSuiteConnection.PortOperation<ReadResponseList, NetSuitePortType>() {
+                ReadResponseList result2 = connection.execute(new NetSuiteClientService.PortOperation<ReadResponseList, NetSuitePortType>() {
 
                     @Override public ReadResponseList execute(NetSuitePortType port) throws Exception {
                                 final GetListRequest request = new GetListRequest();

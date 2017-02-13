@@ -9,7 +9,7 @@ import org.apache.cxf.headers.Header;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.talend.components.netsuite.client.NetSuiteConnection;
+import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.impl.MessageContextHolder;
@@ -34,7 +34,7 @@ import static org.talend.components.netsuite.client.impl.v2016_2.NetSuiteWebServ
 /**
  *
  */
-public class NetSuiteConnectionTest {
+public class NetSuiteClientServiceTest {
 
     private static NetSuiteWebServiceMockTestFixture webServiceTestFixture;
 
@@ -56,12 +56,8 @@ public class NetSuiteConnectionTest {
      * TODO Verify headers (applicationInfo etc.)
      */
     public void testConnectAndLogin() throws Exception {
-        final NetSuiteCredentials credentials = new NetSuiteCredentials(
-                "test@test.com", "12345", "test", "3");
-        credentials.setApplicationId("00000000-0000-0000-0000-000000000000");
-
-        NetSuitePortType port = mock(NetSuitePortType.class);
-        webServiceTestFixture.getPortImpl().setPort(port);
+        final NetSuiteCredentials credentials = webServiceTestFixture.getCredentials();
+        final NetSuitePortType port = webServiceTestFixture.getPortMock();
 
         SessionResponse sessionResponse = new SessionResponse();
         Status status = new Status();
@@ -82,16 +78,16 @@ public class NetSuiteConnectionTest {
                 List<Header> headers = (List<Header>) messageContext.get(Header.HEADER_LIST);
                 assertNotNull(headers);
                 Header appInfoHeader = getHeader(headers, new QName(
-                        NetSuiteConnectionImpl.NS_URI_PLATFORM_MESSAGES, "applicationInfo"));
+                        NetSuiteClientServiceImpl.NS_URI_PLATFORM_MESSAGES, "applicationInfo"));
                 assertNotNull(appInfoHeader);
             }
         }))).thenReturn(response);
 
-        NetSuiteConnection conn = NetSuiteFactory.getConnection("2016.2");
-        conn.setEndpointUrl(webServiceTestFixture.getEndpointAddress().toString());
-        conn.setCredentials(credentials);
+        NetSuiteClientService clientService = NetSuiteClientService.getClientService("2016.2");
+        clientService.setEndpointUrl(webServiceTestFixture.getEndpointAddress().toString());
+        clientService.setCredentials(credentials);
 
-        conn.login();
+        clientService.login();
 
         verify(port, times(1))
                 .login(any(LoginRequest.class));

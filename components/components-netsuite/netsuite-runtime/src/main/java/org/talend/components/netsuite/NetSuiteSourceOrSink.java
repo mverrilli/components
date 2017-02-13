@@ -10,7 +10,7 @@ import org.talend.components.api.component.runtime.SourceOrSink;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.api.properties.ComponentProperties;
-import org.talend.components.netsuite.client.NetSuiteConnection;
+import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.components.netsuite.runtime.SchemaService;
@@ -75,11 +75,11 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
         return properties;
     }
 
-    public NetSuiteConnection connect(RuntimeContainer container) throws NetSuiteException {
+    public NetSuiteClientService connect(RuntimeContainer container) throws NetSuiteException {
         return endpoint.connect();
     }
 
-    public NetSuiteConnection getConnection() throws NetSuiteException {
+    public NetSuiteClientService getConnection() throws NetSuiteException {
         return endpoint.getConnection();
     }
 

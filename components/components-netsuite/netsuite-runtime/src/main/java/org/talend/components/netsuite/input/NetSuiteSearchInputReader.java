@@ -13,7 +13,7 @@ import org.talend.components.api.component.runtime.Result;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.NetSuiteSource;
-import org.talend.components.netsuite.client.NetSuiteConnection;
+import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.components.netsuite.client.NsObject;
@@ -28,7 +28,7 @@ import org.talend.daikon.avro.converter.IndexedRecordConverter;
  */
 public class NetSuiteSearchInputReader<RecT, SearchRecT> extends AbstractBoundedReader<IndexedRecord> {
 
-    private transient NetSuiteConnection connection;
+    private transient NetSuiteClientService connection;
     private transient NetSuiteMetaData metaData;
 
     private transient IndexedRecordConverter<NsObject, IndexedRecord> converter;
@@ -102,7 +102,7 @@ public class NetSuiteSearchInputReader<RecT, SearchRecT> extends AbstractBounded
         return currentRecord;
     }
 
-    protected NetSuiteConnection getConnection() throws NetSuiteException {
+    protected NetSuiteClientService getConnection() throws NetSuiteException {
         if (connection == null) {
             connection = ((NetSuiteSource) getCurrentSource()).connect(container);
             metaData = connection.getMetaData();
@@ -111,7 +111,7 @@ public class NetSuiteSearchInputReader<RecT, SearchRecT> extends AbstractBounded
     }
 
     protected ResultSet<RecT> search() throws NetSuiteException {
-        NetSuiteConnection conn = getConnection();
+        NetSuiteClientService conn = getConnection();
 
         NsSearch<RecT, SearchRecT> search = conn.newSearch();
         search.entity(properties.module.moduleName.getValue());

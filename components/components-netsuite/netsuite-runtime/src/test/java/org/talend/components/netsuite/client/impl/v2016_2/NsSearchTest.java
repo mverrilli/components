@@ -7,7 +7,7 @@ import static org.junit.Assert.assertNull;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.talend.components.netsuite.client.NetSuiteConnection;
+import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NsSearch;
 
@@ -40,9 +40,9 @@ public class NsSearchTest {
 
     @Test
     public void testBasic() throws Exception {
-        NetSuiteConnection conn = NetSuiteFactory.getConnection("2016.2");
+        NetSuiteClientService clientService = NetSuiteClientService.getClientService("2016.2");
 
-        NsSearch<Record, SearchRecord> s1 = conn.newSearch();
+        NsSearch<Record, SearchRecord> s1 = clientService.newSearch();
         s1.entity("Account");
         s1.criteria("type", "List.anyOf", Arrays.asList("Bank"));
         s1.criteria("balance", "Double.greaterThanOrEqualTo", Arrays.asList("10000.0"));
@@ -97,9 +97,9 @@ public class NsSearchTest {
 
     @Test
     public void testSearchDateFieldWithPredefinedDate() throws Exception {
-        NetSuiteConnection conn = NetSuiteFactory.getConnection("2016.2");
+        NetSuiteClientService clientService = NetSuiteClientService.getClientService("2016.2");
 
-        NsSearch<Record, SearchRecord> s1 = conn.newSearch();
+        NsSearch<Record, SearchRecord> s1 = clientService.newSearch();
         s1.entity("Check");
         s1.criteria("tranDate", "PredefinedDate.lastBusinessWeek", null);
         s1.criteria("customDateField1", "PredefinedDate.lastBusinessWeek", null);

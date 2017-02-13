@@ -90,7 +90,7 @@ public class NetSuiteOutputProperties extends ComponentPropertiesImpl implements
     protected NsSchema<NsField> getDeleteSchema(final String typeName) {
         return TNetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, NsSchema>() {
             @Override public NsSchema apply(SchemaService schemaService) {
-                return schemaService.getSearchSchema(typeName);
+                return schemaService.getSearchRecordSchema(typeName);
             }
         }, this);
     }

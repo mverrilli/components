@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.talend.components.netsuite.client.NetSuiteConnection;
+import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteMetaData;
 import org.talend.components.netsuite.client.NsStatus;
-import org.talend.components.netsuite.client.metadata.NsSearchDef;
+import org.talend.components.netsuite.client.schema.NsSearchDef;
 import org.talend.components.netsuite.client.NsSearchResult;
 import org.talend.components.netsuite.client.NsSearchResultSet;
 
@@ -33,7 +33,7 @@ public class NsSearchResultSetTest {
 
     @Test
     public void testPaging() throws Exception {
-        NetSuiteConnection conn = mock(NetSuiteConnection.class);
+        NetSuiteClientService conn = mock(NetSuiteClientService.class);
 
         List<Record> page1 = new ArrayList<>();
         for (int i = 0; i < 1000; i++) {
@@ -78,7 +78,7 @@ public class NsSearchResultSetTest {
         when(conn.search(eq(nsSearchRecord1))).thenReturn(nsSearchResult1);
         when(conn.searchMoreWithId(eq("abc123"), eq(2))).thenReturn(nsSearchResult2);
 
-        NetSuiteMetaData metaData = NetSuiteMetaDataImpl.getInstance();
+        NetSuiteMetaData metaData = NetSuiteClientServiceImpl.NetSuiteMetaDataImpl.getInstance();
         NsSearchDef searchInfo = metaData.getSearchDef("Account");
 
         NsSearchResultSet resultSet = new NsSearchResultSet(conn, searchInfo, nsSearchResult1);
