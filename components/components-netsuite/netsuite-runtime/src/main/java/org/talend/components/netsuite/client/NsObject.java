@@ -43,14 +43,14 @@ public class NsObject<T> {
     }
 
     public Object get(String name) {
-        return getPropertyAccessor(target).get(target, name);
+        return NetSuiteFactory.getPropertyAccessor(target).get(target, name);
     }
 
     public void set(String name, Object value) {
         if (value instanceof NsObject) {
             value = ((NsObject) value).getTarget();
         }
-        getPropertyAccessor(target).set(target, name, value);
+        NetSuiteFactory.getPropertyAccessor(target).set(target, name, value);
     }
 
     public static void set(Object target, String expr, Object value) {
@@ -60,20 +60,20 @@ public class NsObject<T> {
                 String currExpr = expr;
                 while (resolver.hasNested(currExpr)) {
                     String next = resolver.next(currExpr);
-                    Object obj = getPropertyAccessor(current).get(current, next);
+                    Object obj = NetSuiteFactory.getPropertyAccessor(current).get(current, next);
                     if (obj == null) {
                         PropertyInfo pd = TypeManager.getPropertyInfo(current, next);
                         if (!pd.getWriteType().isPrimitive()) {
                             obj = pd.getWriteType().newInstance();
-                            getPropertyAccessor(current).set(current, next, obj);
+                            NetSuiteFactory.getPropertyAccessor(current).set(current, next, obj);
                         }
                     }
                     current = obj;
                     currExpr = resolver.remove(currExpr);
                 }
-                getPropertyAccessor(current).set(current, currExpr, value);
+                NetSuiteFactory.getPropertyAccessor(current).set(current, currExpr, value);
             } else {
-                getPropertyAccessor(current).set(current, expr, value);
+                NetSuiteFactory.getPropertyAccessor(current).set(current, expr, value);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -87,37 +87,16 @@ public class NsObject<T> {
                 String currExpr = expr;
                 while (resolver.hasNested(currExpr) && current != null) {
                     String next = resolver.next(currExpr);
-                    current = getPropertyAccessor(current).get(current, next);
+                    current = NetSuiteFactory.getPropertyAccessor(current).get(current, next);
                     currExpr = resolver.remove(currExpr);
                 }
-                return current != null ? getPropertyAccessor(current).get(current, currExpr) : null;
+                return current != null ? NetSuiteFactory.getPropertyAccessor(current).get(current, currExpr) : null;
             } else {
-                return getPropertyAccessor(current).get(current, expr);
+                return NetSuiteFactory.getPropertyAccessor(current).get(current, expr);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static Property property(final Object target, final String expr) {
-        return new Property() {
-            @Override public void set(Object value) {
-                NsObject.set(target, expr, value);
-            }
-            @Override public Object get() {
-                return NsObject.get(target, expr);
-            }
-        };
-    }
-
-    protected static <T> PropertyAccessor<T> getPropertyAccessor(T target) {
-        return (PropertyAccessor<T>) NetSuiteFactory.getPropertyAccessor(target.getClass());
-    }
-
-    public interface Property {
-
-        void set(Object value);
-
-        Object get();
-    }
 }

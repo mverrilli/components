@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
-import org.talend.components.netsuite.client.schema.NsSearchDef;
+import org.talend.components.netsuite.client.metadata.SearchRecordDef;
+import org.talend.components.netsuite.client.search.SearchResultSet;
 
 import com.netsuite.webservices.lists.accounting.Account;
 import com.netsuite.webservices.lists.accounting.AccountSearch;
@@ -24,7 +25,7 @@ import static org.mockito.Mockito.when;
 /**
  *
  */
-public class NsSearchResultSetTest {
+public class SearchResultSetTest {
 
     @Test
     public void testPaging() throws Exception {
@@ -74,7 +75,7 @@ public class NsSearchResultSetTest {
         when(conn.searchMoreWithId(eq("abc123"), eq(2))).thenReturn(nsSearchResult2);
 
         NetSuiteClientService clientService = new NetSuiteClientService();
-        NsSearchDef searchInfo = clientService.getSearchDef("Account");
+        SearchRecordDef searchInfo = clientService.getSearchRecordDef("Account");
 
         SearchResultSet<Record> resultSet = new SearchResultSet<>(conn, searchInfo, nsSearchResult1,
                 new SearchResultSet.IdentityMapper());

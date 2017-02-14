@@ -7,6 +7,7 @@ import static org.junit.Assert.assertNull;
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.talend.components.netsuite.client.search.SearchQuery;
 
 import com.netsuite.webservices.lists.accounting.AccountSearch;
 import com.netsuite.webservices.platform.common.AccountSearchBasic;
@@ -32,7 +33,7 @@ import com.netsuite.webservices.transactions.sales.TransactionSearch;
 /**
  *
  */
-public class NsSearchTest {
+public class SearchQueryTest {
 
     @Test
     public void testBasic() throws Exception {
@@ -49,7 +50,7 @@ public class NsSearchTest {
         s1.criteria("customStringField1", "String.doesNotContain", Arrays.asList("Foo"));
         s1.criteria("customLongField1", "Numeric.lessThan", Arrays.asList("100"));
 
-        SearchRecord sr1 = s1.build();
+        SearchRecord sr1 = s1.toNativeQuery();
         assertNotNull(sr1);
         assertEquals(AccountSearch.class, sr1.getClass());
 
@@ -100,7 +101,7 @@ public class NsSearchTest {
         s1.criteria("tranDate", "PredefinedDate.lastBusinessWeek", null);
         s1.criteria("customDateField1", "PredefinedDate.lastBusinessWeek", null);
 
-        SearchRecord sr1 = s1.build();
+        SearchRecord sr1 = s1.toNativeQuery();
         assertNotNull(sr1);
         assertEquals(TransactionSearch.class, sr1.getClass());
 

@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.client.schema;
+package org.talend.components.netsuite.client.metadata;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,14 +10,14 @@ import org.talend.components.netsuite.model.Mapper;
 /**
  *
  */
-public class NsSearchFieldOperatorTypeDef<T> {
+public class SearchFieldOperatorTypeDef<T> {
     private String dataType;
     private String typeName;
     private Class<T> operatorClass;
     private Mapper<T, String> mapper;
     private Mapper<String, T> reverseMapper;
 
-    public NsSearchFieldOperatorTypeDef(String dataType, Class<T> operatorClass,
+    public SearchFieldOperatorTypeDef(String dataType, Class<T> operatorClass,
             Mapper<T, String> mapper, Mapper<String, T> reverseMapper) {
 
         this.dataType = dataType;

@@ -1,11 +1,15 @@
-package org.talend.components.netsuite.client;
+package org.talend.components.netsuite.client.search;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.talend.components.netsuite.client.schema.NsSearchDef;
+import org.talend.components.netsuite.client.NetSuiteClientService;
+import org.talend.components.netsuite.client.NetSuiteException;
+import org.talend.components.netsuite.client.ResultSet;
+import org.talend.components.netsuite.client.SearchResultEx;
+import org.talend.components.netsuite.client.metadata.SearchRecordDef;
 import org.talend.components.netsuite.model.Mapper;
 
 import com.netsuite.webservices.platform.core.Record;
@@ -16,7 +20,7 @@ import com.netsuite.webservices.platform.core.Record;
 public class SearchResultSet<R> extends ResultSet<R> {
 
     private NetSuiteClientService clientService;
-    private NsSearchDef searchInfo;
+    private SearchRecordDef searchRecordDef;
     private String searchId;
     private SearchResultEx result;
     private List<R> recordList;
@@ -25,10 +29,10 @@ public class SearchResultSet<R> extends ResultSet<R> {
     private Mapper<Record, R> recordMapper;
 
     public SearchResultSet(NetSuiteClientService clientService,
-            NsSearchDef searchInfo, SearchResultEx result, Mapper<Record, R> recordMapper) {
+            SearchRecordDef searchRecordDef, SearchResultEx result, Mapper<Record, R> recordMapper) {
 
         this.clientService = clientService;
-        this.searchInfo = searchInfo;
+        this.searchRecordDef = searchRecordDef;
         this.result = result;
         this.recordMapper = recordMapper;
 

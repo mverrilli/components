@@ -10,10 +10,10 @@ import org.apache.avro.Schema;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.schema.NsFieldDef;
-import org.talend.components.netsuite.client.schema.NsSearchDef;
-import org.talend.components.netsuite.client.schema.NsSearchFieldOperatorTypeDef;
-import org.talend.components.netsuite.client.schema.NsTypeDef;
+import org.talend.components.netsuite.client.metadata.FieldDef;
+import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeDef;
+import org.talend.components.netsuite.client.metadata.TypeDef;
+import org.talend.components.netsuite.client.metadata.SearchRecordDef;
 import org.talend.components.netsuite.schema.NsSchema;
 import org.talend.components.netsuite.schema.NsSchemaImpl;
 import org.talend.daikon.NamedThing;
@@ -52,7 +52,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public Schema getSchema(String typeName) {
         try {
-            NsTypeDef entityInfo = clientService.getTypeDef(typeName);
+            TypeDef entityInfo = clientService.getTypeDef(typeName);
 
             Schema schema = inferSchemaForType(entityInfo);
             return schema;
@@ -64,9 +64,9 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public NsSchema getSearchRecordSchema(String typeName) {
         try {
-            final NsSearchDef searchInfo = clientService.getSearchDef(typeName);
-            final NsTypeDef searchRecordInfo = clientService.getTypeDef(searchInfo.getSearchBasicClass());
-            List<NsFieldDef> searchFieldInfos = searchRecordInfo.getFields();
+            final SearchRecordDef searchInfo = clientService.getSearchRecordDef(typeName);
+            final TypeDef searchRecordInfo = clientService.getTypeDef(searchInfo.getSearchBasicClass());
+            List<FieldDef> searchFieldInfos = searchRecordInfo.getFields();
             return new NsSchemaImpl(searchRecordInfo.getTypeName(), searchFieldInfos);
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
@@ -76,9 +76,9 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public NsSchema getDeleteRecordSchema(String typeName) {
         try {
-            final NsSearchDef searchInfo = clientService.getSearchDef(typeName);
-            final NsTypeDef searchRecordInfo = clientService.getTypeDef(searchInfo.getSearchBasicClass());
-            List<NsFieldDef> searchFieldInfos = searchRecordInfo.getFields();
+            final SearchRecordDef searchInfo = clientService.getSearchRecordDef(typeName);
+            final TypeDef searchRecordInfo = clientService.getTypeDef(searchInfo.getSearchBasicClass());
+            List<FieldDef> searchFieldInfos = searchRecordInfo.getFields();
             return new NsSchemaImpl(searchRecordInfo.getTypeName(), searchFieldInfos);
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
@@ -87,10 +87,10 @@ public class SchemaServiceImpl implements SchemaService {
 
     @Override
     public List<String> getSearchFieldOperators() {
-        List<NsSearchFieldOperatorTypeDef.QualifiedName> operatorList =
+        List<SearchFieldOperatorTypeDef.QualifiedName> operatorList =
                 new ArrayList<>(clientService.getSearchOperatorNames());
         List<String> operatorNames = new ArrayList<>(operatorList.size());
-        for (NsSearchFieldOperatorTypeDef.QualifiedName operatorName : operatorList) {
+        for (SearchFieldOperatorTypeDef.QualifiedName operatorName : operatorList) {
             operatorNames.add(operatorName.getQualifiedName());
         }
         return operatorNames;
@@ -103,10 +103,10 @@ public class SchemaServiceImpl implements SchemaService {
      * @param in the <code>EntityInfo</code> to analyse.
      * @return the schema for data given from the object.
      */
-    public static Schema inferSchemaForType(NsTypeDef in) {
+    public static Schema inferSchemaForType(TypeDef in) {
         List<Schema.Field> fields = new ArrayList<>();
 
-        for (NsFieldDef fieldInfo : in.getFields()) {
+        for (FieldDef fieldInfo : in.getFields()) {
 
             Schema.Field avroField = new Schema.Field(fieldInfo.getName(),
                     inferSchemaForField(fieldInfo), null, (Object) null);
@@ -152,7 +152,7 @@ public class SchemaServiceImpl implements SchemaService {
      * @param fieldInfo the <code>FieldInfo</code> to analyse.
      * @return the schema for data that the fieldInfo describes.
      */
-    public static Schema inferSchemaForField(NsFieldDef fieldInfo) {
+    public static Schema inferSchemaForField(FieldDef fieldInfo) {
         Schema base;
 
         Class<?> fieldType = fieldInfo.getValueType();

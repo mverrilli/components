@@ -7,6 +7,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.talend.components.netsuite.client.search.SearchResultSet;
 
 import com.netsuite.webservices.lists.accounting.types.AccountType;
 import com.netsuite.webservices.platform.core.Record;

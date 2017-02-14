@@ -11,8 +11,8 @@ import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NsObject;
-import org.talend.components.netsuite.client.schema.NsTypeDef;
-import org.talend.components.netsuite.client.schema.NsFieldDef;
+import org.talend.components.netsuite.client.metadata.TypeDef;
+import org.talend.components.netsuite.client.metadata.FieldDef;
 import org.talend.daikon.avro.converter.AvroConverter;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
 
@@ -57,12 +57,12 @@ public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<Ns
             Object object = clientService.createType(typeName);
             NsObject nsObject = NsObject.wrap(object);
 
-            NsTypeDef typeDef = clientService.getTypeDef(typeName);
+            TypeDef typeDef = clientService.getTypeDef(typeName);
 
             List<String> nullFieldList = new ArrayList<>();
 
             for (Schema.Field field : schema.getFields()) {
-                NsFieldDef fieldDef = typeDef.getField(field.name());
+                FieldDef fieldDef = typeDef.getField(field.name());
                 AvroConverter converter = NetSuiteAvroRegistry.getInstance()
                         .getConverter(field, fieldDef.getValueType());
 
@@ -98,11 +98,11 @@ public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<Ns
 
     protected void initMapping(Schema schema) {
         if (names == null) {
-            NsTypeDef typeDef = clientService.getTypeDef(getSchema().getName());
+            TypeDef typeDef = clientService.getTypeDef(getSchema().getName());
             fieldConverters = new HashMap<>(schema.getFields().size());
             for (Schema.Field field : schema.getFields()) {
                 String fieldName = field.name();
-                NsFieldDef fieldDef = typeDef.getField(fieldName);
+                FieldDef fieldDef = typeDef.getField(fieldName);
                 fieldConverters.put(fieldName, NetSuiteAvroRegistry.getInstance()
                         .getConverter(field, fieldDef.getValueType()));
             }

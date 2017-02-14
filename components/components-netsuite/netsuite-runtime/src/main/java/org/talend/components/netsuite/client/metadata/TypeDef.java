@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.client.schema;
+package org.talend.components.netsuite.client.metadata;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,19 +10,19 @@ import org.talend.components.netsuite.schema.NsSchema;
 /**
  *
  */
-public class NsTypeDef implements NsSchema<NsFieldDef> {
+public class TypeDef implements NsSchema<FieldDef> {
     private String typeName;
     private Class<?> typeClass;
-    private List<NsFieldDef> fields;
-    private Map<String, NsFieldDef> fieldMap;
+    private List<FieldDef> fields;
+    private Map<String, FieldDef> fieldMap;
 
-    public NsTypeDef(String typeName, Class<?> typeClass, List<NsFieldDef> fields) {
+    public TypeDef(String typeName, Class<?> typeClass, List<FieldDef> fields) {
         this.typeName = typeName;
         this.typeClass = typeClass;
         this.fields = fields;
 
         fieldMap = new HashMap<>(fields.size());
-        for (NsFieldDef fieldInfo : fields) {
+        for (FieldDef fieldInfo : fields) {
             fieldMap.put(fieldInfo.getName(), fieldInfo);
         }
     }
@@ -35,15 +35,15 @@ public class NsTypeDef implements NsSchema<NsFieldDef> {
         return typeClass;
     }
 
-    public NsFieldDef getField(String name) {
+    public FieldDef getField(String name) {
         return fieldMap.get(name);
     }
 
-    public Map<String, NsFieldDef> getFieldMap() {
+    public Map<String, FieldDef> getFieldMap() {
         return Collections.unmodifiableMap(fieldMap);
     }
 
-    public List<NsFieldDef> getFields() {
+    public List<FieldDef> getFields() {
         return Collections.unmodifiableList(fields);
     }
 }

@@ -21,12 +21,16 @@ public abstract class NetSuiteFactory {
 
     private transient static final Logger LOG = LoggerFactory.getLogger(NetSuiteFactory.class);
 
-    public static PropertyAccessor<Object> getPropertyAccessor(Class<?> clazz) {
+    public static <T> PropertyAccessor<T> getPropertyAccessor(Class<T> clazz) {
         if (PropertyAccess.class.isAssignableFrom(clazz)) {
-            return OptimizedPropertyAccessor.INSTANCE;
+            return (PropertyAccessor<T>) OptimizedPropertyAccessor.INSTANCE;
         } else {
-            return ReflectionPropertyAccessor.INSTANCE;
+            return (PropertyAccessor<T>) ReflectionPropertyAccessor.INSTANCE;
         }
+    }
+
+    public static <T> PropertyAccessor<T> getPropertyAccessor(T target) {
+        return (PropertyAccessor<T>) NetSuiteFactory.getPropertyAccessor(target.getClass());
     }
 
     public static EnumAccessor getEnumAccessor(Class<? extends Enum> clazz) {
