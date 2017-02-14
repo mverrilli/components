@@ -15,6 +15,8 @@ public interface SchemaService {
 
     Schema getSchema(String typeName);
 
+    List<NamedThing> getSearches();
+
     NsSchema getSearchRecordSchema(String typeName);
 
     NsSchema getDeleteRecordSchema(String typeName);

@@ -24,7 +24,7 @@ import com.netsuite.webservices.lists.accounting.types.AccountType;
 /**
  *
  */
-public class NetSuiteSearchInputReaderITest {
+public class NetSuiteSearchInputReaderIT {
 
     private static NetSuiteWebServiceTestFixture webServiceTestFixture;
 

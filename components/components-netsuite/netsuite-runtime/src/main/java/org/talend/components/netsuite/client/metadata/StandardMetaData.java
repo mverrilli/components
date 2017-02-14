@@ -3,7 +3,6 @@ package org.talend.components.netsuite.client.metadata;
 import static org.talend.components.netsuite.client.NetSuiteClientService.toInitialLower;
 import static org.talend.components.netsuite.client.NetSuiteClientService.toInitialUpper;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,7 +20,6 @@ import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.model.TypeInfo;
 import org.talend.components.netsuite.model.TypeManager;
 
-import com.google.common.reflect.ClassPath;
 import com.netsuite.webservices.activities.scheduling.CalendarEventSearch;
 import com.netsuite.webservices.activities.scheduling.CalendarEventSearchAdvanced;
 import com.netsuite.webservices.activities.scheduling.PhoneCallSearch;
@@ -64,6 +62,9 @@ import com.netsuite.webservices.lists.accounting.DepartmentSearch;
 import com.netsuite.webservices.lists.accounting.DepartmentSearchAdvanced;
 import com.netsuite.webservices.lists.accounting.ExpenseCategorySearch;
 import com.netsuite.webservices.lists.accounting.ExpenseCategorySearchAdvanced;
+import com.netsuite.webservices.lists.accounting.FairValuePrice;
+import com.netsuite.webservices.lists.accounting.FairValuePriceSearch;
+import com.netsuite.webservices.lists.accounting.FairValuePriceSearchAdvanced;
 import com.netsuite.webservices.lists.accounting.GiftCertificateSearch;
 import com.netsuite.webservices.lists.accounting.GiftCertificateSearchAdvanced;
 import com.netsuite.webservices.lists.accounting.GlobalAccountMappingSearch;
@@ -118,6 +119,8 @@ import com.netsuite.webservices.lists.marketing.CouponCodeSearch;
 import com.netsuite.webservices.lists.marketing.CouponCodeSearchAdvanced;
 import com.netsuite.webservices.lists.marketing.PromotionCodeSearch;
 import com.netsuite.webservices.lists.marketing.PromotionCodeSearchAdvanced;
+import com.netsuite.webservices.lists.relationships.BillingAccountSearch;
+import com.netsuite.webservices.lists.relationships.BillingAccountSearchAdvanced;
 import com.netsuite.webservices.lists.relationships.ContactSearch;
 import com.netsuite.webservices.lists.relationships.ContactSearchAdvanced;
 import com.netsuite.webservices.lists.relationships.CustomerSearch;
@@ -155,6 +158,7 @@ import com.netsuite.webservices.lists.website.SiteCategorySearchAdvanced;
 import com.netsuite.webservices.platform.common.AccountSearchBasic;
 import com.netsuite.webservices.platform.common.AccountingPeriodSearchBasic;
 import com.netsuite.webservices.platform.common.AccountingTransactionSearchBasic;
+import com.netsuite.webservices.platform.common.BillingAccountSearchBasic;
 import com.netsuite.webservices.platform.common.BillingScheduleSearchBasic;
 import com.netsuite.webservices.platform.common.BinSearchBasic;
 import com.netsuite.webservices.platform.common.BudgetSearchBasic;
@@ -177,6 +181,7 @@ import com.netsuite.webservices.platform.common.DepartmentSearchBasic;
 import com.netsuite.webservices.platform.common.EmployeeSearchBasic;
 import com.netsuite.webservices.platform.common.EntityGroupSearchBasic;
 import com.netsuite.webservices.platform.common.ExpenseCategorySearchBasic;
+import com.netsuite.webservices.platform.common.FairValuePriceSearchBasic;
 import com.netsuite.webservices.platform.common.FileSearchBasic;
 import com.netsuite.webservices.platform.common.FolderSearchBasic;
 import com.netsuite.webservices.platform.common.GiftCertificateSearchBasic;
@@ -199,6 +204,7 @@ import com.netsuite.webservices.platform.common.MessageSearchBasic;
 import com.netsuite.webservices.platform.common.NexusSearchBasic;
 import com.netsuite.webservices.platform.common.NoteSearchBasic;
 import com.netsuite.webservices.platform.common.NoteTypeSearchBasic;
+import com.netsuite.webservices.platform.common.OpportunitySearchBasic;
 import com.netsuite.webservices.platform.common.OtherNameCategorySearchBasic;
 import com.netsuite.webservices.platform.common.PartnerCategorySearchBasic;
 import com.netsuite.webservices.platform.common.PartnerSearchBasic;
@@ -224,9 +230,12 @@ import com.netsuite.webservices.platform.common.TimeSheetSearchBasic;
 import com.netsuite.webservices.platform.common.TopicSearchBasic;
 import com.netsuite.webservices.platform.common.TransactionSearchBasic;
 import com.netsuite.webservices.platform.common.UnitsTypeSearchBasic;
+import com.netsuite.webservices.platform.common.UsageSearchBasic;
 import com.netsuite.webservices.platform.common.VendorCategorySearchBasic;
 import com.netsuite.webservices.platform.common.VendorSearchBasic;
 import com.netsuite.webservices.platform.common.WinLossReasonSearchBasic;
+import com.netsuite.webservices.platform.core.CustomRecordRef;
+import com.netsuite.webservices.platform.core.CustomizationRef;
 import com.netsuite.webservices.platform.core.Record;
 import com.netsuite.webservices.platform.core.RecordRef;
 import com.netsuite.webservices.platform.core.SearchBooleanCustomField;
@@ -273,11 +282,15 @@ import com.netsuite.webservices.transactions.financial.BudgetSearch;
 import com.netsuite.webservices.transactions.financial.BudgetSearchAdvanced;
 import com.netsuite.webservices.transactions.sales.AccountingTransactionSearch;
 import com.netsuite.webservices.transactions.sales.AccountingTransactionSearchAdvanced;
+import com.netsuite.webservices.transactions.sales.OpportunitySearch;
+import com.netsuite.webservices.transactions.sales.OpportunitySearchAdvanced;
 import com.netsuite.webservices.transactions.sales.TransactionSearch;
 import com.netsuite.webservices.transactions.sales.TransactionSearchAdvanced;
+import com.netsuite.webservices.transactions.sales.UsageSearch;
+import com.netsuite.webservices.transactions.sales.UsageSearchAdvanced;
 
-//import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
-//import io.github.lukehutch.fastclasspathscanner.scanner.ScanResult;
+import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import io.github.lukehutch.fastclasspathscanner.scanner.ScanResult;
 
 /**
  *
@@ -285,6 +298,8 @@ import com.netsuite.webservices.transactions.sales.TransactionSearchAdvanced;
 public class StandardMetaData {
 
     private transient static final Logger LOG = LoggerFactory.getLogger(StandardMetaData.class);
+
+    public static final String SAVED_SEARCH_TYPE_ID = "-119";
 
     private static final String[] entityTypeList = new String[] {
             "Account",
@@ -311,6 +326,7 @@ public class StandardMetaData {
             "Employee",
             "EntityGroup",
             "ExpenseCategory",
+            "FairValuePrice",
             "File",
             "Folder",
             "GiftCertificate",
@@ -357,12 +373,14 @@ public class StandardMetaData {
             "TimeSheet",
             "Topic",
             "UnitsType",
+            "Usage",
             "Vendor",
             "VendorCategory",
             "WinLossReason",
     };
 
     private static final String[] transactionTypeList = {
+            "AccountingTransaction",
             "AssemblyBuild",
             "AssemblyUnbuild",
             "BinTransfer",
@@ -453,6 +471,7 @@ public class StandardMetaData {
             "ServicePurchaseItem",
             "ServiceResaleItem",
             "ServiceSaleItem",
+            "StatisticalJournalEntry",
             "SubtotalItem",
             "SupportCaseIssue",
             "SupportCaseOrigin",
@@ -485,6 +504,9 @@ public class StandardMetaData {
     }
 
     private void initMetaData() {
+        LOG.info("Initializing standard metadata...");
+        long startTime = System.currentTimeMillis();
+
         for (String type : entityTypeList) {
             standardEntityTypes.add(type);
         }
@@ -495,21 +517,16 @@ public class StandardMetaData {
             standardItemTypes.add(type);
         }
 
-//        FastClasspathScanner scanner = new FastClasspathScanner("com.netsuite.webservices");
-//        ScanResult scanResult = scanner.scan();
-
-        final ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        FastClasspathScanner scanner = new FastClasspathScanner("com.netsuite.webservices");
+        ScanResult scanResult = scanner.scan();
 
         try {
             Set<String> excludedTypeNames = new HashSet<>(Arrays.asList(
                     "LandedCost", "Address", "InventoryDetail", "TimeEntry", "CustomFieldType"
             ));
             Set<String> unresolvedTypeNames = new HashSet<>();
-            for (final ClassPath.ClassInfo info : ClassPath.from(loader)
-                    .getTopLevelClassesRecursive("com.netsuite.webservices")) {
-                final Class<?> clazz = info.load();
-//            for (String className : scanResult.getNamesOfSubclassesOf(Record.class)) {
-//                Class<?> clazz = Class.forName(className);
+            for (String className : scanResult.getNamesOfSubclassesOf(Record.class)) {
+                Class<?> clazz = Class.forName(className);
                 String recordTypeName = clazz.getSimpleName();
                 RecordType recordType = null;
                 if (!excludedTypeNames.contains(recordTypeName)) {
@@ -524,25 +541,18 @@ public class StandardMetaData {
 
                 registerType(clazz, recordTypeName);
             }
-            System.out.println("Unresolved types: " + unresolvedTypeNames);
-        } catch (IOException e) {
+            if (!unresolvedTypeNames.isEmpty()) {
+                throw new IllegalStateException("Unresolved record types detected: " + unresolvedTypeNames);
+            }
+        } catch (ClassNotFoundException e) {
             LOG.error("Class not found: " + e.getMessage(), e);
         }
-
-//        try {
-//            for (String className : scanResult.getNamesOfSubclassesOf(SearchRecord.class)) {
-//                Class<?> searchRecordClass = Class.forName(className);
-//                String searchRecordTypeName = searchRecordClass.getSimpleName();
-//                registerType(searchRecordClass, searchRecordTypeName);
-//            }
-//        } catch (ClassNotFoundException e) {
-//            LOG.error("Class not found: " + e.getMessage(), e);
-//        }
 
         SearchRecordDef[] searchRecordDefs = {
                 new SearchRecordDef(SearchRecordType.ACCOUNT, AccountSearch.class, AccountSearchBasic.class, AccountSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.ACCOUNTING_PERIOD, AccountingPeriodSearch.class, AccountingPeriodSearchBasic.class, AccountingPeriodSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.ACCOUNTING_TRANSACTION, AccountingTransactionSearch.class, AccountingTransactionSearchBasic.class, AccountingTransactionSearchAdvanced.class),
+                new SearchRecordDef(SearchRecordType.BILLING_ACCOUNT, BillingAccountSearch.class, BillingAccountSearchBasic.class, BillingAccountSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.BILLING_SCHEDULE, BillingScheduleSearch.class, BillingScheduleSearchBasic.class, BillingScheduleSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.BIN, BinSearch.class, BinSearchBasic.class, BinSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.BUDGET, BudgetSearch.class, BudgetSearchBasic.class, BudgetSearchAdvanced.class),
@@ -563,6 +573,7 @@ public class StandardMetaData {
                 new SearchRecordDef(SearchRecordType.EMPLOYEE, EmployeeSearch.class, EmployeeSearchBasic.class, EmployeeSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.ENTITY_GROUP, EntityGroupSearch.class, EntityGroupSearchBasic.class, EntityGroupSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.EXPENSE_CATEGORY, ExpenseCategorySearch.class, ExpenseCategorySearchBasic.class, ExpenseCategorySearchAdvanced.class),
+                new SearchRecordDef(SearchRecordType.FAIR_VALUE_PRICE, FairValuePriceSearch.class, FairValuePriceSearchBasic.class, FairValuePriceSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.FILE, FileSearch.class, FileSearchBasic.class, FileSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.FOLDER, FolderSearch.class, FolderSearchBasic.class, FolderSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.GIFT_CERTIFICATE, GiftCertificateSearch.class, GiftCertificateSearchBasic.class, GiftCertificateSearchAdvanced.class),
@@ -584,6 +595,7 @@ public class StandardMetaData {
                 new SearchRecordDef(SearchRecordType.NEXUS, NexusSearch.class, NexusSearchBasic.class, NexusSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.NOTE, NoteSearch.class, NoteSearchBasic.class, NoteSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.NOTE_TYPE, NoteTypeSearch.class, NoteTypeSearchBasic.class, NoteTypeSearchAdvanced.class),
+                new SearchRecordDef(SearchRecordType.OPPORTUNITY, OpportunitySearch.class, OpportunitySearchBasic.class, OpportunitySearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.OTHER_NAME_CATEGORY, OtherNameCategorySearch.class, OtherNameCategorySearchBasic.class, OtherNameCategorySearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.PARTNER, PartnerSearch.class, PartnerSearchBasic.class, PartnerSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.PARTNER_CATEGORY, PartnerCategorySearch.class, PartnerCategorySearchBasic.class, PartnerCategorySearchAdvanced.class),
@@ -608,6 +620,7 @@ public class StandardMetaData {
                 new SearchRecordDef(SearchRecordType.TIME_SHEET, TimeSheetSearch.class, TimeSheetSearchBasic.class, TimeSheetSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.TOPIC, TopicSearch.class, TopicSearchBasic.class, TopicSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.UNITS_TYPE, UnitsTypeSearch.class, UnitsTypeSearchBasic.class, UnitsTypeSearchAdvanced.class),
+                new SearchRecordDef(SearchRecordType.USAGE, UsageSearch.class, UsageSearchBasic.class, UsageSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.VENDOR, VendorSearch.class, VendorSearchBasic.class, VendorSearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.VENDOR_CATEGORY, VendorCategorySearch.class, VendorCategorySearchBasic.class, VendorCategorySearchAdvanced.class),
                 new SearchRecordDef(SearchRecordType.WIN_LOSS_REASON, WinLossReasonSearch.class, WinLossReasonSearchBasic.class, WinLossReasonSearchAdvanced.class),
@@ -745,6 +758,12 @@ public class StandardMetaData {
         };
         registerSearchFieldOperatorTypeDefs(searchFieldOperatorTable);
 
+        registerType(RecordRef.class, null);
+        registerType(CustomRecordRef.class, null);
+        registerType(CustomizationRef.class, null);
+
+        long endTime = System.currentTimeMillis();
+        LOG.info("Initialized standard metadata: " + (endTime - startTime));
     }
 
     protected void registerType(Class<?> typeClass, String typeName) {
@@ -835,7 +854,19 @@ public class StandardMetaData {
     }
 
     public Collection<String> getRecordTypes() {
-        return Collections.unmodifiableCollection(recordTypeDefMap.keySet());
+        return getRecordTypes(false);
+    }
+
+    public Collection<String> getRecordTypes(boolean includeCustomizationTypes) {
+        if (!includeCustomizationTypes) {
+            Set<String> types = new HashSet<>();
+            types.addAll(standardEntityTypes);
+            types.addAll(standardTransactionTypes);
+            types.addAll(standardItemTypes);
+            return Collections.unmodifiableCollection(types);
+        } else {
+            return Collections.unmodifiableCollection(recordTypeDefMap.keySet());
+        }
     }
 
     public RecordTypeDef getRecordTypeDef(String typeName) {
@@ -844,7 +875,14 @@ public class StandardMetaData {
 
     public SearchRecordDef getSearchRecordDef(String typeName) {
         RecordTypeDef recordTypeDef = getRecordTypeDef(typeName);
-        SearchRecordType searchRecordType = recordSearchTypeMap.get(recordTypeDef.getRecordType());
+        if (recordTypeDef != null) {
+            SearchRecordType searchRecordType = recordSearchTypeMap.get(recordTypeDef.getRecordType());
+            return searchRecordDefMap.get(searchRecordType);
+        }
+        return null;
+    }
+
+    public SearchRecordDef getSearchRecordDef(SearchRecordType searchRecordType) {
         return searchRecordDefMap.get(searchRecordType);
     }
 

@@ -1,10 +1,12 @@
 package org.talend.components.netsuite;
 
 import org.talend.components.api.component.AbstractComponentDefinition;
+import org.talend.components.api.component.runtime.DependenciesReader;
 import org.talend.components.api.component.runtime.ExecutionEngine;
+import org.talend.components.api.component.runtime.SimpleRuntimeInfo;
 import org.talend.components.api.properties.ComponentProperties;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
-import org.talend.components.netsuite.runtime.RuntimeInfoFactory;
+import org.talend.components.netsuite.connection.TNetSuiteConnectionDefinition;
 import org.talend.components.netsuite.runtime.SchemaService;
 import org.talend.components.netsuite.runtime.RuntimeService;
 import org.talend.daikon.java8.Function;
@@ -17,6 +19,19 @@ import org.talend.daikon.sandbox.SandboxedInstance;
  *
  */
 public abstract class TNetSuiteComponentDefinition extends AbstractComponentDefinition {
+
+    public static final String MAVEN_GROUP_ID = "org.talend.components";
+    public static final String MAVEN_ARTIFACT_ID = "netsuite-runtime";
+
+    public static final String SOURCE_OR_SINK_CLASS =
+            "org.talend.components.netsuite.NetSuiteSourceOrSink";
+    public static final String SOURCE_CLASS =
+            "org.talend.components.netsuite.NetSuiteSource";
+    public static final String SINK_CLASS =
+            "org.talend.components.netsuite.NetSuiteSink";
+
+    public static final String RUNTIME_SERVICE_CLASS =
+            "org.talend.components.netsuite.runtime.RuntimeServiceImpl";
 
     protected TNetSuiteComponentDefinition(String componentName, ExecutionEngine engine1, ExecutionEngine... engines) {
         super(componentName, engine1, engines);
@@ -50,14 +65,20 @@ public abstract class TNetSuiteComponentDefinition extends AbstractComponentDefi
     }
 
     public static <R> R withRuntimeService(final Function<RuntimeService, R> func) {
-
-        RuntimeInfo runtimeInfo = RuntimeInfoFactory.getInstance()
-                .getRuntimeInfo(RuntimeInfoFactory.RUNTIME_SERVICE_CLASS);
-
+        RuntimeInfo runtimeInfo = getRuntimeInfo(TNetSuiteConnectionDefinition.RUNTIME_SERVICE_CLASS);
         try (SandboxedInstance sandboxI = RuntimeUtil.createRuntimeClass(runtimeInfo,
                 TNetSuiteComponentDefinition.class.getClassLoader())) {
             RuntimeService runtimeService = (RuntimeService) sandboxI.getInstance();
             return func.apply(runtimeService);
         }
+    }
+
+    public static RuntimeInfo getRuntimeInfo(String runtimeClassName) {
+        return new SimpleRuntimeInfo(TNetSuiteConnectionDefinition.class.getClassLoader(),
+                DependenciesReader.computeDependenciesFilePath(MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID),
+                runtimeClassName);
+//        return new JarRuntimeInfo("mvn:" + MAVEN_GROUP_ID + "/" + MAVEN_ARTIFACT_ID,
+//                DependenciesReader.computeDependenciesFilePath(MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID),
+//                runtimeClassName);
     }
 }

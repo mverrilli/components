@@ -8,9 +8,12 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.bind.JAXBException;
@@ -32,6 +35,8 @@ import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeDef
 import org.talend.components.netsuite.client.metadata.SearchRecordDef;
 import org.talend.components.netsuite.client.metadata.StandardMetaData;
 import org.talend.components.netsuite.client.search.SearchQuery;
+import org.talend.daikon.NamedThing;
+import org.talend.daikon.SimpleNamedThing;
 
 import com.netsuite.webservices.platform.ExceededRequestSizeFault;
 import com.netsuite.webservices.platform.InsufficientPermissionFault;
@@ -41,20 +46,29 @@ import com.netsuite.webservices.platform.NetSuitePortType;
 import com.netsuite.webservices.platform.NetSuiteService;
 import com.netsuite.webservices.platform.UnexpectedErrorFault;
 import com.netsuite.webservices.platform.core.BaseRef;
+import com.netsuite.webservices.platform.core.CustomizationRef;
+import com.netsuite.webservices.platform.core.CustomizationType;
 import com.netsuite.webservices.platform.core.DataCenterUrls;
+import com.netsuite.webservices.platform.core.GetCustomizationIdResult;
+import com.netsuite.webservices.platform.core.GetSavedSearchRecord;
+import com.netsuite.webservices.platform.core.GetSavedSearchResult;
 import com.netsuite.webservices.platform.core.Passport;
 import com.netsuite.webservices.platform.core.Record;
 import com.netsuite.webservices.platform.core.RecordRef;
 import com.netsuite.webservices.platform.core.SearchRecord;
 import com.netsuite.webservices.platform.core.SearchResult;
 import com.netsuite.webservices.platform.core.Status;
+import com.netsuite.webservices.platform.core.types.GetCustomizationType;
+import com.netsuite.webservices.platform.core.types.SearchRecordType;
 import com.netsuite.webservices.platform.messages.AddListRequest;
 import com.netsuite.webservices.platform.messages.AddRequest;
 import com.netsuite.webservices.platform.messages.ApplicationInfo;
 import com.netsuite.webservices.platform.messages.DeleteListRequest;
 import com.netsuite.webservices.platform.messages.DeleteRequest;
+import com.netsuite.webservices.platform.messages.GetCustomizationIdRequest;
 import com.netsuite.webservices.platform.messages.GetDataCenterUrlsRequest;
 import com.netsuite.webservices.platform.messages.GetDataCenterUrlsResponse;
+import com.netsuite.webservices.platform.messages.GetSavedSearchRequest;
 import com.netsuite.webservices.platform.messages.LoginRequest;
 import com.netsuite.webservices.platform.messages.LoginResponse;
 import com.netsuite.webservices.platform.messages.LogoutRequest;
@@ -709,8 +723,36 @@ public class NetSuiteClientService {
 
     private static StandardMetaData standardMetaData = new StandardMetaData();
 
+    private Map<String, CustomizationDef> customizationRefMap = new HashMap<>();
+    private Map<String, SavedSearchDef> savedSearchDefMap = new HashMap<>();
+    private Set<SearchRecordType> savedSearchesLoaded = new HashSet<>();
+
     public Collection<String> getRecordTypes() {
         return standardMetaData.getRecordTypes();
+    }
+
+    public Collection<NamedThing> getSearches() throws NetSuiteException {
+        List<NamedThing> searches = new ArrayList<>(256);
+
+        Collection<String> recordTypes = standardMetaData.getRecordTypes(false);
+        for (String recordTypeName : recordTypes) {
+            RecordTypeDef def = standardMetaData.getRecordTypeDef(recordTypeName);
+            SearchRecordDef searchRecordDef = standardMetaData.getSearchRecordDef(recordTypeName);
+            if (searchRecordDef != null) {
+                String name = def.getName();
+                searches.add(new SimpleNamedThing(name, name));
+            }
+        }
+
+        loadSavedSearches();
+
+        for (SavedSearchDef def : savedSearchDefMap.values()) {
+            String name = def.getId();
+            String displayName = def.getName();
+            searches.add(new SimpleNamedThing(name, displayName));
+        }
+
+        return searches;
     }
 
     public Collection<String> getTransactionTypes() {
@@ -734,7 +776,17 @@ public class NetSuiteClientService {
     }
 
     public SearchRecordDef getSearchRecordDef(String typeName) {
-        return standardMetaData.getSearchRecordDef(typeName);
+        SearchRecordDef searchRecordDef = standardMetaData.getSearchRecordDef(typeName);
+        if (searchRecordDef == null) {
+            SavedSearchDef savedSearchDef = savedSearchDefMap.get(typeName);
+            if (savedSearchDef != null) {
+                SearchRecordType searchRecordType = savedSearchDef.getSearchRecordType();
+                if (searchRecordType != null) {
+                    searchRecordDef = standardMetaData.getSearchRecordDef(searchRecordType);
+                }
+            }
+        }
+        return searchRecordDef;
     }
 
     public Class<?> getSearchFieldClass(String searchFieldType) {
@@ -766,8 +818,111 @@ public class NetSuiteClientService {
         }
     }
 
-    protected void updateCustomMetaData() throws NetSuiteException {
+    public void updateCustomMetaData() throws NetSuiteException {
+        customizationRefMap.clear();
 
+        savedSearchesLoaded.clear();
+        savedSearchDefMap.clear();
+
+        loadCustomizations();
+        loadSavedSearches();
+    }
+
+    protected void loadCustomizations() throws NetSuiteException {
+
+        GetCustomizationType[] customizationTypes = new GetCustomizationType[] {
+                GetCustomizationType.CUSTOM_RECORD_TYPE,
+                GetCustomizationType.ENTITY_CUSTOM_FIELD,
+                GetCustomizationType.ITEM_CUSTOM_FIELD,
+                GetCustomizationType.CRM_CUSTOM_FIELD,
+                GetCustomizationType.CUSTOM_TRANSACTION_TYPE,
+                GetCustomizationType.TRANSACTION_BODY_CUSTOM_FIELD,
+                GetCustomizationType.TRANSACTION_COLUMN_CUSTOM_FIELD
+        };
+        for (final GetCustomizationType getCustomizationType : customizationTypes) {
+            loadCustomizations(getCustomizationType);
+        }
+//        for (CustomizationDef def : customizationRefMap.values()) {
+//            System.out.println("Customization: " + def.getRef().getScriptId() + ", " + def.getRef().getInternalId() + ", " + def.getRef().getName());
+//        }
+    }
+
+    protected void loadCustomizations(final GetCustomizationType getCustomizationType) throws NetSuiteException {
+        GetCustomizationIdResult result = execute(new PortOperation<GetCustomizationIdResult>() {
+            @Override public GetCustomizationIdResult execute(NetSuitePortType port) throws Exception {
+                final GetCustomizationIdRequest request = new GetCustomizationIdRequest();
+                CustomizationType customizationType = new CustomizationType();
+                customizationType.setGetCustomizationType(getCustomizationType);
+                request.setCustomizationType(customizationType);
+                return port.getCustomizationId(request).getGetCustomizationIdResult();
+            }
+        });
+        if (result.getStatus().getIsSuccess()) {
+            if (result.getTotalRecords() > 0) {
+                for (final CustomizationRef ref : result.getCustomizationRefList().getCustomizationRef()) {
+                    String type = getCustomizationType.value();
+                    CustomizationDef def = new CustomizationDef(type, ref);
+                    if (customizationRefMap.containsKey(ref.getScriptId())) {
+                        throw new IllegalArgumentException("Customization already registered: " + ref.getScriptId());
+                    }
+                    customizationRefMap.put(ref.getScriptId(), def);
+                }
+            }
+        } else {
+            throw new NetSuiteException("Retrieving of customizations was not successful: " + getCustomizationType.value());
+        }
+    }
+
+    protected void loadSavedSearches() throws NetSuiteException {
+        final SearchRecordType[] searchRecordTypes = SearchRecordType.values();
+
+        for (final SearchRecordType searchRecordType : searchRecordTypes) {
+            loadSavedSearches(searchRecordType);
+        }
+//        System.out.println("Saved searches: ");
+//        for (SavedSearchDef def : savedSearchDefMap.values()) {
+//            SearchRecordType searchRecordType = def.getSearchRecordType();
+//            RecordRef ref = def.getRef();
+//            if (ref instanceof CustomizationRef) {
+//                CustomizationRef customizationRef = (CustomizationRef) ref;
+//                System.out.println("  Custom: " + searchRecordType + ", " + customizationRef.getScriptId() + ", " + ref.getInternalId() + ", " + ref.getExternalId() + ", " + ref.getName() + ", " + customizationRef.getType());
+//            } else {
+//                System.out.println("  Standard: " + searchRecordType + ", " + ref.getInternalId() + ", " + ref.getType() + ", " + ref.getName());
+//            }
+//        }
+    }
+
+    protected void loadSavedSearches(final SearchRecordType searchRecordType) throws NetSuiteException {
+        if (savedSearchesLoaded.contains(searchRecordType)) {
+            return;
+        }
+        GetSavedSearchResult result = execute(new PortOperation<GetSavedSearchResult>() {
+            @Override public GetSavedSearchResult execute(NetSuitePortType port) throws Exception {
+                GetSavedSearchRecord savedSearchRecord = new GetSavedSearchRecord();
+                savedSearchRecord.setSearchType(searchRecordType);
+                GetSavedSearchRequest request = new GetSavedSearchRequest();
+                request.setRecord(savedSearchRecord);
+                return port.getSavedSearch(request).getGetSavedSearchResult();
+            }
+        });
+        if (result.getStatus().getIsSuccess()) {
+            if (result.getTotalRecords() > 0) {
+                for (final RecordRef ref : result.getRecordRefList().getRecordRef()) {
+                    if (ref instanceof CustomizationRef) {
+                        CustomizationRef customizationRef = (CustomizationRef) ref;
+                        String id = customizationRef.getScriptId();
+                        SavedSearchDef def = new SavedSearchDef(searchRecordType, customizationRef);
+                        if (savedSearchDefMap.containsKey(id)) {
+                            throw new IllegalArgumentException("Saved search already registered: " + id);
+                        }
+                        savedSearchDefMap.put(id, def);
+                    }
+                }
+            }
+        } else {
+            throw new NetSuiteException("Retrieving of saved searches was not successful: " + searchRecordType.value());
+        }
+        savedSearchesLoaded.add(searchRecordType);
     }
 
     public static String toInitialUpper(String value) {
@@ -782,7 +937,65 @@ public class NetSuiteClientService {
         return "_" + toInitialLower(value);
     }
 
-    public static void main(String... args) throws Exception {
-        new NetSuiteClientService();
+    protected static class CustomizationDef {
+        private String customizationType;
+        private CustomizationRef ref;
+
+        public CustomizationDef(String customizationType, CustomizationRef ref) {
+            this.customizationType = customizationType;
+            this.ref = ref;
+        }
+
+        public String getCustomizationType() {
+            return customizationType;
+        }
+
+        public CustomizationRef getRef() {
+            return ref;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("CustomizationDef{");
+            sb.append("customizationType='").append(customizationType).append('\'');
+            sb.append(", ref=").append(ref);
+            sb.append('}');
+            return sb.toString();
+        }
+    }
+
+    protected static class SavedSearchDef {
+        private SearchRecordType searchRecordType;
+        private CustomizationRef ref;
+
+        public SavedSearchDef(SearchRecordType searchRecordType, CustomizationRef ref) {
+            this.searchRecordType = searchRecordType;
+            this.ref = ref;
+        }
+
+        public String getId() {
+            return ref.getScriptId();
+        }
+
+        public String getName() {
+            return ref.getName();
+        }
+
+        public SearchRecordType getSearchRecordType() {
+            return searchRecordType;
+        }
+
+        public CustomizationRef getRef() {
+            return ref;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("SavedSearchDef{");
+            sb.append("searchRecordType=").append(searchRecordType);
+            sb.append(", ref=").append(ref);
+            sb.append('}');
+            return sb.toString();
+        }
     }
 }

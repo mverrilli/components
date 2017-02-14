@@ -16,7 +16,7 @@ public class SearchRecordDef {
 
     public SearchRecordDef(SearchRecordType searchRecordType,
             Class<?> searchClass, Class<?> searchBasicClass, Class<?> searchAdvancedClass) {
-        this.name = NetSuiteClientService.toInitialUpper(searchRecordType.name());
+        this.name = NetSuiteClientService.toInitialUpper(searchRecordType.value());
         this.searchRecordType = searchRecordType;
         this.searchClass = searchClass;
         this.searchBasicClass = searchBasicClass;

@@ -2,6 +2,7 @@ package org.talend.components.netsuite.runtime;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -56,6 +57,22 @@ public class SchemaServiceImpl implements SchemaService {
 
             Schema schema = inferSchemaForType(entityInfo);
             return schema;
+        } catch (NetSuiteException e) {
+            throw new ComponentException(e);
+        }
+    }
+
+    @Override
+    public List<NamedThing> getSearches() {
+        try {
+            List<NamedThing> searches = new ArrayList<>(clientService.getSearches());
+            // Sort by display name alphabetically
+            Collections.sort(searches, new Comparator<NamedThing>() {
+                @Override public int compare(NamedThing o1, NamedThing o2) {
+                    return o1.getDisplayName().compareTo(o2.getDisplayName());
+                }
+            });
+            return searches;
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }

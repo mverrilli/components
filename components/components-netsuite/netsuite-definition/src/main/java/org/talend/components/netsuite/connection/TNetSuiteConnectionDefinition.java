@@ -6,7 +6,6 @@ import java.util.Set;
 import org.talend.components.api.component.ConnectorTopology;
 import org.talend.components.api.component.runtime.ExecutionEngine;
 import org.talend.components.api.properties.ComponentProperties;
-import org.talend.components.netsuite.runtime.RuntimeInfoFactory;
 import org.talend.components.netsuite.TNetSuiteComponentDefinition;
 import org.talend.daikon.properties.property.Property;
 import org.talend.daikon.runtime.RuntimeInfo;
@@ -42,8 +41,7 @@ public class TNetSuiteConnectionDefinition extends TNetSuiteComponentDefinition 
             ConnectorTopology connectorTopology) {
         assertEngineCompatibility(engine);
         assertConnectorTopologyCompatibility(connectorTopology);
-        return RuntimeInfoFactory.getInstance()
-                .getRuntimeInfo(RuntimeInfoFactory.SOURCE_OR_SINK_CLASS);
+        return getRuntimeInfo(TNetSuiteConnectionDefinition.SOURCE_OR_SINK_CLASS);
     }
 
     @Override
