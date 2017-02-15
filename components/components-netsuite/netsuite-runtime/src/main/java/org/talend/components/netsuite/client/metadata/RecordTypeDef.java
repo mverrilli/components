@@ -1,6 +1,6 @@
 package org.talend.components.netsuite.client.metadata;
 
-import org.talend.components.netsuite.client.NetSuiteClientService;
+import org.talend.components.netsuite.client.NetSuiteFactory;
 
 /**
  *
@@ -11,7 +11,7 @@ public class RecordTypeDef {
     private Class<?> recordClass;
 
     public RecordTypeDef(String recordType, Class<?> recordClass) {
-        this.name = NetSuiteClientService.toInitialUpper(recordType);
+        this.name = NetSuiteFactory.toInitialUpper(recordType);
         this.recordType = recordType;
         this.recordClass = recordClass;
     }

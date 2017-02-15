@@ -1,5 +1,6 @@
 package org.talend.components.netsuite.client;
 
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,7 +22,8 @@ import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.model.TypeInfo;
 import org.talend.components.netsuite.model.TypeManager;
 
-import static org.talend.components.netsuite.client.NetSuiteClientService.toInitialUpper;
+import static org.talend.components.netsuite.client.NetSuiteFactory.toInitialLower;
+import static org.talend.components.netsuite.client.NetSuiteFactory.toInitialUpper;
 
 /**
  *
@@ -63,6 +65,41 @@ public abstract class StandardMetaData {
             }
         }
         typeMap.put(typeNameToRegister, typeClass);
+    }
+
+    protected void registerRecordTypes(Class<?> recordBaseClass, Collection<Class<?>> recordClasses,
+            Collection<String> excludedRecordTypeNames, EnumAccessor recordTypeEnumAccessor) {
+
+        Set<String> unresolvedTypeNames = new HashSet<>();
+
+        for (Class<?> clazz : recordClasses) {
+            if (clazz == recordBaseClass
+                    || !recordBaseClass.isAssignableFrom(clazz)
+                    || Modifier.isAbstract(clazz.getModifiers())) {
+                continue;
+            }
+
+            String recordTypeName = clazz.getSimpleName();
+            Enum<?> recordType;
+            if (!excludedRecordTypeNames.contains(recordTypeName)) {
+                try {
+                    recordType = recordTypeEnumAccessor.mapFromString(toInitialLower(recordTypeName));
+
+                    String name = recordTypeEnumAccessor.mapToString(recordType);
+
+                    RecordTypeDef def = new RecordTypeDef(name, clazz);
+                    recordTypeDefMap.put(recordTypeName, def);
+
+                } catch (IllegalArgumentException e) {
+                    unresolvedTypeNames.add(recordTypeName);
+                }
+                registerType(clazz, recordTypeName);
+            }
+        }
+
+        if (!unresolvedTypeNames.isEmpty()) {
+            throw new IllegalStateException("Unresolved record types detected: " + unresolvedTypeNames);
+        }
     }
 
     protected void registerRecordSearchTypeMapping(Enum<?>[] recordTypes,
@@ -127,16 +164,20 @@ public abstract class StandardMetaData {
         searchFieldOperatorMap.put("SearchEnumMultiSelectCustomField", "SearchEnumMultiSelectFieldOperator");
     }
 
-    public Collection<String> getTransactionTypes() {
-        return Collections.unmodifiableCollection(standardTransactionTypes);
-    }
+//    public Collection<String> getTransactionTypes() {
+//        return Collections.unmodifiableCollection(standardTransactionTypes);
+//    }
+//
+//    public Collection<String> getItemTypes() {
+//        return Collections.unmodifiableCollection(standardItemTypes);
+//    }
 
-    public Collection<String> getItemTypes() {
-        return Collections.unmodifiableCollection(standardItemTypes);
+    public Class<?> getTypeClass(String typeName) {
+        return typeMap.get(typeName);
     }
 
     public TypeDef getTypeDef(String typeName) {
-        Class<?> clazz = typeMap.get(typeName);
+        Class<?> clazz = getTypeClass(typeName);
         return clazz != null ? getTypeDef(clazz) : null;
     }
 
@@ -160,19 +201,7 @@ public abstract class StandardMetaData {
     }
 
     public Collection<String> getRecordTypes() {
-        return getRecordTypes(false);
-    }
-
-    public Collection<String> getRecordTypes(boolean includeCustomizationTypes) {
-        if (!includeCustomizationTypes) {
-            Set<String> types = new HashSet<>();
-            types.addAll(standardEntityTypes);
-            types.addAll(standardTransactionTypes);
-            types.addAll(standardItemTypes);
-            return Collections.unmodifiableCollection(types);
-        } else {
-            return Collections.unmodifiableCollection(recordTypeDefMap.keySet());
-        }
+        return Collections.unmodifiableCollection(recordTypeDefMap.keySet());
     }
 
     public RecordTypeDef getRecordTypeDef(String recordType) {

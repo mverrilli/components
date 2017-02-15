@@ -17,8 +17,8 @@ import org.talend.components.netsuite.runtime.SchemaServiceImpl;
 import org.talend.daikon.avro.SchemaConstants;
 import org.talend.daikon.avro.converter.AvroConverter;
 
-import com.netsuite.webservices.lists.accounting.types.AccountType;
-import com.netsuite.webservices.lists.accounting.types.ConsolidatedRate;
+import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
+import com.netsuite.webservices.v2016_2.lists.accounting.types.ConsolidatedRate;
 
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
@@ -32,7 +32,7 @@ import static org.junit.Assert.assertThat;
  */
 public class NetSuiteAvroRegistryTest {
 
-    private NetSuiteClientService clientService = new NetSuiteClientService();
+    private NetSuiteClientService clientService = NetSuiteClientService.create("2016.2");
     private NetSuiteAvroRegistry registry = NetSuiteAvroRegistry.getInstance();
 
     @Test

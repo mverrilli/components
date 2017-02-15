@@ -8,8 +8,8 @@ import javax.xml.ws.Endpoint;
 
 import org.apache.cxf.headers.Header;
 
-import com.netsuite.webservices.platform.NetSuitePortType;
-import com.netsuite.webservices.platform.NetSuiteService;
+import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
+import com.netsuite.webservices.v2016_2.platform.NetSuiteService;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -52,7 +52,7 @@ public class NetSuiteWebServiceMockTestFixture {
         portMock = mock(NetSuitePortType.class);
         portMockAdapter.setPort(portMock);
 
-        clientService = new NetSuiteClientService();
+        clientService = NetSuiteClientService.create("2016.2");
         clientService.setEndpointUrl(endpointAddress.toString());
         clientService.setCredentials(credentials);
 

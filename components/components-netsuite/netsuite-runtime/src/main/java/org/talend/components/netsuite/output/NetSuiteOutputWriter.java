@@ -14,9 +14,6 @@ import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NsObject;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
 
-import com.netsuite.webservices.platform.core.BaseRef;
-import com.netsuite.webservices.platform.core.Record;
-
 /**
  * TODO Implement bulk Add/Update/Upsert/Delete
  */
@@ -62,13 +59,13 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
         IndexedRecord record = (IndexedRecord) object;
         try {
             if (action == NetSuiteOutputProperties.OutputAction.ADD) {
-                clientService.add(createObject(record, Record.class));
+                clientService.add(createObject(record, Object.class));
             } else if (action == NetSuiteOutputProperties.OutputAction.UPDATE) {
-                clientService.update(createObject(record, Record.class));
+                clientService.update(createObject(record, Object.class));
             } else if (action == NetSuiteOutputProperties.OutputAction.UPSERT) {
-                clientService.upsert(createObject(record, Record.class));
+                clientService.upsert(createObject(record, Object.class));
             } else if (action == NetSuiteOutputProperties.OutputAction.DELETE) {
-                clientService.delete(createObject(record, BaseRef.class));
+                clientService.delete(createObject(record, Object.class));
             }
             successfulWrites.add(record);
         } catch (IOException e) {

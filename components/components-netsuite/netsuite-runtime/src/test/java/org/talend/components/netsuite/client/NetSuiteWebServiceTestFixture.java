@@ -24,7 +24,7 @@ public class NetSuiteWebServiceTestFixture {
 
         credentials = NetSuiteCredentials.loadFromProperties(properties, "credentials.");
 
-        clientService = new NetSuiteClientService();
+        clientService = NetSuiteClientService.create("2016.2");
         clientService.setEndpointUrl(getEndpointUrl());
         clientService.setCredentials(credentials);
 

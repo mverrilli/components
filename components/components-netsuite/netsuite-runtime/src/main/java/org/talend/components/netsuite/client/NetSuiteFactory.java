@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.commons.beanutils.MethodUtils;
+import org.talend.components.netsuite.model.PropertyAccessor;
 import org.talend.components.netsuite.model.EnumAccessor;
 import org.talend.components.netsuite.model.Mapper;
 import org.talend.components.netsuite.model.PropertyAccess;
@@ -65,6 +66,18 @@ public abstract class NetSuiteFactory {
 
     public static Mapper<String, Enum> getEnumFromStringMapper(Class<Enum> clazz) {
         return getEnumAccessorImpl(clazz).getFromStringMapper();
+    }
+
+    public static String toInitialUpper(String value) {
+        return value.substring(0, 1).toUpperCase() + value.substring(1);
+    }
+
+    public static String toInitialLower(String value) {
+        return value.substring(0, 1).toLowerCase() + value.substring(1);
+    }
+
+    public static String toNetSuiteType(String value) {
+        return "_" + toInitialLower(value);
     }
 
     public static class ReflectionPropertyAccessor implements PropertyAccessor<Object> {

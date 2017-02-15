@@ -11,21 +11,21 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.talend.components.netsuite.client.common.SearchResultSet;
 import org.talend.components.netsuite.client.metadata.RecordTypeDef;
 import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeDef;
 import org.talend.components.netsuite.client.metadata.SearchRecordDef;
+import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.model.TypeInfo;
 import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.model.TypeManager;
-
-import com.netsuite.webservices.platform.core.ListOrRecordRef;
 
 import static org.talend.components.netsuite.client.NetSuiteFactory.getPropertyAccessor;
 
 /**
  *
  */
-public class SearchQuery {
+public class SearchQuery<SearchT, RecT> {
 
     protected NetSuiteClientService clientService;
 
@@ -33,9 +33,9 @@ public class SearchQuery {
     protected RecordTypeDef recordTypeDef;
     protected SearchRecordDef searchRecordDef;
 
-    protected Object search;             // search class' instance
-    protected Object searchBasic;        // search basic class' instance
-    protected Object searchAdvanced;     // search advanced class' instance
+    protected SearchT search;             // search class' instance
+    protected SearchT searchBasic;        // search basic class' instance
+    protected SearchT searchAdvanced;     // search advanced class' instance
 
     protected String savedSearchId;
 
@@ -69,12 +69,12 @@ public class SearchQuery {
         }
         try {
             // get a search class instance
-            search = searchRecordDef.getSearchClass().newInstance();
+            search = (SearchT) searchRecordDef.getSearchClass().newInstance();
 
             // get a advanced search class instance and set 'savedSearchId' into it
             searchAdvanced = null;
             if (savedSearchId != null && savedSearchId.length() > 0) {
-                searchAdvanced = searchRecordDef.getSearchAdvancedClass().newInstance();
+                searchAdvanced = (SearchT) searchRecordDef.getSearchAdvancedClass().newInstance();
                 getPropertyAccessor(searchAdvanced).set(searchAdvanced, "savedSearchId", savedSearchId);
             }
 
@@ -84,7 +84,7 @@ public class SearchQuery {
             }
 
             // get a basic search class instance
-            searchBasic = searchRecordDef.getSearchBasicClass().newInstance();
+            searchBasic = (SearchT) searchRecordDef.getSearchBasicClass().newInstance();
 
         } catch (InstantiationException | IllegalAccessException e) {
             throw new NetSuiteException(e.getMessage(), e);
@@ -292,7 +292,7 @@ public class SearchQuery {
 
                 List<Object> values = (List<Object>) searchArgumentType.get("searchValue");
                 for (int i = 0; i < searchValue.size(); i++) {
-                    NsObject item = NsObject.wrap(new ListOrRecordRef());
+                    NsObject item = NsObject.wrap(clientService.createType("ListOrRecordRef"));
                     item.set("name", searchValue.get(i));
                     item.set("internalId", searchValue.get(i));
                     item.set("externalId", null);
@@ -321,7 +321,7 @@ public class SearchQuery {
         }
     }
 
-    public Object toNativeQuery() throws NetSuiteException {
+    public SearchT toNativeQuery() throws NetSuiteException {
         initSearch();
 
 //        Collection<String> transactionTypes = clientService.getTransactionTypes();
@@ -349,7 +349,7 @@ public class SearchQuery {
 
         NsObject.wrap(search).set("basic", searchBasic);
 
-        Object searchRecord = search;
+        SearchT searchRecord = search;
         if (searchAdvanced != null) {
             NsObject.wrap(searchAdvanced).set("criteria", search);
             searchRecord = searchAdvanced;
@@ -358,11 +358,10 @@ public class SearchQuery {
         return searchRecord;
     }
 
-    public SearchResultSet<?> search() throws NetSuiteException {
+    public SearchResultSet<RecT> search() throws NetSuiteException {
         Object searchRecord = toNativeQuery();
-        SearchResultEx result = clientService.search(searchRecord);
-        SearchResultSet<?> resultSet = new SearchResultSet<>(clientService, searchRecordDef, result,
-                new SearchResultSet.IdentityMapper());
+        NsSearchResult result = clientService.search(searchRecord);
+        SearchResultSet<RecT> resultSet = new SearchResultSet<>(clientService, searchRecordDef, result);
         return resultSet;
     }
 }

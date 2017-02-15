@@ -63,7 +63,7 @@ public class NetSuiteEndpoint {
     protected NetSuiteClientService connect(String endpointUrl, NetSuiteCredentials credentials)
             throws NetSuiteException {
 
-        NetSuiteClientService clientService = new NetSuiteClientService();
+        NetSuiteClientService clientService = NetSuiteClientService.create("2016.2");
         clientService.setEndpointUrl(endpointUrl);
         clientService.setCredentials(credentials);
         return clientService;

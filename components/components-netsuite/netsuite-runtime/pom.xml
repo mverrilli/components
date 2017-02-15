@@ -168,7 +168,7 @@
                                         <extraarg>-xjc-b,${basedir}/src/main/resources/wsdl/2016.2/bindings.jaxb</extraarg>
                                         <extraarg>-xjc-Xbg</extraarg>
                                         <extraarg>-p</extraarg>
-                                        <extraarg>urn:platform_2016_2.webservices.netsuite.com=com.netsuite.webservices.platform</extraarg>
+                                        <extraarg>urn:platform_2016_2.webservices.netsuite.com=com.netsuite.webservices.v2016_2.platform</extraarg>
                                     </extraargs>
                                 </wsdlOption>
                             </wsdlOptions>

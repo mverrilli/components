@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.client;
+package org.talend.components.netsuite.client.common;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,12 +7,7 @@ import java.util.List;
 
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.ResultSet;
-import org.talend.components.netsuite.client.SearchResultEx;
 import org.talend.components.netsuite.client.metadata.SearchRecordDef;
-import org.talend.components.netsuite.model.Mapper;
-
-import com.netsuite.webservices.platform.core.Record;
 
 /**
  *
@@ -22,19 +17,17 @@ public class SearchResultSet<R> extends ResultSet<R> {
     private NetSuiteClientService clientService;
     private SearchRecordDef searchRecordDef;
     private String searchId;
-    private SearchResultEx result;
+    private NsSearchResult result;
     private List<R> recordList;
     private Iterator<R> recordIterator;
     private R current;
-    private Mapper<Record, R> recordMapper;
 
     public SearchResultSet(NetSuiteClientService clientService,
-            SearchRecordDef searchRecordDef, SearchResultEx result, Mapper<Record, R> recordMapper) {
+            SearchRecordDef searchRecordDef, NsSearchResult result) {
 
         this.clientService = clientService;
         this.searchRecordDef = searchRecordDef;
         this.result = result;
-        this.recordMapper = recordMapper;
 
         searchId = result.getSearchId();
         recordList = filterRecordList();
@@ -84,26 +77,20 @@ public class SearchResultSet<R> extends ResultSet<R> {
     }
 
     protected List<R> filterRecordList() {
-        List<Record> recordList = result.getRecordList();
+        List<R> recordList = result.getRecordList();
         List<R> list = null;
         if (recordList == null) {
             list = Collections.emptyList();
         }
         if (!recordList.isEmpty()) {
             list = new ArrayList<>(recordList.size());
-            Iterator<Record> recordIterator = recordList.iterator();
+            Iterator<R> recordIterator = recordList.iterator();
             while (recordIterator.hasNext()) {
-                Record record = recordIterator.next();
-                list.add(recordMapper.map(record));
+                R record = recordIterator.next();
+                list.add(record);
             }
         }
         return list;
-    }
-
-    public static class IdentityMapper implements Mapper<Record, Record> {
-        @Override public Record map(Record input) {
-            return input;
-        }
     }
 
 }

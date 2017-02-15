@@ -1,9 +1,9 @@
-package org.talend.components.netsuite.client;
+package org.talend.components.netsuite.client.common;
 
 /**
  *
  */
-public class PreferencesEx {
+public class NsPreferences {
     protected Boolean warningAsError;
     protected Boolean disableMandatoryCustomFieldValidation;
     protected Boolean disableSystemNotesForCustomFields;

@@ -35,16 +35,14 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public List<NamedThing> getSchemaNames() {
         try {
-            List<String> recordTypes = new ArrayList<>(clientService.getRecordTypes());
-            // Sort alphabetically
-            Collections.sort(recordTypes);
-
-            List<NamedThing> schemaNames = new ArrayList<>();
-            for (String typeName : recordTypes) {
-                schemaNames.add(new SimpleNamedThing(typeName, typeName));
-            }
-
-            return schemaNames;
+            List<NamedThing> recordTypes = new ArrayList<>(clientService.getRecordTypes());
+            // Sort by display name alphabetically
+            Collections.sort(recordTypes, new Comparator<NamedThing>() {
+                @Override public int compare(NamedThing o1, NamedThing o2) {
+                    return o1.getDisplayName().compareTo(o2.getDisplayName());
+                }
+            });
+            return recordTypes;
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }

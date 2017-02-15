@@ -4,16 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Test;
+import org.talend.components.netsuite.client.common.SearchResultSet;
 import org.talend.components.netsuite.client.metadata.SearchRecordDef;
+import org.talend.components.netsuite.client.common.NsSearchResult;
+import org.talend.components.netsuite.client.v2016_2.NetSuiteClientServiceImpl;
 
-import com.netsuite.webservices.lists.accounting.Account;
-import com.netsuite.webservices.lists.accounting.AccountSearch;
-import com.netsuite.webservices.platform.core.Record;
-import com.netsuite.webservices.platform.core.RecordList;
-import com.netsuite.webservices.platform.core.SearchResult;
-import com.netsuite.webservices.platform.core.Status;
-import com.netsuite.webservices.platform.messages.SearchMoreWithIdResponse;
-import com.netsuite.webservices.platform.messages.SearchResponse;
+import com.netsuite.webservices.v2016_2.lists.accounting.Account;
+import com.netsuite.webservices.v2016_2.lists.accounting.AccountSearch;
+import com.netsuite.webservices.v2016_2.platform.core.Record;
+import com.netsuite.webservices.v2016_2.platform.core.RecordList;
+import com.netsuite.webservices.v2016_2.platform.core.SearchResult;
+import com.netsuite.webservices.v2016_2.platform.core.Status;
+import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreWithIdResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.SearchResponse;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -67,17 +70,16 @@ public class SearchResultSetTest {
         response2.setSearchResult(result2);
 
         AccountSearch nsSearchRecord1 = new AccountSearch();
-        SearchResultEx nsSearchResult1 = new SearchResultEx(result1);
-        SearchResultEx nsSearchResult2 = new SearchResultEx(result2);
+        NsSearchResult nsSearchResult1 = NetSuiteClientServiceImpl.toNsSearchResult(result1);
+        NsSearchResult nsSearchResult2 = NetSuiteClientServiceImpl.toNsSearchResult(result2);
 
         when(conn.search(eq(nsSearchRecord1))).thenReturn(nsSearchResult1);
         when(conn.searchMoreWithId(eq("abc123"), eq(2))).thenReturn(nsSearchResult2);
 
-        NetSuiteClientService clientService = new NetSuiteClientService();
+        NetSuiteClientService clientService = NetSuiteClientService.create("2016.2");
         SearchRecordDef searchInfo = clientService.getSearchRecordDef("Account");
 
-        SearchResultSet<Record> resultSet = new SearchResultSet<>(conn, searchInfo, nsSearchResult1,
-                new SearchResultSet.IdentityMapper());
+        SearchResultSet<Record> resultSet = new SearchResultSet<>(conn, searchInfo, nsSearchResult1);
 
         List<Object> recordList = new ArrayList<>();
         while (resultSet.next()) {

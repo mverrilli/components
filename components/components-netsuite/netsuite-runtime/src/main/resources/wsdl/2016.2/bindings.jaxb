@@ -8,232 +8,232 @@
         </globalBindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:general_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.general"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.general"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:common_2016_2.platform.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.platform.common"/>
+                <package name="com.netsuite.webservices.v2016_2.platform.common"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:sales_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.sales"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.sales"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:inventory_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.inventory"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.inventory"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:bank_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.bank"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.bank"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.faults_2016_2.platform.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.platform.faults.types"/>
+                <package name="com.netsuite.webservices.v2016_2.platform.faults.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:relationships_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.relationships"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.relationships"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.inventory_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.inventory.types"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.inventory.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.employees_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.employees.types"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.employees.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:support_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.support"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.support"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.sales_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.sales.types"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.sales.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:purchases_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.purchases"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.purchases"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:financial_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.financial"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.financial"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:accounting_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.accounting"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.accounting"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:customization_2016_2.setup.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.setup.customization"/>
+                <package name="com.netsuite.webservices.v2016_2.setup.customization"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.employees_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.employees.types"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.employees.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:demandplanning_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.demandplanning"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.demandplanning"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:employees_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.employees"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.employees"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:filecabinet_2016_2.documents.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.documents.filecabinet"/>
+                <package name="com.netsuite.webservices.v2016_2.documents.filecabinet"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.supplychain_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.supplychain.types"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.supplychain.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:messages_2016_2.platform.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.platform.messages"/>
+                <package name="com.netsuite.webservices.v2016_2.platform.messages"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.filecabinet_2016_2.documents.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.documents.filecabinet.types"/>
+                <package name="com.netsuite.webservices.v2016_2.documents.filecabinet.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:employees_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.employees"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.employees"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:supplychain_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.supplychain"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.supplychain"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.common_2016_2.platform.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.platform.common.types"/>
+                <package name="com.netsuite.webservices.v2016_2.platform.common.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:website_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.website"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.website"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.core_2016_2.platform.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.platform.core.types"/>
+                <package name="com.netsuite.webservices.v2016_2.platform.core.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.relationships_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.relationships.types"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.relationships.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.demandplanning_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.demandplanning.types"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.demandplanning.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.bank_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.bank.types"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.bank.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.accounting_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.accounting.types"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.accounting.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:customers_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.customers"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.customers"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.support_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.support.types"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.support.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:faults_2016_2.platform.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.platform.faults"/>
+                <package name="com.netsuite.webservices.v2016_2.platform.faults"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:marketing_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.marketing"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.marketing"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.customization_2016_2.setup.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.setup.customization.types"/>
+                <package name="com.netsuite.webservices.v2016_2.setup.customization.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.financial_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.financial.types"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.financial.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:core_2016_2.platform.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.platform.core"/>
+                <package name="com.netsuite.webservices.v2016_2.platform.core"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.purchases_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.purchases.types"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.purchases.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.scheduling_2016_2.activities.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.activities.scheduling.types"/>
+                <package name="com.netsuite.webservices.v2016_2.activities.scheduling.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.website_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.website.types"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.website.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:scheduling_2016_2.activities.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.activities.scheduling"/>
+                <package name="com.netsuite.webservices.v2016_2.activities.scheduling"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:communication_2016_2.general.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.general.communication"/>
+                <package name="com.netsuite.webservices.v2016_2.general.communication"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.customers_2016_2.transactions.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.transactions.customers.types"/>
+                <package name="com.netsuite.webservices.v2016_2.transactions.customers.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.marketing_2016_2.lists.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.lists.marketing.types"/>
+                <package name="com.netsuite.webservices.v2016_2.lists.marketing.types"/>
             </schemaBindings>
         </bindings>
         <bindings scd="x-schema::tns" xmlns:tns="urn:types.communication_2016_2.general.webservices.netsuite.com">
             <schemaBindings>
-                <package name="com.netsuite.webservices.general.communication.types"/>
+                <package name="com.netsuite.webservices.v2016_2.general.communication.types"/>
             </schemaBindings>
         </bindings>
     </bindings>

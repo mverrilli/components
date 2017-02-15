@@ -1,9 +1,9 @@
-package org.talend.components.netsuite.client;
+package org.talend.components.netsuite.client.common;
 
 /**
  *
  */
-public class SearchPreferencesEx {
+public class NsSearchPreferences {
 
     protected Boolean bodyFieldsOnly;
     protected Boolean returnSearchColumns;

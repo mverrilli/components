@@ -14,15 +14,16 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.netsuite.client.metadata.RecordTypeDef;
 import org.talend.components.netsuite.client.metadata.SearchRecordDef;
+import org.talend.components.netsuite.client.v2016_2.NetSuiteClientServiceImpl;
 import org.talend.components.netsuite.test.AssertMatcher;
 
-import com.netsuite.webservices.platform.NetSuitePortType;
-import com.netsuite.webservices.platform.core.Status;
-import com.netsuite.webservices.platform.core.types.RecordType;
-import com.netsuite.webservices.platform.core.types.SearchRecordType;
-import com.netsuite.webservices.platform.messages.LoginRequest;
-import com.netsuite.webservices.platform.messages.LoginResponse;
-import com.netsuite.webservices.platform.messages.SessionResponse;
+import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
+import com.netsuite.webservices.v2016_2.platform.core.Status;
+import com.netsuite.webservices.v2016_2.platform.core.types.RecordType;
+import com.netsuite.webservices.v2016_2.platform.core.types.SearchRecordType;
+import com.netsuite.webservices.v2016_2.platform.messages.LoginRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.LoginResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.SessionResponse;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.talend.components.netsuite.client.NetSuiteClientService.toInitialUpper;
+import static org.talend.components.netsuite.client.NetSuiteFactory.toInitialUpper;
 
 /**
  *
@@ -80,7 +81,7 @@ public class NetSuiteClientServiceTest {
                 List<Header> headers = (List<Header>) messageContext.get(Header.HEADER_LIST);
                 assertNotNull(headers);
                 Header appInfoHeader = NetSuiteWebServiceMockTestFixture
-                        .getHeader(headers, new QName(NetSuiteClientService.NS_URI_PLATFORM_MESSAGES, "applicationInfo"));
+                        .getHeader(headers, new QName(NetSuiteClientServiceImpl.NS_URI_PLATFORM_MESSAGES, "applicationInfo"));
                 assertNotNull(appInfoHeader);
             }
         }))).thenReturn(response);
@@ -110,10 +111,17 @@ public class NetSuiteClientServiceTest {
 
         Set<RecordType> recordTypeSet = new HashSet<>(Arrays.asList(RecordType.values()));
         recordTypeSet.remove(RecordType.CRM_CUSTOM_FIELD);
+        recordTypeSet.remove(RecordType.ENTITY_CUSTOM_FIELD);
+        recordTypeSet.remove(RecordType.ITEM_CUSTOM_FIELD);
+        recordTypeSet.remove(RecordType.ITEM_OPTION_CUSTOM_FIELD);
+        recordTypeSet.remove(RecordType.ITEM_NUMBER_CUSTOM_FIELD);
         recordTypeSet.remove(RecordType.CUSTOM_TRANSACTION_TYPE);
         recordTypeSet.remove(RecordType.CUSTOM_TRANSACTION);
         recordTypeSet.remove(RecordType.CUSTOM_RECORD);
         recordTypeSet.remove(RecordType.CUSTOM_RECORD_CUSTOM_FIELD);
+        recordTypeSet.remove(RecordType.TRANSACTION_BODY_CUSTOM_FIELD);
+        recordTypeSet.remove(RecordType.TRANSACTION_COLUMN_CUSTOM_FIELD);
+        recordTypeSet.remove(RecordType.OTHER_CUSTOM_FIELD);
 
         for (RecordType recordType : recordTypeSet) {
             RecordTypeDef recordTypeDef = clientService.getRecordTypeDef(toInitialUpper(recordType.value()));

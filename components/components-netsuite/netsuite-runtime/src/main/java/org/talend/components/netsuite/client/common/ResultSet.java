@@ -1,4 +1,6 @@
-package org.talend.components.netsuite.client;
+package org.talend.components.netsuite.client.common;
+
+import org.talend.components.netsuite.client.NetSuiteException;
 
 /**
  *

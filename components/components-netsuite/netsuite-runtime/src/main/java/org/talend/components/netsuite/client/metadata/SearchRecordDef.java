@@ -1,6 +1,6 @@
 package org.talend.components.netsuite.client.metadata;
 
-import org.talend.components.netsuite.client.NetSuiteClientService;
+import org.talend.components.netsuite.client.NetSuiteFactory;
 
 /**
  *
@@ -14,7 +14,7 @@ public class SearchRecordDef {
 
     public SearchRecordDef(String searchRecordType,
             Class<?> searchClass, Class<?> searchBasicClass, Class<?> searchAdvancedClass) {
-        this.name = NetSuiteClientService.toInitialUpper(searchRecordType);
+        this.name = NetSuiteFactory.toInitialUpper(searchRecordType);
         this.searchRecordType = searchRecordType;
         this.searchClass = searchClass;
         this.searchBasicClass = searchBasicClass;

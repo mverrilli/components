@@ -34,7 +34,7 @@ import org.talend.components.netsuite.NsObjectIndexedRecordConverter;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.NsObject;
-import org.talend.components.netsuite.client.PropertyAccessor;
+import org.talend.components.netsuite.model.PropertyAccessor;
 import org.talend.components.netsuite.client.NetSuiteWebServiceMockTestFixture;
 import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.model.TypeInfo;
@@ -43,17 +43,17 @@ import org.talend.components.netsuite.runtime.RuntimeService;
 import org.talend.components.netsuite.runtime.RuntimeServiceImpl;
 import org.talend.components.netsuite.runtime.SchemaService;
 
-import com.netsuite.webservices.lists.accounting.Account;
-import com.netsuite.webservices.platform.NetSuitePortType;
-import com.netsuite.webservices.platform.core.RecordRef;
-import com.netsuite.webservices.platform.core.Status;
-import com.netsuite.webservices.platform.core.types.RecordType;
-import com.netsuite.webservices.platform.messages.LoginRequest;
-import com.netsuite.webservices.platform.messages.LoginResponse;
-import com.netsuite.webservices.platform.messages.SessionResponse;
-import com.netsuite.webservices.platform.messages.UpdateRequest;
-import com.netsuite.webservices.platform.messages.UpdateResponse;
-import com.netsuite.webservices.platform.messages.WriteResponse;
+import com.netsuite.webservices.v2016_2.lists.accounting.Account;
+import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
+import com.netsuite.webservices.v2016_2.platform.core.RecordRef;
+import com.netsuite.webservices.v2016_2.platform.core.Status;
+import com.netsuite.webservices.v2016_2.platform.core.types.RecordType;
+import com.netsuite.webservices.v2016_2.platform.messages.LoginRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.LoginResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.SessionResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.UpdateRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.UpdateResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.WriteResponse;
 
 /**
  *

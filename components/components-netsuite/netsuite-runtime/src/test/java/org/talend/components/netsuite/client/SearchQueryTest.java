@@ -8,36 +8,37 @@ import java.util.Arrays;
 
 import org.junit.Test;
 
-import com.netsuite.webservices.lists.accounting.AccountSearch;
-import com.netsuite.webservices.platform.common.AccountSearchBasic;
-import com.netsuite.webservices.platform.common.TransactionSearchBasic;
-import com.netsuite.webservices.platform.core.SearchBooleanCustomField;
-import com.netsuite.webservices.platform.core.SearchBooleanField;
-import com.netsuite.webservices.platform.core.SearchCustomFieldList;
-import com.netsuite.webservices.platform.core.SearchDateCustomField;
-import com.netsuite.webservices.platform.core.SearchDateField;
-import com.netsuite.webservices.platform.core.SearchDoubleField;
-import com.netsuite.webservices.platform.core.SearchEnumMultiSelectField;
-import com.netsuite.webservices.platform.core.SearchLongCustomField;
-import com.netsuite.webservices.platform.core.SearchRecord;
-import com.netsuite.webservices.platform.core.SearchStringCustomField;
-import com.netsuite.webservices.platform.core.SearchStringField;
-import com.netsuite.webservices.platform.core.types.RecordType;
-import com.netsuite.webservices.platform.core.types.SearchDate;
-import com.netsuite.webservices.platform.core.types.SearchDoubleFieldOperator;
-import com.netsuite.webservices.platform.core.types.SearchEnumMultiSelectFieldOperator;
-import com.netsuite.webservices.platform.core.types.SearchLongFieldOperator;
-import com.netsuite.webservices.platform.core.types.SearchStringFieldOperator;
-import com.netsuite.webservices.transactions.sales.TransactionSearch;
+import com.netsuite.webservices.v2016_2.lists.accounting.AccountSearch;
+import com.netsuite.webservices.v2016_2.platform.common.AccountSearchBasic;
+import com.netsuite.webservices.v2016_2.platform.common.TransactionSearchBasic;
+import com.netsuite.webservices.v2016_2.platform.core.SearchBooleanCustomField;
+import com.netsuite.webservices.v2016_2.platform.core.SearchBooleanField;
+import com.netsuite.webservices.v2016_2.platform.core.SearchCustomFieldList;
+import com.netsuite.webservices.v2016_2.platform.core.SearchDateCustomField;
+import com.netsuite.webservices.v2016_2.platform.core.SearchDateField;
+import com.netsuite.webservices.v2016_2.platform.core.SearchDoubleField;
+import com.netsuite.webservices.v2016_2.platform.core.SearchEnumMultiSelectField;
+import com.netsuite.webservices.v2016_2.platform.core.SearchLongCustomField;
+import com.netsuite.webservices.v2016_2.platform.core.SearchRecord;
+import com.netsuite.webservices.v2016_2.platform.core.SearchStringCustomField;
+import com.netsuite.webservices.v2016_2.platform.core.SearchStringField;
+import com.netsuite.webservices.v2016_2.platform.core.types.RecordType;
+import com.netsuite.webservices.v2016_2.platform.core.types.SearchDate;
+import com.netsuite.webservices.v2016_2.platform.core.types.SearchDoubleFieldOperator;
+import com.netsuite.webservices.v2016_2.platform.core.types.SearchEnumMultiSelectFieldOperator;
+import com.netsuite.webservices.v2016_2.platform.core.types.SearchLongFieldOperator;
+import com.netsuite.webservices.v2016_2.platform.core.types.SearchStringFieldOperator;
+import com.netsuite.webservices.v2016_2.transactions.sales.TransactionSearch;
 
 /**
  *
  */
 public class SearchQueryTest {
 
+    private NetSuiteClientService clientService = NetSuiteClientService.create("2016.2");
+
     @Test
     public void testBasic() throws Exception {
-        NetSuiteClientService clientService = new NetSuiteClientService();
 
         SearchQuery s1 = clientService.newSearch();
         s1.entity("Account");
@@ -50,7 +51,7 @@ public class SearchQueryTest {
         s1.criteria("customStringField1", "String.doesNotContain", Arrays.asList("Foo"));
         s1.criteria("customLongField1", "Numeric.lessThan", Arrays.asList("100"));
 
-        SearchRecord sr1 = s1.toNativeQuery();
+        SearchRecord sr1 = (SearchRecord) s1.toNativeQuery();
         assertNotNull(sr1);
         assertEquals(AccountSearch.class, sr1.getClass());
 
@@ -94,14 +95,13 @@ public class SearchQueryTest {
 
     @Test
     public void testSearchDateFieldWithPredefinedDate() throws Exception {
-        NetSuiteClientService clientService = new NetSuiteClientService();
 
         SearchQuery s1 = clientService.newSearch();
         s1.entity("Check");
         s1.criteria("tranDate", "PredefinedDate.lastBusinessWeek", null);
         s1.criteria("customDateField1", "PredefinedDate.lastBusinessWeek", null);
 
-        SearchRecord sr1 = s1.toNativeQuery();
+        SearchRecord sr1 = (SearchRecord) s1.toNativeQuery();
         assertNotNull(sr1);
         assertEquals(TransactionSearch.class, sr1.getClass());
 

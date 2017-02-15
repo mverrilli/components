@@ -18,11 +18,9 @@ import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NsObject;
 import org.talend.components.netsuite.NsObjectIndexedRecordConverter;
 import org.talend.components.netsuite.client.SearchQuery;
-import org.talend.components.netsuite.client.ResultSet;
+import org.talend.components.netsuite.client.common.ResultSet;
 import org.talend.daikon.avro.AvroUtils;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
-
-import com.netsuite.webservices.platform.core.Record;
 
 /**
  *
@@ -41,9 +39,9 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
 
     protected RuntimeContainer container;
 
-    protected ResultSet<Record> resultSet;
+    protected ResultSet<?> resultSet;
 
-    protected Record currentRecord;
+    protected Object currentRecord;
 
     public NetSuiteSearchInputReader(RuntimeContainer container,
             NetSuiteSource source, NetSuiteInputProperties properties) {
@@ -98,7 +96,7 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
         return result.toMap();
     }
 
-    public Record getCurrentRecord() throws NoSuchElementException {
+    public Object getCurrentRecord() throws NoSuchElementException {
         return currentRecord;
     }
 
@@ -109,7 +107,7 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
         return clientService;
     }
 
-    protected ResultSet<Record> search() throws NetSuiteException {
+    protected ResultSet<?> search() throws NetSuiteException {
         NetSuiteClientService conn = getClientService();
 
         SearchQuery search = conn.newSearch();
@@ -128,7 +126,7 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
             }
         }
 
-        ResultSet<Record> resultSet = search.search();
+        ResultSet<?> resultSet = search.search();
         return resultSet;
     }
 
@@ -143,7 +141,7 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
         return searchSchema;
     }
 
-    protected IndexedRecord convertRecord(Record record) throws IOException {
+    protected IndexedRecord convertRecord(Object record) throws IOException {
         return getConverter().convertToAvro(NsObject.wrap(record));
     }
 

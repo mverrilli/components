@@ -7,114 +7,116 @@ import javax.jws.WebService;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
-import com.netsuite.webservices.platform.core.DataCenterUrls;
-import com.netsuite.webservices.platform.core.GetDataCenterUrlsResult;
-import com.netsuite.webservices.platform.core.Status;
-import com.netsuite.webservices.platform.messages.AddListRequest;
-import com.netsuite.webservices.platform.messages.AddListResponse;
-import com.netsuite.webservices.platform.messages.AddRequest;
-import com.netsuite.webservices.platform.messages.AddResponse;
-import com.netsuite.webservices.platform.messages.AsyncAddListRequest;
-import com.netsuite.webservices.platform.messages.AsyncDeleteListRequest;
-import com.netsuite.webservices.platform.messages.AsyncGetListRequest;
-import com.netsuite.webservices.platform.messages.AsyncInitializeListRequest;
-import com.netsuite.webservices.platform.messages.AsyncSearchRequest;
-import com.netsuite.webservices.platform.messages.AsyncStatusResponse;
-import com.netsuite.webservices.platform.messages.AsyncUpdateListRequest;
-import com.netsuite.webservices.platform.messages.AsyncUpsertListRequest;
-import com.netsuite.webservices.platform.messages.AttachRequest;
-import com.netsuite.webservices.platform.messages.AttachResponse;
-import com.netsuite.webservices.platform.messages.ChangeEmailRequest;
-import com.netsuite.webservices.platform.messages.ChangeEmailResponse;
-import com.netsuite.webservices.platform.messages.ChangePasswordRequest;
-import com.netsuite.webservices.platform.messages.ChangePasswordResponse;
-import com.netsuite.webservices.platform.messages.CheckAsyncStatusRequest;
-import com.netsuite.webservices.platform.messages.DeleteListRequest;
-import com.netsuite.webservices.platform.messages.DeleteListResponse;
-import com.netsuite.webservices.platform.messages.DeleteRequest;
-import com.netsuite.webservices.platform.messages.DeleteResponse;
-import com.netsuite.webservices.platform.messages.DetachRequest;
-import com.netsuite.webservices.platform.messages.DetachResponse;
-import com.netsuite.webservices.platform.messages.GetAllRequest;
-import com.netsuite.webservices.platform.messages.GetAllResponse;
-import com.netsuite.webservices.platform.messages.GetAsyncResultRequest;
-import com.netsuite.webservices.platform.messages.GetAsyncResultResponse;
-import com.netsuite.webservices.platform.messages.GetBudgetExchangeRateRequest;
-import com.netsuite.webservices.platform.messages.GetBudgetExchangeRateResponse;
-import com.netsuite.webservices.platform.messages.GetConsolidatedExchangeRateRequest;
-import com.netsuite.webservices.platform.messages.GetConsolidatedExchangeRateResponse;
-import com.netsuite.webservices.platform.messages.GetCurrencyRateRequest;
-import com.netsuite.webservices.platform.messages.GetCurrencyRateResponse;
-import com.netsuite.webservices.platform.messages.GetCustomizationIdRequest;
-import com.netsuite.webservices.platform.messages.GetCustomizationIdResponse;
-import com.netsuite.webservices.platform.messages.GetDataCenterUrlsRequest;
-import com.netsuite.webservices.platform.messages.GetDataCenterUrlsResponse;
-import com.netsuite.webservices.platform.messages.GetDeletedRequest;
-import com.netsuite.webservices.platform.messages.GetDeletedResponse;
-import com.netsuite.webservices.platform.messages.GetItemAvailabilityRequest;
-import com.netsuite.webservices.platform.messages.GetItemAvailabilityResponse;
-import com.netsuite.webservices.platform.messages.GetListRequest;
-import com.netsuite.webservices.platform.messages.GetListResponse;
-import com.netsuite.webservices.platform.messages.GetPostingTransactionSummaryRequest;
-import com.netsuite.webservices.platform.messages.GetPostingTransactionSummaryResponse;
-import com.netsuite.webservices.platform.messages.GetRequest;
-import com.netsuite.webservices.platform.messages.GetResponse;
-import com.netsuite.webservices.platform.messages.GetSavedSearchRequest;
-import com.netsuite.webservices.platform.messages.GetSavedSearchResponse;
-import com.netsuite.webservices.platform.messages.GetSelectValueRequest;
-import com.netsuite.webservices.platform.messages.GetSelectValueResponse;
-import com.netsuite.webservices.platform.messages.GetServerTimeRequest;
-import com.netsuite.webservices.platform.messages.GetServerTimeResponse;
-import com.netsuite.webservices.platform.messages.InitializeListRequest;
-import com.netsuite.webservices.platform.messages.InitializeListResponse;
-import com.netsuite.webservices.platform.messages.InitializeRequest;
-import com.netsuite.webservices.platform.messages.InitializeResponse;
-import com.netsuite.webservices.platform.messages.LoginRequest;
-import com.netsuite.webservices.platform.messages.LoginResponse;
-import com.netsuite.webservices.platform.messages.LogoutRequest;
-import com.netsuite.webservices.platform.messages.LogoutResponse;
-import com.netsuite.webservices.platform.messages.MapSsoRequest;
-import com.netsuite.webservices.platform.messages.MapSsoResponse;
-import com.netsuite.webservices.platform.messages.SearchMoreRequest;
-import com.netsuite.webservices.platform.messages.SearchMoreResponse;
-import com.netsuite.webservices.platform.messages.SearchMoreWithIdRequest;
-import com.netsuite.webservices.platform.messages.SearchMoreWithIdResponse;
-import com.netsuite.webservices.platform.messages.SearchNextRequest;
-import com.netsuite.webservices.platform.messages.SearchNextResponse;
-import com.netsuite.webservices.platform.messages.SearchRequest;
-import com.netsuite.webservices.platform.messages.SearchResponse;
-import com.netsuite.webservices.platform.messages.SsoLoginRequest;
-import com.netsuite.webservices.platform.messages.SsoLoginResponse;
-import com.netsuite.webservices.platform.messages.UpdateInviteeStatusListRequest;
-import com.netsuite.webservices.platform.messages.UpdateInviteeStatusListResponse;
-import com.netsuite.webservices.platform.messages.UpdateInviteeStatusRequest;
-import com.netsuite.webservices.platform.messages.UpdateInviteeStatusResponse;
-import com.netsuite.webservices.platform.messages.UpdateListRequest;
-import com.netsuite.webservices.platform.messages.UpdateListResponse;
-import com.netsuite.webservices.platform.messages.UpdateRequest;
-import com.netsuite.webservices.platform.messages.UpdateResponse;
-import com.netsuite.webservices.platform.messages.UpsertListRequest;
-import com.netsuite.webservices.platform.messages.UpsertListResponse;
-import com.netsuite.webservices.platform.messages.UpsertRequest;
-import com.netsuite.webservices.platform.messages.UpsertResponse;
-import com.netsuite.webservices.platform.AsyncFault;
-import com.netsuite.webservices.platform.ExceededConcurrentRequestLimitFault;
-import com.netsuite.webservices.platform.ExceededRecordCountFault;
-import com.netsuite.webservices.platform.ExceededRequestLimitFault;
-import com.netsuite.webservices.platform.ExceededRequestSizeFault;
-import com.netsuite.webservices.platform.ExceededUsageLimitFault;
-import com.netsuite.webservices.platform.InsufficientPermissionFault;
-import com.netsuite.webservices.platform.InvalidAccountFault;
-import com.netsuite.webservices.platform.InvalidCredentialsFault;
-import com.netsuite.webservices.platform.InvalidSessionFault;
-import com.netsuite.webservices.platform.InvalidVersionFault;
-import com.netsuite.webservices.platform.NetSuitePortType;
-import com.netsuite.webservices.platform.UnexpectedErrorFault;
+import com.netsuite.webservices.v2016_2.platform.core.CustomizationRefList;
+import com.netsuite.webservices.v2016_2.platform.core.DataCenterUrls;
+import com.netsuite.webservices.v2016_2.platform.core.GetCustomizationIdResult;
+import com.netsuite.webservices.v2016_2.platform.core.GetDataCenterUrlsResult;
+import com.netsuite.webservices.v2016_2.platform.core.Status;
+import com.netsuite.webservices.v2016_2.platform.messages.AddListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.AddListResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.AddRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.AddResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.AsyncAddListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.AsyncDeleteListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.AsyncGetListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.AsyncInitializeListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.AsyncSearchRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.AsyncStatusResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.AsyncUpdateListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.AsyncUpsertListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.AttachRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.AttachResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.ChangeEmailRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.ChangeEmailResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.ChangePasswordRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.ChangePasswordResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.CheckAsyncStatusRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.DeleteListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.DeleteListResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.DeleteRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.DeleteResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.DetachRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.DetachResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetAllRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetAllResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetAsyncResultRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetAsyncResultResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetBudgetExchangeRateRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetBudgetExchangeRateResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetConsolidatedExchangeRateRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetConsolidatedExchangeRateResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetCurrencyRateRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetCurrencyRateResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetCustomizationIdRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetCustomizationIdResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetDataCenterUrlsRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetDataCenterUrlsResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetDeletedRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetDeletedResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetItemAvailabilityRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetItemAvailabilityResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetListResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetPostingTransactionSummaryRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetPostingTransactionSummaryResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetSavedSearchRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetSavedSearchResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetSelectValueRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetSelectValueResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetServerTimeRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.GetServerTimeResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.InitializeListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.InitializeListResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.InitializeRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.InitializeResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.LoginRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.LoginResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.LogoutRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.LogoutResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.MapSsoRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.MapSsoResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreWithIdRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreWithIdResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.SearchNextRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.SearchNextResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.SearchRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.SearchResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.SsoLoginRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.SsoLoginResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.UpdateInviteeStatusListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.UpdateInviteeStatusListResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.UpdateInviteeStatusRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.UpdateInviteeStatusResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.UpdateListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.UpdateListResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.UpdateRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.UpdateResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.UpsertListRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.UpsertListResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.UpsertRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.UpsertResponse;
+import com.netsuite.webservices.v2016_2.platform.AsyncFault;
+import com.netsuite.webservices.v2016_2.platform.ExceededConcurrentRequestLimitFault;
+import com.netsuite.webservices.v2016_2.platform.ExceededRecordCountFault;
+import com.netsuite.webservices.v2016_2.platform.ExceededRequestLimitFault;
+import com.netsuite.webservices.v2016_2.platform.ExceededRequestSizeFault;
+import com.netsuite.webservices.v2016_2.platform.ExceededUsageLimitFault;
+import com.netsuite.webservices.v2016_2.platform.InsufficientPermissionFault;
+import com.netsuite.webservices.v2016_2.platform.InvalidAccountFault;
+import com.netsuite.webservices.v2016_2.platform.InvalidCredentialsFault;
+import com.netsuite.webservices.v2016_2.platform.InvalidSessionFault;
+import com.netsuite.webservices.v2016_2.platform.InvalidVersionFault;
+import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
+import com.netsuite.webservices.v2016_2.platform.UnexpectedErrorFault;
 
 /**
  *
  */
-@WebService(endpointInterface = "com.netsuite.webservices.platform.NetSuitePortType",
+@WebService(endpointInterface = "com.netsuite.webservices.v2016_2.platform.NetSuitePortType",
         targetNamespace = "urn:platform_2016_2.webservices.netsuite.com",
         serviceName = "NetSuiteService", portName = "NetSuitePort")
 public class NetSuitePortTypeMockAdapter {
@@ -272,7 +274,24 @@ public class NetSuitePortTypeMockAdapter {
             throws InvalidSessionFault, ExceededUsageLimitFault, UnexpectedErrorFault, ExceededRequestLimitFault,
             ExceededRequestSizeFault, ExceededConcurrentRequestLimitFault, InvalidCredentialsFault, InsufficientPermissionFault,
             ExceededRecordCountFault {
-        return port.getCustomizationId(parameters);
+
+        GetCustomizationIdResponse response = null;
+        if (port != null) {
+            response = port.getCustomizationId(parameters);
+        }
+
+        if (response == null) {
+            response = new GetCustomizationIdResponse();
+            GetCustomizationIdResult result = new GetCustomizationIdResult();
+            Status status = new Status();
+            status.setIsSuccess(true);
+            result.setStatus(status);
+            result.setTotalRecords(0);
+            result.setCustomizationRefList(new CustomizationRefList());
+            response.setGetCustomizationIdResult(result);
+        }
+
+        return response;
     }
 
     public UpdateResponse update(UpdateRequest parameters)
