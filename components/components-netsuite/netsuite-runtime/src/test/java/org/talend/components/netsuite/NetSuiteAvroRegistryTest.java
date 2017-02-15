@@ -37,33 +37,33 @@ public class NetSuiteAvroRegistryTest {
 
     @Test
     public void testInferSchemaForEntity() throws Exception {
-        TypeDef entityInfo = clientService.getTypeDef("Account");
+        TypeDef typeDef = clientService.getTypeDef("Account");
 
-        Schema s = SchemaServiceImpl.inferSchemaForType(entityInfo);
+        Schema s = SchemaServiceImpl.inferSchemaForRecord(typeDef.getTypeName(), typeDef.getFields());
 
         System.out.println(s);
 
         assertThat(s.getType(), is(Schema.Type.RECORD));
         assertThat(s.getName(), is("Account"));
-        assertThat(s.getFields(), hasSize(entityInfo.getFields().size()));
+        assertThat(s.getFields(), hasSize(typeDef.getFields().size()));
         assertThat(s.getObjectProps().keySet(), empty());
 
-        FieldDef fieldInfo = entityInfo.getField("acctType");
+        FieldDef fieldInfo = typeDef.getField("acctType");
         Schema.Field f = s.getField(fieldInfo.getName());
         assertUnionType(f.schema(), Arrays.asList(Schema.Type.STRING, Schema.Type.NULL));
         assertThat(f.schema().getObjectProps().keySet(), empty());
 
-        fieldInfo = entityInfo.getField("acctName");
+        fieldInfo = typeDef.getField("acctName");
         f = s.getField(fieldInfo.getName());
         assertUnionType(f.schema(), Arrays.asList(Schema.Type.STRING, Schema.Type.NULL));
         assertThat(f.schema().getObjectProps().keySet(), empty());
 
-        fieldInfo = entityInfo.getField("inventory");
+        fieldInfo = typeDef.getField("inventory");
         f = s.getField(fieldInfo.getName());
         assertUnionType(f.schema(), Arrays.asList(Schema.Type.BOOLEAN, Schema.Type.NULL));
         assertThat(f.schema().getObjectProps().keySet(), empty());
 
-        fieldInfo = entityInfo.getField("tranDate");
+        fieldInfo = typeDef.getField("tranDate");
         f = s.getField(fieldInfo.getName());
         assertUnionType(f.schema(), Arrays.asList(Schema.Type.LONG, Schema.Type.NULL));
         assertThat(f.getObjectProps().keySet(), containsInAnyOrder(SchemaConstants.TALEND_COLUMN_PATTERN));
@@ -74,7 +74,7 @@ public class NetSuiteAvroRegistryTest {
     public void testEnumConverter() throws Exception {
         TypeDef typeDef = clientService.getTypeDef("Account");
 
-        Schema s = SchemaServiceImpl.inferSchemaForType(typeDef);
+        Schema s = SchemaServiceImpl.inferSchemaForRecord(typeDef.getTypeName(), typeDef.getFields());
 
         FieldDef fieldInfo = typeDef.getField("acctType");
         Schema.Field f = s.getField(fieldInfo.getName());
@@ -99,14 +99,15 @@ public class NetSuiteAvroRegistryTest {
 
     @Test
     public void testXMLGregorianCalendarConverter() throws Exception {
-        TypeDef entityInfo = clientService.getTypeDef("Account");
+        TypeDef typeDef = clientService.getTypeDef("Account");
 
-        Schema s = SchemaServiceImpl.inferSchemaForType(entityInfo);
+        Schema s = SchemaServiceImpl.inferSchemaForRecord(typeDef.getTypeName(), typeDef.getFields());
 
         DateTimeZone tz1 = DateTimeZone.forID("EET");
 
         MutableDateTime dateTime1 = new MutableDateTime(tz1);
         dateTime1.setDate(System.currentTimeMillis());
+        Long controlValue1 = dateTime1.getMillis();
 
         XMLGregorianCalendar xmlCalendar1 = registry.getDatatypeFactory().newXMLGregorianCalendar();
         xmlCalendar1.setYear(dateTime1.getYear());
@@ -118,18 +119,8 @@ public class NetSuiteAvroRegistryTest {
         xmlCalendar1.setMillisecond(dateTime1.getMillisOfSecond());
         xmlCalendar1.setTimezone(tz1.toTimeZone().getRawOffset() / 60000);
 
-        FieldDef fieldInfo = entityInfo.getField("tranDate");
+        FieldDef fieldInfo = typeDef.getField("tranDate");
         Schema.Field f = s.getField(fieldInfo.getName());
-
-//        DateTimeFormatter dateFormat = DateTimeFormat
-//                .forPattern(f.getProp(SchemaConstants.TALEND_COLUMN_PATTERN))
-//                .withZone(tz1);
-
-        Long controlValue1 = dateTime1.getMillis();
-
-//        // The same calendar but with second precision
-//        XMLGregorianCalendar controlXmlCalendar1 = (XMLGregorianCalendar) xmlCalendar1.clone();
-//        controlXmlCalendar1.setMillisecond(0);
 
         AvroConverter<XMLGregorianCalendar, Long> converter1 =
                 (AvroConverter<XMLGregorianCalendar, Long>) registry.getConverter(f, fieldInfo.getValueType());

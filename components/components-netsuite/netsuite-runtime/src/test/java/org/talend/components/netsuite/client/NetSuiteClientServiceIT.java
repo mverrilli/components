@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.netsuite.client.metadata.SearchRecordDef;
-import org.talend.components.netsuite.client.search.SearchResultSet;
 import org.talend.daikon.NamedThing;
 
 import com.netsuite.webservices.lists.accounting.types.AccountType;

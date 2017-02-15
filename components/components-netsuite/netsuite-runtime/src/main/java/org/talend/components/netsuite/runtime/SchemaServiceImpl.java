@@ -53,9 +53,8 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public Schema getSchema(String typeName) {
         try {
-            TypeDef entityInfo = clientService.getTypeDef(typeName);
-
-            Schema schema = inferSchemaForType(entityInfo);
+            TypeDef def = clientService.getTypeDef(typeName);
+            Schema schema = inferSchemaForRecord(def.getTypeName(), def.getFields());
             return schema;
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
@@ -93,10 +92,8 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public NsSchema getDeleteRecordSchema(String typeName) {
         try {
-            final SearchRecordDef searchInfo = clientService.getSearchRecordDef(typeName);
-            final TypeDef searchRecordInfo = clientService.getTypeDef(searchInfo.getSearchBasicClass());
-            List<FieldDef> searchFieldInfos = searchRecordInfo.getFields();
-            return new NsSchemaImpl(searchRecordInfo.getTypeName(), searchFieldInfos);
+            final TypeDef def = clientService.getTypeDef("RecordRef");
+            return new NsSchemaImpl(def.getTypeName(), def.getFields());
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }
@@ -117,13 +114,13 @@ public class SchemaServiceImpl implements SchemaService {
      * Infers an Avro schema for the given NsObject. This can be an expensive operation so the schema
      * should be cached where possible. This is always an {@link Schema.Type#RECORD}.
      *
-     * @param in the <code>EntityInfo</code> to analyse.
+     * @param name name of a record.
      * @return the schema for data given from the object.
      */
-    public static Schema inferSchemaForType(TypeDef in) {
+    public static Schema inferSchemaForRecord(String name, List<FieldDef> fieldDefList) {
         List<Schema.Field> fields = new ArrayList<>();
 
-        for (FieldDef fieldInfo : in.getFields()) {
+        for (FieldDef fieldInfo : fieldDefList) {
 
             Schema.Field avroField = new Schema.Field(fieldInfo.getName(),
                     inferSchemaForField(fieldInfo), null, (Object) null);
@@ -158,7 +155,7 @@ public class SchemaServiceImpl implements SchemaService {
             fields.add(avroField);
         }
 
-        return Schema.createRecord(in.getTypeName(), null, null, false, fields);
+        return Schema.createRecord(name, null, null, false, fields);
     }
 
     /**

@@ -12,11 +12,13 @@ import org.apache.cxf.headers.Header;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.talend.components.netsuite.client.metadata.RecordTypeDef;
 import org.talend.components.netsuite.client.metadata.SearchRecordDef;
 import org.talend.components.netsuite.test.AssertMatcher;
 
 import com.netsuite.webservices.platform.NetSuitePortType;
 import com.netsuite.webservices.platform.core.Status;
+import com.netsuite.webservices.platform.core.types.RecordType;
 import com.netsuite.webservices.platform.core.types.SearchRecordType;
 import com.netsuite.webservices.platform.messages.LoginRequest;
 import com.netsuite.webservices.platform.messages.LoginResponse;
@@ -106,6 +108,17 @@ public class NetSuiteClientServiceTest {
             assertNotNull("Search record def found: " + searchRecordType.value(), searchRecordDef);
         }
 
+        Set<RecordType> recordTypeSet = new HashSet<>(Arrays.asList(RecordType.values()));
+        recordTypeSet.remove(RecordType.CRM_CUSTOM_FIELD);
+        recordTypeSet.remove(RecordType.CUSTOM_TRANSACTION_TYPE);
+        recordTypeSet.remove(RecordType.CUSTOM_TRANSACTION);
+        recordTypeSet.remove(RecordType.CUSTOM_RECORD);
+        recordTypeSet.remove(RecordType.CUSTOM_RECORD_CUSTOM_FIELD);
+
+        for (RecordType recordType : recordTypeSet) {
+            RecordTypeDef recordTypeDef = clientService.getRecordTypeDef(toInitialUpper(recordType.value()));
+            assertNotNull("Record type def found: " + recordType.value(), recordTypeDef);
+        }
     }
 
 }

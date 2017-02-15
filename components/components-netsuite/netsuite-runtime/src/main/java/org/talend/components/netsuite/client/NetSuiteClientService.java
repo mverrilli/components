@@ -33,8 +33,6 @@ import org.talend.components.netsuite.client.metadata.TypeDef;
 import org.talend.components.netsuite.client.metadata.RecordTypeDef;
 import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeDef;
 import org.talend.components.netsuite.client.metadata.SearchRecordDef;
-import org.talend.components.netsuite.client.metadata.StandardMetaData;
-import org.talend.components.netsuite.client.search.SearchQuery;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.SimpleNamedThing;
 
@@ -59,6 +57,7 @@ import com.netsuite.webservices.platform.core.SearchRecord;
 import com.netsuite.webservices.platform.core.SearchResult;
 import com.netsuite.webservices.platform.core.Status;
 import com.netsuite.webservices.platform.core.types.GetCustomizationType;
+import com.netsuite.webservices.platform.core.types.RecordType;
 import com.netsuite.webservices.platform.core.types.SearchRecordType;
 import com.netsuite.webservices.platform.messages.AddListRequest;
 import com.netsuite.webservices.platform.messages.AddRequest;
@@ -68,11 +67,13 @@ import com.netsuite.webservices.platform.messages.DeleteRequest;
 import com.netsuite.webservices.platform.messages.GetCustomizationIdRequest;
 import com.netsuite.webservices.platform.messages.GetDataCenterUrlsRequest;
 import com.netsuite.webservices.platform.messages.GetDataCenterUrlsResponse;
+import com.netsuite.webservices.platform.messages.GetListRequest;
 import com.netsuite.webservices.platform.messages.GetSavedSearchRequest;
 import com.netsuite.webservices.platform.messages.LoginRequest;
 import com.netsuite.webservices.platform.messages.LoginResponse;
 import com.netsuite.webservices.platform.messages.LogoutRequest;
 import com.netsuite.webservices.platform.messages.Preferences;
+import com.netsuite.webservices.platform.messages.ReadResponseList;
 import com.netsuite.webservices.platform.messages.SearchMoreRequest;
 import com.netsuite.webservices.platform.messages.SearchMoreWithIdRequest;
 import com.netsuite.webservices.platform.messages.SearchNextRequest;
@@ -204,7 +205,7 @@ public class NetSuiteClientService {
         return new SearchQuery(this);
     }
 
-    public SearchResultEx search(final SearchRecord searchRecord) throws NetSuiteException {
+    public SearchResultEx search(final Object searchRecord) throws NetSuiteException {
         return execute(new PortOperation<SearchResultEx>() {
             @Override public SearchResultEx execute(NetSuitePortType port) throws Exception {
                 SearchRequest request = new SearchRequest();
@@ -721,11 +722,11 @@ public class NetSuiteClientService {
     // Meta Data
     ///////////////////////////////////////////////////////////////////////////
 
-    private static StandardMetaData standardMetaData = new StandardMetaData();
+    private StandardMetaData standardMetaData;
 
     private Map<String, CustomizationDef> customizationRefMap = new HashMap<>();
     private Map<String, SavedSearchDef> savedSearchDefMap = new HashMap<>();
-    private Set<SearchRecordType> savedSearchesLoaded = new HashSet<>();
+    private Set<String> savedSearchesLoaded = new HashSet<>();
 
     public Collection<String> getRecordTypes() {
         return standardMetaData.getRecordTypes();
@@ -859,14 +860,29 @@ public class NetSuiteClientService {
         });
         if (result.getStatus().getIsSuccess()) {
             if (result.getTotalRecords() > 0) {
-                for (final CustomizationRef ref : result.getCustomizationRefList().getCustomizationRef()) {
-                    String type = getCustomizationType.value();
-                    CustomizationDef def = new CustomizationDef(type, ref);
+                final List<CustomizationRef> customizationRefs = new ArrayList<>(
+                        result.getCustomizationRefList().getCustomizationRef());
+                for (final CustomizationRef ref : customizationRefs) {
+//                    String type = getCustomizationType.value();
+                    RecordType recordType = RecordType.fromValue(getCustomizationType.value());
+                    CustomizationDef def = new CustomizationDef(recordType, ref);
                     if (customizationRefMap.containsKey(ref.getScriptId())) {
                         throw new IllegalArgumentException("Customization already registered: " + ref.getScriptId());
                     }
                     customizationRefMap.put(ref.getScriptId(), def);
                 }
+                ReadResponseList result2 = execute(new PortOperation<ReadResponseList>() {
+                    @Override public ReadResponseList execute(NetSuitePortType port) throws Exception {
+                        GetListRequest request = new GetListRequest();
+                        request.getBaseRef().addAll(customizationRefs);
+                        return port.getList(request).getReadResponseList();
+//                        AsyncGetListRequest asyncRequest = new AsyncGetListRequest();
+//                        asyncRequest.getBaseRef().addAll(customizationRefs);
+//                        AsyncStatusResult asyncStatusResult = port.asyncGetList(asyncRequest).getAsyncStatusResult();
+//                        return null;
+                    }
+                });
+                System.out.println(result2);
             }
         } else {
             throw new NetSuiteException("Retrieving of customizations was not successful: " + getCustomizationType.value());
@@ -938,15 +954,15 @@ public class NetSuiteClientService {
     }
 
     protected static class CustomizationDef {
-        private String customizationType;
+        private RecordType customizationType;
         private CustomizationRef ref;
 
-        public CustomizationDef(String customizationType, CustomizationRef ref) {
+        public CustomizationDef(RecordType customizationType, CustomizationRef ref) {
             this.customizationType = customizationType;
             this.ref = ref;
         }
 
-        public String getCustomizationType() {
+        public RecordType getCustomizationType() {
             return customizationType;
         }
 
@@ -965,10 +981,10 @@ public class NetSuiteClientService {
     }
 
     protected static class SavedSearchDef {
-        private SearchRecordType searchRecordType;
+        private String searchRecordType;
         private CustomizationRef ref;
 
-        public SavedSearchDef(SearchRecordType searchRecordType, CustomizationRef ref) {
+        public SavedSearchDef(String searchRecordType, CustomizationRef ref) {
             this.searchRecordType = searchRecordType;
             this.ref = ref;
         }
@@ -981,7 +997,7 @@ public class NetSuiteClientService {
             return ref.getName();
         }
 
-        public SearchRecordType getSearchRecordType() {
+        public String getSearchRecordType() {
             return searchRecordType;
         }
 

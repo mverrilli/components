@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.junit.Test;
 import org.talend.components.netsuite.client.metadata.SearchRecordDef;
-import org.talend.components.netsuite.client.search.SearchResultSet;
 
 import com.netsuite.webservices.lists.accounting.Account;
 import com.netsuite.webservices.lists.accounting.AccountSearch;

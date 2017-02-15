@@ -12,7 +12,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.talend.components.netsuite.client.metadata.StandardMetaData;
 
 import com.netsuite.webservices.platform.NetSuitePortType;
 import com.netsuite.webservices.platform.common.CustomRecordSearchBasic;
@@ -25,14 +24,12 @@ import com.netsuite.webservices.platform.core.GetSavedSearchResult;
 import com.netsuite.webservices.platform.core.RecordRef;
 import com.netsuite.webservices.platform.core.SearchResult;
 import com.netsuite.webservices.platform.core.types.GetCustomizationType;
-import com.netsuite.webservices.platform.core.types.RecordType;
 import com.netsuite.webservices.platform.core.types.SearchRecordType;
 import com.netsuite.webservices.platform.messages.GetCustomizationIdRequest;
 import com.netsuite.webservices.platform.messages.GetListRequest;
 import com.netsuite.webservices.platform.messages.GetSavedSearchRequest;
 import com.netsuite.webservices.platform.messages.ReadResponseList;
 import com.netsuite.webservices.platform.messages.SearchRequest;
-import com.netsuite.webservices.setup.customization.CustomRecordSearch;
 import com.netsuite.webservices.setup.customization.CustomRecordSearchAdvanced;
 
 /**
@@ -119,7 +116,7 @@ public class NetSuiteGetCustomizationsIT {
         //        for (SearchRecordType searchRecordType : searchRecordTypes) {
 //            System.out.println("" + searchRecordType.value());
             final GetSavedSearchRecord savedSearchRecord = new GetSavedSearchRecord();
-            savedSearchRecord.setSearchType(SearchRecordType.OPPORTUNITY);
+            savedSearchRecord.setSearchType(SearchRecordType.CUSTOM_RECORD);
 
             GetSavedSearchResult result = connection.execute(new NetSuiteClientService.PortOperation<GetSavedSearchResult>() {
 

@@ -2,21 +2,19 @@ package org.talend.components.netsuite.client.metadata;
 
 import org.talend.components.netsuite.client.NetSuiteClientService;
 
-import com.netsuite.webservices.platform.core.types.SearchRecordType;
-
 /**
  *
  */
 public class SearchRecordDef {
     private String name;
-    private SearchRecordType searchRecordType;
+    private String searchRecordType;
     private Class<?> searchClass;
     private Class<?> searchBasicClass;
     private Class<?> searchAdvancedClass;
 
-    public SearchRecordDef(SearchRecordType searchRecordType,
+    public SearchRecordDef(String searchRecordType,
             Class<?> searchClass, Class<?> searchBasicClass, Class<?> searchAdvancedClass) {
-        this.name = NetSuiteClientService.toInitialUpper(searchRecordType.value());
+        this.name = NetSuiteClientService.toInitialUpper(searchRecordType);
         this.searchRecordType = searchRecordType;
         this.searchClass = searchClass;
         this.searchBasicClass = searchBasicClass;
@@ -27,7 +25,7 @@ public class SearchRecordDef {
         return name;
     }
 
-    public SearchRecordType getSearchRecordType() {
+    public String getSearchRecordType() {
         return searchRecordType;
     }
 

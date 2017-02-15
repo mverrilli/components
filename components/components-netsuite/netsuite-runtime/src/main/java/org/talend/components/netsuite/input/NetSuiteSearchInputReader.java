@@ -17,7 +17,7 @@ import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NsObject;
 import org.talend.components.netsuite.NsObjectIndexedRecordConverter;
-import org.talend.components.netsuite.client.search.SearchQuery;
+import org.talend.components.netsuite.client.SearchQuery;
 import org.talend.components.netsuite.client.ResultSet;
 import org.talend.daikon.avro.AvroUtils;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;

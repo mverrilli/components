@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.client.search;
+package org.talend.components.netsuite.client;
 
 import java.util.ArrayList;
 import java.util.Collections;

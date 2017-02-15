@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNull;
 import java.util.Arrays;
 
 import org.junit.Test;
-import org.talend.components.netsuite.client.search.SearchQuery;
 
 import com.netsuite.webservices.lists.accounting.AccountSearch;
 import com.netsuite.webservices.platform.common.AccountSearchBasic;
@@ -23,6 +22,7 @@ import com.netsuite.webservices.platform.core.SearchLongCustomField;
 import com.netsuite.webservices.platform.core.SearchRecord;
 import com.netsuite.webservices.platform.core.SearchStringCustomField;
 import com.netsuite.webservices.platform.core.SearchStringField;
+import com.netsuite.webservices.platform.core.types.RecordType;
 import com.netsuite.webservices.platform.core.types.SearchDate;
 import com.netsuite.webservices.platform.core.types.SearchDoubleFieldOperator;
 import com.netsuite.webservices.platform.core.types.SearchEnumMultiSelectFieldOperator;
@@ -110,6 +110,12 @@ public class SearchQueryTest {
 
         TransactionSearchBasic searchBasic = search.getBasic();
         assertNotNull(searchBasic.getTranDate());
+
+        SearchEnumMultiSelectField typeField = searchBasic.getType();
+        assertNotNull(typeField);
+        assertNotNull(typeField.getSearchValue());
+        assertEquals(1, typeField.getSearchValue().size());
+        assertEquals(RecordType.CHECK.value(), typeField.getSearchValue().get(0));
 
         SearchDateField field1 = searchBasic.getTranDate();
         assertNull(field1.getOperator());
