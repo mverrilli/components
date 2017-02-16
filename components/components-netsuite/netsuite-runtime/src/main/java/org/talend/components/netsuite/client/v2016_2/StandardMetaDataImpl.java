@@ -153,6 +153,7 @@ import com.netsuite.webservices.v2016_2.lists.website.SiteCategorySearchAdvanced
 import com.netsuite.webservices.v2016_2.platform.common.AccountSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.AccountingPeriodSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.AccountingTransactionSearchBasic;
+import com.netsuite.webservices.v2016_2.platform.common.AddressSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.BillingAccountSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.BillingScheduleSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.BinSearchBasic;
@@ -181,6 +182,7 @@ import com.netsuite.webservices.v2016_2.platform.common.FileSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.FolderSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.GiftCertificateSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.GlobalAccountMappingSearchBasic;
+import com.netsuite.webservices.v2016_2.platform.common.InventoryDetailSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.InventoryNumberSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.IssueSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.ItemAccountMappingSearchBasic;
@@ -221,6 +223,7 @@ import com.netsuite.webservices.v2016_2.platform.common.SupportCaseSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.TaskSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.TermSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.TimeBillSearchBasic;
+import com.netsuite.webservices.v2016_2.platform.common.TimeEntrySearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.TimeSheetSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.TopicSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.TransactionSearchBasic;
@@ -272,6 +275,9 @@ import com.netsuite.webservices.v2016_2.transactions.demandplanning.ItemSupplyPl
 import com.netsuite.webservices.v2016_2.transactions.demandplanning.ItemSupplyPlanSearchAdvanced;
 import com.netsuite.webservices.v2016_2.transactions.employees.TimeBillSearch;
 import com.netsuite.webservices.v2016_2.transactions.employees.TimeBillSearchAdvanced;
+import com.netsuite.webservices.v2016_2.transactions.employees.TimeEntry;
+import com.netsuite.webservices.v2016_2.transactions.employees.TimeEntrySearch;
+import com.netsuite.webservices.v2016_2.transactions.employees.TimeEntrySearchAdvanced;
 import com.netsuite.webservices.v2016_2.transactions.employees.TimeSheetSearch;
 import com.netsuite.webservices.v2016_2.transactions.employees.TimeSheetSearchAdvanced;
 import com.netsuite.webservices.v2016_2.transactions.financial.BudgetSearch;
@@ -489,7 +495,6 @@ public class StandardMetaDataImpl extends StandardMetaData {
     };
 
     private static final Class<?>[] searchFieldTable = {
-            SearchCustomFieldList.class,
             SearchBooleanCustomField.class,
             SearchBooleanField.class,
             SearchCustomField.class,
@@ -591,6 +596,11 @@ public class StandardMetaDataImpl extends StandardMetaData {
 
             new SearchRecordDef(SearchRecordType.TRANSACTION.value(), TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
             new SearchRecordDef(SearchRecordType.ITEM.value(), ItemSearch.class, ItemSearchBasic.class, ItemSearchAdvanced.class),
+
+            // These record types are not listed in RecordType enum
+            new SearchRecordDef("address", null, AddressSearchBasic.class, null),
+            new SearchRecordDef("inventoryDetail", null, InventoryDetailSearchBasic.class, null),
+            new SearchRecordDef("timeEntry", TimeEntrySearch.class, TimeEntrySearchBasic.class, TimeEntrySearchAdvanced.class),
     };
 
     private static final SearchFieldOperatorTypeDef<?>[] searchFieldOperatorTable = {
@@ -698,16 +708,18 @@ public class StandardMetaDataImpl extends StandardMetaData {
         Collection<Class<?>> recordClasses = new HashSet<>(Arrays.<Class<?>>asList(xmlSeeAlso.value()));
 
         registerRecordTypes(Record.class, recordClasses,
-                new HashSet<>(Arrays.asList(
-                        "LandedCost", "Address", "InventoryDetail", "TimeEntry"
-                )),
-                NetSuiteFactory.getEnumAccessor(RecordType.class));
+                new HashSet<>(Arrays.asList("LandedCost")),
+                new HashSet<>(Arrays.asList("Address", "InventoryDetail", "TimeEntry")),
+                NetSuiteFactory.getEnumAccessor(RecordType.class)
+        );
 
         registerSearchRecordDefs(searchRecordDefs);
 
         registerRecordSearchTypeMapping(RecordType.values(),
                 NetSuiteFactory.getEnumAccessor(RecordType.class),
-                NetSuiteFactory.getEnumAccessor(SearchRecordType.class));
+                NetSuiteFactory.getEnumAccessor(SearchRecordType.class),
+                new HashSet<>(Arrays.asList("address", "inventoryDetail", "timeEntry"))
+        );
 
         registerSearchFieldDefs(searchFieldTable);
         registerSearchFieldOperatorTypeDefs(searchFieldOperatorTable);
@@ -716,6 +728,7 @@ public class StandardMetaDataImpl extends StandardMetaData {
         registerType(ListOrRecordRef.class, null);
         registerType(CustomRecordRef.class, null);
         registerType(CustomizationRef.class, null);
+        registerType(SearchCustomFieldList.class, null);
 
         long endTime = System.currentTimeMillis();
         logger.info("Initialized standard metadata: " + (endTime - startTime));

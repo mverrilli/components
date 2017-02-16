@@ -17,7 +17,8 @@ import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NsObject;
 import org.talend.components.netsuite.NsObjectIndexedRecordConverter;
-import org.talend.components.netsuite.client.SearchQuery;
+import org.talend.components.netsuite.client.query.SearchCondition;
+import org.talend.components.netsuite.client.query.SearchQuery;
 import org.talend.components.netsuite.client.common.ResultSet;
 import org.talend.daikon.avro.AvroUtils;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
@@ -111,7 +112,7 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
         NetSuiteClientService conn = getClientService();
 
         SearchQuery search = conn.newSearch();
-        search.entity(properties.module.moduleName.getValue());
+        search.target(properties.module.moduleName.getValue());
 
         List<String> fieldNames = properties.searchConditionTable.field.getValue();
         if (fieldNames != null && !fieldNames.isEmpty()) {
@@ -120,9 +121,11 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
                 String operator = properties.searchConditionTable.operator.getValue().get(i);
                 String value1 = properties.searchConditionTable.value1.getValue().get(i);
                 String value2 = properties.searchConditionTable.value2.getValue().get(i);
-                List<String> values = value2 != null ? Arrays.asList(value1, value2) : Arrays.asList(value1);
-
-                search.criteria(fieldName, operator, values);
+                List<String> values = null;
+                if (value1 != null) {
+                    values = value2 != null ? Arrays.asList(value1, value2) : Arrays.asList(value1);
+                }
+                search.condition(new SearchCondition(fieldName, operator, values));
             }
         }
 

@@ -24,6 +24,7 @@ import org.talend.components.netsuite.client.metadata.RecordTypeDef;
 import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeDef;
 import org.talend.components.netsuite.client.metadata.SearchRecordDef;
 import org.talend.components.netsuite.client.metadata.TypeDef;
+import org.talend.components.netsuite.client.query.SearchQuery;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.SimpleNamedThing;
 
@@ -56,6 +57,7 @@ public abstract class NetSuiteClientService<PortT> {
 
     protected int searchPageSize = DEFAULT_PAGE_SIZE;
     protected boolean bodyFieldsOnly = true;
+    protected boolean returnSearchColumns = false;
 
     protected boolean treatWarningsAsErrors = false;
     protected boolean disableMandatoryCustomFieldValidation = false;
@@ -109,6 +111,14 @@ public abstract class NetSuiteClientService<PortT> {
 
     public void setBodyFieldsOnly(boolean bodyFieldsOnly) {
         this.bodyFieldsOnly = bodyFieldsOnly;
+    }
+
+    public boolean isReturnSearchColumns() {
+        return returnSearchColumns;
+    }
+
+    public void setReturnSearchColumns(boolean returnSearchColumns) {
+        this.returnSearchColumns = returnSearchColumns;
     }
 
     public boolean isTreatWarningsAsErrors() {
@@ -371,6 +381,7 @@ public abstract class NetSuiteClientService<PortT> {
         NsSearchPreferences searchPreferences = new NsSearchPreferences();
         searchPreferences.setPageSize(searchPageSize);
         searchPreferences.setBodyFieldsOnly(Boolean.valueOf(bodyFieldsOnly));
+        searchPreferences.setReturnSearchColumns(Boolean.valueOf(returnSearchColumns));
 
         this.searchPreferences = searchPreferences;
 

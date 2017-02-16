@@ -7,9 +7,12 @@ import static org.junit.Assert.assertNull;
 import java.util.Arrays;
 
 import org.junit.Test;
+import org.talend.components.netsuite.client.query.SearchCondition;
+import org.talend.components.netsuite.client.query.SearchQuery;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.AccountSearch;
 import com.netsuite.webservices.v2016_2.platform.common.AccountSearchBasic;
+import com.netsuite.webservices.v2016_2.platform.common.AddressSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.TransactionSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.core.SearchBooleanCustomField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchBooleanField;
@@ -38,18 +41,18 @@ public class SearchQueryTest {
     private NetSuiteClientService clientService = NetSuiteClientService.create("2016.2");
 
     @Test
-    public void testBasic() throws Exception {
+    public void testBasics() throws Exception {
 
         SearchQuery s1 = clientService.newSearch();
-        s1.entity("Account");
-        s1.criteria("type", "List.anyOf", Arrays.asList("Bank"));
-        s1.criteria("balance", "Double.greaterThanOrEqualTo", Arrays.asList("10000.0"));
-        s1.criteria("legalName", "String.contains", Arrays.asList("Acme"));
-        s1.criteria("isInactive", "Boolean", Arrays.asList("true"));
+        s1.target("Account");
+        s1.condition(new SearchCondition("type", "List.anyOf", Arrays.asList("bank")));
+        s1.condition(new SearchCondition("balance", "Double.greaterThanOrEqualTo", Arrays.asList("10000.0")));
+        s1.condition(new SearchCondition("legalName", "String.contains", Arrays.asList("Acme")));
+        s1.condition(new SearchCondition("isInactive", "Boolean", Arrays.asList("true")));
 
-        s1.criteria("customBooleanField1", "Boolean", Arrays.asList("true"));
-        s1.criteria("customStringField1", "String.doesNotContain", Arrays.asList("Foo"));
-        s1.criteria("customLongField1", "Numeric.lessThan", Arrays.asList("100"));
+        s1.condition(new SearchCondition("customBooleanField1", "Boolean", Arrays.asList("true")));
+        s1.condition(new SearchCondition("customStringField1", "String.doesNotContain", Arrays.asList("Foo")));
+        s1.condition(new SearchCondition("customLongField1", "Numeric.lessThan", Arrays.asList("100")));
 
         SearchRecord sr1 = (SearchRecord) s1.toNativeQuery();
         assertNotNull(sr1);
@@ -63,7 +66,7 @@ public class SearchQueryTest {
 
         SearchEnumMultiSelectField typeField = searchBasic.getType();
         assertEquals(SearchEnumMultiSelectFieldOperator.ANY_OF, typeField.getOperator());
-        assertEquals(Arrays.asList("Bank"), typeField.getSearchValue());
+        assertEquals(Arrays.asList("bank"), typeField.getSearchValue());
 
         SearchDoubleField balanceField = searchBasic.getBalance();
         assertEquals(SearchDoubleFieldOperator.GREATER_THAN_OR_EQUAL_TO, balanceField.getOperator());
@@ -94,12 +97,46 @@ public class SearchQueryTest {
     }
 
     @Test
+    public void testSearchForSpecialRecordTypes() throws Exception {
+
+        SearchQuery s1 = clientService.newSearch();
+        s1.target("Address");
+        s1.condition(new SearchCondition("country", "List.anyOf", Arrays.asList("Ukraine")));
+        s1.condition(new SearchCondition("customStringField1", "String.contains", Arrays.asList("abc")));
+
+        SearchRecord sr1 = (SearchRecord) s1.toNativeQuery();
+        assertNotNull(sr1);
+        assertEquals(AddressSearchBasic.class, sr1.getClass());
+
+        AddressSearchBasic search = (AddressSearchBasic) sr1;
+        assertNotNull(search.getCountry());
+
+        SearchEnumMultiSelectField field1 = search.getCountry();
+        assertNotNull(field1);
+        assertEquals(SearchEnumMultiSelectFieldOperator.ANY_OF, field1.getOperator());
+        assertNotNull(field1.getSearchValue());
+        assertEquals(1, field1.getSearchValue().size());
+        assertEquals(Arrays.asList("Ukraine"), field1.getSearchValue());
+
+        SearchCustomFieldList customFieldList = search.getCustomFieldList();
+        assertNotNull(customFieldList);
+        assertNotNull(customFieldList.getCustomField());
+        assertEquals(1, customFieldList.getCustomField().size());
+
+        SearchStringCustomField customField1 = (SearchStringCustomField) customFieldList.getCustomField().get(0);
+        assertNotNull(customField1.getOperator());
+        assertEquals(SearchStringFieldOperator.CONTAINS, customField1.getOperator());
+        assertNotNull(customField1.getSearchValue());
+        assertEquals("abc", customField1.getSearchValue());
+    }
+
+    @Test
     public void testSearchDateFieldWithPredefinedDate() throws Exception {
 
         SearchQuery s1 = clientService.newSearch();
-        s1.entity("Check");
-        s1.criteria("tranDate", "PredefinedDate.lastBusinessWeek", null);
-        s1.criteria("customDateField1", "PredefinedDate.lastBusinessWeek", null);
+        s1.target("Check");
+        s1.condition(new SearchCondition("tranDate", "PredefinedDate.lastBusinessWeek", null));
+        s1.condition(new SearchCondition("customDateField1", "PredefinedDate.lastBusinessWeek", null));
 
         SearchRecord sr1 = (SearchRecord) s1.toNativeQuery();
         assertNotNull(sr1);

@@ -2,7 +2,6 @@ package org.talend.components.netsuite.client;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import org.junit.After;
 import org.junit.AfterClass;
@@ -11,6 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.netsuite.client.common.SearchResultSet;
 import org.talend.components.netsuite.client.metadata.SearchRecordDef;
+import org.talend.components.netsuite.client.query.SearchCondition;
 import org.talend.daikon.NamedThing;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
@@ -53,8 +53,8 @@ public class NetSuiteClientServiceIT {
         connection.login();
 
         SearchResultSet<Record> rs = connection.newSearch()
-                .entity("Account")
-                .criteria("type", "List.anyOf", Arrays.asList("Bank"))
+                .target("Account")
+                .condition(new SearchCondition("type", "List.anyOf", Arrays.asList("Bank")))
                 .search();
 
         int count = 0;

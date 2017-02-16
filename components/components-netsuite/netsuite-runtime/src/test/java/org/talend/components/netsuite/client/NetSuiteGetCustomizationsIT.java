@@ -13,8 +13,17 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import com.netsuite.webservices.v2016_2.lists.accounting.ItemSearch;
+import com.netsuite.webservices.v2016_2.lists.accounting.SubsidiarySearch;
+import com.netsuite.webservices.v2016_2.lists.accounting.SubsidiarySearchAdvanced;
+import com.netsuite.webservices.v2016_2.lists.accounting.SubsidiarySearchRow;
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
+import com.netsuite.webservices.v2016_2.platform.common.AddressSearchBasic;
 import com.netsuite.webservices.v2016_2.platform.common.CustomRecordSearchBasic;
+import com.netsuite.webservices.v2016_2.platform.common.ItemSearchBasic;
+import com.netsuite.webservices.v2016_2.platform.common.SubsidiarySearchBasic;
+import com.netsuite.webservices.v2016_2.platform.common.SubsidiarySearchRowBasic;
+import com.netsuite.webservices.v2016_2.platform.common.types.Country;
 import com.netsuite.webservices.v2016_2.platform.core.CustomRecordRef;
 import com.netsuite.webservices.v2016_2.platform.core.CustomizationRef;
 import com.netsuite.webservices.v2016_2.platform.core.CustomizationType;
@@ -22,14 +31,17 @@ import com.netsuite.webservices.v2016_2.platform.core.GetCustomizationIdResult;
 import com.netsuite.webservices.v2016_2.platform.core.GetSavedSearchRecord;
 import com.netsuite.webservices.v2016_2.platform.core.GetSavedSearchResult;
 import com.netsuite.webservices.v2016_2.platform.core.RecordRef;
+import com.netsuite.webservices.v2016_2.platform.core.SearchEnumMultiSelectField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchResult;
 import com.netsuite.webservices.v2016_2.platform.core.types.GetCustomizationType;
+import com.netsuite.webservices.v2016_2.platform.core.types.SearchEnumMultiSelectFieldOperator;
 import com.netsuite.webservices.v2016_2.platform.core.types.SearchRecordType;
 import com.netsuite.webservices.v2016_2.platform.messages.GetCustomizationIdRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.GetListRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.GetSavedSearchRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.ReadResponseList;
 import com.netsuite.webservices.v2016_2.platform.messages.SearchRequest;
+import com.netsuite.webservices.v2016_2.platform.messages.SearchResponse;
 import com.netsuite.webservices.v2016_2.setup.customization.CustomRecordSearchAdvanced;
 
 /**
@@ -59,7 +71,68 @@ public class NetSuiteGetCustomizationsIT {
     public void tearDown() throws Exception {
     }
 
-//    @Test
+    @Test
+    public void testSearchAddress() throws Exception {
+        NetSuiteClientService<NetSuitePortType> connection = webServiceTestFixture.getClientService();
+
+        SearchResult result = connection.execute(new NetSuiteClientService.PortOperation<SearchResult, NetSuitePortType>() {
+            @Override public SearchResult execute(NetSuitePortType port) throws Exception {
+                SearchRequest request = new SearchRequest();
+
+                AddressSearchBasic searchBasic = new AddressSearchBasic();
+                request.setSearchRecord(searchBasic);
+                SearchEnumMultiSelectField countryField = new SearchEnumMultiSelectField();
+                countryField.setOperator(SearchEnumMultiSelectFieldOperator.ANY_OF);
+                countryField.getSearchValue().add("france");
+                searchBasic.setCountry(countryField);
+
+//                ItemSearch search = new ItemSearch();
+//                ItemSearchBasic searchBasic = new ItemSearchBasic();
+//                SearchEnumMultiSelectField typeField = new SearchEnumMultiSelectField();
+//                typeField.setOperator(SearchEnumMultiSelectFieldOperator.ANY_OF);
+//                typeField.getSearchValue().add("address");
+//                searchBasic.setType(typeField);
+//                search.setBasic(searchBasic);
+                SearchResponse response = port.search(request);
+                return response.getSearchResult();
+            }
+        });
+
+        System.out.println(result);
+    }
+
+    @Test
+    public void testSubsidiarySearch() throws Exception {
+        NetSuiteClientService<NetSuitePortType> connection = webServiceTestFixture.getClientService();
+        connection.setBodyFieldsOnly(true);
+        connection.setReturnSearchColumns(true);
+
+        SearchResult result = connection.execute(new NetSuiteClientService.PortOperation<SearchResult, NetSuitePortType>() {
+            @Override public SearchResult execute(NetSuitePortType port) throws Exception {
+                SearchRequest request = new SearchRequest();
+
+                SubsidiarySearch search = new SubsidiarySearch();
+                SubsidiarySearchBasic searchBasic = new SubsidiarySearchBasic();
+                search.setBasic(searchBasic);
+
+//                SubsidiarySearchAdvanced searchAdvanced = new SubsidiarySearchAdvanced();
+//                searchAdvanced.setCriteria(search);
+//                SubsidiarySearchRow searchRow = new SubsidiarySearchRow();
+//                SubsidiarySearchRowBasic searchRowBasic = new SubsidiarySearchRowBasic();
+//                searchRow.setBasic(searchRowBasic);
+//                searchAdvanced.setColumns(searchRow);
+
+                request.setSearchRecord(search);
+
+                SearchResponse response = port.search(request);
+                return response.getSearchResult();
+            }
+        });
+
+        System.out.println(result);
+    }
+
+    //    @Test
 //    public void testUpdateCustomMetaData() throws Exception {
 //        NetSuiteClientService connection = webServiceTestFixture.getClientService();
 //

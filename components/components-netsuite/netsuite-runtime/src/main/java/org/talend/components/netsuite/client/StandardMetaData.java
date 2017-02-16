@@ -67,8 +67,11 @@ public abstract class StandardMetaData {
         typeMap.put(typeNameToRegister, typeClass);
     }
 
-    protected void registerRecordTypes(Class<?> recordBaseClass, Collection<Class<?>> recordClasses,
-            Collection<String> excludedRecordTypeNames, EnumAccessor recordTypeEnumAccessor) {
+    protected void registerRecordTypes(Class<?> recordBaseClass,
+            Collection<Class<?>> recordClasses,
+            Collection<String> excludedRecordTypeNames,
+            Collection<String> unspecifiedRecordTypeNames,
+            EnumAccessor recordTypeEnumAccessor) {
 
         Set<String> unresolvedTypeNames = new HashSet<>();
 
@@ -79,21 +82,29 @@ public abstract class StandardMetaData {
                 continue;
             }
 
-            String recordTypeName = clazz.getSimpleName();
-            Enum<?> recordType;
-            if (!excludedRecordTypeNames.contains(recordTypeName)) {
-                try {
-                    recordType = recordTypeEnumAccessor.mapFromString(toInitialLower(recordTypeName));
-
-                    String name = recordTypeEnumAccessor.mapToString(recordType);
-
-                    RecordTypeDef def = new RecordTypeDef(name, clazz);
-                    recordTypeDefMap.put(recordTypeName, def);
-
-                } catch (IllegalArgumentException e) {
-                    unresolvedTypeNames.add(recordTypeName);
+            String recordTypeClassSimpleName = clazz.getSimpleName();
+            if (!excludedRecordTypeNames.contains(recordTypeClassSimpleName)) {
+                String recordTypeName = null;
+                if (unspecifiedRecordTypeNames.contains(recordTypeClassSimpleName)) {
+                    recordTypeName = toInitialLower(recordTypeClassSimpleName);
+                } else {
+                    try {
+                        Enum<?> recordType = recordTypeEnumAccessor.mapFromString(
+                                toInitialLower(recordTypeClassSimpleName));
+                        recordTypeName = recordTypeEnumAccessor.mapToString(recordType);
+                    } catch (IllegalArgumentException e) {
+                        unresolvedTypeNames.add(recordTypeClassSimpleName);
+                    }
                 }
-                registerType(clazz, recordTypeName);
+                if (recordTypeName != null) {
+                    RecordTypeDef def = new RecordTypeDef(recordTypeName, clazz);
+                    if (!recordTypeDefMap.containsKey(recordTypeName)) {
+                        recordTypeDefMap.put(toInitialUpper(recordTypeName), def);
+                    } else {
+                        throw new IllegalArgumentException("Record type already registered: " + recordTypeClassSimpleName);
+                    }
+                }
+                registerType(clazz, recordTypeClassSimpleName);
             }
         }
 
@@ -103,7 +114,9 @@ public abstract class StandardMetaData {
     }
 
     protected void registerRecordSearchTypeMapping(Enum<?>[] recordTypes,
-            EnumAccessor recordTypeEnumAccessor, EnumAccessor searchRecordTypeEnumAccessor) {
+            EnumAccessor recordTypeEnumAccessor,
+            EnumAccessor searchRecordTypeEnumAccessor,
+            Collection<String> unspecifiedRecordTypeNames) {
 
         for (Enum<?> recordType : recordTypes) {
             String recordTypeName = recordTypeEnumAccessor.mapToString(recordType);
@@ -124,14 +137,27 @@ public abstract class StandardMetaData {
                 logger.error("Search record type not found for '" + recordTypeName + "'");
             }
         }
+
+        for (String recordTypeName : unspecifiedRecordTypeNames) {
+            recordSearchTypeMap.put(recordTypeName, recordTypeName);
+        }
     }
 
     protected void registerSearchRecordDefs(SearchRecordDef[] searchRecordDefs) {
         for (SearchRecordDef def : searchRecordDefs) {
 
-            registerType(def.getSearchClass(), null);
+            // For some record types main search record not available
+            if (def.getSearchClass() != null) {
+                registerType(def.getSearchClass(), null);
+            }
+
+            // Basic must be present
             registerType(def.getSearchBasicClass(), null);
-            registerType(def.getSearchAdvancedClass(), null);
+
+            // For some record types advanced search record not available
+            if (def.getSearchAdvancedClass() != null) {
+                registerType(def.getSearchAdvancedClass(), null);
+            }
 
             if (searchRecordDefMap.containsKey(def.getSearchRecordType())) {
                 throw new IllegalArgumentException(
@@ -163,14 +189,6 @@ public abstract class StandardMetaData {
         searchFieldOperatorMap.put("SearchEnumMultiSelectField", "SearchEnumMultiSelectFieldOperator");
         searchFieldOperatorMap.put("SearchEnumMultiSelectCustomField", "SearchEnumMultiSelectFieldOperator");
     }
-
-//    public Collection<String> getTransactionTypes() {
-//        return Collections.unmodifiableCollection(standardTransactionTypes);
-//    }
-//
-//    public Collection<String> getItemTypes() {
-//        return Collections.unmodifiableCollection(standardItemTypes);
-//    }
 
     public Class<?> getTypeClass(String typeName) {
         return typeMap.get(typeName);

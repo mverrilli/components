@@ -104,9 +104,17 @@ public class NetSuiteClientServiceTest {
         searchRecordTypeSet.remove(SearchRecordType.CUSTOM_LIST);
         searchRecordTypeSet.remove(SearchRecordType.CUSTOM_RECORD);
 
+        Set<String> searchRecordTypeNameSet = new HashSet<>();
         for (SearchRecordType searchRecordType : searchRecordTypeSet) {
-            SearchRecordDef searchRecordDef = clientService.getSearchRecordDef(toInitialUpper(searchRecordType.value()));
-            assertNotNull("Search record def found: " + searchRecordType.value(), searchRecordDef);
+            searchRecordTypeNameSet.add(toInitialUpper(searchRecordType.value()));
+        }
+        searchRecordTypeNameSet.add("Address");
+        searchRecordTypeNameSet.add("InventoryDetail");
+        searchRecordTypeNameSet.add("TimeEntry");
+
+        for (String searchRecordType : searchRecordTypeNameSet) {
+            SearchRecordDef searchRecordDef = clientService.getSearchRecordDef(searchRecordType);
+            assertNotNull("Search record def found: " + searchRecordType, searchRecordDef);
         }
 
         Set<RecordType> recordTypeSet = new HashSet<>(Arrays.asList(RecordType.values()));
@@ -123,9 +131,17 @@ public class NetSuiteClientServiceTest {
         recordTypeSet.remove(RecordType.TRANSACTION_COLUMN_CUSTOM_FIELD);
         recordTypeSet.remove(RecordType.OTHER_CUSTOM_FIELD);
 
+        Set<String> recordTypeNameSet = new HashSet<>();
         for (RecordType recordType : recordTypeSet) {
-            RecordTypeDef recordTypeDef = clientService.getRecordTypeDef(toInitialUpper(recordType.value()));
-            assertNotNull("Record type def found: " + recordType.value(), recordTypeDef);
+            recordTypeNameSet.add(toInitialUpper(recordType.value()));
+        }
+        recordTypeNameSet.add("Address");
+        recordTypeNameSet.add("InventoryDetail");
+        recordTypeNameSet.add("TimeEntry");
+
+        for (String recordType : recordTypeNameSet) {
+            RecordTypeDef recordTypeDef = clientService.getRecordTypeDef(recordType);
+            assertNotNull("Record type def found: " + recordType, recordTypeDef);
         }
     }
 
