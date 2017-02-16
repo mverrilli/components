@@ -20,10 +20,10 @@ import javax.wsdl.xml.WSDLReader;
 /**
  *
  */
-public class NetSuiteXmlBindingConfigGen {
+public class JAXBConfigGen {
 
     public static void main(String... args) throws Exception {
-        NetSuiteXmlBindingConfigGen tool = new NetSuiteXmlBindingConfigGen();
+        JAXBConfigGen tool = new JAXBConfigGen();
 //        tool.run("2014.2", "_2014_2", "v2014_2");
         tool.run("2016.2", "_2016_2", "v2016_2");
     }

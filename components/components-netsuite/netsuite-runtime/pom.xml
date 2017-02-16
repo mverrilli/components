@@ -29,11 +29,6 @@
             <artifactId>netsuite-common</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.talend.components</groupId>-->
-            <!--<artifactId>netsuite-client</artifactId>-->
-            <!--<version>${project.version}</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.talend.components</groupId>
             <artifactId>netsuite-definition</artifactId>
@@ -60,16 +55,6 @@
             <artifactId>cxf-rt-transports-http</artifactId>
             <version>3.1.4</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>com.google.guava</groupId>-->
-            <!--<artifactId>guava</artifactId>-->
-            <!--<version>19.0</version>-->
-        <!--</dependency>-->
-        <dependency>
-            <groupId>io.github.lukehutch</groupId>
-            <artifactId>fast-classpath-scanner</artifactId>
-            <version>2.0.13</version>
-        </dependency>
 
         <!--<dependency>-->
             <!--<groupId>org.apache.beam</groupId>-->
@@ -90,12 +75,6 @@
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.talend.components</groupId>-->
-            <!--<artifactId>netsuite-client</artifactId>-->
-            <!--<version>${project.version}</version>-->
-            <!--<classifier>tests</classifier>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxws</artifactId>
@@ -230,6 +209,32 @@
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.20-PAXEXAM-PATCH</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <argLine>-Xms512m -Xmx1024m</argLine>
+                    <systemPropertyVariables>
+                        <pax.exam.karaf.version>4.0.2</pax.exam.karaf.version>
+                        <netsuite.endpoint>${netsuite.endpoint}</netsuite.endpoint>
+                        <netsuite.email>${netsuite.email}</netsuite.email>
+                        <netsuite.password>${netsuite.password}</netsuite.password>
+                        <netsuite.role>${netsuite.role}</netsuite.role>
+                        <netsuite.account>${netsuite.account}</netsuite.account>
+                        <netsuite.applicationId>${netsuite.applicationId}</netsuite.applicationId>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -292,8 +297,10 @@
                                 <Service-Component>*</Service-Component>
                                 <!--<Export-Package>!com.netsuite.webservices.*,*</Export-Package>-->
                                 <!--<Import-Package>!*internal,!org.talend.components.netsuite*,!com.netsuite.webservices.*,*</Import-Package>-->
-                                <Import-Package>!*internal,!org.joda.time*,!org.apache.cxf*,!org.springframework*,!com.sun*,!com.ctc*,!javax*,!com.fasterxml.jackson*,!javassist*,*</Import-Package>
-                                <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*|cxf-*|commons-*</Embed-Dependency>
+                                <!--<Import-Package>!*internal,!org.joda.time*,!org.apache.cxf*,!org.springframework*,!com.sun*,!com.ctc*,!javax*,!com.fasterxml.jackson*,!javassist*,*</Import-Package>-->
+                                <Import-Package>!*internal,!org.talend.components.netsuite*,!com.netsuite.webservices*,!org.springframework*,org.talend*,org.slf4j*,org.joda.time*,org.apache.commons*,org.apache.avro.*,org.apache.cxf*,com.sun*,com.ctc*,javax.xml.bind*,com.fasterxml.jackson*,javassist*,*</Import-Package>
+                                <!--<Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*|cxf-*|commons-*</Embed-Dependency>-->
+                                <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*|commons-*</Embed-Dependency>
                                 <Include-Resource>
                                     {maven-resources},META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt=target/classes/META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt
                                 </Include-Resource>
@@ -302,6 +309,21 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- The following plugins are there to make sure they are launched after
+                the bundle are packaged when used in the package phase.-->
+            <!-- They may be used with the -PgenerateP2 maven profile to build a p2
+                update site for distribution to the Studio -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.tycho.extras</groupId>
+                <artifactId>tycho-p2-extras-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
             </plugin>
         </plugins>
     </build>

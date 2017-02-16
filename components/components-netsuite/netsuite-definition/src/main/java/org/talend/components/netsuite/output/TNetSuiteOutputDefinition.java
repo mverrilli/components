@@ -51,7 +51,7 @@ public class TNetSuiteOutputDefinition extends TNetSuiteComponentDefinition {
 
     @Override
     public Class<? extends ComponentProperties> getPropertyClass() {
-        return NetSuiteInputProperties.class;
+        return NetSuiteOutputProperties.class;
     }
 
 }

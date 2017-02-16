@@ -16,6 +16,7 @@ import org.talend.daikon.properties.presentation.Form;
 import org.talend.daikon.properties.presentation.Widget;
 import org.talend.daikon.properties.property.StringProperty;
 
+import static org.talend.components.netsuite.util.ComponentExceptions.exceptionToValidationResult;
 import static org.talend.daikon.properties.presentation.Widget.widget;
 import static org.talend.daikon.properties.property.PropertyFactory.newString;
 
@@ -78,7 +79,7 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
             List<NamedThing> moduleNames = getSchemaNames();
             moduleName.setPossibleNamedThingValues(moduleNames);
         } catch (ComponentException ex) {
-            return ex.getValidationResult();
+            return exceptionToValidationResult(ex);
         }
         return ValidationResult.OK;
     }
@@ -88,7 +89,7 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
             Schema schema = getSchema(moduleName.getStringValue());
             main.schema.setValue(schema);
         } catch (ComponentException ex) {
-            return ex.getValidationResult();
+            return exceptionToValidationResult(ex);
         }
         return ValidationResult.OK;
     }

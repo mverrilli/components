@@ -1,11 +1,14 @@
 package org.talend.components.netsuite.input;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.talend.components.api.component.Connector;
 import org.talend.components.api.component.PropertyPathConnector;
 import org.talend.components.api.properties.ComponentPropertiesImpl;
+import org.talend.components.common.FixedConnectorsComponentProperties;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.components.netsuite.NetSuiteModuleProperties;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
@@ -25,7 +28,8 @@ import static org.talend.daikon.properties.presentation.Widget.widget;
 /**
  *
  */
-public class NetSuiteInputProperties extends ComponentPropertiesImpl implements NetSuiteProvideConnectionProperties {
+public class NetSuiteInputProperties extends FixedConnectorsComponentProperties
+        implements NetSuiteProvideConnectionProperties {
 
     public NetSuiteConnectionProperties connection = new NetSuiteConnectionProperties("connection");
 
@@ -119,4 +123,11 @@ public class NetSuiteInputProperties extends ComponentPropertiesImpl implements 
         }
     }
 
+    @Override
+    protected Set<PropertyPathConnector> getAllSchemaPropertiesConnectors(boolean isOutputConnection) {
+        if (isOutputConnection) {
+            return Collections.singleton(MAIN_CONNECTOR);
+        }
+        return Collections.emptySet();
+    }
 }

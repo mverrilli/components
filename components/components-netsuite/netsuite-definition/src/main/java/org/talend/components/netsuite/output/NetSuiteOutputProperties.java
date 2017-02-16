@@ -1,8 +1,12 @@
 package org.talend.components.netsuite.output;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.talend.components.api.component.Connector;
 import org.talend.components.api.component.PropertyPathConnector;
 import org.talend.components.api.properties.ComponentPropertiesImpl;
+import org.talend.components.common.FixedConnectorsComponentProperties;
 import org.talend.components.common.SchemaProperties;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.components.netsuite.TNetSuiteComponentDefinition;
@@ -22,7 +26,8 @@ import static org.talend.daikon.properties.property.PropertyFactory.newEnum;
 /**
  *
  */
-public class NetSuiteOutputProperties extends ComponentPropertiesImpl implements NetSuiteProvideConnectionProperties {
+public class NetSuiteOutputProperties extends FixedConnectorsComponentProperties
+        implements NetSuiteProvideConnectionProperties {
 
     public enum OutputAction {
         ADD, UPDATE, UPSERT, DELETE
@@ -36,6 +41,12 @@ public class NetSuiteOutputProperties extends ComponentPropertiesImpl implements
 
     protected transient PropertyPathConnector MAIN_CONNECTOR =
             new PropertyPathConnector(Connector.MAIN_NAME, "module.main");
+
+    protected transient PropertyPathConnector FLOW_CONNECTOR =
+            new PropertyPathConnector(Connector.MAIN_NAME, "schemaFlow");
+
+    protected transient PropertyPathConnector REJECT_CONNECTOR =
+            new PropertyPathConnector(Connector.REJECT_NAME, "schemaReject");
 
     public SchemaProperties schemaFlow = new SchemaProperties("schemaFlow"); //$NON-NLS-1$
 
@@ -93,6 +104,18 @@ public class NetSuiteOutputProperties extends ComponentPropertiesImpl implements
                 return schemaService.getSearchRecordSchema(typeName);
             }
         }, this);
+    }
+
+    @Override
+    protected Set<PropertyPathConnector> getAllSchemaPropertiesConnectors(boolean isOutputConnection) {
+        HashSet<PropertyPathConnector> connectors = new HashSet<>();
+        if (isOutputConnection) {
+            connectors.add(FLOW_CONNECTOR);
+            connectors.add(REJECT_CONNECTOR);
+        } else {
+            connectors.add(MAIN_CONNECTOR);
+        }
+        return connectors;
     }
 
 }
