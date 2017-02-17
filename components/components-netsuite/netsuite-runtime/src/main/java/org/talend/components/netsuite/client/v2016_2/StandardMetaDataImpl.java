@@ -13,7 +13,6 @@ import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.StandardMetaData;
 import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeDef;
 import org.talend.components.netsuite.client.metadata.SearchRecordDef;
-import org.talend.components.netsuite.model.Mapper;
 import org.talend.components.netsuite.model.PropertyInfo;
 
 import com.netsuite.webservices.v2016_2.activities.scheduling.CalendarEventSearch;
@@ -275,7 +274,6 @@ import com.netsuite.webservices.v2016_2.transactions.demandplanning.ItemSupplyPl
 import com.netsuite.webservices.v2016_2.transactions.demandplanning.ItemSupplyPlanSearchAdvanced;
 import com.netsuite.webservices.v2016_2.transactions.employees.TimeBillSearch;
 import com.netsuite.webservices.v2016_2.transactions.employees.TimeBillSearchAdvanced;
-import com.netsuite.webservices.v2016_2.transactions.employees.TimeEntry;
 import com.netsuite.webservices.v2016_2.transactions.employees.TimeEntrySearch;
 import com.netsuite.webservices.v2016_2.transactions.employees.TimeEntrySearchAdvanced;
 import com.netsuite.webservices.v2016_2.transactions.employees.TimeSheetSearch;
@@ -605,84 +603,21 @@ public class StandardMetaDataImpl extends StandardMetaData {
 
     private static final SearchFieldOperatorTypeDef<?>[] searchFieldOperatorTable = {
             // Date
-            new SearchFieldOperatorTypeDef<>("Date",
-                    SearchDateFieldOperator.class, new Mapper<SearchDateFieldOperator, String>() {
-                @Override public String map(SearchDateFieldOperator input) {
-                    return input.value();
-                }
-            }, new Mapper<String, SearchDateFieldOperator>() {
-                @Override public SearchDateFieldOperator map(String input) {
-                    return SearchDateFieldOperator.fromValue(input);
-                }
-            }),
+            createSearchFieldOperatorTypeDef("Date", SearchDateFieldOperator.class),
             // Predefined Date
-            new SearchFieldOperatorTypeDef<>("PredefinedDate",
-                    SearchDate.class, new Mapper<SearchDate, String>() {
-                @Override public String map(SearchDate input) {
-                    return input.value();
-                }
-            }, new Mapper<String, SearchDate>() {
-                @Override public SearchDate map(String input) {
-                    return SearchDate.fromValue(input);
-                }
-            }),
+            createSearchFieldOperatorTypeDef("PredefinedDate", SearchDate.class),
+            // Long
+            createSearchFieldOperatorTypeDef("Numeric", SearchLongFieldOperator.class),
             // Double
-            new SearchFieldOperatorTypeDef<>("Double",
-                    SearchDoubleFieldOperator.class, new Mapper<SearchDoubleFieldOperator, String>() {
-                @Override public String map(SearchDoubleFieldOperator input) {
-                    return input.value();
-                }
-            }, new Mapper<String, SearchDoubleFieldOperator>() {
-                @Override public SearchDoubleFieldOperator map(String input) {
-                    return SearchDoubleFieldOperator.fromValue(input);
-                }
-            }),
-            // Date
-            new SearchFieldOperatorTypeDef<>("Numeric",
-                    SearchLongFieldOperator.class, new Mapper<SearchLongFieldOperator, String>() {
-                @Override public String map(SearchLongFieldOperator input) {
-                    return input.value();
-                }
-            }, new Mapper<String, SearchLongFieldOperator>() {
-                @Override public SearchLongFieldOperator map(String input) {
-                    return SearchLongFieldOperator.fromValue(input);
-                }
-            }),
+            createSearchFieldOperatorTypeDef("Double", SearchDoubleFieldOperator.class),
             // String
-            new SearchFieldOperatorTypeDef<>("String",
-                    SearchStringFieldOperator.class, new Mapper<SearchStringFieldOperator, String>() {
-                @Override public String map(SearchStringFieldOperator input) {
-                    return input.value();
-                }
-            }, new Mapper<String, SearchStringFieldOperator>() {
-                @Override public SearchStringFieldOperator map(String input) {
-                    return SearchStringFieldOperator.fromValue(input);
-                }
-            }),
+            createSearchFieldOperatorTypeDef("String", SearchStringFieldOperator.class),
             // List of values
-            new SearchFieldOperatorTypeDef<>("List",
-                    SearchMultiSelectFieldOperator.class, new Mapper<SearchMultiSelectFieldOperator, String>() {
-                @Override public String map(SearchMultiSelectFieldOperator input) {
-                    return input.value();
-                }
-            }, new Mapper<String, SearchMultiSelectFieldOperator>() {
-                @Override public SearchMultiSelectFieldOperator map(String input) {
-                    return SearchMultiSelectFieldOperator.fromValue(input);
-                }
-            }),
+            createSearchFieldOperatorTypeDef("List", SearchMultiSelectFieldOperator.class),
             // List of predefined values
-            new SearchFieldOperatorTypeDef<>("List",
-                    SearchEnumMultiSelectFieldOperator.class, new Mapper<SearchEnumMultiSelectFieldOperator, String>() {
-                @Override public String map(SearchEnumMultiSelectFieldOperator input) {
-                    return input.value();
-                }
-            }, new Mapper<String, SearchEnumMultiSelectFieldOperator>() {
-                @Override public SearchEnumMultiSelectFieldOperator map(String input) {
-                    return SearchEnumMultiSelectFieldOperator.fromValue(input);
-                }
-            }),
+            createSearchFieldOperatorTypeDef("List", SearchEnumMultiSelectFieldOperator.class),
             // Boolean (Synthetic)
-            new SearchFieldOperatorTypeDef<>("Boolean",
+            new SearchFieldOperatorTypeDef("Boolean",
                     SearchFieldOperatorTypeDef.SearchBooleanFieldOperator.class, null, null)
     };
 

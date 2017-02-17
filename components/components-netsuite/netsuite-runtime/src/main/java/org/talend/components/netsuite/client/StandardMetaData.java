@@ -18,10 +18,13 @@ import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeDef
 import org.talend.components.netsuite.client.metadata.SearchRecordDef;
 import org.talend.components.netsuite.client.metadata.TypeDef;
 import org.talend.components.netsuite.model.EnumAccessor;
+import org.talend.components.netsuite.model.Mapper;
 import org.talend.components.netsuite.model.PropertyInfo;
 import org.talend.components.netsuite.model.TypeInfo;
 import org.talend.components.netsuite.model.TypeManager;
 
+import static org.talend.components.netsuite.client.NetSuiteFactory.getEnumFromStringMapper;
+import static org.talend.components.netsuite.client.NetSuiteFactory.getEnumToStringMapper;
 import static org.talend.components.netsuite.client.NetSuiteFactory.toInitialLower;
 import static org.talend.components.netsuite.client.NetSuiteFactory.toInitialUpper;
 
@@ -268,4 +271,11 @@ public abstract class StandardMetaData {
     }
 
     protected abstract boolean isKeyField(Class<?> entityClass, PropertyInfo propertyInfo);
+
+    public static <T> SearchFieldOperatorTypeDef<T> createSearchFieldOperatorTypeDef(
+            String dataType, Class<T> clazz) {
+        return new SearchFieldOperatorTypeDef<>(dataType, clazz,
+                (Mapper<T, String>) getEnumToStringMapper((Class<Enum>) clazz),
+                (Mapper<String, T>) getEnumFromStringMapper((Class<Enum>) clazz));
+    }
 }
