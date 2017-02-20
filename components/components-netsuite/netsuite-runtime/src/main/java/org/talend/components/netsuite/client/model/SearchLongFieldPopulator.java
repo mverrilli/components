@@ -9,8 +9,8 @@ import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanPrope
  */
 public class SearchLongFieldPopulator<T> extends SearchFieldPopulator<T> {
 
-    public SearchLongFieldPopulator(RuntimeModel runtimeInfoSet, String fieldType, Class<T> fieldClass) {
-        super(runtimeInfoSet, fieldType, fieldClass);
+    public SearchLongFieldPopulator(RuntimeModelProvider runtimeModelProvider, String fieldType, Class<T> fieldClass) {
+        super(runtimeModelProvider, fieldType, fieldClass);
     }
 
     @Override
@@ -22,7 +22,7 @@ public class SearchLongFieldPopulator<T> extends SearchFieldPopulator<T> {
             if (values.size() > 1) {
                 setBeanProperty(nsObject, "searchValue2", Long.valueOf(Long.parseLong(values.get(1))));
             }
-            setBeanProperty(nsObject, "operator", runtimeInfoSet.getSearchFieldOperatorByName(fieldType, operatorName));
+            setBeanProperty(nsObject, "operator", runtimeModelProvider.getSearchFieldOperatorByName(fieldType, operatorName));
         }
 
         return nsObject;

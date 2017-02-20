@@ -9,8 +9,8 @@ import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanPrope
  */
 public class SearchBooleanFieldPopulator<T> extends SearchFieldPopulator<T> {
 
-    public SearchBooleanFieldPopulator(RuntimeModel runtimeInfoSet, String fieldType, Class<T> fieldClass) {
-        super(runtimeInfoSet, fieldType, fieldClass);
+    public SearchBooleanFieldPopulator(RuntimeModelProvider runtimeModelProvider, String fieldType, Class<T> fieldClass) {
+        super(runtimeModelProvider, fieldType, fieldClass);
     }
 
     @Override

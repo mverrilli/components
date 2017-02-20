@@ -10,8 +10,8 @@ import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanPrope
  */
 public class SearchMultiSelectFieldPopulator<T> extends SearchFieldPopulator<T> {
 
-    public SearchMultiSelectFieldPopulator(RuntimeModel runtimeInfoSet, String fieldType, Class<T> fieldClass) {
-        super(runtimeInfoSet, fieldType, fieldClass);
+    public SearchMultiSelectFieldPopulator(RuntimeModelProvider runtimeModelProvider, String fieldType, Class<T> fieldClass) {
+        super(runtimeModelProvider, fieldType, fieldClass);
     }
 
     @Override
@@ -20,7 +20,7 @@ public class SearchMultiSelectFieldPopulator<T> extends SearchFieldPopulator<T> 
 
         List<Object> searchValue = (List<Object>) getBeanProperty(nsObject, "searchValue");
         for (int i = 0; i < values.size(); i++) {
-            Object item = runtimeInfoSet.createType("ListOrRecordRef");
+            Object item = runtimeModelProvider.createType("ListOrRecordRef");
             setBeanProperty(item, "name", values.get(i));
             setBeanProperty(item, "internalId", values.get(i));
             setBeanProperty(item, "externalId", null);
@@ -28,7 +28,7 @@ public class SearchMultiSelectFieldPopulator<T> extends SearchFieldPopulator<T> 
             searchValue.add(item);
         }
 
-        setBeanProperty(nsObject, "operator", runtimeInfoSet.getSearchFieldOperatorByName(fieldType, operatorName));
+        setBeanProperty(nsObject, "operator", runtimeModelProvider.getSearchFieldOperatorByName(fieldType, operatorName));
 
         return nsObject;
     }

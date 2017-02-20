@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.client.common;
+package org.talend.components.netsuite.client.query;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,6 +7,8 @@ import java.util.List;
 
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
+import org.talend.components.netsuite.client.common.NsSearchResult;
+import org.talend.components.netsuite.client.common.ResultSet;
 import org.talend.components.netsuite.client.model.SearchRecordInfo;
 
 /**

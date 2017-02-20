@@ -8,7 +8,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.talend.components.netsuite.client.common.SearchResultSet;
+import org.talend.components.netsuite.client.query.SearchResultSet;
 import org.talend.components.netsuite.client.model.SearchRecordInfo;
 import org.talend.components.netsuite.client.query.SearchCondition;
 import org.talend.daikon.NamedThing;

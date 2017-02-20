@@ -21,7 +21,7 @@ import org.talend.components.netsuite.client.common.NsSearchPreferences;
 import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.client.common.NsWriteResponse;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
-import org.talend.components.netsuite.client.model.RuntimeModel;
+import org.talend.components.netsuite.client.model.RuntimeModelProvider;
 import org.talend.components.netsuite.client.model.SearchFieldOperatorTypeInfo;
 import org.talend.components.netsuite.client.model.SearchFieldPopulator;
 import org.talend.components.netsuite.client.model.SearchRecordInfo;
@@ -70,7 +70,7 @@ public abstract class NetSuiteClientService<PortT> {
 
     protected PortT port;
 
-    protected RuntimeModel runtimeModel;
+    protected RuntimeModelProvider runtimeModelProvider;
 
     protected NetSuiteClientService() {
         super();
@@ -211,7 +211,7 @@ public abstract class NetSuiteClientService<PortT> {
     public Collection<NamedThing> getRecordTypes() {
         List<NamedThing> recordTypes = new ArrayList<>();
 
-        Collection<String> standardRecordTypes = runtimeModel.getRecordTypes();
+        Collection<String> standardRecordTypes = runtimeModelProvider.getRecordTypes();
         for (String recordType : standardRecordTypes) {
             recordTypes.add(new SimpleNamedThing(recordType, recordType));
         }
@@ -232,10 +232,10 @@ public abstract class NetSuiteClientService<PortT> {
     public Collection<NamedThing> getSearches() throws NetSuiteException {
         List<NamedThing> searches = new ArrayList<>(256);
 
-        Collection<String> recordTypes = runtimeModel.getRecordTypes();
+        Collection<String> recordTypes = runtimeModelProvider.getRecordTypes();
         for (String recordTypeName : recordTypes) {
-            RecordTypeInfo def = runtimeModel.getRecordTypeInfo(recordTypeName);
-            SearchRecordInfo searchRecordInfo = runtimeModel.getSearchRecordInfo(recordTypeName);
+            RecordTypeInfo def = runtimeModelProvider.getRecordTypeInfo(recordTypeName);
+            SearchRecordInfo searchRecordInfo = runtimeModelProvider.getSearchRecordInfo(recordTypeName);
             if (searchRecordInfo != null) {
                 String name = def.getName();
                 searches.add(new SimpleNamedThing(name, name));
@@ -246,39 +246,39 @@ public abstract class NetSuiteClientService<PortT> {
     }
 
     public TypeInfo getTypeInfo(String typeName) {
-        return runtimeModel.getTypeInfo(typeName);
+        return runtimeModelProvider.getTypeInfo(typeName);
     }
 
     public TypeInfo getTypeInfo(Class<?> clazz) {
-        return runtimeModel.getTypeInfo(clazz);
+        return runtimeModelProvider.getTypeInfo(clazz);
     }
 
     public RecordTypeInfo getRecordTypeInfo(String typeName) {
-        return runtimeModel.getRecordTypeInfo(typeName);
+        return runtimeModelProvider.getRecordTypeInfo(typeName);
     }
 
     public SearchRecordInfo getSearchRecordInfo(String recordType) {
-        SearchRecordInfo searchRecordInfo = runtimeModel.getSearchRecordTypeInfoByRecordType(recordType);
+        SearchRecordInfo searchRecordInfo = runtimeModelProvider.getSearchRecordTypeInfoByRecordType(recordType);
         if (searchRecordInfo == null) {
-            searchRecordInfo = runtimeModel.getSearchRecordInfo(recordType);
+            searchRecordInfo = runtimeModelProvider.getSearchRecordInfo(recordType);
         }
         return searchRecordInfo;
     }
 
     public Class<?> getSearchFieldClass(String searchFieldType) {
-        return runtimeModel.getSearchFieldClass(searchFieldType);
+        return runtimeModelProvider.getSearchFieldClass(searchFieldType);
     }
 
     public Object getSearchFieldOperatorByName(String searchFieldType, String searchFieldOperatorName) {
-        return runtimeModel.getSearchFieldOperatorByName(searchFieldType, searchFieldOperatorName);
+        return runtimeModelProvider.getSearchFieldOperatorByName(searchFieldType, searchFieldOperatorName);
     }
 
     public Collection<SearchFieldOperatorTypeInfo.QualifiedName> getSearchOperatorNames() {
-        return runtimeModel.getSearchOperatorNames();
+        return runtimeModelProvider.getSearchOperatorNames();
     }
 
     public SearchFieldPopulator<?> getSearchFieldPopulator(String fieldType) {
-        return runtimeModel.getSearchFieldPopulator(fieldType);
+        return runtimeModelProvider.getSearchFieldPopulator(fieldType);
     }
 
     public void updateCustomMetaData() throws NetSuiteException {
@@ -504,7 +504,7 @@ public abstract class NetSuiteClientService<PortT> {
     }
 
     public <T> T createType(String typeName) throws NetSuiteException {
-        return runtimeModel.createType(typeName);
+        return runtimeModelProvider.createType(typeName);
     }
 
     protected <T> T createInstance(Class<T> clazz) throws NetSuiteException {

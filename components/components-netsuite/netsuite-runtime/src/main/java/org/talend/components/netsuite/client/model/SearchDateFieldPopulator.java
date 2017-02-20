@@ -21,8 +21,8 @@ public class SearchDateFieldPopulator<T> extends SearchFieldPopulator<T> {
 
     private DatatypeFactory datatypeFactory;
 
-    public SearchDateFieldPopulator(RuntimeModel runtimeInfoSet, String fieldType, Class<T> fieldClass) {
-        super(runtimeInfoSet, fieldType, fieldClass);
+    public SearchDateFieldPopulator(RuntimeModelProvider runtimeModelProvider, String fieldType, Class<T> fieldClass) {
+        super(runtimeModelProvider, fieldType, fieldClass);
 
         try {
             datatypeFactory = DatatypeFactory.newInstance();
@@ -40,7 +40,7 @@ public class SearchDateFieldPopulator<T> extends SearchFieldPopulator<T> {
 
         if (operatorQName.getDataType().equals("PredefinedDate")) {
             setBeanProperty(nsObject, "predefinedSearchValue",
-                    runtimeInfoSet.getSearchFieldOperatorByName(fieldType, operatorName));
+                    runtimeModelProvider.getSearchFieldOperatorByName(fieldType, operatorName));
         } else {
             if (values != null && values.size() != 0) {
                 Calendar calValue = Calendar.getInstance();
@@ -100,7 +100,7 @@ public class SearchDateFieldPopulator<T> extends SearchFieldPopulator<T> {
                 }
             }
 
-            setBeanProperty(nsObject, "operator", runtimeInfoSet.getSearchFieldOperatorByName(fieldType, operatorName));
+            setBeanProperty(nsObject, "operator", runtimeModelProvider.getSearchFieldOperatorByName(fieldType, operatorName));
         }
 
         return nsObject;

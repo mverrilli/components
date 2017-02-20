@@ -12,12 +12,12 @@ import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanPrope
  *
  */
 public abstract class SearchFieldPopulator<T> {
-    protected RuntimeModel runtimeInfoSet;
+    protected RuntimeModelProvider runtimeModelProvider;
     protected String fieldType;
     protected Class<T> fieldClass;
 
-    public SearchFieldPopulator(RuntimeModel runtimeInfoSet, String fieldType, Class<T> fieldClass) {
-        this.runtimeInfoSet = runtimeInfoSet;
+    public SearchFieldPopulator(RuntimeModelProvider runtimeModelProvider, String fieldType, Class<T> fieldClass) {
+        this.runtimeModelProvider = runtimeModelProvider;
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
     }

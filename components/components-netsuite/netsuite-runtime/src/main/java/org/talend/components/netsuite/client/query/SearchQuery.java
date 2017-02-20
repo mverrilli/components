@@ -13,7 +13,6 @@ import org.talend.components.netsuite.beans.PropertyInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.common.NsSearchResult;
-import org.talend.components.netsuite.client.common.SearchResultSet;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.SearchFieldOperatorTypeInfo;
 import org.talend.components.netsuite.client.model.SearchFieldPopulator;
