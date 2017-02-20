@@ -8,7 +8,7 @@ import org.apache.avro.Schema;
 import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
 import org.talend.components.api.exception.ComponentException;
-import org.talend.components.netsuite.beans.Mapper;
+import org.talend.components.netsuite.beans.EnumAccessor;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.daikon.avro.AvroRegistry;
 import org.talend.daikon.avro.converter.AvroConverter;
@@ -43,9 +43,7 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
     public AvroConverter<?, ?> getConverter(Schema.Field field, Class<?> datumClass) {
         if (datumClass.isEnum()) {
             Class<Enum> enumClass = (Class<Enum>) datumClass;
-            return new EnumToStringConverter<>(field, enumClass,
-                    NetSuiteFactory.getEnumToStringMapper(enumClass),
-                    NetSuiteFactory.getEnumFromStringMapper(enumClass));
+            return new EnumToStringConverter<>(field, enumClass, NetSuiteFactory.getEnumAccessor(enumClass));
         }
         if (datumClass == XMLGregorianCalendar.class) {
             return new XMLGregorianCalendarToTimestampConverter(field, datatypeFactory);
@@ -64,15 +62,13 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
 
         private final Schema.Field field;
         private final Class<T> clazz;
-        private final Mapper<Enum, String> enumToStringMapper;
-        private final Mapper<String, Enum> enumFromStringMapper;
+        private final EnumAccessor enumAccessor;
 
         public EnumToStringConverter(Schema.Field field, Class<T> clazz,
-                Mapper<Enum, String> enumToStringMapper, Mapper<String, Enum> enumFromStringMapper) {
+                EnumAccessor enumAccessor) {
             this.field = field;
             this.clazz = clazz;
-            this.enumToStringMapper = enumToStringMapper;
-            this.enumFromStringMapper = enumFromStringMapper;
+            this.enumAccessor = enumAccessor;
         }
 
         @Override
@@ -87,15 +83,28 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
 
         @Override
         public T convertToDatum(String value) {
-            return value == null ? null : (T) enumFromStringMapper.map(value);
+            if (value == null) {
+                return null;
+            }
+            try {
+                return (T) enumAccessor.mapFromString(value);
+            } catch (IllegalArgumentException ex) {
+                // Fallback to .valueOf(String)
+                return Enum.valueOf(clazz, value);
+            }
         }
 
         @Override
-        public String convertToAvro(Enum anEnum) {
-            if (anEnum == null) {
+        public String convertToAvro(Enum enumValue) {
+            if (enumValue == null) {
                 return null;
             }
-            return enumToStringMapper.map(anEnum);
+            try {
+                return enumAccessor.mapToString(enumValue);
+            } catch (IllegalArgumentException ex) {
+                // Fallback to .name()
+                return enumValue.name();
+            }
         }
     }
 

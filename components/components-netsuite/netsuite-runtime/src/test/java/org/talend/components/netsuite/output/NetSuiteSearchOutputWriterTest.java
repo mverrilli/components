@@ -30,7 +30,7 @@ import org.talend.components.api.component.runtime.Result;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteAvroRegistry;
 import org.talend.components.netsuite.NetSuiteSink;
-import org.talend.components.netsuite.NsObjectIndexedRecordConverter;
+import org.talend.components.netsuite.input.NsRecordReadTransducer;
 import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteFactory;
@@ -156,15 +156,15 @@ public class NetSuiteSearchOutputWriterTest {
     }
 
     private List<IndexedRecord> makeRecords(NetSuiteClientService clientService, Schema schema, int count) throws Exception {
-        NsObjectIndexedRecordConverter converter = new NsObjectIndexedRecordConverter(clientService);
-        converter.setSchema(schema);
+        NsRecordReadTransducer transducer = new NsRecordReadTransducer(clientService);
+        transducer.setSchema(schema);
 
         List<IndexedRecord> recordList = new ArrayList<>();
 
         while (count > 0) {
             Account nsRecord = composeObject(Account.class);
 
-            IndexedRecord convertedRecord = converter.convertToAvro(nsRecord);
+            IndexedRecord convertedRecord = transducer.read(nsRecord);
 
             Schema recordSchema = convertedRecord.getSchema();
 

@@ -8,10 +8,8 @@ import org.apache.avro.generic.IndexedRecord;
 import org.talend.components.api.component.runtime.Result;
 import org.talend.components.api.component.runtime.WriteOperation;
 import org.talend.components.api.component.runtime.WriterWithFeedback;
-import org.talend.components.netsuite.NsObjectIndexedRecordConverter;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.daikon.avro.converter.IndexedRecordConverter;
 
 /**
  * TODO Implement bulk Add/Update/Upsert/Delete
@@ -26,7 +24,7 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
 
     protected NetSuiteClientService clientService;
     protected NetSuiteOutputProperties.OutputAction action;
-    protected IndexedRecordConverter<Object, IndexedRecord> converter;
+    protected NsRecordWriteTransducer transducer;
     protected int dataCount = 0;
 
     public NetSuiteOutputWriter(NetSuiteWriteOperation writeOperation) {
@@ -48,6 +46,18 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
         try {
             clientService = writeOperation.getSink().connect(writeOperation.getRuntimeContainer());
             action = writeOperation.getProperties().action.getValue();
+            if (action == NetSuiteOutputProperties.OutputAction.ADD
+                    || action == NetSuiteOutputProperties.OutputAction.UPDATE
+                    || action == NetSuiteOutputProperties.OutputAction.UPSERT) {
+
+                String typeName = writeOperation.getProperties().module.moduleName.getValue();
+                transducer = new NsRecordWriteTransducer(clientService, typeName);
+
+            } else if (action == NetSuiteOutputProperties.OutputAction.DELETE) {
+
+                String typeName = writeOperation.getProperties().module.moduleName.getValue();
+                transducer = new NsRecordWriteTransducer(clientService, typeName);
+            }
         } catch (NetSuiteException e) {
             throw new IOException(e);
         }
@@ -58,13 +68,13 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
         IndexedRecord record = (IndexedRecord) object;
         try {
             if (action == NetSuiteOutputProperties.OutputAction.ADD) {
-                clientService.add(createObject(record, Object.class));
+                clientService.add(transduceRecord(record));
             } else if (action == NetSuiteOutputProperties.OutputAction.UPDATE) {
-                clientService.update(createObject(record, Object.class));
+                clientService.update(transduceRecord(record));
             } else if (action == NetSuiteOutputProperties.OutputAction.UPSERT) {
-                clientService.upsert(createObject(record, Object.class));
+                clientService.upsert(transduceRecord(record));
             } else if (action == NetSuiteOutputProperties.OutputAction.DELETE) {
-                clientService.delete(createObject(record, Object.class));
+                clientService.delete(transduceRecord(record));
             }
             successfulWrites.add(record);
         } catch (IOException e) {
@@ -87,16 +97,8 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
         return writeOperation;
     }
 
-    protected <T> T createObject(IndexedRecord record, Class<T> clazz) throws IOException {
-        Object nsObject = getConverter().convertToDatum(record);
-        return clazz.cast(nsObject);
-    }
-
-    protected IndexedRecordConverter<Object, IndexedRecord> getConverter() throws IOException {
-        if (converter == null) {
-            converter = new NsObjectIndexedRecordConverter(clientService);
-        }
-        return converter;
+    protected Object transduceRecord(IndexedRecord record) throws IOException {
+        return transducer.write(record);
     }
 
 }
