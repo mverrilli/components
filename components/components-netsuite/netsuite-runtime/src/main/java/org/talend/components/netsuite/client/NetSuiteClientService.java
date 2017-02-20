@@ -20,10 +20,12 @@ import org.talend.components.netsuite.client.common.NsPreferences;
 import org.talend.components.netsuite.client.common.NsSearchPreferences;
 import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.client.common.NsWriteResponse;
-import org.talend.components.netsuite.client.metadata.RecordTypeInfo;
-import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeInfo;
-import org.talend.components.netsuite.client.metadata.SearchRecordInfo;
-import org.talend.components.netsuite.client.metadata.TypeInfo;
+import org.talend.components.netsuite.client.model.RecordTypeInfo;
+import org.talend.components.netsuite.client.model.RuntimeModel;
+import org.talend.components.netsuite.client.model.SearchFieldOperatorTypeInfo;
+import org.talend.components.netsuite.client.model.SearchFieldPopulator;
+import org.talend.components.netsuite.client.model.SearchRecordInfo;
+import org.talend.components.netsuite.client.model.TypeInfo;
 import org.talend.components.netsuite.client.query.SearchQuery;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.SimpleNamedThing;
@@ -68,7 +70,7 @@ public abstract class NetSuiteClientService<PortT> {
 
     protected PortT port;
 
-    protected StandardMetaData standardMetaData;
+    protected RuntimeModel runtimeModel;
 
     protected NetSuiteClientService() {
         super();
@@ -209,7 +211,7 @@ public abstract class NetSuiteClientService<PortT> {
     public Collection<NamedThing> getRecordTypes() {
         List<NamedThing> recordTypes = new ArrayList<>();
 
-        Collection<String> standardRecordTypes = standardMetaData.getRecordTypes();
+        Collection<String> standardRecordTypes = runtimeModel.getRecordTypes();
         for (String recordType : standardRecordTypes) {
             recordTypes.add(new SimpleNamedThing(recordType, recordType));
         }
@@ -230,10 +232,10 @@ public abstract class NetSuiteClientService<PortT> {
     public Collection<NamedThing> getSearches() throws NetSuiteException {
         List<NamedThing> searches = new ArrayList<>(256);
 
-        Collection<String> recordTypes = standardMetaData.getRecordTypes();
+        Collection<String> recordTypes = runtimeModel.getRecordTypes();
         for (String recordTypeName : recordTypes) {
-            RecordTypeInfo def = standardMetaData.getRecordTypeDef(recordTypeName);
-            SearchRecordInfo searchRecordInfo = standardMetaData.getSearchRecordDef(recordTypeName);
+            RecordTypeInfo def = runtimeModel.getRecordTypeInfo(recordTypeName);
+            SearchRecordInfo searchRecordInfo = runtimeModel.getSearchRecordInfo(recordTypeName);
             if (searchRecordInfo != null) {
                 String name = def.getName();
                 searches.add(new SimpleNamedThing(name, name));
@@ -244,35 +246,39 @@ public abstract class NetSuiteClientService<PortT> {
     }
 
     public TypeInfo getTypeInfo(String typeName) {
-        return standardMetaData.getTypeDef(typeName);
+        return runtimeModel.getTypeInfo(typeName);
     }
 
     public TypeInfo getTypeInfo(Class<?> clazz) {
-        return standardMetaData.getTypeDef(clazz);
+        return runtimeModel.getTypeInfo(clazz);
     }
 
     public RecordTypeInfo getRecordTypeInfo(String typeName) {
-        return standardMetaData.getRecordTypeDef(typeName);
+        return runtimeModel.getRecordTypeInfo(typeName);
     }
 
     public SearchRecordInfo getSearchRecordInfo(String recordType) {
-        SearchRecordInfo searchRecordInfo = standardMetaData.getSearchRecordDefByRecordType(recordType);
+        SearchRecordInfo searchRecordInfo = runtimeModel.getSearchRecordTypeInfoByRecordType(recordType);
         if (searchRecordInfo == null) {
-            searchRecordInfo = standardMetaData.getSearchRecordDef(recordType);
+            searchRecordInfo = runtimeModel.getSearchRecordInfo(recordType);
         }
         return searchRecordInfo;
     }
 
     public Class<?> getSearchFieldClass(String searchFieldType) {
-        return standardMetaData.getSearchFieldClass(searchFieldType);
+        return runtimeModel.getSearchFieldClass(searchFieldType);
     }
 
     public Object getSearchFieldOperatorByName(String searchFieldType, String searchFieldOperatorName) {
-        return standardMetaData.getSearchFieldOperatorByName(searchFieldType, searchFieldOperatorName);
+        return runtimeModel.getSearchFieldOperatorByName(searchFieldType, searchFieldOperatorName);
     }
 
     public Collection<SearchFieldOperatorTypeInfo.QualifiedName> getSearchOperatorNames() {
-        return standardMetaData.getSearchOperatorNames();
+        return runtimeModel.getSearchOperatorNames();
+    }
+
+    public SearchFieldPopulator<?> getSearchFieldPopulator(String fieldType) {
+        return runtimeModel.getSearchFieldPopulator(fieldType);
     }
 
     public void updateCustomMetaData() throws NetSuiteException {
@@ -498,11 +504,7 @@ public abstract class NetSuiteClientService<PortT> {
     }
 
     public <T> T createType(String typeName) throws NetSuiteException {
-        Class<?> clazz = standardMetaData.getTypeClass(typeName);
-        if (clazz == null) {
-            throw new NetSuiteException("Unknown type: " + typeName);
-        }
-        return (T) createInstance(clazz);
+        return runtimeModel.createType(typeName);
     }
 
     protected <T> T createInstance(Class<T> clazz) throws NetSuiteException {

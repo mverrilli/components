@@ -89,7 +89,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
     public NetSuiteClientServiceImpl() {
         super();
 
-        standardMetaData = StandardMetaDataImpl.getInstance();
+        runtimeModel = RuntimeModelProviderImpl.getInstance();
     }
 
     @Override

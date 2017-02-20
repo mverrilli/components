@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.client.query;
+package org.talend.components.netsuite.client.model;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -10,9 +10,7 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
-import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeInfo;
 
 import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanProperty;
 
@@ -23,8 +21,8 @@ public class SearchDateFieldPopulator<T> extends SearchFieldPopulator<T> {
 
     private DatatypeFactory datatypeFactory;
 
-    public SearchDateFieldPopulator(NetSuiteClientService clientService, String fieldType, Class<T> fieldClass) {
-        super(clientService, fieldType, fieldClass);
+    public SearchDateFieldPopulator(RuntimeModel runtimeInfoSet, String fieldType, Class<T> fieldClass) {
+        super(runtimeInfoSet, fieldType, fieldClass);
 
         try {
             datatypeFactory = DatatypeFactory.newInstance();
@@ -42,7 +40,7 @@ public class SearchDateFieldPopulator<T> extends SearchFieldPopulator<T> {
 
         if (operatorQName.getDataType().equals("PredefinedDate")) {
             setBeanProperty(nsObject, "predefinedSearchValue",
-                    clientService.getSearchFieldOperatorByName(fieldType, operatorName));
+                    runtimeInfoSet.getSearchFieldOperatorByName(fieldType, operatorName));
         } else {
             if (values != null && values.size() != 0) {
                 Calendar calValue = Calendar.getInstance();
@@ -102,7 +100,7 @@ public class SearchDateFieldPopulator<T> extends SearchFieldPopulator<T> {
                 }
             }
 
-            setBeanProperty(nsObject, "operator", clientService.getSearchFieldOperatorByName(fieldType, operatorName));
+            setBeanProperty(nsObject, "operator", runtimeInfoSet.getSearchFieldOperatorByName(fieldType, operatorName));
         }
 
         return nsObject;

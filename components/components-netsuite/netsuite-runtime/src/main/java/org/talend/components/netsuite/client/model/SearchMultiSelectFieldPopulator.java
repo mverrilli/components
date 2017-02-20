@@ -1,8 +1,6 @@
-package org.talend.components.netsuite.client.query;
+package org.talend.components.netsuite.client.model;
 
 import java.util.List;
-
-import org.talend.components.netsuite.client.NetSuiteClientService;
 
 import static org.talend.components.netsuite.client.NetSuiteFactory.getBeanProperty;
 import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanProperty;
@@ -12,8 +10,8 @@ import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanPrope
  */
 public class SearchMultiSelectFieldPopulator<T> extends SearchFieldPopulator<T> {
 
-    public SearchMultiSelectFieldPopulator(NetSuiteClientService clientService, String fieldType, Class<T> fieldClass) {
-        super(clientService, fieldType, fieldClass);
+    public SearchMultiSelectFieldPopulator(RuntimeModel runtimeInfoSet, String fieldType, Class<T> fieldClass) {
+        super(runtimeInfoSet, fieldType, fieldClass);
     }
 
     @Override
@@ -22,7 +20,7 @@ public class SearchMultiSelectFieldPopulator<T> extends SearchFieldPopulator<T> 
 
         List<Object> searchValue = (List<Object>) getBeanProperty(nsObject, "searchValue");
         for (int i = 0; i < values.size(); i++) {
-            Object item = clientService.createType("ListOrRecordRef");
+            Object item = runtimeInfoSet.createType("ListOrRecordRef");
             setBeanProperty(item, "name", values.get(i));
             setBeanProperty(item, "internalId", values.get(i));
             setBeanProperty(item, "externalId", null);
@@ -30,7 +28,7 @@ public class SearchMultiSelectFieldPopulator<T> extends SearchFieldPopulator<T> 
             searchValue.add(item);
         }
 
-        setBeanProperty(nsObject, "operator", clientService.getSearchFieldOperatorByName(fieldType, operatorName));
+        setBeanProperty(nsObject, "operator", runtimeInfoSet.getSearchFieldOperatorByName(fieldType, operatorName));
 
         return nsObject;
     }

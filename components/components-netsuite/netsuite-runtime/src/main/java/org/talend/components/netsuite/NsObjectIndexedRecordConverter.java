@@ -10,8 +10,8 @@ import org.apache.avro.generic.IndexedRecord;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.metadata.TypeInfo;
-import org.talend.components.netsuite.client.metadata.FieldInfo;
+import org.talend.components.netsuite.client.model.TypeInfo;
+import org.talend.components.netsuite.client.model.FieldInfo;
 import org.talend.daikon.avro.converter.AvroConverter;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
 

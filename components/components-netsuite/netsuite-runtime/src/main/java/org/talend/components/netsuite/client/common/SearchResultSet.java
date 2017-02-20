@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.metadata.SearchRecordInfo;
+import org.talend.components.netsuite.client.model.SearchRecordInfo;
 
 /**
  *

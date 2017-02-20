@@ -1,8 +1,6 @@
-package org.talend.components.netsuite.client.query;
+package org.talend.components.netsuite.client.model;
 
 import java.util.List;
-
-import org.talend.components.netsuite.client.NetSuiteClientService;
 
 import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanProperty;
 
@@ -11,8 +9,8 @@ import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanPrope
  */
 public class SearchStringFieldPopulator<T> extends SearchFieldPopulator<T> {
 
-    public SearchStringFieldPopulator(NetSuiteClientService clientService, String fieldType, Class<T> fieldClass) {
-        super(clientService, fieldType, fieldClass);
+    public SearchStringFieldPopulator(RuntimeModel runtimeInfoSet, String fieldType, Class<T> fieldClass) {
+        super(runtimeInfoSet, fieldType, fieldClass);
     }
 
     @Override
@@ -21,7 +19,7 @@ public class SearchStringFieldPopulator<T> extends SearchFieldPopulator<T> {
 
         if (values != null && values.size() != 0) {
             setBeanProperty(nsObject, "searchValue", values.get(0));
-            setBeanProperty(nsObject, "operator", clientService.getSearchFieldOperatorByName(fieldType, operatorName));
+            setBeanProperty(nsObject, "operator", runtimeInfoSet.getSearchFieldOperatorByName(fieldType, operatorName));
         }
 
         return nsObject;

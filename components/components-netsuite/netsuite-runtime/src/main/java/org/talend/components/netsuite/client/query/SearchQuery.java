@@ -1,25 +1,23 @@
 package org.talend.components.netsuite.client.query;
 
+import static org.talend.components.netsuite.client.NetSuiteFactory.getBeanProperty;
+import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanProperty;
+
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.talend.components.netsuite.beans.BeanInfo;
+import org.talend.components.netsuite.beans.BeanManager;
+import org.talend.components.netsuite.beans.PropertyInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.common.SearchResultSet;
-import org.talend.components.netsuite.client.metadata.RecordTypeInfo;
-import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeInfo;
-import org.talend.components.netsuite.client.metadata.SearchRecordInfo;
 import org.talend.components.netsuite.client.common.NsSearchResult;
-import org.talend.components.netsuite.beans.PropertyInfo;
-import org.talend.components.netsuite.beans.BeanManager;
-
-import static org.talend.components.netsuite.client.NetSuiteFactory.getBeanProperty;
-import static org.talend.components.netsuite.client.NetSuiteFactory.getPropertyAccessor;
-import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanProperty;
+import org.talend.components.netsuite.client.common.SearchResultSet;
+import org.talend.components.netsuite.client.model.RecordTypeInfo;
+import org.talend.components.netsuite.client.model.SearchFieldOperatorTypeInfo;
+import org.talend.components.netsuite.client.model.SearchFieldPopulator;
+import org.talend.components.netsuite.client.model.SearchRecordInfo;
 
 /**
  *
@@ -27,8 +25,6 @@ import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanPrope
 public class SearchQuery<SearchT, RecT> {
 
     protected NetSuiteClientService clientService;
-
-    protected Map<String, SearchFieldPopulator<?>> searchFieldPopulatorMap = new HashMap<>();
 
     protected String recordTypeName;
     protected RecordTypeInfo recordTypeInfo;
@@ -80,7 +76,7 @@ public class SearchQuery<SearchT, RecT> {
             if (savedSearchId != null && savedSearchId.length() > 0) {
                 if (searchRecordInfo.getSearchAdvancedClass() != null) {
                     searchAdvanced = (SearchT) searchRecordInfo.getSearchAdvancedClass().newInstance();
-                    getPropertyAccessor(searchAdvanced).set(searchAdvanced, "savedSearchId", savedSearchId);
+                    setBeanProperty(searchAdvanced, "savedSearchId", savedSearchId);
                 } else {
                     throw new NetSuiteException("Advanced search not available: " + recordTypeName);
                 }
@@ -154,7 +150,7 @@ public class SearchQuery<SearchT, RecT> {
             String searchOperator = condition.getOperatorName();
             List<String> searchValue = condition.getValues();
 
-            SearchFieldPopulator<?> fieldPopulator = getFieldPopulator(fieldType);
+            SearchFieldPopulator<?> fieldPopulator = clientService.getSearchFieldPopulator(fieldType);
             Object searchField = fieldPopulator.populate(searchFieldName, searchOperator, searchValue);
 
             return searchField;
@@ -167,7 +163,7 @@ public class SearchQuery<SearchT, RecT> {
         initSearch();
 
         if (searchRecordInfo.getSearchRecordType().equals("transaction")) {
-            SearchFieldPopulator<?> populator = getFieldPopulator("SearchEnumMultiSelectField");
+            SearchFieldPopulator<?> populator = clientService.getSearchFieldPopulator("SearchEnumMultiSelectField");
             Object searchTypeField = populator.populate(
                     "List.anyOf", Arrays.asList(recordTypeInfo.getRecordType()));
             setBeanProperty(searchBasic, "type", searchTypeField);
@@ -204,33 +200,4 @@ public class SearchQuery<SearchT, RecT> {
         return resultSet;
     }
 
-    private SearchFieldPopulator<?> getFieldPopulator(String fieldType) {
-        return createFieldPopulator(fieldType);
-    }
-
-    private SearchFieldPopulator<?> createFieldPopulator(String fieldType) {
-        SearchFieldPopulator<?> fieldPopulator = searchFieldPopulatorMap.get(fieldType);
-        if (fieldPopulator == null) {
-            Class<?> fieldClass = clientService.getSearchFieldClass(fieldType);
-            if ("SearchBooleanField".equals(fieldType) || "SearchBooleanCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchBooleanFieldPopulator<>(clientService, fieldType, fieldClass);
-            } else if ("SearchStringField".equals(fieldType) || "SearchStringCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchStringFieldPopulator<>(clientService, fieldType, fieldClass);
-            } else if ("SearchLongField".equals(fieldType) || "SearchLongCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchLongFieldPopulator<>(clientService, fieldType, fieldClass);
-            } else if ("SearchDoubleField".equals(fieldType) || "SearchDoubleCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchDoubleFieldPopulator<>(clientService, fieldType, fieldClass);
-            } else if ("SearchDateField".equals(fieldType) || "SearchDateCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchDateFieldPopulator<>(clientService, fieldType, fieldClass);
-            } else if ("SearchMultiSelectField".equals(fieldType) || "SearchMultiSelectCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchMultiSelectFieldPopulator<>(clientService, fieldType, fieldClass);
-            } else if ("SearchEnumMultiSelectField".equals(fieldType) || "SearchEnumMultiSelectCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchEnumMultiSelectFieldPopulator<>(clientService, fieldType, fieldClass);
-            } else {
-                throw new IllegalArgumentException("Invalid search field type: " + fieldType);
-            }
-            searchFieldPopulatorMap.put(fieldType, fieldPopulator);
-        }
-        return fieldPopulator;
-    }
 }

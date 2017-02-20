@@ -1,9 +1,8 @@
-package org.talend.components.netsuite.client.query;
+package org.talend.components.netsuite.client.model;
 
 import java.util.List;
 
 import org.talend.components.netsuite.beans.BeanInfo;
-import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.beans.BeanManager;
 
@@ -13,12 +12,12 @@ import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanPrope
  *
  */
 public abstract class SearchFieldPopulator<T> {
-    protected NetSuiteClientService clientService;
+    protected RuntimeModel runtimeInfoSet;
     protected String fieldType;
     protected Class<T> fieldClass;
 
-    public SearchFieldPopulator(NetSuiteClientService clientService, String fieldType, Class<T> fieldClass) {
-        this.clientService = clientService;
+    public SearchFieldPopulator(RuntimeModel runtimeInfoSet, String fieldType, Class<T> fieldClass) {
+        this.runtimeInfoSet = runtimeInfoSet;
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
     }

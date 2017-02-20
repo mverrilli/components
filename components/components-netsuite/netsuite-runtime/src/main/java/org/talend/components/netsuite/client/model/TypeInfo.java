@@ -1,11 +1,9 @@
-package org.talend.components.netsuite.client.metadata;
+package org.talend.components.netsuite.client.model;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.talend.components.netsuite.schema.NsSchema;
 
 /**
  *
