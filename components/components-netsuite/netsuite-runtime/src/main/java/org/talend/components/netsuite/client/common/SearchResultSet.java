@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.metadata.SearchRecordDef;
+import org.talend.components.netsuite.client.metadata.SearchRecordInfo;
 
 /**
  *
@@ -15,7 +15,7 @@ import org.talend.components.netsuite.client.metadata.SearchRecordDef;
 public class SearchResultSet<R> extends ResultSet<R> {
 
     private NetSuiteClientService clientService;
-    private SearchRecordDef searchRecordDef;
+    private SearchRecordInfo searchRecordInfo;
     private String searchId;
     private NsSearchResult result;
     private List<R> recordList;
@@ -23,10 +23,10 @@ public class SearchResultSet<R> extends ResultSet<R> {
     private R current;
 
     public SearchResultSet(NetSuiteClientService clientService,
-            SearchRecordDef searchRecordDef, NsSearchResult result) {
+            SearchRecordInfo searchRecordInfo, NsSearchResult result) {
 
         this.clientService = clientService;
-        this.searchRecordDef = searchRecordDef;
+        this.searchRecordInfo = searchRecordInfo;
         this.result = result;
 
         searchId = result.getSearchId();

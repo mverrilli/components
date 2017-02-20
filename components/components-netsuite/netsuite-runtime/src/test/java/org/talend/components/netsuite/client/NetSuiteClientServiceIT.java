@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.netsuite.client.common.SearchResultSet;
-import org.talend.components.netsuite.client.metadata.SearchRecordDef;
+import org.talend.components.netsuite.client.metadata.SearchRecordInfo;
 import org.talend.components.netsuite.client.query.SearchCondition;
 import org.talend.daikon.NamedThing;
 
@@ -19,6 +19,7 @@ import com.netsuite.webservices.v2016_2.platform.core.Record;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.talend.components.netsuite.client.NetSuiteFactory.getBeanProperty;
 
 /**
  *
@@ -60,9 +61,8 @@ public class NetSuiteClientServiceIT {
         int count = 0;
         while (rs.next()) {
             Record record = rs.get();
-            NsObject nsRecord = NsObject.wrap(record);
 
-            assertEquals(AccountType.BANK, nsRecord.get("acctType"));
+            assertEquals(AccountType.BANK, getBeanProperty(record, "acctType"));
 
             count++;
         }
@@ -83,8 +83,8 @@ public class NetSuiteClientServiceIT {
             assertNotNull(search.getName());
             assertNotNull(search.getDisplayName());
 
-            SearchRecordDef searchRecordDef = connection.getSearchRecordDef(search.getName());
-            assertNotNull("Search record def found: " + search.getName(), searchRecordDef);
+            SearchRecordInfo searchRecordInfo = connection.getSearchRecordInfo(search.getName());
+            assertNotNull("Search record def found: " + search.getName(), searchRecordInfo);
         }
     }
 

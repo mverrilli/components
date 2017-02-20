@@ -3,24 +3,75 @@ package org.talend.components.netsuite.client;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.apache.commons.beanutils.expression.DefaultResolver;
+import org.apache.commons.beanutils.expression.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import org.apache.commons.beanutils.MethodUtils;
-import org.talend.components.netsuite.model.PropertyAccessor;
-import org.talend.components.netsuite.model.EnumAccessor;
-import org.talend.components.netsuite.model.Mapper;
-import org.talend.components.netsuite.model.PropertyAccess;
-import org.talend.components.netsuite.model.TypeInfo;
-import org.talend.components.netsuite.model.PropertyInfo;
-import org.talend.components.netsuite.model.TypeManager;
+import org.talend.components.netsuite.beans.BeanInfo;
+import org.talend.components.netsuite.beans.PropertyAccessor;
+import org.talend.components.netsuite.beans.EnumAccessor;
+import org.talend.components.netsuite.beans.Mapper;
+import org.talend.components.netsuite.beans.PropertyAccess;
+import org.talend.components.netsuite.beans.PropertyInfo;
+import org.talend.components.netsuite.beans.BeanManager;
 
 /**
  *
  */
 public abstract class NetSuiteFactory {
+    private static final Resolver propertyResolver = new DefaultResolver();
 
     private transient static final Logger LOG = LoggerFactory.getLogger(NetSuiteFactory.class);
+
+    public static void setBeanProperty(Object target, String expr, Object value) {
+        try {
+            Object current = target;
+            if (propertyResolver.hasNested(expr)) {
+                String currExpr = expr;
+                while (propertyResolver.hasNested(currExpr)) {
+                    String next = propertyResolver.next(currExpr);
+                    Object obj = getPropertyAccessor(current).get(current, next);
+                    if (obj == null) {
+                        PropertyInfo pd = BeanManager.getPropertyInfo(current, next);
+                        if (!pd.getWriteType().isPrimitive()) {
+                            obj = pd.getWriteType().newInstance();
+                            getPropertyAccessor(current).set(current, next, obj);
+                        }
+                    }
+                    current = obj;
+                    currExpr = propertyResolver.remove(currExpr);
+                }
+                if (current != null) {
+                    getPropertyAccessor(current).set(current, currExpr, value);
+                }
+            } else {
+                getPropertyAccessor(current).set(current, expr, value);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Object getBeanProperty(Object target, String expr) {
+        try {
+            Object current = target;
+            if (propertyResolver.hasNested(expr)) {
+                String currExpr = expr;
+                while (propertyResolver.hasNested(currExpr) && current != null) {
+                    String next = propertyResolver.next(currExpr);
+                    current = getPropertyAccessor(current).get(current, next);
+                    currExpr = propertyResolver.remove(currExpr);
+                }
+                return current != null ? getPropertyAccessor(current).get(current, currExpr) : null;
+            } else {
+                return getPropertyAccessor(current).get(current, expr);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static <T> PropertyAccessor<T> getPropertyAccessor(Class<T> clazz) {
         if (PropertyAccess.class.isAssignableFrom(clazz)) {
@@ -96,7 +147,7 @@ public abstract class NetSuiteFactory {
             }
 
             // Retrieve the property getter method for the specified property
-            TypeInfo metaData = TypeManager.forClass(target.getClass());
+            BeanInfo metaData = BeanManager.getBeanInfo(target.getClass());
             PropertyInfo descriptor = metaData.getProperty(name);
             if (descriptor == null) {
                 throw new IllegalArgumentException("Unknown property '" +
@@ -124,7 +175,7 @@ public abstract class NetSuiteFactory {
             }
 
             // Retrieve the property setter method for the specified property
-            TypeInfo metaData = TypeManager.forClass(target.getClass());
+            BeanInfo metaData = BeanManager.getBeanInfo(target.getClass());
             PropertyInfo descriptor = metaData.getProperty(name);
             if (descriptor == null) {
                 throw new IllegalArgumentException("Unknown property '" +

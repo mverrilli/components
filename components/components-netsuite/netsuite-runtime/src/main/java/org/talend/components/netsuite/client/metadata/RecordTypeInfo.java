@@ -5,12 +5,12 @@ import org.talend.components.netsuite.client.NetSuiteFactory;
 /**
  *
  */
-public class RecordTypeDef {
+public class RecordTypeInfo {
     private String name;
     private String recordType;
     private Class<?> recordClass;
 
-    public RecordTypeDef(String recordType, Class<?> recordClass) {
+    public RecordTypeInfo(String recordType, Class<?> recordClass) {
         this.name = NetSuiteFactory.toInitialUpper(recordType);
         this.recordType = recordType;
         this.recordClass = recordClass;
@@ -29,7 +29,7 @@ public class RecordTypeDef {
     }
 
     @Override public String toString() {
-        final StringBuilder sb = new StringBuilder("RecordTypeDef{");
+        final StringBuilder sb = new StringBuilder("RecordTypeInfo{");
         sb.append(", name=").append(name);
         sb.append(", recordType=").append(recordType);
         sb.append(", recordClass=").append(recordClass);

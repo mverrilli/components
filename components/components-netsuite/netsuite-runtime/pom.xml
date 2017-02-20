@@ -75,12 +75,12 @@
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-frontend-jaxws</artifactId>
-            <version>3.1.4</version>
-            <scope>test</scope>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.apache.cxf</groupId>-->
+            <!--<artifactId>cxf-rt-frontend-jaxws</artifactId>-->
+            <!--<version>3.1.4</version>-->
+            <!--<scope>test</scope>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-transports-http-jetty</artifactId>
@@ -235,6 +235,26 @@
             </plugin>
 
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.0.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-deps-m2-repo</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/dependency/.m2/repository</outputDirectory>
+                            <includeScope>runtime</includeScope>
+                            <useRepositoryLayout>true</useRepositoryLayout>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
@@ -295,12 +315,12 @@
                             <instructions>
                                 <Bundle-SymbolicName>org.talend.components.netsuite</Bundle-SymbolicName>
                                 <Service-Component>*</Service-Component>
-                                <!--<Export-Package>!com.netsuite.webservices.*,*</Export-Package>-->
+                                <Export-Package>org.talend.components.netsuite.*</Export-Package>
                                 <!--<Import-Package>!*internal,!org.talend.components.netsuite*,!com.netsuite.webservices.*,*</Import-Package>-->
-                                <!--<Import-Package>!*internal,!org.joda.time*,!org.apache.cxf*,!org.springframework*,!com.sun*,!com.ctc*,!javax*,!com.fasterxml.jackson*,!javassist*,*</Import-Package>-->
-                                <Import-Package>!*internal,!org.talend.components.netsuite*,!com.netsuite.webservices*,!org.springframework*,org.talend*,org.slf4j*,org.joda.time*,org.apache.commons*,org.apache.avro.*,org.apache.cxf*,com.sun*,com.ctc*,javax.xml.bind*,com.fasterxml.jackson*,javassist*,*</Import-Package>
-                                <!--<Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*|cxf-*|commons-*</Embed-Dependency>-->
-                                <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*|commons-*</Embed-Dependency>
+                                <Import-Package>!*internal,!org.joda.time*,!org.apache.cxf*,!org.springframework*,!com.sun*,!com.ctc*,!javax*,!com.fasterxml.jackson*,!javassist*,*</Import-Package>
+                                <!--<Import-Package>!*internal,!org.talend.components.netsuite*,!com.netsuite.webservices*,!org.springframework*,org.talend*,org.slf4j*,org.joda.time*,org.apache.commons*,org.apache.avro.*,org.apache.cxf*,com.sun*,com.ctc*,javax.xml.bind*,com.fasterxml.jackson*,javassist*,*</Import-Package>-->
+                                <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*|cxf-*|commons-*</Embed-Dependency>
+                                <!--<Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*|commons-*</Embed-Dependency>-->
                                 <Include-Resource>
                                     {maven-resources},META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt=target/classes/META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt
                                 </Include-Resource>

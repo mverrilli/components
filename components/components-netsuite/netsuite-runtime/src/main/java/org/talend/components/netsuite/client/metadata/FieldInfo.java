@@ -1,17 +1,15 @@
 package org.talend.components.netsuite.client.metadata;
 
-import org.talend.components.netsuite.schema.NsField;
-
 /**
  *
  */
-public class FieldDef implements NsField {
+public class FieldInfo {
     private String name;
     private Class valueType;
     private boolean key;
     private boolean nullable;
 
-    public FieldDef(String name, Class valueType, boolean key, boolean nullable) {
+    public FieldInfo(String name, Class valueType, boolean key, boolean nullable) {
         this.name = name;
         this.valueType = valueType;
         this.key = key;

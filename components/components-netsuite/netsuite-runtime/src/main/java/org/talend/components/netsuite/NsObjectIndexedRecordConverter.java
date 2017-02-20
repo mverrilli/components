@@ -10,16 +10,18 @@ import org.apache.avro.generic.IndexedRecord;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NsObject;
-import org.talend.components.netsuite.client.metadata.TypeDef;
-import org.talend.components.netsuite.client.metadata.FieldDef;
+import org.talend.components.netsuite.client.metadata.TypeInfo;
+import org.talend.components.netsuite.client.metadata.FieldInfo;
 import org.talend.daikon.avro.converter.AvroConverter;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
+
+import static org.talend.components.netsuite.client.NetSuiteFactory.getBeanProperty;
+import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanProperty;
 
 /**
  *
  */
-public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<NsObject, IndexedRecord> {
+public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<Object, IndexedRecord> {
 
     private Schema schema;
     private NetSuiteClientService clientService;
@@ -44,35 +46,34 @@ public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<Ns
     }
 
     @Override
-    public Class<NsObject> getDatumClass() {
-        return NsObject.class;
+    public Class<Object> getDatumClass() {
+        return Object.class;
     }
 
     @Override
-    public NsObject convertToDatum(IndexedRecord indexedRecord) {
+    public Object convertToDatum(IndexedRecord indexedRecord) {
         Schema schema = indexedRecord.getSchema();
 
         String typeName = schema.getName();
         try {
             Object object = clientService.createType(typeName);
-            NsObject nsObject = NsObject.wrap(object);
 
-            TypeDef typeDef = clientService.getTypeDef(typeName);
+            TypeInfo typeInfo = clientService.getTypeInfo(typeName);
 
             List<String> nullFieldList = new ArrayList<>();
 
             for (Schema.Field field : schema.getFields()) {
-                FieldDef fieldDef = typeDef.getField(field.name());
+                FieldInfo fieldInfo = typeInfo.getField(field.name());
                 AvroConverter converter = NetSuiteAvroRegistry.getInstance()
-                        .getConverter(field, fieldDef.getValueType());
+                        .getConverter(field, fieldInfo.getValueType());
 
                 if (converter != null) {
                     Object value = indexedRecord.get(field.pos());
                     Object nsValue = converter.convertToDatum(value);
                     if (nsValue != null) {
-                        nsObject.set(field.name(), nsValue);
+                        setBeanProperty(object, field.name(), nsValue);
                     } else {
-                        nullFieldList.add(fieldDef.getName());
+                        nullFieldList.add(fieldInfo.getName());
                     }
                 }
             }
@@ -81,7 +82,7 @@ public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<Ns
                 // TODO Handle null fields
             }
 
-            return nsObject;
+            return object;
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }
@@ -89,7 +90,7 @@ public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<Ns
     }
 
     @Override
-    public IndexedRecord convertToAvro(NsObject data) {
+    public IndexedRecord convertToAvro(Object data) {
         Schema schema = getSchema();
         initMapping(schema);
 
@@ -98,13 +99,13 @@ public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<Ns
 
     protected void initMapping(Schema schema) {
         if (names == null) {
-            TypeDef typeDef = clientService.getTypeDef(getSchema().getName());
+            TypeInfo typeInfo = clientService.getTypeInfo(getSchema().getName());
             fieldConverters = new HashMap<>(schema.getFields().size());
             for (Schema.Field field : schema.getFields()) {
                 String fieldName = field.name();
-                FieldDef fieldDef = typeDef.getField(fieldName);
+                FieldInfo fieldInfo = typeInfo.getField(fieldName);
                 fieldConverters.put(fieldName, NetSuiteAvroRegistry.getInstance()
-                        .getConverter(field, fieldDef.getValueType()));
+                        .getConverter(field, fieldInfo.getValueType()));
             }
 
             names = new String[getSchema().getFields().size()];
@@ -119,9 +120,9 @@ public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<Ns
     }
 
     private class NsObjectIndexedRecord implements IndexedRecord {
-        private NsObject record;
+        private Object record;
 
-        NsObjectIndexedRecord(NsObject record) {
+        NsObjectIndexedRecord(Object record) {
             this.record = record;
         }
 
@@ -137,7 +138,7 @@ public class NsObjectIndexedRecordConverter implements IndexedRecordConverter<Ns
 
         @Override
         public Object get(int i) {
-            Object value = record.get(names[i]);
+            Object value = getBeanProperty(record, names[i]);
             AvroConverter converter = fieldConverter[i];
             if (converter == null) {
                 return null;

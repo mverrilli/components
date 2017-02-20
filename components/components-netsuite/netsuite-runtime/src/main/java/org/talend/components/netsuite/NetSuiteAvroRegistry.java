@@ -8,7 +8,7 @@ import org.apache.avro.Schema;
 import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
 import org.talend.components.api.exception.ComponentException;
-import org.talend.components.netsuite.model.Mapper;
+import org.talend.components.netsuite.beans.Mapper;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.daikon.avro.AvroRegistry;
 import org.talend.daikon.avro.converter.AvroConverter;

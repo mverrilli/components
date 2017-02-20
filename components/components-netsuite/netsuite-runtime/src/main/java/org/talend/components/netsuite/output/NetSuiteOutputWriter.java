@@ -11,7 +11,6 @@ import org.talend.components.api.component.runtime.WriterWithFeedback;
 import org.talend.components.netsuite.NsObjectIndexedRecordConverter;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NsObject;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
 
 /**
@@ -27,7 +26,7 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
 
     protected NetSuiteClientService clientService;
     protected NetSuiteOutputProperties.OutputAction action;
-    protected IndexedRecordConverter<NsObject, IndexedRecord> converter;
+    protected IndexedRecordConverter<Object, IndexedRecord> converter;
     protected int dataCount = 0;
 
     public NetSuiteOutputWriter(NetSuiteWriteOperation writeOperation) {
@@ -89,11 +88,11 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
     }
 
     protected <T> T createObject(IndexedRecord record, Class<T> clazz) throws IOException {
-        NsObject<T> nsObject = getConverter().convertToDatum(record);
-        return clazz.cast(nsObject.getTarget());
+        Object nsObject = getConverter().convertToDatum(record);
+        return clazz.cast(nsObject);
     }
 
-    protected IndexedRecordConverter<NsObject, IndexedRecord> getConverter() throws IOException {
+    protected IndexedRecordConverter<Object, IndexedRecord> getConverter() throws IOException {
         if (converter == null) {
             converter = new NsObjectIndexedRecordConverter(clientService);
         }

@@ -4,11 +4,11 @@ import java.util.Collection;
 
 import org.apache.commons.beanutils.MethodUtils;
 import org.junit.Test;
-import org.talend.components.netsuite.model.EnumAccessor;
-import org.talend.components.netsuite.model.PropertyAccess;
-import org.talend.components.netsuite.model.PropertyInfo;
-import org.talend.components.netsuite.model.TypeInfo;
-import org.talend.components.netsuite.model.TypeManager;
+import org.talend.components.netsuite.beans.BeanInfo;
+import org.talend.components.netsuite.beans.EnumAccessor;
+import org.talend.components.netsuite.beans.PropertyAccess;
+import org.talend.components.netsuite.beans.PropertyInfo;
+import org.talend.components.netsuite.beans.BeanManager;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
 import com.netsuite.webservices.v2016_2.lists.accounting.Account;
@@ -24,7 +24,7 @@ public class CodeGenTest {
 
     @Test
     public void testMetaData() throws Exception {
-        TypeInfo md = TypeManager.forClass(Account.class);
+        BeanInfo md = BeanManager.getBeanInfo(Account.class);
 
         Collection<PropertyInfo> properties = md.getProperties();
 

@@ -35,5 +35,14 @@ public class NsSchemaImpl<F extends NsField> implements NsSchema<F> {
     public F getField(String name) {
         return fieldMap.get(name);
     }
+
+    @Override public String toString() {
+        final StringBuilder sb = new StringBuilder("NsSchemaImpl{");
+        sb.append("name='").append(name).append('\'');
+        sb.append(", fields=").append(fields);
+        sb.append(", typeName='").append(getTypeName()).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }
 

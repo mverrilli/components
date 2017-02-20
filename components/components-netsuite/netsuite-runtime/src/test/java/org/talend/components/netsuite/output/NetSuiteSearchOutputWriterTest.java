@@ -31,14 +31,13 @@ import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteAvroRegistry;
 import org.talend.components.netsuite.NetSuiteSink;
 import org.talend.components.netsuite.NsObjectIndexedRecordConverter;
+import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteFactory;
-import org.talend.components.netsuite.client.NsObject;
-import org.talend.components.netsuite.model.PropertyAccessor;
+import org.talend.components.netsuite.beans.PropertyAccessor;
 import org.talend.components.netsuite.client.NetSuiteWebServiceMockTestFixture;
-import org.talend.components.netsuite.model.PropertyInfo;
-import org.talend.components.netsuite.model.TypeInfo;
-import org.talend.components.netsuite.model.TypeManager;
+import org.talend.components.netsuite.beans.PropertyInfo;
+import org.talend.components.netsuite.beans.BeanManager;
 import org.talend.components.netsuite.runtime.RuntimeService;
 import org.talend.components.netsuite.runtime.RuntimeServiceImpl;
 import org.talend.components.netsuite.runtime.SchemaService;
@@ -165,7 +164,7 @@ public class NetSuiteSearchOutputWriterTest {
         while (count > 0) {
             Account nsRecord = composeObject(Account.class);
 
-            IndexedRecord convertedRecord = converter.convertToAvro(NsObject.wrap(nsRecord));
+            IndexedRecord convertedRecord = converter.convertToAvro(nsRecord);
 
             Schema recordSchema = convertedRecord.getSchema();
 
@@ -184,8 +183,8 @@ public class NetSuiteSearchOutputWriterTest {
     }
 
     private <T> T composeObject(Class<T> clazz) throws Exception {
-        TypeInfo typeInfo = TypeManager.forClass(clazz);
-        List<PropertyInfo> propertyInfoList = typeInfo.getProperties();
+        BeanInfo beanInfo = BeanManager.getBeanInfo(clazz);
+        List<PropertyInfo> propertyInfoList = beanInfo.getProperties();
 
         T obj = clazz.newInstance();
 

@@ -1,6 +1,5 @@
-package org.talend.components.netsuite.model.reflect;
+package org.talend.components.netsuite.beans;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -11,124 +10,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlType;
-
-import org.apache.commons.beanutils.MethodUtils;
-import org.talend.components.netsuite.model.PrimitiveInfo;
-import org.talend.components.netsuite.model.PropertyInfo;
-import org.talend.components.netsuite.model.TypeIntrospector;
-import org.talend.components.netsuite.model.javassist.JavassistPropertyInfo;
-import org.talend.components.netsuite.model.javassist.JavassistTypeIntrospector;
-
-import javassist.ClassPool;
-import javassist.CtClass;
-
 /**
  *
  */
-public class ReflectionTypeIntrospector implements TypeIntrospector {
+public class ReflectionBeanIntrospector implements BeanIntrospector {
 
-    private static final ReflectionTypeIntrospector instance = new ReflectionTypeIntrospector();
+    private static final ReflectionBeanIntrospector instance = new ReflectionBeanIntrospector();
 
-    public static ReflectionTypeIntrospector getInstance() {
+    public static ReflectionBeanIntrospector getInstance() {
         return instance;
     }
 
     public List<PropertyInfo> getProperties(String className) throws Exception {
         Class clazz = Class.forName(className);
-
         Collection<PropertyInfo> propertyInfos = getProperties(getMethods(clazz));
-
-        Map<String, PropertyInfo> propertyInfoMap = new HashMap<>(propertyInfos.size());
-        for (PropertyInfo propertyInfo : propertyInfos) {
-            propertyInfoMap.put(propertyInfo.getName(), propertyInfo);
-        }
-
-        List<String> orderedPropNames = getPropertyOrder(clazz, propertyInfoMap);
-
-        List<PropertyInfo> orderedPropInfos = new ArrayList<>(orderedPropNames.size());
-        for (String propName : orderedPropNames) {
-            PropertyInfo propertyInfo = propertyInfoMap.get(propName);
-            orderedPropInfos.add(propertyInfo);
-            propertyInfoMap.remove(propName);
-        }
-        if (!propertyInfoMap.isEmpty()) {
-            System.out.println("Unhandled properties: " + clazz + " " + propertyInfoMap.keySet());
-        }
-        return orderedPropInfos;
-    }
-
-    protected List<String> getPropertyOrder(Class<?> aClass, Map<String, PropertyInfo> propertyInfoMap) throws Exception {
-        Set<String> propNames = new HashSet<>(propertyInfoMap.keySet());
-        List<String> orderedPropNames = new ArrayList<>(propNames.size());
-
-        XmlType xmlType = aClass.getAnnotation(XmlType.class);
-        if (xmlType != null) {
-            String[] propOrder = xmlType.propOrder();
-            if (propOrder != null && propOrder.length != 0) {
-                for (String propName : propOrder) {
-                    if (propName.equals("")) {
-                        continue;
-                    }
-
-                    String actualPropName = propName;
-                    Field field = null;
-                    try {
-                        field = aClass.getDeclaredField(propName);
-                    } catch (NoSuchFieldException e) {
-                        try {
-                            field = aClass.getField(propName);
-                        } catch (NoSuchFieldException e2) {
-                        }
-                    }
-
-                    if (field != null) {
-                        XmlElement xmlElement = field.getAnnotation(XmlElement.class);
-                        if (xmlElement != null && !xmlElement.name().equals("##default")) {
-                            String name = xmlElement.name();
-                            if (!name.equals("class")) {
-                                actualPropName = name;
-                            }
-                        }
-                    }
-                    actualPropName = actualPropName.replace("_", "");
-
-                    PropertyInfo propertyInfo = propertyInfoMap.get(actualPropName);
-                    if (propertyInfo == null) {
-                        for (String name : propertyInfoMap.keySet()) {
-                            if (name.equalsIgnoreCase(actualPropName)) {
-                                propertyInfo = propertyInfoMap.get(name);
-                                break;
-                            }
-                        }
-                        if (propertyInfo == null) {
-                            throw new IllegalArgumentException("Property info is null: " + aClass + " " + actualPropName);
-                        }
-                    }
-
-                    orderedPropNames.add(propertyInfo.getName());
-
-                    propNames.remove(propertyInfo.getName());
-                }
-
-                if (!propNames.isEmpty()) {
-                    for (String propName : propNames) {
-                        PropertyInfo propertyInfo = propertyInfoMap.get(propName);
-                        if (propertyInfo.getName().equals("class") && propertyInfo.getReadType() == Class.class) {
-                            continue;
-                        }
-                        orderedPropNames.add(propertyInfo.getName());
-                    }
-                }
-
-            } else {
-                orderedPropNames.addAll(propNames);
-            }
-        } else {
-            orderedPropNames.addAll(propNames);
-        }
-        return orderedPropNames;
+        return new ArrayList<>(propertyInfos);
     }
 
     protected Set<PropertyInfo> getProperties(Set<Method> methods) throws Exception {

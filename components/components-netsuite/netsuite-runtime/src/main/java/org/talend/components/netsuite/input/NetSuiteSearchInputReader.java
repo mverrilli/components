@@ -15,7 +15,6 @@ import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.NetSuiteSource;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NsObject;
 import org.talend.components.netsuite.NsObjectIndexedRecordConverter;
 import org.talend.components.netsuite.client.query.SearchCondition;
 import org.talend.components.netsuite.client.query.SearchQuery;
@@ -30,7 +29,7 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
 
     private transient NetSuiteClientService clientService;
 
-    private transient IndexedRecordConverter<NsObject, IndexedRecord> converter;
+    private transient IndexedRecordConverter<Object, IndexedRecord> converter;
 
     protected transient Schema searchSchema;
 
@@ -145,10 +144,10 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
     }
 
     protected IndexedRecord convertRecord(Object record) throws IOException {
-        return getConverter().convertToAvro(NsObject.wrap(record));
+        return getConverter().convertToAvro(record);
     }
 
-    protected IndexedRecordConverter<NsObject, IndexedRecord> getConverter() throws IOException {
+    protected IndexedRecordConverter<Object, IndexedRecord> getConverter() throws IOException {
         if (converter == null) {
             converter = new NsObjectIndexedRecordConverter(clientService);
             converter.setSchema(getSchema());

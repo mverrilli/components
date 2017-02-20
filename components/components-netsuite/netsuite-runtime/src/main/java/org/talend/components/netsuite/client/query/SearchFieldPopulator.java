@@ -2,11 +2,12 @@ package org.talend.components.netsuite.client.query;
 
 import java.util.List;
 
+import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NsObject;
-import org.talend.components.netsuite.model.TypeInfo;
-import org.talend.components.netsuite.model.TypeManager;
+import org.talend.components.netsuite.beans.BeanManager;
+
+import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanProperty;
 
 /**
  *
@@ -32,12 +33,12 @@ public abstract class SearchFieldPopulator<T> {
 
     public abstract T populate(T fieldObject, String internalId, String operatorName, List<String> values);
 
-    protected NsObject<T> createField(String internalId) throws NetSuiteException {
+    protected T createField(String internalId) throws NetSuiteException {
         try {
-            TypeInfo fieldTypeMetaData = TypeManager.forClass(fieldClass);
-            NsObject<T> searchField = NsObject.wrap(fieldClass.newInstance());
+            BeanInfo fieldTypeMetaData = BeanManager.getBeanInfo(fieldClass);
+            T searchField = fieldClass.newInstance();
             if (fieldTypeMetaData.getProperty("internalId") != null && internalId != null) {
-                searchField.set("internalId", internalId);
+                setBeanProperty(searchField, "internalId", internalId);
             }
             return searchField;
         } catch (IllegalAccessException | IllegalArgumentException | InstantiationException e) {

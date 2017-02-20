@@ -3,8 +3,8 @@ package org.talend.components.netsuite.client;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
-import org.talend.components.netsuite.model.PropertyAccessor;
-import org.talend.components.netsuite.model.EnumAccessor;
+import org.talend.components.netsuite.beans.PropertyAccessor;
+import org.talend.components.netsuite.beans.EnumAccessor;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.Account;
 import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;

@@ -12,8 +12,8 @@ import org.apache.cxf.headers.Header;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.talend.components.netsuite.client.metadata.RecordTypeDef;
-import org.talend.components.netsuite.client.metadata.SearchRecordDef;
+import org.talend.components.netsuite.client.metadata.RecordTypeInfo;
+import org.talend.components.netsuite.client.metadata.SearchRecordInfo;
 import org.talend.components.netsuite.client.v2016_2.NetSuiteClientServiceImpl;
 import org.talend.components.netsuite.test.AssertMatcher;
 
@@ -113,8 +113,8 @@ public class NetSuiteClientServiceTest {
         searchRecordTypeNameSet.add("TimeEntry");
 
         for (String searchRecordType : searchRecordTypeNameSet) {
-            SearchRecordDef searchRecordDef = clientService.getSearchRecordDef(searchRecordType);
-            assertNotNull("Search record def found: " + searchRecordType, searchRecordDef);
+            SearchRecordInfo searchRecordInfo = clientService.getSearchRecordInfo(searchRecordType);
+            assertNotNull("Search record def found: " + searchRecordType, searchRecordInfo);
         }
 
         Set<RecordType> recordTypeSet = new HashSet<>(Arrays.asList(RecordType.values()));
@@ -140,8 +140,8 @@ public class NetSuiteClientServiceTest {
         recordTypeNameSet.add("TimeEntry");
 
         for (String recordType : recordTypeNameSet) {
-            RecordTypeDef recordTypeDef = clientService.getRecordTypeDef(recordType);
-            assertNotNull("Record type def found: " + recordType, recordTypeDef);
+            RecordTypeInfo recordTypeInfo = clientService.getRecordTypeInfo(recordType);
+            assertNotNull("Record type def found: " + recordType, recordTypeInfo);
         }
     }
 

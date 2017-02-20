@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.model;
+package org.talend.components.netsuite.beans;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,16 +10,16 @@ import java.util.Map;
 /**
  *
  */
-public class TypeInfo {
+public class BeanInfo {
 
     private List<PropertyInfo> properties;
     private Map<String, PropertyInfo> propertyMap;
 
-    public TypeInfo(PropertyInfo[] properties) {
+    public BeanInfo(PropertyInfo[] properties) {
         this(Arrays.asList(properties));
     }
 
-    public TypeInfo(List<PropertyInfo> properties) {
+    public BeanInfo(List<PropertyInfo> properties) {
         this.properties = new ArrayList<>(properties);
         propertyMap = new HashMap<>(properties.size());
         for (PropertyInfo pmd : properties) {

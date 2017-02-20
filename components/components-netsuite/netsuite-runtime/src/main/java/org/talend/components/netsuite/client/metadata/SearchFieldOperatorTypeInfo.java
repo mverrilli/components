@@ -5,19 +5,19 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import org.talend.components.netsuite.model.Mapper;
+import org.talend.components.netsuite.beans.Mapper;
 
 /**
  *
  */
-public class SearchFieldOperatorTypeDef<T> {
+public class SearchFieldOperatorTypeInfo<T> {
     private String dataType;
     private String typeName;
     private Class<T> operatorClass;
     private Mapper<T, String> mapper;
     private Mapper<String, T> reverseMapper;
 
-    public SearchFieldOperatorTypeDef(String dataType, Class<T> operatorClass,
+    public SearchFieldOperatorTypeInfo(String dataType, Class<T> operatorClass,
             Mapper<T, String> mapper, Mapper<String, T> reverseMapper) {
 
         this.dataType = dataType;

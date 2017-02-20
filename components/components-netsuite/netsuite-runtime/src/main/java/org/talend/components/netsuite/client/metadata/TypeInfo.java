@@ -10,19 +10,19 @@ import org.talend.components.netsuite.schema.NsSchema;
 /**
  *
  */
-public class TypeDef implements NsSchema<FieldDef> {
+public class TypeInfo {
     private String typeName;
     private Class<?> typeClass;
-    private List<FieldDef> fields;
-    private Map<String, FieldDef> fieldMap;
+    private List<FieldInfo> fields;
+    private Map<String, FieldInfo> fieldMap;
 
-    public TypeDef(String typeName, Class<?> typeClass, List<FieldDef> fields) {
+    public TypeInfo(String typeName, Class<?> typeClass, List<FieldInfo> fields) {
         this.typeName = typeName;
         this.typeClass = typeClass;
         this.fields = fields;
 
         fieldMap = new HashMap<>(fields.size());
-        for (FieldDef fieldInfo : fields) {
+        for (FieldInfo fieldInfo : fields) {
             fieldMap.put(fieldInfo.getName(), fieldInfo);
         }
     }
@@ -35,15 +35,15 @@ public class TypeDef implements NsSchema<FieldDef> {
         return typeClass;
     }
 
-    public FieldDef getField(String name) {
+    public FieldInfo getField(String name) {
         return fieldMap.get(name);
     }
 
-    public Map<String, FieldDef> getFieldMap() {
+    public Map<String, FieldInfo> getFieldMap() {
         return Collections.unmodifiableMap(fieldMap);
     }
 
-    public List<FieldDef> getFields() {
+    public List<FieldInfo> getFields() {
         return Collections.unmodifiableList(fields);
     }
 }

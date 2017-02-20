@@ -5,14 +5,14 @@ import org.talend.components.netsuite.client.NetSuiteFactory;
 /**
  *
  */
-public class SearchRecordDef {
+public class SearchRecordInfo {
     private String name;
     private String searchRecordType;
     private Class<?> searchClass;
     private Class<?> searchBasicClass;
     private Class<?> searchAdvancedClass;
 
-    public SearchRecordDef(String searchRecordType,
+    public SearchRecordInfo(String searchRecordType,
             Class<?> searchClass, Class<?> searchBasicClass, Class<?> searchAdvancedClass) {
         this.name = NetSuiteFactory.toInitialUpper(searchRecordType);
         this.searchRecordType = searchRecordType;
@@ -42,7 +42,7 @@ public class SearchRecordDef {
     }
 
     @Override public String toString() {
-        final StringBuilder sb = new StringBuilder("SearchRecordDef{");
+        final StringBuilder sb = new StringBuilder("SearchRecordInfo{");
         sb.append("name='").append(name).append('\'');
         sb.append(", searchRecordType=").append(searchRecordType);
         sb.append(", searchClass=").append(searchClass);

@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.model.javassist;
+package org.talend.components.netsuite.codegen;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -13,7 +13,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.junit.Test;
-import org.talend.components.netsuite.model.PropertyInfo;
 
 /**
  *
@@ -22,71 +21,39 @@ public class JavassistTypeIntrospectorTest {
 
     @Test
     public void testSetterForGetterWithPrimitiveWrapperReturnType() throws Exception {
-        List<PropertyInfo> propertyInfoSet = JavassistTypeIntrospector.getInstance()
+        List<JavassistPropertyInfo> propertyInfoSet = JavassistTypeIntrospector.getInstance()
                 .getProperties(BeanA.class.getName());
 
-        Map<String, PropertyInfo> propertyInfoMap = new HashMap<>();
-        for (PropertyInfo info : propertyInfoSet) {
+        Map<String, JavassistPropertyInfo> propertyInfoMap = new HashMap<>();
+        for (JavassistPropertyInfo info : propertyInfoSet) {
             propertyInfoMap.put(info.getName(), info);
         }
 
         assertEquals(3, propertyInfoMap.size());
 
-        PropertyInfo info1 = propertyInfoMap.get("prop1");
-        assertNotNull(info1.getReadMethodName());
-        assertNotNull(info1.getWriteMethodName());
+        JavassistPropertyInfo info1 = propertyInfoMap.get("prop1");
+        assertNotNull(info1.getReadMethod());
+        assertNotNull(info1.getWriteMethod());
 
-        PropertyInfo info2 = propertyInfoMap.get("prop2");
-        assertNotNull(info2.getReadMethodName());
-        assertNotNull(info2.getWriteMethodName());
+        JavassistPropertyInfo info2 = propertyInfoMap.get("prop2");
+        assertNotNull(info2.getReadMethod());
+        assertNotNull(info2.getWriteMethod());
     }
 
     @Test
     public void testGetterSetterForNonPrimitivePropertyType() throws Exception {
-        List<PropertyInfo> propertyInfoSet = JavassistTypeIntrospector.getInstance()
+        List<JavassistPropertyInfo> propertyInfoSet = JavassistTypeIntrospector.getInstance()
                 .getProperties(BeanB.class.getName());
 
-        Map<String, PropertyInfo> propertyInfoMap = new HashMap<>();
-        for (PropertyInfo info : propertyInfoSet) {
+        Map<String, JavassistPropertyInfo> propertyInfoMap = new HashMap<>();
+        for (JavassistPropertyInfo info : propertyInfoSet) {
             propertyInfoMap.put(info.getName(), info);
         }
 
         assertEquals(2, propertyInfoMap.size());
-        PropertyInfo info = propertyInfoMap.get("list");
-        assertNotNull(info.getReadMethodName());
-        assertNotNull(info.getWriteMethodName());
-    }
-
-    @Test
-    public void testPropertyOrder() throws Exception {
-        List<PropertyInfo> propertyInfoSet = JavassistTypeIntrospector.getInstance()
-                .getProperties(BeanC.class.getName());
-
-        Map<String, PropertyInfo> propertyInfoMap = new HashMap<>();
-        for (PropertyInfo info : propertyInfoSet) {
-            propertyInfoMap.put(info.getName(), info);
-        }
-
-        assertEquals(3, propertyInfoMap.size());
-        PropertyInfo info1 = propertyInfoSet.get(0);
-        assertEquals("count", info1.getName());
-        PropertyInfo info2 = propertyInfoSet.get(1);
-        assertEquals("balance", info2.getName());
-        PropertyInfo info3 = propertyInfoSet.get(2);
-        assertEquals("private", info3.getName());
-    }
-
-    @Test
-    public void testNoProperties() throws Exception {
-        List<PropertyInfo> propertyInfoSet = JavassistTypeIntrospector.getInstance()
-                .getProperties(Request.class.getName());
-
-        Map<String, PropertyInfo> propertyInfoMap = new HashMap<>();
-        for (PropertyInfo info : propertyInfoSet) {
-            propertyInfoMap.put(info.getName(), info);
-        }
-
-        assertEquals(0, propertyInfoMap.size());
+        JavassistPropertyInfo info = propertyInfoMap.get("list");
+        assertNotNull(info.getReadMethod());
+        assertNotNull(info.getWriteMethod());
     }
 
     public static class BeanA {

@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.model.javassist;
+package org.talend.components.netsuite.codegen;
 
 import javassist.CtClass;
 import javassist.CtMethod;

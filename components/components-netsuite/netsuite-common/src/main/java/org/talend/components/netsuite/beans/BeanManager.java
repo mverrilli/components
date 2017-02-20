@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.model;
+package org.talend.components.netsuite.beans;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -6,26 +6,24 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import org.talend.components.netsuite.model.javassist.JavassistTypeIntrospector;
-
 /**
  *
  */
-public abstract class TypeManager {
+public abstract class BeanManager {
 
-    private static final ConcurrentMap<Class<?>, TypeInfo> cache = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<Class<?>, BeanInfo> cache = new ConcurrentHashMap<>();
 
-    private static final TypeIntrospector TYPE_INTROSPECTOR = new JavassistTypeIntrospector();
+    private static final BeanIntrospector INSTANCE = new ReflectionBeanIntrospector();
 
     public static PropertyInfo getPropertyInfo(Object target, String name) {
-        TypeInfo metaData = forClass(target.getClass());
+        BeanInfo metaData = getBeanInfo(target.getClass());
         return metaData != null ? metaData.getProperty(name) : null;
     }
 
-    public static TypeInfo forClass(Class<?> clazz) {
-        TypeInfo metaData = cache.get(clazz);
+    public static BeanInfo getBeanInfo(Class<?> clazz) {
+        BeanInfo metaData = cache.get(clazz);
         if (metaData == null) {
-            TypeInfo newMetaData = loadForClass(clazz);
+            BeanInfo newMetaData = loadBeanInfoForClass(clazz);
             if (cache.putIfAbsent(clazz, newMetaData) == null) {
                 metaData = newMetaData;
             } else {
@@ -35,29 +33,29 @@ public abstract class TypeManager {
         return metaData;
     }
 
-    protected static TypeInfo loadForClass(Class<?> clazz) {
+    protected static BeanInfo loadBeanInfoForClass(Class<?> clazz) {
         Method m;
         try {
-            m = clazz.getDeclaredMethod("getBeanMetaData", new Class[0]);
-            if (!m.getReturnType().equals(TypeInfo.class)) {
+            m = clazz.getDeclaredMethod("getNsBeanInfo", new Class[0]);
+            if (!m.getReturnType().equals(BeanInfo.class)) {
                 throw new NoSuchMethodException();
             }
-            return (TypeInfo) m.invoke(new Object[0]);
+            return (BeanInfo) m.invoke(new Object[0]);
         } catch (NoSuchMethodException e) {
             try {
                 List<PropertyInfo> properties = getTypeInstrospector().getProperties(clazz.getName());
-                return new TypeInfo(properties);
+                return new BeanInfo(properties);
             } catch (Exception e2) {
                 throw new RuntimeException(e2);
             }
 //            throw new IllegalArgumentException("Target class doesn't have "
-//                    + "'TypeInfo getBeanMetaData()' static method: " + clazz);
+//                    + "'BeanInfo getBeanMetaData()' static method: " + clazz);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static TypeIntrospector getTypeInstrospector() {
-        return TYPE_INTROSPECTOR;
+    public static BeanIntrospector getTypeInstrospector() {
+        return INSTANCE;
     }
 }

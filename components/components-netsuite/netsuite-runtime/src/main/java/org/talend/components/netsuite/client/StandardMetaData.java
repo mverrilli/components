@@ -12,16 +12,16 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.netsuite.client.metadata.FieldDef;
-import org.talend.components.netsuite.client.metadata.RecordTypeDef;
-import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeDef;
-import org.talend.components.netsuite.client.metadata.SearchRecordDef;
-import org.talend.components.netsuite.client.metadata.TypeDef;
-import org.talend.components.netsuite.model.EnumAccessor;
-import org.talend.components.netsuite.model.Mapper;
-import org.talend.components.netsuite.model.PropertyInfo;
-import org.talend.components.netsuite.model.TypeInfo;
-import org.talend.components.netsuite.model.TypeManager;
+import org.talend.components.netsuite.beans.BeanInfo;
+import org.talend.components.netsuite.client.metadata.FieldInfo;
+import org.talend.components.netsuite.client.metadata.RecordTypeInfo;
+import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeInfo;
+import org.talend.components.netsuite.client.metadata.SearchRecordInfo;
+import org.talend.components.netsuite.client.metadata.TypeInfo;
+import org.talend.components.netsuite.beans.EnumAccessor;
+import org.talend.components.netsuite.beans.Mapper;
+import org.talend.components.netsuite.beans.PropertyInfo;
+import org.talend.components.netsuite.beans.BeanManager;
 
 import static org.talend.components.netsuite.client.NetSuiteFactory.getEnumFromStringMapper;
 import static org.talend.components.netsuite.client.NetSuiteFactory.getEnumToStringMapper;
@@ -43,12 +43,12 @@ public abstract class StandardMetaData {
 
     protected Map<String, Class<?>> typeMap = new HashMap<>();
 
-    protected Map<String, RecordTypeDef> recordTypeDefMap = new HashMap<>();
+    protected Map<String, RecordTypeInfo> recordTypeMap = new HashMap<>();
 
-    protected Map<String, SearchRecordDef> searchRecordDefMap = new HashMap<>();
+    protected Map<String, SearchRecordInfo> searchRecordMap = new HashMap<>();
     protected Map<String, String> recordSearchTypeMap = new HashMap<>();
     protected Map<String, Class<?>> searchFieldMap = new HashMap<>();
-    protected Map<String, SearchFieldOperatorTypeDef> searchFieldOperatorTypeMap = new HashMap<>();
+    protected Map<String, SearchFieldOperatorTypeInfo> searchFieldOperatorTypeMap = new HashMap<>();
     protected Map<String, String> searchFieldOperatorMap = new HashMap<>();
 
     protected StandardMetaData() {
@@ -100,9 +100,9 @@ public abstract class StandardMetaData {
                     }
                 }
                 if (recordTypeName != null) {
-                    RecordTypeDef def = new RecordTypeDef(recordTypeName, clazz);
-                    if (!recordTypeDefMap.containsKey(recordTypeName)) {
-                        recordTypeDefMap.put(toInitialUpper(recordTypeName), def);
+                    RecordTypeInfo def = new RecordTypeInfo(recordTypeName, clazz);
+                    if (!recordTypeMap.containsKey(recordTypeName)) {
+                        recordTypeMap.put(toInitialUpper(recordTypeName), def);
                     } else {
                         throw new IllegalArgumentException("Record type already registered: " + recordTypeClassSimpleName);
                     }
@@ -146,8 +146,8 @@ public abstract class StandardMetaData {
         }
     }
 
-    protected void registerSearchRecordDefs(SearchRecordDef[] searchRecordDefs) {
-        for (SearchRecordDef def : searchRecordDefs) {
+    protected void registerSearchRecordDefs(SearchRecordInfo[] searchRecordInfos) {
+        for (SearchRecordInfo def : searchRecordInfos) {
 
             // For some record types main search record not available
             if (def.getSearchClass() != null) {
@@ -162,7 +162,7 @@ public abstract class StandardMetaData {
                 registerType(def.getSearchAdvancedClass(), null);
             }
 
-            if (searchRecordDefMap.containsKey(def.getSearchRecordType())) {
+            if (searchRecordMap.containsKey(def.getSearchRecordType())) {
                 throw new IllegalArgumentException(
                         "Search record def already registered: "
                                 + def.getSearchRecordType() + ", search classes to register are "
@@ -170,7 +170,7 @@ public abstract class StandardMetaData {
                                 + def.getSearchBasicClass() + ", "
                                 + def.getSearchAdvancedClass());
             }
-            searchRecordDefMap.put(def.getSearchRecordType(), def);
+            searchRecordMap.put(def.getSearchRecordType(), def);
         }
     }
 
@@ -181,9 +181,9 @@ public abstract class StandardMetaData {
         }
     }
 
-    protected void registerSearchFieldOperatorTypeDefs(SearchFieldOperatorTypeDef[] searchFieldOperatorTable) {
+    protected void registerSearchFieldOperatorTypeDefs(SearchFieldOperatorTypeInfo[] searchFieldOperatorTable) {
         searchFieldOperatorTypeMap = new HashMap<>(searchFieldOperatorTable.length);
-        for (SearchFieldOperatorTypeDef info : searchFieldOperatorTable) {
+        for (SearchFieldOperatorTypeInfo info : searchFieldOperatorTable) {
             searchFieldOperatorTypeMap.put(info.getTypeName(), info);
         }
 
@@ -197,15 +197,15 @@ public abstract class StandardMetaData {
         return typeMap.get(typeName);
     }
 
-    public TypeDef getTypeDef(String typeName) {
+    public TypeInfo getTypeDef(String typeName) {
         Class<?> clazz = getTypeClass(typeName);
         return clazz != null ? getTypeDef(clazz) : null;
     }
 
-    public TypeDef getTypeDef(Class<?> clazz) {
-        TypeInfo beanInfo = TypeManager.forClass(clazz);
+    public TypeInfo getTypeDef(Class<?> clazz) {
+        BeanInfo beanInfo = BeanManager.getBeanInfo(clazz);
         List<PropertyInfo> propertyInfos = beanInfo.getProperties();
-        List<FieldDef> fields = new ArrayList<>(propertyInfos.size());
+        List<FieldInfo> fields = new ArrayList<>(propertyInfos.size());
         for (PropertyInfo propertyInfo : propertyInfos) {
             String fieldName = propertyInfo.getName();
             Class fieldValueType = propertyInfo.getReadType();
@@ -214,32 +214,32 @@ public abstract class StandardMetaData {
                 continue;
             }
             boolean isKeyField = isKeyField(clazz, propertyInfo);
-            FieldDef fieldInfo = new FieldDef(fieldName, fieldValueType, isKeyField, true);
+            FieldInfo fieldInfo = new FieldInfo(fieldName, fieldValueType, isKeyField, true);
             fields.add(fieldInfo);
         }
 
-        return new TypeDef(clazz.getSimpleName(), clazz, fields);
+        return new TypeInfo(clazz.getSimpleName(), clazz, fields);
     }
 
     public Collection<String> getRecordTypes() {
-        return Collections.unmodifiableCollection(recordTypeDefMap.keySet());
+        return Collections.unmodifiableCollection(recordTypeMap.keySet());
     }
 
-    public RecordTypeDef getRecordTypeDef(String recordType) {
-        return recordTypeDefMap.get(recordType);
+    public RecordTypeInfo getRecordTypeDef(String recordType) {
+        return recordTypeMap.get(recordType);
     }
 
-    public SearchRecordDef getSearchRecordDefByRecordType(String recordType) {
-        RecordTypeDef recordTypeDef = getRecordTypeDef(recordType);
-        if (recordTypeDef != null) {
-            String searchRecordType = recordSearchTypeMap.get(recordTypeDef.getRecordType());
-            return searchRecordDefMap.get(searchRecordType);
+    public SearchRecordInfo getSearchRecordDefByRecordType(String recordType) {
+        RecordTypeInfo recordTypeInfo = getRecordTypeDef(recordType);
+        if (recordTypeInfo != null) {
+            String searchRecordType = recordSearchTypeMap.get(recordTypeInfo.getRecordType());
+            return searchRecordMap.get(searchRecordType);
         }
         return null;
     }
 
-    public SearchRecordDef getSearchRecordDef(String searchRecordType) {
-        return searchRecordDefMap.get(searchRecordType);
+    public SearchRecordInfo getSearchRecordDef(String searchRecordType) {
+        return searchRecordMap.get(searchRecordType);
     }
 
     public Class<?> getSearchFieldClass(String searchFieldType) {
@@ -247,14 +247,14 @@ public abstract class StandardMetaData {
     }
 
     public Object getSearchFieldOperatorByName(String searchFieldType, String searchFieldOperatorName) {
-        SearchFieldOperatorTypeDef.QualifiedName operatorQName =
-                new SearchFieldOperatorTypeDef.QualifiedName(searchFieldOperatorName);
+        SearchFieldOperatorTypeInfo.QualifiedName operatorQName =
+                new SearchFieldOperatorTypeInfo.QualifiedName(searchFieldOperatorName);
         String searchFieldOperatorType = searchFieldOperatorMap.get(searchFieldType);
         if (searchFieldOperatorType != null) {
-            SearchFieldOperatorTypeDef def = searchFieldOperatorTypeMap.get(searchFieldOperatorType);
+            SearchFieldOperatorTypeInfo def = searchFieldOperatorTypeMap.get(searchFieldOperatorType);
             return def.getOperator(searchFieldOperatorName);
         }
-        for (SearchFieldOperatorTypeDef def : searchFieldOperatorTypeMap.values()) {
+        for (SearchFieldOperatorTypeInfo def : searchFieldOperatorTypeMap.values()) {
             if (def.hasOperatorName(operatorQName)) {
                 return def.getOperator(searchFieldOperatorName);
             }
@@ -262,9 +262,9 @@ public abstract class StandardMetaData {
         return null;
     }
 
-    public Collection<SearchFieldOperatorTypeDef.QualifiedName> getSearchOperatorNames() {
-        Set<SearchFieldOperatorTypeDef.QualifiedName> names = new HashSet<>();
-        for (SearchFieldOperatorTypeDef info : searchFieldOperatorTypeMap.values()) {
+    public Collection<SearchFieldOperatorTypeInfo.QualifiedName> getSearchOperatorNames() {
+        Set<SearchFieldOperatorTypeInfo.QualifiedName> names = new HashSet<>();
+        for (SearchFieldOperatorTypeInfo info : searchFieldOperatorTypeMap.values()) {
             names.addAll(info.getOperatorNames());
         }
         return Collections.unmodifiableSet(names);
@@ -272,9 +272,9 @@ public abstract class StandardMetaData {
 
     protected abstract boolean isKeyField(Class<?> entityClass, PropertyInfo propertyInfo);
 
-    public static <T> SearchFieldOperatorTypeDef<T> createSearchFieldOperatorTypeDef(
+    public static <T> SearchFieldOperatorTypeInfo<T> createSearchFieldOperatorTypeDef(
             String dataType, Class<T> clazz) {
-        return new SearchFieldOperatorTypeDef<>(dataType, clazz,
+        return new SearchFieldOperatorTypeInfo<>(dataType, clazz,
                 (Mapper<T, String>) getEnumToStringMapper((Class<Enum>) clazz),
                 (Mapper<String, T>) getEnumFromStringMapper((Class<Enum>) clazz));
     }

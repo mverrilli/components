@@ -14,13 +14,11 @@ import java.util.Collection;
 import javax.xml.bind.annotation.XmlEnum;
 import javax.xml.bind.annotation.XmlType;
 
-import org.talend.components.netsuite.model.EnumAccessor;
-import org.talend.components.netsuite.model.PropertyAccess;
-import org.talend.components.netsuite.model.PropertyInfo;
-import org.talend.components.netsuite.model.TypeInfo;
-import org.talend.components.netsuite.model.javassist.JavassistPropertyInfo;
-import org.talend.components.netsuite.model.javassist.JavassistTypeIntrospector;
-import org.talend.components.netsuite.model.PrimitiveInfo;
+import org.talend.components.netsuite.beans.BeanInfo;
+import org.talend.components.netsuite.beans.EnumAccessor;
+import org.talend.components.netsuite.beans.PrimitiveInfo;
+import org.talend.components.netsuite.beans.PropertyAccess;
+import org.talend.components.netsuite.beans.PropertyInfo;
 
 /**
  *
@@ -254,7 +252,7 @@ public class NetSuiteClassEnhancer {
     private void genGetMetaDataMethod(CtClass targetClass,
             Collection<JavassistPropertyInfo> propertyInfoSet) throws Exception {
 
-        CtClass beanMetaDataClass = ClassPool.getDefault().get(TypeInfo.class.getName());
+        CtClass beanMetaDataClass = ClassPool.getDefault().get(BeanInfo.class.getName());
         CtClass propMetaDataClass = ClassPool.getDefault().get(PropertyInfo.class.getName());
 
         StringBuilder body = new StringBuilder("return new " + beanMetaDataClass.getName() +"(");
@@ -312,7 +310,7 @@ public class NetSuiteClassEnhancer {
         body.append(");");
 
         try {
-            CtMethod method = CtNewMethod.make(beanMetaDataClass, "getBeanMetaData",
+            CtMethod method = CtNewMethod.make(beanMetaDataClass, "getNsBeanInfo",
                     new CtClass[0], new CtClass[0], body.toString(), targetClass);
             method.setModifiers(Modifier.PUBLIC | Modifier.STATIC);
 

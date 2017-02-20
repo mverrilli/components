@@ -11,9 +11,9 @@ import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NetSuiteFactory;
 import org.talend.components.netsuite.client.StandardMetaData;
-import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeDef;
-import org.talend.components.netsuite.client.metadata.SearchRecordDef;
-import org.talend.components.netsuite.model.PropertyInfo;
+import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeInfo;
+import org.talend.components.netsuite.client.metadata.SearchRecordInfo;
+import org.talend.components.netsuite.beans.PropertyInfo;
 
 import com.netsuite.webservices.v2016_2.activities.scheduling.CalendarEventSearch;
 import com.netsuite.webservices.v2016_2.activities.scheduling.CalendarEventSearchAdvanced;
@@ -512,96 +512,96 @@ public class StandardMetaDataImpl extends StandardMetaData {
             SearchStringField.class
     };
 
-    private static final SearchRecordDef[] searchRecordDefs = {
-            new SearchRecordDef(SearchRecordType.ACCOUNT.value(), AccountSearch.class, AccountSearchBasic.class, AccountSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.ACCOUNTING_PERIOD.value(), AccountingPeriodSearch.class, AccountingPeriodSearchBasic.class, AccountingPeriodSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.ACCOUNTING_TRANSACTION.value(), AccountingTransactionSearch.class, AccountingTransactionSearchBasic.class, AccountingTransactionSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.BILLING_ACCOUNT.value(), BillingAccountSearch.class, BillingAccountSearchBasic.class, BillingAccountSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.BILLING_SCHEDULE.value(), BillingScheduleSearch.class, BillingScheduleSearchBasic.class, BillingScheduleSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.BIN.value(), BinSearch.class, BinSearchBasic.class, BinSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.BUDGET.value(), BudgetSearch.class, BudgetSearchBasic.class, BudgetSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.CALENDAR_EVENT.value(), CalendarEventSearch.class, CalendarEventSearchBasic.class, CalendarEventSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.CAMPAIGN.value(), CampaignSearch.class, CampaignSearchBasic.class, CampaignSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.CHARGE.value(), ChargeSearch.class, ChargeSearchBasic.class, ChargeSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.CLASSIFICATION.value(), ClassificationSearch.class, ClassificationSearchBasic.class, ClassificationSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.CONTACT.value(), ContactSearch.class, ContactSearchBasic.class, ContactSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.CONTACT_CATEGORY.value(), ContactCategorySearch.class, ContactCategorySearchBasic.class, ContactCategorySearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.CONTACT_ROLE.value(), ContactRoleSearch.class, ContactRoleSearchBasic.class, ContactRoleSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.COUPON_CODE.value(), CouponCodeSearch.class, CouponCodeSearchBasic.class, CouponCodeSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.CURRENCY_RATE.value(), CurrencyRateSearch.class, CurrencyRateSearchBasic.class, CurrencyRateSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.CUSTOMER.value(), CustomerSearch.class, CustomerSearchBasic.class, CustomerSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.CUSTOMER_CATEGORY.value(), CustomerCategorySearch.class, CustomerCategorySearchBasic.class, CustomerCategorySearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.CUSTOMER_MESSAGE.value(), CustomerMessageSearch.class, CustomerMessageSearchBasic.class, CustomerMessageSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.CUSTOMER_STATUS.value(), CustomerStatusSearch.class, CustomerStatusSearchBasic.class, CustomerStatusSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.DEPARTMENT.value(), DepartmentSearch.class, DepartmentSearchBasic.class, DepartmentSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.EMPLOYEE.value(), EmployeeSearch.class, EmployeeSearchBasic.class, EmployeeSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.ENTITY_GROUP.value(), EntityGroupSearch.class, EntityGroupSearchBasic.class, EntityGroupSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.EXPENSE_CATEGORY.value(), ExpenseCategorySearch.class, ExpenseCategorySearchBasic.class, ExpenseCategorySearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.FAIR_VALUE_PRICE.value(), FairValuePriceSearch.class, FairValuePriceSearchBasic.class, FairValuePriceSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.FILE.value(), FileSearch.class, FileSearchBasic.class, FileSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.FOLDER.value(), FolderSearch.class, FolderSearchBasic.class, FolderSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.GIFT_CERTIFICATE.value(), GiftCertificateSearch.class, GiftCertificateSearchBasic.class, GiftCertificateSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.GLOBAL_ACCOUNT_MAPPING.value(), GlobalAccountMappingSearch.class, GlobalAccountMappingSearchBasic.class, GlobalAccountMappingSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.INVENTORY_NUMBER.value(), InventoryNumberSearch.class, InventoryNumberSearchBasic.class, InventoryNumberSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.ISSUE.value(), IssueSearch.class, IssueSearchBasic.class, IssueSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.ITEM_ACCOUNT_MAPPING.value(), ItemAccountMappingSearch.class, ItemAccountMappingSearchBasic.class, ItemAccountMappingSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.ITEM_DEMAND_PLAN.value(), ItemDemandPlanSearch.class, ItemDemandPlanSearchBasic.class, ItemDemandPlanSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.ITEM_REVISION.value(), ItemRevisionSearch.class, ItemRevisionSearchBasic.class, ItemRevisionSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.ITEM_SUPPLY_PLAN.value(), ItemSupplyPlanSearch.class, ItemSupplyPlanSearchBasic.class, ItemSupplyPlanSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.JOB.value(), JobSearch.class, JobSearchBasic.class, JobSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.JOB_STATUS.value(), JobStatusSearch.class, JobStatusSearchBasic.class, JobStatusSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.JOB_TYPE.value(), JobTypeSearch.class, JobTypeSearchBasic.class, JobTypeSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.LOCATION.value(), LocationSearch.class, LocationSearchBasic.class, LocationSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.MANUFACTURING_COST_TEMPLATE.value(), ManufacturingCostTemplateSearch.class, ManufacturingCostTemplateSearchBasic.class, ManufacturingCostTemplateSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.MANUFACTURING_OPERATION_TASK.value(), ManufacturingOperationTaskSearch.class, ManufacturingOperationTaskSearchBasic.class, ManufacturingOperationTaskSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.MANUFACTURING_ROUTING.value(), ManufacturingRoutingSearch.class, ManufacturingRoutingSearchBasic.class, ManufacturingRoutingSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.MESSAGE.value(), MessageSearch.class, MessageSearchBasic.class, MessageSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.NEXUS.value(), NexusSearch.class, NexusSearchBasic.class, NexusSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.NOTE.value(), NoteSearch.class, NoteSearchBasic.class, NoteSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.NOTE_TYPE.value(), NoteTypeSearch.class, NoteTypeSearchBasic.class, NoteTypeSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.OPPORTUNITY.value(), OpportunitySearch.class, OpportunitySearchBasic.class, OpportunitySearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.OTHER_NAME_CATEGORY.value(), OtherNameCategorySearch.class, OtherNameCategorySearchBasic.class, OtherNameCategorySearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.PARTNER.value(), PartnerSearch.class, PartnerSearchBasic.class, PartnerSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.PARTNER_CATEGORY.value(), PartnerCategorySearch.class, PartnerCategorySearchBasic.class, PartnerCategorySearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.PAYMENT_METHOD.value(), PaymentMethodSearch.class, PaymentMethodSearchBasic.class, PaymentMethodSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.PAYROLL_ITEM.value(), PayrollItemSearch.class, PayrollItemSearchBasic.class, PayrollItemSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.PHONE_CALL.value(), PhoneCallSearch.class, PhoneCallSearchBasic.class, PhoneCallSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.PRICE_LEVEL.value(), PriceLevelSearch.class, PriceLevelSearchBasic.class, PriceLevelSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.PRICING_GROUP.value(), PricingGroupSearch.class, PricingGroupSearchBasic.class, PricingGroupSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.PROJECT_TASK.value(), ProjectTaskSearch.class, ProjectTaskSearchBasic.class, ProjectTaskSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.PROMOTION_CODE.value(), PromotionCodeSearch.class, PromotionCodeSearchBasic.class, PromotionCodeSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.RESOURCE_ALLOCATION.value(), ResourceAllocationSearch.class, ResourceAllocationSearchBasic.class, ResourceAllocationSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.REV_REC_SCHEDULE.value(), RevRecScheduleSearch.class, RevRecScheduleSearchBasic.class, RevRecScheduleSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.REV_REC_TEMPLATE.value(), RevRecTemplateSearch.class, RevRecTemplateSearchBasic.class, RevRecTemplateSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.SALES_ROLE.value(), SalesRoleSearch.class, SalesRoleSearchBasic.class, SalesRoleSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.SITE_CATEGORY.value(), SiteCategorySearch.class, SiteCategorySearchBasic.class, SiteCategorySearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.SOLUTION.value(), SolutionSearch.class, SolutionSearchBasic.class, SolutionSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.SUBSIDIARY.value(), SubsidiarySearch.class, SubsidiarySearchBasic.class, SubsidiarySearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.SUPPORT_CASE.value(), SupportCaseSearch.class, SupportCaseSearchBasic.class, SupportCaseSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.TASK.value(), TaskSearch.class, TaskSearchBasic.class, TaskSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.TERM.value(), TermSearch.class, TermSearchBasic.class, TermSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.TIME_BILL.value(), TimeBillSearch.class, TimeBillSearchBasic.class, TimeBillSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.TIME_SHEET.value(), TimeSheetSearch.class, TimeSheetSearchBasic.class, TimeSheetSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.TOPIC.value(), TopicSearch.class, TopicSearchBasic.class, TopicSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.UNITS_TYPE.value(), UnitsTypeSearch.class, UnitsTypeSearchBasic.class, UnitsTypeSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.USAGE.value(), UsageSearch.class, UsageSearchBasic.class, UsageSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.VENDOR.value(), VendorSearch.class, VendorSearchBasic.class, VendorSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.VENDOR_CATEGORY.value(), VendorCategorySearch.class, VendorCategorySearchBasic.class, VendorCategorySearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.WIN_LOSS_REASON.value(), WinLossReasonSearch.class, WinLossReasonSearchBasic.class, WinLossReasonSearchAdvanced.class),
+    private static final SearchRecordInfo[] SEARCH_RECORD_INFOS = {
+            new SearchRecordInfo(SearchRecordType.ACCOUNT.value(), AccountSearch.class, AccountSearchBasic.class, AccountSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.ACCOUNTING_PERIOD.value(), AccountingPeriodSearch.class, AccountingPeriodSearchBasic.class, AccountingPeriodSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.ACCOUNTING_TRANSACTION.value(), AccountingTransactionSearch.class, AccountingTransactionSearchBasic.class, AccountingTransactionSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.BILLING_ACCOUNT.value(), BillingAccountSearch.class, BillingAccountSearchBasic.class, BillingAccountSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.BILLING_SCHEDULE.value(), BillingScheduleSearch.class, BillingScheduleSearchBasic.class, BillingScheduleSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.BIN.value(), BinSearch.class, BinSearchBasic.class, BinSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.BUDGET.value(), BudgetSearch.class, BudgetSearchBasic.class, BudgetSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CALENDAR_EVENT.value(), CalendarEventSearch.class, CalendarEventSearchBasic.class, CalendarEventSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CAMPAIGN.value(), CampaignSearch.class, CampaignSearchBasic.class, CampaignSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CHARGE.value(), ChargeSearch.class, ChargeSearchBasic.class, ChargeSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CLASSIFICATION.value(), ClassificationSearch.class, ClassificationSearchBasic.class, ClassificationSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CONTACT.value(), ContactSearch.class, ContactSearchBasic.class, ContactSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CONTACT_CATEGORY.value(), ContactCategorySearch.class, ContactCategorySearchBasic.class, ContactCategorySearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CONTACT_ROLE.value(), ContactRoleSearch.class, ContactRoleSearchBasic.class, ContactRoleSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.COUPON_CODE.value(), CouponCodeSearch.class, CouponCodeSearchBasic.class, CouponCodeSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CURRENCY_RATE.value(), CurrencyRateSearch.class, CurrencyRateSearchBasic.class, CurrencyRateSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CUSTOMER.value(), CustomerSearch.class, CustomerSearchBasic.class, CustomerSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CUSTOMER_CATEGORY.value(), CustomerCategorySearch.class, CustomerCategorySearchBasic.class, CustomerCategorySearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CUSTOMER_MESSAGE.value(), CustomerMessageSearch.class, CustomerMessageSearchBasic.class, CustomerMessageSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CUSTOMER_STATUS.value(), CustomerStatusSearch.class, CustomerStatusSearchBasic.class, CustomerStatusSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.DEPARTMENT.value(), DepartmentSearch.class, DepartmentSearchBasic.class, DepartmentSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.EMPLOYEE.value(), EmployeeSearch.class, EmployeeSearchBasic.class, EmployeeSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.ENTITY_GROUP.value(), EntityGroupSearch.class, EntityGroupSearchBasic.class, EntityGroupSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.EXPENSE_CATEGORY.value(), ExpenseCategorySearch.class, ExpenseCategorySearchBasic.class, ExpenseCategorySearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.FAIR_VALUE_PRICE.value(), FairValuePriceSearch.class, FairValuePriceSearchBasic.class, FairValuePriceSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.FILE.value(), FileSearch.class, FileSearchBasic.class, FileSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.FOLDER.value(), FolderSearch.class, FolderSearchBasic.class, FolderSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.GIFT_CERTIFICATE.value(), GiftCertificateSearch.class, GiftCertificateSearchBasic.class, GiftCertificateSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.GLOBAL_ACCOUNT_MAPPING.value(), GlobalAccountMappingSearch.class, GlobalAccountMappingSearchBasic.class, GlobalAccountMappingSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.INVENTORY_NUMBER.value(), InventoryNumberSearch.class, InventoryNumberSearchBasic.class, InventoryNumberSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.ISSUE.value(), IssueSearch.class, IssueSearchBasic.class, IssueSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.ITEM_ACCOUNT_MAPPING.value(), ItemAccountMappingSearch.class, ItemAccountMappingSearchBasic.class, ItemAccountMappingSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.ITEM_DEMAND_PLAN.value(), ItemDemandPlanSearch.class, ItemDemandPlanSearchBasic.class, ItemDemandPlanSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.ITEM_REVISION.value(), ItemRevisionSearch.class, ItemRevisionSearchBasic.class, ItemRevisionSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.ITEM_SUPPLY_PLAN.value(), ItemSupplyPlanSearch.class, ItemSupplyPlanSearchBasic.class, ItemSupplyPlanSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.JOB.value(), JobSearch.class, JobSearchBasic.class, JobSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.JOB_STATUS.value(), JobStatusSearch.class, JobStatusSearchBasic.class, JobStatusSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.JOB_TYPE.value(), JobTypeSearch.class, JobTypeSearchBasic.class, JobTypeSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.LOCATION.value(), LocationSearch.class, LocationSearchBasic.class, LocationSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.MANUFACTURING_COST_TEMPLATE.value(), ManufacturingCostTemplateSearch.class, ManufacturingCostTemplateSearchBasic.class, ManufacturingCostTemplateSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.MANUFACTURING_OPERATION_TASK.value(), ManufacturingOperationTaskSearch.class, ManufacturingOperationTaskSearchBasic.class, ManufacturingOperationTaskSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.MANUFACTURING_ROUTING.value(), ManufacturingRoutingSearch.class, ManufacturingRoutingSearchBasic.class, ManufacturingRoutingSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.MESSAGE.value(), MessageSearch.class, MessageSearchBasic.class, MessageSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.NEXUS.value(), NexusSearch.class, NexusSearchBasic.class, NexusSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.NOTE.value(), NoteSearch.class, NoteSearchBasic.class, NoteSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.NOTE_TYPE.value(), NoteTypeSearch.class, NoteTypeSearchBasic.class, NoteTypeSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.OPPORTUNITY.value(), OpportunitySearch.class, OpportunitySearchBasic.class, OpportunitySearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.OTHER_NAME_CATEGORY.value(), OtherNameCategorySearch.class, OtherNameCategorySearchBasic.class, OtherNameCategorySearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.PARTNER.value(), PartnerSearch.class, PartnerSearchBasic.class, PartnerSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.PARTNER_CATEGORY.value(), PartnerCategorySearch.class, PartnerCategorySearchBasic.class, PartnerCategorySearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.PAYMENT_METHOD.value(), PaymentMethodSearch.class, PaymentMethodSearchBasic.class, PaymentMethodSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.PAYROLL_ITEM.value(), PayrollItemSearch.class, PayrollItemSearchBasic.class, PayrollItemSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.PHONE_CALL.value(), PhoneCallSearch.class, PhoneCallSearchBasic.class, PhoneCallSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.PRICE_LEVEL.value(), PriceLevelSearch.class, PriceLevelSearchBasic.class, PriceLevelSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.PRICING_GROUP.value(), PricingGroupSearch.class, PricingGroupSearchBasic.class, PricingGroupSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.PROJECT_TASK.value(), ProjectTaskSearch.class, ProjectTaskSearchBasic.class, ProjectTaskSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.PROMOTION_CODE.value(), PromotionCodeSearch.class, PromotionCodeSearchBasic.class, PromotionCodeSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.RESOURCE_ALLOCATION.value(), ResourceAllocationSearch.class, ResourceAllocationSearchBasic.class, ResourceAllocationSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.REV_REC_SCHEDULE.value(), RevRecScheduleSearch.class, RevRecScheduleSearchBasic.class, RevRecScheduleSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.REV_REC_TEMPLATE.value(), RevRecTemplateSearch.class, RevRecTemplateSearchBasic.class, RevRecTemplateSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.SALES_ROLE.value(), SalesRoleSearch.class, SalesRoleSearchBasic.class, SalesRoleSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.SITE_CATEGORY.value(), SiteCategorySearch.class, SiteCategorySearchBasic.class, SiteCategorySearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.SOLUTION.value(), SolutionSearch.class, SolutionSearchBasic.class, SolutionSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.SUBSIDIARY.value(), SubsidiarySearch.class, SubsidiarySearchBasic.class, SubsidiarySearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.SUPPORT_CASE.value(), SupportCaseSearch.class, SupportCaseSearchBasic.class, SupportCaseSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.TASK.value(), TaskSearch.class, TaskSearchBasic.class, TaskSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.TERM.value(), TermSearch.class, TermSearchBasic.class, TermSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.TIME_BILL.value(), TimeBillSearch.class, TimeBillSearchBasic.class, TimeBillSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.TIME_SHEET.value(), TimeSheetSearch.class, TimeSheetSearchBasic.class, TimeSheetSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.TOPIC.value(), TopicSearch.class, TopicSearchBasic.class, TopicSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.UNITS_TYPE.value(), UnitsTypeSearch.class, UnitsTypeSearchBasic.class, UnitsTypeSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.USAGE.value(), UsageSearch.class, UsageSearchBasic.class, UsageSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.VENDOR.value(), VendorSearch.class, VendorSearchBasic.class, VendorSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.VENDOR_CATEGORY.value(), VendorCategorySearch.class, VendorCategorySearchBasic.class, VendorCategorySearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.WIN_LOSS_REASON.value(), WinLossReasonSearch.class, WinLossReasonSearchBasic.class, WinLossReasonSearchAdvanced.class),
 
-            new SearchRecordDef(SearchRecordType.CUSTOM_LIST.value(), CustomListSearch.class, CustomListSearchBasic.class, CustomListSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.CUSTOM_RECORD.value(), CustomRecordSearch.class, CustomRecordSearchBasic.class, CustomRecordSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CUSTOM_LIST.value(), CustomListSearch.class, CustomListSearchBasic.class, CustomListSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.CUSTOM_RECORD.value(), CustomRecordSearch.class, CustomRecordSearchBasic.class, CustomRecordSearchAdvanced.class),
 
-            new SearchRecordDef(SearchRecordType.TRANSACTION.value(), TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
-            new SearchRecordDef(SearchRecordType.ITEM.value(), ItemSearch.class, ItemSearchBasic.class, ItemSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.TRANSACTION.value(), TransactionSearch.class, TransactionSearchBasic.class, TransactionSearchAdvanced.class),
+            new SearchRecordInfo(SearchRecordType.ITEM.value(), ItemSearch.class, ItemSearchBasic.class, ItemSearchAdvanced.class),
 
             // These record types are not listed in RecordType enum
-            new SearchRecordDef("address", null, AddressSearchBasic.class, null),
-            new SearchRecordDef("inventoryDetail", null, InventoryDetailSearchBasic.class, null),
-            new SearchRecordDef("timeEntry", TimeEntrySearch.class, TimeEntrySearchBasic.class, TimeEntrySearchAdvanced.class),
+            new SearchRecordInfo("address", null, AddressSearchBasic.class, null),
+            new SearchRecordInfo("inventoryDetail", null, InventoryDetailSearchBasic.class, null),
+            new SearchRecordInfo("timeEntry", TimeEntrySearch.class, TimeEntrySearchBasic.class, TimeEntrySearchAdvanced.class),
     };
 
-    private static final SearchFieldOperatorTypeDef<?>[] searchFieldOperatorTable = {
+    private static final SearchFieldOperatorTypeInfo<?>[] searchFieldOperatorTable = {
             // Date
             createSearchFieldOperatorTypeDef("Date", SearchDateFieldOperator.class),
             // Predefined Date
@@ -617,8 +617,8 @@ public class StandardMetaDataImpl extends StandardMetaData {
             // List of predefined values
             createSearchFieldOperatorTypeDef("List", SearchEnumMultiSelectFieldOperator.class),
             // Boolean (Synthetic)
-            new SearchFieldOperatorTypeDef("Boolean",
-                    SearchFieldOperatorTypeDef.SearchBooleanFieldOperator.class, null, null)
+            new SearchFieldOperatorTypeInfo("Boolean",
+                    SearchFieldOperatorTypeInfo.SearchBooleanFieldOperator.class, null, null)
     };
 
     public StandardMetaDataImpl() {
@@ -648,7 +648,7 @@ public class StandardMetaDataImpl extends StandardMetaData {
                 NetSuiteFactory.getEnumAccessor(RecordType.class)
         );
 
-        registerSearchRecordDefs(searchRecordDefs);
+        registerSearchRecordDefs(SEARCH_RECORD_INFOS);
 
         registerRecordSearchTypeMapping(RecordType.values(),
                 NetSuiteFactory.getEnumAccessor(RecordType.class),

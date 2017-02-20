@@ -12,8 +12,9 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NsObject;
-import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeDef;
+import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeInfo;
+
+import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanProperty;
 
 /**
  *
@@ -34,13 +35,13 @@ public class SearchDateFieldPopulator<T> extends SearchFieldPopulator<T> {
 
     @Override
     public T populate(T fieldObject, String internalId, String operatorName, List<String> values) {
-        NsObject<T> nsObject = fieldObject != null ? NsObject.wrap(fieldObject) : createField(internalId);
+        T nsObject = fieldObject != null ? fieldObject : createField(internalId);
 
-        SearchFieldOperatorTypeDef.QualifiedName operatorQName =
-                new SearchFieldOperatorTypeDef.QualifiedName(operatorName);
+        SearchFieldOperatorTypeInfo.QualifiedName operatorQName =
+                new SearchFieldOperatorTypeInfo.QualifiedName(operatorName);
 
         if (operatorQName.getDataType().equals("PredefinedDate")) {
-            nsObject.set("predefinedSearchValue",
+            setBeanProperty(nsObject, "predefinedSearchValue",
                     clientService.getSearchFieldOperatorByName(fieldType, operatorName));
         } else {
             if (values != null && values.size() != 0) {
@@ -78,7 +79,7 @@ public class SearchDateFieldPopulator<T> extends SearchFieldPopulator<T> {
                 xts.setMillisecond(calValue.get(Calendar.MILLISECOND));
                 xts.setTimezone(calValue.get(Calendar.ZONE_OFFSET) / 60000);
 
-                nsObject.set("searchValue", xts);
+                setBeanProperty(nsObject,"searchValue", xts);
 
                 if (values.size() > 1) {
                     try {
@@ -97,13 +98,13 @@ public class SearchDateFieldPopulator<T> extends SearchFieldPopulator<T> {
                     xts2.setMillisecond(calValue.get(Calendar.MILLISECOND));
                     xts2.setTimezone(calValue.get(Calendar.ZONE_OFFSET) / 60000);
 
-                    nsObject.set("searchValue2", xts2);
+                    setBeanProperty(nsObject, "searchValue2", xts2);
                 }
             }
 
-            nsObject.set("operator", clientService.getSearchFieldOperatorByName(fieldType, operatorName));
+            setBeanProperty(nsObject, "operator", clientService.getSearchFieldOperatorByName(fieldType, operatorName));
         }
 
-        return nsObject.getTarget();
+        return nsObject;
     }
 }

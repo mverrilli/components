@@ -3,6 +3,7 @@ package org.talend.components.netsuite;
 import org.talend.components.api.component.AbstractComponentDefinition;
 import org.talend.components.api.component.runtime.DependenciesReader;
 import org.talend.components.api.component.runtime.ExecutionEngine;
+import org.talend.components.api.component.runtime.JarRuntimeInfo;
 import org.talend.components.api.component.runtime.SimpleRuntimeInfo;
 import org.talend.components.api.properties.ComponentProperties;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
@@ -74,11 +75,11 @@ public abstract class TNetSuiteComponentDefinition extends AbstractComponentDefi
     }
 
     public static RuntimeInfo getRuntimeInfo(String runtimeClassName) {
-        return new SimpleRuntimeInfo(TNetSuiteConnectionDefinition.class.getClassLoader(),
-                DependenciesReader.computeDependenciesFilePath(MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID),
-                runtimeClassName);
-//        return new JarRuntimeInfo("mvn:" + MAVEN_GROUP_ID + "/" + MAVEN_ARTIFACT_ID,
+//        return new SimpleRuntimeInfo(TNetSuiteConnectionDefinition.class.getClassLoader(),
 //                DependenciesReader.computeDependenciesFilePath(MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID),
 //                runtimeClassName);
+        return new JarRuntimeInfo("mvn:" + MAVEN_GROUP_ID + "/" + MAVEN_ARTIFACT_ID,
+                DependenciesReader.computeDependenciesFilePath(MAVEN_GROUP_ID, MAVEN_ARTIFACT_ID),
+                runtimeClassName);
     }
 }

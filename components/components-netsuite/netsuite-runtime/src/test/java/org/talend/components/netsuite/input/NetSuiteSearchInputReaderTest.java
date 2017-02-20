@@ -20,16 +20,16 @@ import org.talend.components.api.component.ComponentDefinition;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteAvroRegistry;
 import org.talend.components.netsuite.NetSuiteSource;
+import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteFactory;
-import org.talend.components.netsuite.client.metadata.TypeDef;
-import org.talend.components.netsuite.client.metadata.FieldDef;
-import org.talend.components.netsuite.model.PropertyAccessor;
+import org.talend.components.netsuite.client.metadata.TypeInfo;
+import org.talend.components.netsuite.client.metadata.FieldInfo;
+import org.talend.components.netsuite.beans.PropertyAccessor;
 import org.talend.components.netsuite.client.NetSuiteWebServiceMockTestFixture;
-import org.talend.components.netsuite.model.Mapper;
-import org.talend.components.netsuite.model.PropertyInfo;
-import org.talend.components.netsuite.model.TypeInfo;
-import org.talend.components.netsuite.model.TypeManager;
+import org.talend.components.netsuite.beans.Mapper;
+import org.talend.components.netsuite.beans.PropertyInfo;
+import org.talend.components.netsuite.beans.BeanManager;
 import org.talend.components.netsuite.runtime.RuntimeService;
 import org.talend.components.netsuite.runtime.RuntimeServiceImpl;
 import org.talend.components.netsuite.runtime.SchemaService;
@@ -129,7 +129,7 @@ public class NetSuiteSearchInputReaderTest {
         });
 
         NetSuiteClientService clientService = source.getConnection();
-        TypeDef entityInfo = clientService.getTypeDef(Account.class);
+        TypeInfo entityInfo = clientService.getTypeInfo(Account.class);
 
         NetSuiteSearchInputReader reader = (NetSuiteSearchInputReader) source.createReader(container);
 
@@ -146,7 +146,7 @@ public class NetSuiteSearchInputReaderTest {
             List<Schema.Field> fields = record.getSchema().getFields();
             for (int i = 0; i < fields.size(); i++) {
                 Schema.Field field = fields.get(i);
-                FieldDef fieldInfo = entityInfo.getField(field.name());
+                FieldInfo fieldInfo = entityInfo.getField(field.name());
                 Class<?> datumClass = fieldInfo.getValueType();
 
                 Object value = record.get(i);
@@ -232,8 +232,8 @@ public class NetSuiteSearchInputReaderTest {
     }
 
     private <T> T composeObject(Class<T> clazz) throws Exception {
-        TypeInfo typeInfo = TypeManager.forClass(clazz);
-        List<PropertyInfo> propertyInfoList = typeInfo.getProperties();
+        BeanInfo beanInfo = BeanManager.getBeanInfo(clazz);
+        List<PropertyInfo> propertyInfoList = beanInfo.getProperties();
 
         T obj = clazz.newInstance();
 

@@ -11,8 +11,8 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
 import org.junit.Test;
 import org.talend.components.netsuite.client.NetSuiteClientService;
-import org.talend.components.netsuite.client.metadata.TypeDef;
-import org.talend.components.netsuite.client.metadata.FieldDef;
+import org.talend.components.netsuite.client.metadata.TypeInfo;
+import org.talend.components.netsuite.client.metadata.FieldInfo;
 import org.talend.components.netsuite.runtime.SchemaServiceImpl;
 import org.talend.daikon.avro.SchemaConstants;
 import org.talend.daikon.avro.converter.AvroConverter;
@@ -37,33 +37,33 @@ public class NetSuiteAvroRegistryTest {
 
     @Test
     public void testInferSchemaForEntity() throws Exception {
-        TypeDef typeDef = clientService.getTypeDef("Account");
+        TypeInfo typeInfo = clientService.getTypeInfo("Account");
 
-        Schema s = SchemaServiceImpl.inferSchemaForRecord(typeDef.getTypeName(), typeDef.getFields());
+        Schema s = SchemaServiceImpl.inferSchemaForRecord(typeInfo.getTypeName(), typeInfo.getFields());
 
         System.out.println(s);
 
         assertThat(s.getType(), is(Schema.Type.RECORD));
         assertThat(s.getName(), is("Account"));
-        assertThat(s.getFields(), hasSize(typeDef.getFields().size()));
+        assertThat(s.getFields(), hasSize(typeInfo.getFields().size()));
         assertThat(s.getObjectProps().keySet(), empty());
 
-        FieldDef fieldInfo = typeDef.getField("acctType");
+        FieldInfo fieldInfo = typeInfo.getField("acctType");
         Schema.Field f = s.getField(fieldInfo.getName());
         assertUnionType(f.schema(), Arrays.asList(Schema.Type.STRING, Schema.Type.NULL));
         assertThat(f.schema().getObjectProps().keySet(), empty());
 
-        fieldInfo = typeDef.getField("acctName");
+        fieldInfo = typeInfo.getField("acctName");
         f = s.getField(fieldInfo.getName());
         assertUnionType(f.schema(), Arrays.asList(Schema.Type.STRING, Schema.Type.NULL));
         assertThat(f.schema().getObjectProps().keySet(), empty());
 
-        fieldInfo = typeDef.getField("inventory");
+        fieldInfo = typeInfo.getField("inventory");
         f = s.getField(fieldInfo.getName());
         assertUnionType(f.schema(), Arrays.asList(Schema.Type.BOOLEAN, Schema.Type.NULL));
         assertThat(f.schema().getObjectProps().keySet(), empty());
 
-        fieldInfo = typeDef.getField("tranDate");
+        fieldInfo = typeInfo.getField("tranDate");
         f = s.getField(fieldInfo.getName());
         assertUnionType(f.schema(), Arrays.asList(Schema.Type.LONG, Schema.Type.NULL));
         assertThat(f.getObjectProps().keySet(), containsInAnyOrder(SchemaConstants.TALEND_COLUMN_PATTERN));
@@ -72,11 +72,11 @@ public class NetSuiteAvroRegistryTest {
 
     @Test
     public void testEnumConverter() throws Exception {
-        TypeDef typeDef = clientService.getTypeDef("Account");
+        TypeInfo typeInfo = clientService.getTypeInfo("Account");
 
-        Schema s = SchemaServiceImpl.inferSchemaForRecord(typeDef.getTypeName(), typeDef.getFields());
+        Schema s = SchemaServiceImpl.inferSchemaForRecord(typeInfo.getTypeName(), typeInfo.getFields());
 
-        FieldDef fieldInfo = typeDef.getField("acctType");
+        FieldInfo fieldInfo = typeInfo.getField("acctType");
         Schema.Field f = s.getField(fieldInfo.getName());
         AvroConverter<Enum<AccountType>, String> converter1 =
                 (AvroConverter<Enum<AccountType>, String>) registry.getConverter(f, fieldInfo.getValueType());
@@ -86,7 +86,7 @@ public class NetSuiteAvroRegistryTest {
         assertEquals(AccountType.ACCOUNTS_PAYABLE,
                 converter1.convertToDatum(AccountType.ACCOUNTS_PAYABLE.value()));
 
-        fieldInfo = typeDef.getField("generalRate");
+        fieldInfo = typeInfo.getField("generalRate");
         f = s.getField(fieldInfo.getName());
         AvroConverter<Enum<ConsolidatedRate>, String> converter2 =
                 (AvroConverter<Enum<ConsolidatedRate>, String>) registry.getConverter(f, fieldInfo.getValueType());
@@ -99,9 +99,9 @@ public class NetSuiteAvroRegistryTest {
 
     @Test
     public void testXMLGregorianCalendarConverter() throws Exception {
-        TypeDef typeDef = clientService.getTypeDef("Account");
+        TypeInfo typeInfo = clientService.getTypeInfo("Account");
 
-        Schema s = SchemaServiceImpl.inferSchemaForRecord(typeDef.getTypeName(), typeDef.getFields());
+        Schema s = SchemaServiceImpl.inferSchemaForRecord(typeInfo.getTypeName(), typeInfo.getFields());
 
         DateTimeZone tz1 = DateTimeZone.forID("EET");
 
@@ -119,7 +119,7 @@ public class NetSuiteAvroRegistryTest {
         xmlCalendar1.setMillisecond(dateTime1.getMillisOfSecond());
         xmlCalendar1.setTimezone(tz1.toTimeZone().getRawOffset() / 60000);
 
-        FieldDef fieldInfo = typeDef.getField("tranDate");
+        FieldInfo fieldInfo = typeInfo.getField("tranDate");
         Schema.Field f = s.getField(fieldInfo.getName());
 
         AvroConverter<XMLGregorianCalendar, Long> converter1 =

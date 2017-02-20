@@ -20,10 +20,10 @@ import org.talend.components.netsuite.client.common.NsPreferences;
 import org.talend.components.netsuite.client.common.NsSearchPreferences;
 import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.client.common.NsWriteResponse;
-import org.talend.components.netsuite.client.metadata.RecordTypeDef;
-import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeDef;
-import org.talend.components.netsuite.client.metadata.SearchRecordDef;
-import org.talend.components.netsuite.client.metadata.TypeDef;
+import org.talend.components.netsuite.client.metadata.RecordTypeInfo;
+import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeInfo;
+import org.talend.components.netsuite.client.metadata.SearchRecordInfo;
+import org.talend.components.netsuite.client.metadata.TypeInfo;
 import org.talend.components.netsuite.client.query.SearchQuery;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.SimpleNamedThing;
@@ -232,9 +232,9 @@ public abstract class NetSuiteClientService<PortT> {
 
         Collection<String> recordTypes = standardMetaData.getRecordTypes();
         for (String recordTypeName : recordTypes) {
-            RecordTypeDef def = standardMetaData.getRecordTypeDef(recordTypeName);
-            SearchRecordDef searchRecordDef = standardMetaData.getSearchRecordDef(recordTypeName);
-            if (searchRecordDef != null) {
+            RecordTypeInfo def = standardMetaData.getRecordTypeDef(recordTypeName);
+            SearchRecordInfo searchRecordInfo = standardMetaData.getSearchRecordDef(recordTypeName);
+            if (searchRecordInfo != null) {
                 String name = def.getName();
                 searches.add(new SimpleNamedThing(name, name));
             }
@@ -243,24 +243,24 @@ public abstract class NetSuiteClientService<PortT> {
         return searches;
     }
 
-    public TypeDef getTypeDef(String typeName) {
+    public TypeInfo getTypeInfo(String typeName) {
         return standardMetaData.getTypeDef(typeName);
     }
 
-    public TypeDef getTypeDef(Class<?> clazz) {
+    public TypeInfo getTypeInfo(Class<?> clazz) {
         return standardMetaData.getTypeDef(clazz);
     }
 
-    public RecordTypeDef getRecordTypeDef(String typeName) {
+    public RecordTypeInfo getRecordTypeInfo(String typeName) {
         return standardMetaData.getRecordTypeDef(typeName);
     }
 
-    public SearchRecordDef getSearchRecordDef(String recordType) {
-        SearchRecordDef searchRecordDef = standardMetaData.getSearchRecordDefByRecordType(recordType);
-        if (searchRecordDef == null) {
-            searchRecordDef = standardMetaData.getSearchRecordDef(recordType);
+    public SearchRecordInfo getSearchRecordInfo(String recordType) {
+        SearchRecordInfo searchRecordInfo = standardMetaData.getSearchRecordDefByRecordType(recordType);
+        if (searchRecordInfo == null) {
+            searchRecordInfo = standardMetaData.getSearchRecordDef(recordType);
         }
-        return searchRecordDef;
+        return searchRecordInfo;
     }
 
     public Class<?> getSearchFieldClass(String searchFieldType) {
@@ -271,7 +271,7 @@ public abstract class NetSuiteClientService<PortT> {
         return standardMetaData.getSearchFieldOperatorByName(searchFieldType, searchFieldOperatorName);
     }
 
-    public Collection<SearchFieldOperatorTypeDef.QualifiedName> getSearchOperatorNames() {
+    public Collection<SearchFieldOperatorTypeInfo.QualifiedName> getSearchOperatorNames() {
         return standardMetaData.getSearchOperatorNames();
     }
 

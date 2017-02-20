@@ -6,19 +6,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NsObject;
 import org.talend.components.netsuite.client.common.SearchResultSet;
-import org.talend.components.netsuite.client.metadata.RecordTypeDef;
-import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeDef;
-import org.talend.components.netsuite.client.metadata.SearchRecordDef;
+import org.talend.components.netsuite.client.metadata.RecordTypeInfo;
+import org.talend.components.netsuite.client.metadata.SearchFieldOperatorTypeInfo;
+import org.talend.components.netsuite.client.metadata.SearchRecordInfo;
 import org.talend.components.netsuite.client.common.NsSearchResult;
-import org.talend.components.netsuite.model.TypeInfo;
-import org.talend.components.netsuite.model.PropertyInfo;
-import org.talend.components.netsuite.model.TypeManager;
+import org.talend.components.netsuite.beans.PropertyInfo;
+import org.talend.components.netsuite.beans.BeanManager;
 
+import static org.talend.components.netsuite.client.NetSuiteFactory.getBeanProperty;
 import static org.talend.components.netsuite.client.NetSuiteFactory.getPropertyAccessor;
+import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanProperty;
 
 /**
  *
@@ -30,8 +31,8 @@ public class SearchQuery<SearchT, RecT> {
     protected Map<String, SearchFieldPopulator<?>> searchFieldPopulatorMap = new HashMap<>();
 
     protected String recordTypeName;
-    protected RecordTypeDef recordTypeDef;
-    protected SearchRecordDef searchRecordDef;
+    protected RecordTypeInfo recordTypeInfo;
+    protected SearchRecordInfo searchRecordInfo;
 
     protected SearchT search;             // search class' instance
     protected SearchT searchBasic;        // search basic class' instance
@@ -48,11 +49,11 @@ public class SearchQuery<SearchT, RecT> {
     public SearchQuery target(final String recordTypeName) throws NetSuiteException {
         this.recordTypeName = recordTypeName;
 
-        recordTypeDef = clientService.getRecordTypeDef(recordTypeName);
-        searchRecordDef = clientService.getSearchRecordDef(recordTypeName);
+        recordTypeInfo = clientService.getRecordTypeInfo(recordTypeName);
+        searchRecordInfo = clientService.getSearchRecordInfo(recordTypeName);
 
         // search not found or not supported
-        if (searchRecordDef == null) {
+        if (searchRecordInfo == null) {
             throw new IllegalArgumentException("Search entity not found: " + this.recordTypeName);
         }
 
@@ -70,15 +71,15 @@ public class SearchQuery<SearchT, RecT> {
         }
         try {
             // get a search class instance
-            if (searchRecordDef.getSearchClass() != null) {
-                search = (SearchT) searchRecordDef.getSearchClass().newInstance();
+            if (searchRecordInfo.getSearchClass() != null) {
+                search = (SearchT) searchRecordInfo.getSearchClass().newInstance();
             }
 
             // get a advanced search class instance and set 'savedSearchId' into it
             searchAdvanced = null;
             if (savedSearchId != null && savedSearchId.length() > 0) {
-                if (searchRecordDef.getSearchAdvancedClass() != null) {
-                    searchAdvanced = (SearchT) searchRecordDef.getSearchAdvancedClass().newInstance();
+                if (searchRecordInfo.getSearchAdvancedClass() != null) {
+                    searchAdvanced = (SearchT) searchRecordInfo.getSearchAdvancedClass().newInstance();
                     getPropertyAccessor(searchAdvanced).set(searchAdvanced, "savedSearchId", savedSearchId);
                 } else {
                     throw new NetSuiteException("Advanced search not available: " + recordTypeName);
@@ -86,12 +87,12 @@ public class SearchQuery<SearchT, RecT> {
             }
 
             // basic search class not found or supported
-            if (searchRecordDef.getSearchBasicClass() == null) {
+            if (searchRecordInfo.getSearchBasicClass() == null) {
                 throw new IllegalArgumentException("Search basic class not found: " + recordTypeName);
             }
 
             // get a basic search class instance
-            searchBasic = (SearchT) searchRecordDef.getSearchBasicClass().newInstance();
+            searchBasic = (SearchT) searchRecordInfo.getSearchBasicClass().newInstance();
 
         } catch (InstantiationException | IllegalAccessException e) {
             throw new NetSuiteException(e.getMessage(), e);
@@ -103,16 +104,16 @@ public class SearchQuery<SearchT, RecT> {
 
         initSearch();
 
-        TypeInfo searchMetaData = TypeManager.forClass(searchRecordDef.getSearchBasicClass());
+        BeanInfo searchMetaData = BeanManager.getBeanInfo(searchRecordInfo.getSearchBasicClass());
 
         PropertyInfo fieldMetaData = searchMetaData.getProperty(condition.getFieldName());
 
-        SearchFieldOperatorTypeDef.QualifiedName operatorQName =
-                new SearchFieldOperatorTypeDef.QualifiedName(condition.getOperatorName());
+        SearchFieldOperatorTypeInfo.QualifiedName operatorQName =
+                new SearchFieldOperatorTypeInfo.QualifiedName(condition.getOperatorName());
 
         if (fieldMetaData != null) {
-            NsObject<?> searchField = processConditionForSearchRecord(searchBasic, condition);
-            NsObject.wrap(searchBasic).set(condition.getFieldName(), searchField);
+            Object searchField = processConditionForSearchRecord(searchBasic, condition);
+            setBeanProperty(searchBasic, condition.getFieldName(), searchField);
 
         } else {
             String dataType = operatorQName.getDataType();
@@ -133,28 +134,28 @@ public class SearchQuery<SearchT, RecT> {
                 throw new NetSuiteException("Invalid data type: " + searchFieldType);
             }
 
-            NsObject criteria = processCondition(searchFieldType, condition);
+            Object criteria = processCondition(searchFieldType, condition);
             customFieldList.add(criteria);
         }
 
         return this;
     }
 
-    private NsObject processConditionForSearchRecord(Object searchRecord, SearchCondition condition) throws NetSuiteException {
-        TypeInfo searchMetaData = TypeManager.forClass(searchRecord.getClass());
+    private Object processConditionForSearchRecord(Object searchRecord, SearchCondition condition) throws NetSuiteException {
+        BeanInfo searchMetaData = BeanManager.getBeanInfo(searchRecord.getClass());
         Class<?> searchFieldClass = searchMetaData.getProperty(condition.getFieldName()).getWriteType();
-        NsObject criteria = processCondition(searchFieldClass.getSimpleName(), condition);
+        Object criteria = processCondition(searchFieldClass.getSimpleName(), condition);
         return criteria;
     }
 
-    private NsObject processCondition(String fieldType, SearchCondition condition) throws NetSuiteException {
+    private Object processCondition(String fieldType, SearchCondition condition) throws NetSuiteException {
         try {
             String searchFieldName = condition.getFieldName();
             String searchOperator = condition.getOperatorName();
             List<String> searchValue = condition.getValues();
 
             SearchFieldPopulator<?> fieldPopulator = getFieldPopulator(fieldType);
-            NsObject searchField = NsObject.wrap(fieldPopulator.populate(searchFieldName, searchOperator, searchValue));
+            Object searchField = fieldPopulator.populate(searchFieldName, searchOperator, searchValue);
 
             return searchField;
         } catch (IllegalArgumentException e) {
@@ -165,28 +166,28 @@ public class SearchQuery<SearchT, RecT> {
     public SearchT toNativeQuery() throws NetSuiteException {
         initSearch();
 
-        if (searchRecordDef.getSearchRecordType().equals("transaction")) {
+        if (searchRecordInfo.getSearchRecordType().equals("transaction")) {
             SearchFieldPopulator<?> populator = getFieldPopulator("SearchEnumMultiSelectField");
-            NsObject searchTypeField = NsObject.wrap(populator.populate(
-                    "List.anyOf", Arrays.asList(recordTypeDef.getRecordType())));
-            NsObject.wrap(searchBasic).set("type", searchTypeField.getTarget());
+            Object searchTypeField = populator.populate(
+                    "List.anyOf", Arrays.asList(recordTypeInfo.getRecordType()));
+            setBeanProperty(searchBasic, "type", searchTypeField);
         }
 
         if (!customFieldList.isEmpty()) {
-            NsObject customFieldList = NsObject.wrap(clientService.createType("SearchCustomFieldList"));
-            List<Object> list = (List<Object>) customFieldList.get("customField");
+            Object customFieldList = clientService.createType("SearchCustomFieldList");
+            List<Object> list = (List<Object>) getBeanProperty(customFieldList, "customField");
             for (Object customCriteria : this.customFieldList) {
-                list.add(NsObject.unwrap(customCriteria));
+                list.add(customCriteria);
             }
-            NsObject.wrap(searchBasic).set("customFieldList", customFieldList.getTarget());
+            setBeanProperty(searchBasic, "customFieldList", customFieldList);
         }
 
         SearchT searchRecord;
-        if (searchRecordDef.getSearchClass() != null) {
-            NsObject.wrap(search).set("basic", searchBasic);
+        if (searchRecordInfo.getSearchClass() != null) {
+            setBeanProperty(search, "basic", searchBasic);
             searchRecord = search;
             if (searchAdvanced != null) {
-                NsObject.wrap(searchAdvanced).set("condition", search);
+                setBeanProperty(searchAdvanced, "condition", search);
                 searchRecord = searchAdvanced;
             }
         } else {
@@ -199,7 +200,7 @@ public class SearchQuery<SearchT, RecT> {
     public SearchResultSet<RecT> search() throws NetSuiteException {
         Object searchRecord = toNativeQuery();
         NsSearchResult result = clientService.search(searchRecord);
-        SearchResultSet<RecT> resultSet = new SearchResultSet<>(clientService, searchRecordDef, result);
+        SearchResultSet<RecT> resultSet = new SearchResultSet<>(clientService, searchRecordInfo, result);
         return resultSet;
     }
 

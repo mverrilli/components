@@ -23,7 +23,6 @@ import org.apache.cxf.feature.LoggingFeature;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NsObject;
 import org.talend.components.netsuite.client.common.NsCustomizationRef;
 import org.talend.components.netsuite.client.common.NsStatus;
 import org.talend.components.netsuite.client.common.NsPreferences;
@@ -98,8 +97,8 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         return execute(new PortOperation<NsSearchResult<RecT>, NetSuitePortType>() {
             @Override public NsSearchResult execute(NetSuitePortType port) throws Exception {
                 SearchRequest request = new SearchRequest();
-                SearchRecord r = NsObject.unwrap(searchRecord, SearchRecord.class);
-                request.setSearchRecord(r);
+                SearchRecord sr = (SearchRecord) searchRecord;
+                request.setSearchRecord(sr);
 
                 SearchResult result = port.search(request).getSearchResult();
                 return toNsSearchResult(result);
@@ -154,7 +153,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         return execute(new PortOperation<NsWriteResponse<RefT>, NetSuitePortType>() {
             @Override public NsWriteResponse execute(NetSuitePortType port) throws Exception {
                 AddRequest request = new AddRequest();
-                request.setRecord(NsObject.unwrap(record, Record.class));
+                request.setRecord((Record) record);
 
                 WriteResponse response = port.add(request).getWriteResponse();
                 return toNsWriteResponse(response);
@@ -186,7 +185,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         return execute(new PortOperation<NsWriteResponse<RefT>, NetSuitePortType>() {
             @Override public NsWriteResponse<RefT> execute(NetSuitePortType port) throws Exception {
                 UpdateRequest request = new UpdateRequest();
-                request.setRecord(NsObject.unwrap(record, Record.class));
+                request.setRecord((Record) record);
 
                 WriteResponse response = port.update(request).getWriteResponse();
                 return toNsWriteResponse(response);
@@ -218,7 +217,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         return execute(new PortOperation<NsWriteResponse<RefT>, NetSuitePortType>() {
             @Override public NsWriteResponse execute(NetSuitePortType port) throws Exception {
                 UpsertRequest request = new UpsertRequest();
-                request.setRecord(NsObject.unwrap(record, Record.class));
+                request.setRecord((Record) record);
 
                 WriteResponse response = port.upsert(request).getWriteResponse();
                 return toNsWriteResponse(response);
@@ -250,7 +249,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         return execute(new PortOperation<NsWriteResponse<RefT>, NetSuitePortType>() {
             @Override public NsWriteResponse execute(NetSuitePortType port) throws Exception {
                 DeleteRequest request = new DeleteRequest();
-                BaseRef baseRef = NsObject.unwrap(ref, BaseRef.class);
+                BaseRef baseRef = (BaseRef) ref;
                 request.setBaseRef(baseRef);
 
                 WriteResponse writeResponse = port.delete(request).getWriteResponse();
@@ -478,7 +477,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
     public static <RecT> List<Record> toRecordList(List<RecT> nsRecordList) {
         List<Record> recordList = new ArrayList<>(nsRecordList.size());
         for (RecT nsRecord : nsRecordList) {
-            Record r = NsObject.unwrap(nsRecord, Record.class);
+            Record r = (Record) nsRecord;
             recordList.add(r);
         }
         return recordList;
@@ -487,7 +486,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
     public static <RefT> List<BaseRef> toBaseRefList(List<RefT> nsRefList) {
         List<BaseRef> baseRefList = new ArrayList<>(nsRefList.size());
         for (RefT nsRef : nsRefList) {
-            BaseRef r = NsObject.unwrap(nsRef, BaseRef.class);
+            BaseRef r = (BaseRef) nsRef;
             baseRefList.add(r);
         }
         return baseRefList;
