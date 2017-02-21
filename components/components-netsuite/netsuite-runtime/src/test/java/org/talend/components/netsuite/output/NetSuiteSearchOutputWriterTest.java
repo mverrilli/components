@@ -33,8 +33,7 @@ import org.talend.components.netsuite.NetSuiteSink;
 import org.talend.components.netsuite.input.NsRecordReadTransducer;
 import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
-import org.talend.components.netsuite.client.NetSuiteFactory;
-import org.talend.components.netsuite.beans.PropertyAccessor;
+import org.talend.components.netsuite.client.model.BeanUtils;
 import org.talend.components.netsuite.client.NetSuiteWebServiceMockTestFixture;
 import org.talend.components.netsuite.beans.PropertyInfo;
 import org.talend.components.netsuite.beans.BeanManager;
@@ -136,7 +135,7 @@ public class NetSuiteSearchOutputWriterTest {
         NetSuiteSink sink = new NetSuiteSink();
         sink.initialize(container, properties);
 
-        NetSuiteClientService clientService = sink.getConnection();
+        NetSuiteClientService clientService = sink.getClientService();
 
         NetSuiteWriteOperation writeOperation = (NetSuiteWriteOperation) sink.createWriteOperation();
         NetSuiteOutputWriter writer = (NetSuiteOutputWriter) writeOperation.createWriter(container);
@@ -156,8 +155,7 @@ public class NetSuiteSearchOutputWriterTest {
     }
 
     private List<IndexedRecord> makeRecords(NetSuiteClientService clientService, Schema schema, int count) throws Exception {
-        NsRecordReadTransducer transducer = new NsRecordReadTransducer(clientService);
-        transducer.setSchema(schema);
+        NsRecordReadTransducer transducer = new NsRecordReadTransducer(clientService, schema);
 
         List<IndexedRecord> recordList = new ArrayList<>();
 
@@ -188,12 +186,10 @@ public class NetSuiteSearchOutputWriterTest {
 
         T obj = clazz.newInstance();
 
-        PropertyAccessor accessor = NetSuiteFactory.getPropertyAccessor(clazz);
-
         for (PropertyInfo propertyInfo : propertyInfoList) {
             if (propertyInfo.getWriteType() != null) {
                 Object value = composeValue(propertyInfo.getWriteType());
-                accessor.set(obj, propertyInfo.getName(), value);
+                BeanUtils.setProperty(obj, propertyInfo.getName(), value);
             }
         }
 

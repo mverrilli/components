@@ -1,6 +1,6 @@
-package org.talend.components.netsuite.client.model;
+package org.talend.components.netsuite.client.model.search;
 
-import org.talend.components.netsuite.client.NetSuiteFactory;
+import org.talend.components.netsuite.client.model.BeanUtils;
 
 /**
  *
@@ -14,7 +14,7 @@ public class SearchRecordInfo {
 
     public SearchRecordInfo(String searchRecordType,
             Class<?> searchClass, Class<?> searchBasicClass, Class<?> searchAdvancedClass) {
-        this.name = NetSuiteFactory.toInitialUpper(searchRecordType);
+        this.name = BeanUtils.toInitialUpper(searchRecordType);
         this.searchRecordType = searchRecordType;
         this.searchClass = searchClass;
         this.searchBasicClass = searchBasicClass;

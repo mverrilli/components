@@ -44,7 +44,7 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
     @Override
     public void open(String uId) throws IOException {
         try {
-            clientService = writeOperation.getSink().connect(writeOperation.getRuntimeContainer());
+            clientService = writeOperation.getSink().getClientService();
             action = writeOperation.getProperties().action.getValue();
             if (action == NetSuiteOutputProperties.OutputAction.ADD
                     || action == NetSuiteOutputProperties.OutputAction.UPDATE

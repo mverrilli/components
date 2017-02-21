@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.client;
+package org.talend.components.netsuite.client.model;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -20,12 +20,12 @@ import org.talend.components.netsuite.beans.BeanManager;
 /**
  *
  */
-public abstract class NetSuiteFactory {
+public abstract class BeanUtils {
     private static final Resolver propertyResolver = new DefaultResolver();
 
-    private transient static final Logger LOG = LoggerFactory.getLogger(NetSuiteFactory.class);
+    private transient static final Logger LOG = LoggerFactory.getLogger(BeanUtils.class);
 
-    public static void setBeanProperty(Object target, String expr, Object value) {
+    public static void setProperty(Object target, String expr, Object value) {
         try {
             Object current = target;
             if (propertyResolver.hasNested(expr)) {
@@ -33,28 +33,25 @@ public abstract class NetSuiteFactory {
                 while (propertyResolver.hasNested(currExpr)) {
                     String next = propertyResolver.next(currExpr);
                     Object obj = getPropertyAccessor(current).get(current, next);
-                    if (obj == null) {
-                        PropertyInfo pd = BeanManager.getPropertyInfo(current, next);
-                        if (!pd.getWriteType().isPrimitive()) {
-                            obj = pd.getWriteType().newInstance();
-                            getPropertyAccessor(current).set(current, next, obj);
-                        }
+                    if (obj != null) {
+                        current = obj;
+                        currExpr = propertyResolver.remove(currExpr);
                     }
-                    current = obj;
-                    currExpr = propertyResolver.remove(currExpr);
                 }
                 if (current != null) {
                     getPropertyAccessor(current).set(current, currExpr, value);
                 }
             } else {
-                getPropertyAccessor(current).set(current, expr, value);
+                if (current != null) {
+                    getPropertyAccessor(current).set(current, expr, value);
+                }
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static Object getBeanProperty(Object target, String expr) {
+    public static Object getProperty(Object target, String expr) {
         try {
             Object current = target;
             if (propertyResolver.hasNested(expr)) {
@@ -73,7 +70,7 @@ public abstract class NetSuiteFactory {
         }
     }
 
-    public static <T> PropertyAccessor<T> getPropertyAccessor(Class<T> clazz) {
+    protected static <T> PropertyAccessor<T> getPropertyAccessor(Class<T> clazz) {
         if (PropertyAccess.class.isAssignableFrom(clazz)) {
             return (PropertyAccessor<T>) OptimizedPropertyAccessor.INSTANCE;
         } else {
@@ -81,15 +78,15 @@ public abstract class NetSuiteFactory {
         }
     }
 
-    public static <T> PropertyAccessor<T> getPropertyAccessor(T target) {
-        return (PropertyAccessor<T>) NetSuiteFactory.getPropertyAccessor(target.getClass());
+    protected static <T> PropertyAccessor<T> getPropertyAccessor(T target) {
+        return (PropertyAccessor<T>) BeanUtils.getPropertyAccessor(target.getClass());
     }
 
     public static EnumAccessor getEnumAccessor(Class<? extends Enum> clazz) {
         return getEnumAccessorImpl(clazz);
     }
 
-    private static AbstractEnumAccessor getEnumAccessorImpl(Class<? extends Enum> clazz) {
+    protected static AbstractEnumAccessor getEnumAccessorImpl(Class<? extends Enum> clazz) {
         EnumAccessor accessor = null;
         Method m;
         try {
@@ -335,6 +332,9 @@ public abstract class NetSuiteFactory {
             try {
                 return (String) MethodUtils.invokeExactMethod(enumValue, "value", null);
             } catch (InvocationTargetException e) {
+                if (e.getTargetException() instanceof IllegalArgumentException) {
+                    throw (IllegalArgumentException) e.getTargetException();
+                }
                 throw new RuntimeException(e.getTargetException());
             } catch (NoSuchMethodException | IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -346,6 +346,9 @@ public abstract class NetSuiteFactory {
             try {
                 return (Enum) MethodUtils.invokeExactStaticMethod(enumClass, "fromValue", value);
             } catch (InvocationTargetException e) {
+                if (e.getTargetException() instanceof IllegalArgumentException) {
+                    throw (IllegalArgumentException) e.getTargetException();
+                }
                 throw new RuntimeException(e.getTargetException());
             } catch (NoSuchMethodException | IllegalAccessException e) {
                 throw new RuntimeException(e);

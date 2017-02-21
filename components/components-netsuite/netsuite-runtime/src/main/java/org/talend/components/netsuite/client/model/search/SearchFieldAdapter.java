@@ -1,23 +1,24 @@
-package org.talend.components.netsuite.client.model;
+package org.talend.components.netsuite.client.model.search;
 
 import java.util.List;
 
 import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.beans.BeanManager;
+import org.talend.components.netsuite.client.model.MetaDataProvider;
 
-import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
 
 /**
  *
  */
-public abstract class SearchFieldPopulator<T> {
-    protected RuntimeModelProvider runtimeModelProvider;
+public abstract class SearchFieldAdapter<T> {
+    protected MetaDataProvider metaDataProvider;
     protected String fieldType;
     protected Class<T> fieldClass;
 
-    public SearchFieldPopulator(RuntimeModelProvider runtimeModelProvider, String fieldType, Class<T> fieldClass) {
-        this.runtimeModelProvider = runtimeModelProvider;
+    public SearchFieldAdapter(MetaDataProvider metaDataProvider, String fieldType, Class<T> fieldClass) {
+        this.metaDataProvider = metaDataProvider;
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
     }
@@ -37,7 +38,7 @@ public abstract class SearchFieldPopulator<T> {
             BeanInfo fieldTypeMetaData = BeanManager.getBeanInfo(fieldClass);
             T searchField = fieldClass.newInstance();
             if (fieldTypeMetaData.getProperty("internalId") != null && internalId != null) {
-                setBeanProperty(searchField, "internalId", internalId);
+                setProperty(searchField, "internalId", internalId);
             }
             return searchField;
         } catch (IllegalAccessException | IllegalArgumentException | InstantiationException e) {

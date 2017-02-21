@@ -52,6 +52,7 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
     @Override
     public boolean start() throws IOException {
         try {
+            clientService = ((NetSuiteSource) getCurrentSource()).getClientService();
             resultSet = search();
             return advance();
         } catch (NetSuiteException e) {
@@ -95,54 +96,29 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
         return currentRecord;
     }
 
-    protected NetSuiteClientService getClientService() throws NetSuiteException {
-        if (clientService == null) {
-            clientService = ((NetSuiteSource) getCurrentSource()).connect(container);
-        }
-        return clientService;
-    }
-
     protected ResultSet<?> search() throws NetSuiteException {
-        try {
-            NetSuiteClientService clientService = getClientService();
+        transducer = new NsRecordReadTransducer(clientService, searchSchema);
 
-            transducer = new NsRecordReadTransducer(clientService);
-            transducer.setSchema(getSchema());
+        SearchQuery search = clientService.newSearch();
+        search.target(properties.module.moduleName.getValue());
 
-            SearchQuery search = clientService.newSearch();
-            search.target(properties.module.moduleName.getValue());
-
-            List<String> fieldNames = properties.searchConditionTable.field.getValue();
-            if (fieldNames != null && !fieldNames.isEmpty()) {
-                for (int i = 0; i < fieldNames.size(); i++) {
-                    String fieldName = fieldNames.get(i);
-                    String operator = properties.searchConditionTable.operator.getValue().get(i);
-                    String value1 = properties.searchConditionTable.value1.getValue().get(i);
-                    String value2 = properties.searchConditionTable.value2.getValue().get(i);
-                    List<String> values = null;
-                    if (value1 != null) {
-                        values = value2 != null ? Arrays.asList(value1, value2) : Arrays.asList(value1);
-                    }
-                    search.condition(new SearchCondition(fieldName, operator, values));
+        List<String> fieldNames = properties.searchConditionTable.field.getValue();
+        if (fieldNames != null && !fieldNames.isEmpty()) {
+            for (int i = 0; i < fieldNames.size(); i++) {
+                String fieldName = fieldNames.get(i);
+                String operator = properties.searchConditionTable.operator.getValue().get(i);
+                String value1 = properties.searchConditionTable.value1.getValue().get(i);
+                String value2 = properties.searchConditionTable.value2.getValue().get(i);
+                List<String> values = null;
+                if (value1 != null) {
+                    values = value2 != null ? Arrays.asList(value1, value2) : Arrays.asList(value1);
                 }
-            }
-
-            ResultSet<?> resultSet = search.search();
-            return resultSet;
-        } catch (IOException ex) {
-            throw new NetSuiteException(ex.getMessage(), ex);
-        }
-    }
-
-    protected Schema getSchema() throws IOException {
-        if (searchSchema == null) {
-            searchSchema = properties.module.main.schema.getValue();
-            if (AvroUtils.isIncludeAllFields(searchSchema)) {
-                String moduleName = properties.module.moduleName.getValue();
-                searchSchema = getCurrentSource().getEndpointSchema(container, moduleName);
+                search.condition(new SearchCondition(fieldName, operator, values));
             }
         }
-        return searchSchema;
+
+        ResultSet<?> resultSet = search.search();
+        return resultSet;
     }
 
     protected IndexedRecord transduceRecord(Object record) throws IOException {

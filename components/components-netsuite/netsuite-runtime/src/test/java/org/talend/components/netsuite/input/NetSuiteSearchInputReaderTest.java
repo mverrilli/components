@@ -22,10 +22,9 @@ import org.talend.components.netsuite.NetSuiteAvroRegistry;
 import org.talend.components.netsuite.NetSuiteSource;
 import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
-import org.talend.components.netsuite.client.NetSuiteFactory;
+import org.talend.components.netsuite.client.model.BeanUtils;
 import org.talend.components.netsuite.client.model.TypeInfo;
 import org.talend.components.netsuite.client.model.FieldInfo;
-import org.talend.components.netsuite.beans.PropertyAccessor;
 import org.talend.components.netsuite.client.NetSuiteWebServiceMockTestFixture;
 import org.talend.components.netsuite.beans.Mapper;
 import org.talend.components.netsuite.beans.PropertyInfo;
@@ -128,7 +127,7 @@ public class NetSuiteSearchInputReaderTest {
             }
         });
 
-        NetSuiteClientService clientService = source.getConnection();
+        NetSuiteClientService clientService = source.getClientService();
         TypeInfo entityInfo = clientService.getTypeInfo(Account.class);
 
         NetSuiteSearchInputReader reader = (NetSuiteSearchInputReader) source.createReader(container);
@@ -171,7 +170,7 @@ public class NetSuiteSearchInputReaderTest {
                 }
                 if (datumClass.isEnum()) {
                     assertNotNull(value);
-                    Mapper<String, Enum> enumAccessor = NetSuiteFactory.getEnumFromStringMapper((Class<Enum>) datumClass);
+                    Mapper<String, Enum> enumAccessor = BeanUtils.getEnumFromStringMapper((Class<Enum>) datumClass);
                     Enum modelValue = enumAccessor.map((String) value);
                     assertNotNull(modelValue);
                 }
@@ -237,12 +236,10 @@ public class NetSuiteSearchInputReaderTest {
 
         T obj = clazz.newInstance();
 
-        PropertyAccessor accessor = NetSuiteFactory.getPropertyAccessor(clazz);
-
         for (PropertyInfo propertyInfo : propertyInfoList) {
             if (propertyInfo.getWriteType() != null) {
                 Object value = composeValue(propertyInfo.getWriteType());
-                accessor.set(obj, propertyInfo.getName(), value);
+                BeanUtils.setProperty(obj, propertyInfo.getName(), value);
             }
         }
 

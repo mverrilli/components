@@ -6,8 +6,9 @@ import java.net.SocketException;
 import java.net.URL;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,16 +20,19 @@ import javax.xml.ws.WebServiceFeature;
 import javax.xml.ws.soap.SOAPFaultException;
 
 import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang3.time.StopWatch;
 import org.apache.cxf.feature.LoggingFeature;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.common.NsCustomizationRef;
-import org.talend.components.netsuite.client.common.NsStatus;
 import org.talend.components.netsuite.client.common.NsPreferences;
+import org.talend.components.netsuite.client.common.NsReadResponse;
 import org.talend.components.netsuite.client.common.NsSearchPreferences;
 import org.talend.components.netsuite.client.common.NsSearchResult;
+import org.talend.components.netsuite.client.common.NsStatus;
 import org.talend.components.netsuite.client.common.NsWriteResponse;
+import org.talend.components.netsuite.client.model.custom.CustomFieldInfo;
 
 import com.netsuite.webservices.v2016_2.platform.ExceededRequestSizeFault;
 import com.netsuite.webservices.v2016_2.platform.InsufficientPermissionFault;
@@ -50,6 +54,7 @@ import com.netsuite.webservices.v2016_2.platform.core.SearchResult;
 import com.netsuite.webservices.v2016_2.platform.core.Status;
 import com.netsuite.webservices.v2016_2.platform.core.StatusDetail;
 import com.netsuite.webservices.v2016_2.platform.core.types.GetCustomizationType;
+import com.netsuite.webservices.v2016_2.platform.core.types.RecordType;
 import com.netsuite.webservices.v2016_2.platform.messages.AddListRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.AddRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.ApplicationInfo;
@@ -58,10 +63,13 @@ import com.netsuite.webservices.v2016_2.platform.messages.DeleteRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.GetCustomizationIdRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.GetDataCenterUrlsRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.GetDataCenterUrlsResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.GetListRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.LoginRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.LoginResponse;
 import com.netsuite.webservices.v2016_2.platform.messages.LogoutRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.Preferences;
+import com.netsuite.webservices.v2016_2.platform.messages.ReadResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.ReadResponseList;
 import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreWithIdRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.SearchNextRequest;
@@ -89,7 +97,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
     public NetSuiteClientServiceImpl() {
         super();
 
-        runtimeModelProvider = RuntimeModelProviderImpl.getInstance();
+        metaDataProvider = MetaDataProviderImpl.getInstance();
     }
 
     @Override
@@ -452,6 +460,14 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         return nsWriteResponses;
     }
 
+    public static <RecT> List<NsReadResponse<RecT>> toNsReadResponseList(ReadResponseList readResponseList) {
+        List<NsReadResponse<RecT>> nsReadResponses = new ArrayList<>(readResponseList.getReadResponse().size());
+        for (ReadResponse readResponse : readResponseList.getReadResponse()) {
+            nsReadResponses.add((NsReadResponse<RecT>) toNsReadResponse(readResponse));
+        }
+        return nsReadResponses;
+    }
+
     public static <RecT> NsSearchResult<RecT> toNsSearchResult(SearchResult result) {
         NsSearchResult nsResult = new NsSearchResult(toNsStatus(result.getStatus()));
         nsResult.setSearchId(result.getSearchId());
@@ -472,6 +488,13 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
                 toNsStatus(writeResponse.getStatus()),
                 writeResponse.getBaseRef());
         return nsWriteResponse;
+    }
+
+    public static <RecT> NsReadResponse<RecT> toNsReadResponse(ReadResponse readResponse) {
+        NsReadResponse<RecT> nsReadResponse = new NsReadResponse(
+                toNsStatus(readResponse.getStatus()),
+                readResponse.getRecord());
+        return nsReadResponse;
     }
 
     public static <RecT> List<Record> toRecordList(List<RecT> nsRecordList) {
@@ -512,32 +535,35 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
 
     private ConcurrentMap<String, Map<String, NsCustomizationRef>> customizationsByTypeMap = new ConcurrentHashMap<>();
 
-    protected Map<String, NsCustomizationRef> getCustomizationIds(final String type) throws NetSuiteException {
-        Map<String, NsCustomizationRef> customizationRefMap = customizationsByTypeMap.get(type);
-        if (customizationRefMap == null) {
-            List<NsCustomizationRef> customizationRefs = loadCustomizationIds(type);
-            Map<String, NsCustomizationRef> newCustomizationRefMap = new HashMap<>(customizationRefs.size());
-            for (NsCustomizationRef ref : customizationRefs) {
-                newCustomizationRefMap.put(ref.getScriptId(), ref);
-            }
+    protected void loadCustomizations() throws NetSuiteException {
+        List<NsCustomizationRef> customRecordTypes = loadCustomizationIds(
+                Arrays.asList("customRecordType", "customTransactionType"));
+    }
 
-            if (customizationsByTypeMap.putIfAbsent(type, newCustomizationRefMap) == null) {
-                customizationRefMap = newCustomizationRefMap;
-            } else {
-                customizationRefMap = customizationsByTypeMap.get(type);
-            }
+    @Override
+    protected Collection<CustomFieldInfo> getCustomFieldsForRecordType(String recordType) throws NetSuiteException {
+        Map<String, CustomFieldInfo> recordCustomFields = recordCustomFieldMap.get(recordType);
+        if (recordCustomFields != null) {
+            return Collections.unmodifiableCollection(recordCustomFields.values());
         }
-        return customizationRefMap;
+        return Collections.emptySet();
     }
 
     protected List<NsCustomizationRef> loadCustomizationIds(final String type) throws NetSuiteException {
         GetCustomizationIdResult result = execute(new PortOperation<GetCustomizationIdResult, NetSuitePortType>() {
             @Override public GetCustomizationIdResult execute(NetSuitePortType port) throws Exception {
-                final GetCustomizationIdRequest request = new GetCustomizationIdRequest();
-                CustomizationType customizationType = new CustomizationType();
-                customizationType.setGetCustomizationType(GetCustomizationType.fromValue(type));
-                request.setCustomizationType(customizationType);
-                return port.getCustomizationId(request).getGetCustomizationIdResult();
+                StopWatch stopWatch = new StopWatch();
+                try {
+                    stopWatch.start();
+                    final GetCustomizationIdRequest request = new GetCustomizationIdRequest();
+                    CustomizationType customizationType = new CustomizationType();
+                    customizationType.setGetCustomizationType(GetCustomizationType.fromValue(type));
+                    request.setCustomizationType(customizationType);
+                    return port.getCustomizationId(request).getGetCustomizationIdResult();
+                } finally {
+                    stopWatch.stop();
+                    System.out.println("loadCustomizationIds: " + stopWatch);
+                }
             }
         });
         if (result.getStatus().getIsSuccess()) {
@@ -562,4 +588,46 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         }
     }
 
+    protected <T> List<T> loadCustomizations(final List<NsCustomizationRef> nsCustomizationRefs) throws NetSuiteException {
+        if (nsCustomizationRefs.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        final List<CustomizationRef> customizationRefs = new ArrayList<>(nsCustomizationRefs.size());
+        for (NsCustomizationRef nsCustomizationRef : nsCustomizationRefs) {
+            CustomizationRef customizationRef = new CustomizationRef();
+            customizationRef.setType(RecordType.fromValue(nsCustomizationRef.getType()));
+            customizationRef.setScriptId(nsCustomizationRef.getScriptId());
+            customizationRef.setInternalId(nsCustomizationRef.getInternalId());
+            customizationRefs.add(customizationRef);
+        }
+
+        List<NsReadResponse<Record>> result = execute(new PortOperation<List<NsReadResponse<Record>>, NetSuitePortType>() {
+            @Override public List<NsReadResponse<Record>> execute(NetSuitePortType port) throws Exception {
+                StopWatch stopWatch = new StopWatch();
+                try {
+                    stopWatch.start();
+                    final GetListRequest request = new GetListRequest();
+                    request.getBaseRef().addAll(customizationRefs);
+                    return toNsReadResponseList(port.getList(request).getReadResponseList());
+                } finally {
+                    stopWatch.stop();
+                    System.out.println("loadCustomizations: " + stopWatch);
+                }
+            }
+        });
+        if (!result.isEmpty()) {
+            List<T> customizations = new ArrayList<>(result.size());
+            for (NsReadResponse response : result) {
+                if (response.getStatus().isSuccess()) {
+                    customizations.add((T) response.getRecord());
+                } else {
+                    throw new NetSuiteException("Retrieving of customization was not successful: " + response.getStatus());
+                }
+            }
+            return customizations;
+        } else {
+            return Collections.emptyList();
+        }
+    }
 }

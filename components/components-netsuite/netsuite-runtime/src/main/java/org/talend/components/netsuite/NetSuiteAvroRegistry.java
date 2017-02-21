@@ -9,7 +9,7 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.beans.EnumAccessor;
-import org.talend.components.netsuite.client.NetSuiteFactory;
+import org.talend.components.netsuite.client.model.BeanUtils;
 import org.talend.daikon.avro.AvroRegistry;
 import org.talend.daikon.avro.converter.AvroConverter;
 
@@ -43,7 +43,7 @@ public class NetSuiteAvroRegistry extends AvroRegistry {
     public AvroConverter<?, ?> getConverter(Schema.Field field, Class<?> datumClass) {
         if (datumClass.isEnum()) {
             Class<Enum> enumClass = (Class<Enum>) datumClass;
-            return new EnumToStringConverter<>(field, enumClass, NetSuiteFactory.getEnumAccessor(enumClass));
+            return new EnumToStringConverter<>(field, enumClass, BeanUtils.getEnumAccessor(enumClass));
         }
         if (datumClass == XMLGregorianCalendar.class) {
             return new XMLGregorianCalendarToTimestampConverter(field, datatypeFactory);

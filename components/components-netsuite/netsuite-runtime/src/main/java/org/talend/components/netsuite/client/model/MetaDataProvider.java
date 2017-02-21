@@ -3,11 +3,15 @@ package org.talend.components.netsuite.client.model;
 import java.util.Collection;
 
 import org.talend.components.netsuite.client.NetSuiteException;
+import org.talend.components.netsuite.client.model.custom.CustomFieldRefType;
+import org.talend.components.netsuite.client.model.search.SearchFieldOperatorTypeInfo;
+import org.talend.components.netsuite.client.model.search.SearchFieldAdapter;
+import org.talend.components.netsuite.client.model.search.SearchRecordInfo;
 
 /**
  *
  */
-public interface RuntimeModelProvider {
+public interface MetaDataProvider {
 
     Class<?> getTypeClass(String typeName);
 
@@ -16,6 +20,8 @@ public interface RuntimeModelProvider {
     TypeInfo getTypeInfo(Class<?> clazz);
 
     Collection<String> getRecordTypes();
+
+    boolean isRecord(String typeName);
 
     RecordTypeInfo getRecordTypeInfo(String recordType);
 
@@ -29,7 +35,11 @@ public interface RuntimeModelProvider {
 
     Collection<SearchFieldOperatorTypeInfo.QualifiedName> getSearchOperatorNames();
 
-    SearchFieldPopulator<?> getSearchFieldPopulator(String fieldType);
+    SearchFieldAdapter<?> getSearchFieldPopulator(String fieldType);
+
+    CustomFieldRefType getCustomFieldRefType(String customizationType);
+
+    CustomFieldRefType getCustomFieldRefType(String recordType, String customFieldType, Object customField);
 
     <T> T createType(String typeName) throws NetSuiteException;
 }

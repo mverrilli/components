@@ -1,5 +1,10 @@
 package org.talend.components.netsuite.client.model;
 
+import static org.talend.components.netsuite.client.model.BeanUtils.getEnumFromStringMapper;
+import static org.talend.components.netsuite.client.model.BeanUtils.getEnumToStringMapper;
+import static org.talend.components.netsuite.client.model.BeanUtils.toInitialLower;
+import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
+
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,17 +27,31 @@ import org.talend.components.netsuite.beans.EnumAccessor;
 import org.talend.components.netsuite.beans.Mapper;
 import org.talend.components.netsuite.beans.PropertyInfo;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NetSuiteFactory;
-
-import static org.talend.components.netsuite.client.NetSuiteFactory.getEnumFromStringMapper;
-import static org.talend.components.netsuite.client.NetSuiteFactory.getEnumToStringMapper;
-import static org.talend.components.netsuite.client.NetSuiteFactory.toInitialLower;
-import static org.talend.components.netsuite.client.NetSuiteFactory.toInitialUpper;
+import org.talend.components.netsuite.client.model.custom.CrmCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.custom.CustomFieldAdapter;
+import org.talend.components.netsuite.client.model.custom.CustomFieldRefType;
+import org.talend.components.netsuite.client.model.custom.DefaultCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.custom.EntityCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.custom.ItemCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.custom.ItemOptionCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.custom.TransactionBodyCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.custom.TransactionColumnCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.search.SearchBooleanFieldAdapter;
+import org.talend.components.netsuite.client.model.search.SearchDateFieldAdapter;
+import org.talend.components.netsuite.client.model.search.SearchDoubleFieldAdapter;
+import org.talend.components.netsuite.client.model.search.SearchEnumMultiSelectFieldAdapter;
+import org.talend.components.netsuite.client.model.search.SearchFieldOperatorTypeInfo;
+import org.talend.components.netsuite.client.model.search.SearchFieldAdapter;
+import org.talend.components.netsuite.client.model.search.SearchLongFieldAdapter;
+import org.talend.components.netsuite.client.model.search.SearchMultiSelectFieldAdapter;
+import org.talend.components.netsuite.client.model.search.SearchRecordInfo;
+import org.talend.components.netsuite.client.model.search.SearchStringFieldAdapter;
+import org.talend.components.netsuite.client.model.search.SearchTextNumberFieldAdapter;
 
 /**
  *
  */
-public abstract class RuntimeModelProviderBaseImpl implements RuntimeModelProvider {
+public abstract class MetaDataProviderBaseImpl implements MetaDataProvider {
     protected transient final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected Class<?> recordBaseClass;
@@ -70,7 +89,10 @@ public abstract class RuntimeModelProviderBaseImpl implements RuntimeModelProvid
     protected Set<String> excludedSearchRecordTypeNames = new HashSet<>();
     protected Set<String> unspecifiedSearchRecordTypes = new HashSet<>();
 
-    protected Map<String, SearchFieldPopulator<?>> searchFieldPopulatorMap = new HashMap<>();
+    protected Map<String, SearchFieldAdapter<?>> searchFieldPopulatorMap = new HashMap<>();
+
+    protected Map<String, CustomFieldRefType> customFieldRefTypeMap = new HashMap<>();
+    protected Map<String, CustomFieldAdapter<?>> customFieldAdapterMap = new HashMap<>();
 
     protected void setRecordBaseClass(Class<?> recordBaseClass) {
         this.recordBaseClass = recordBaseClass;
@@ -78,7 +100,7 @@ public abstract class RuntimeModelProviderBaseImpl implements RuntimeModelProvid
 
     protected void setRecordTypeEnumClass(Class<? extends Enum> recordTypeEnumClass) {
         this.recordTypeEnumClass = recordTypeEnumClass;
-        this.recordTypeEnumAccessor = NetSuiteFactory.getEnumAccessor(recordTypeEnumClass);
+        this.recordTypeEnumAccessor = BeanUtils.getEnumAccessor(recordTypeEnumClass);
     }
 
     protected void setSearchRecordBaseClasses(Collection<Class<?>> searchRecordBaseClasses) {
@@ -87,7 +109,7 @@ public abstract class RuntimeModelProviderBaseImpl implements RuntimeModelProvid
 
     protected void setSearchRecordTypeEnumClass(Class<? extends Enum> searchRecordTypeEnumClass) {
         this.searchRecordTypeEnumClass = searchRecordTypeEnumClass;
-        this.searchRecordTypeEnumAccessor = NetSuiteFactory.getEnumAccessor(searchRecordTypeEnumClass);
+        this.searchRecordTypeEnumAccessor = BeanUtils.getEnumAccessor(searchRecordTypeEnumClass);
     }
 
     protected void setRecordRefClass(Class<?> recordRefClass) {
@@ -285,7 +307,7 @@ public abstract class RuntimeModelProviderBaseImpl implements RuntimeModelProvid
 
             searchFieldMap.put(searchFieldTypeName, entry);
 
-            createSearchFieldPopulator(searchFieldTypeName);
+            registerSearchFieldPopulator(searchFieldTypeName);
         }
     }
 
@@ -315,12 +337,84 @@ public abstract class RuntimeModelProviderBaseImpl implements RuntimeModelProvid
         searchFieldOperatorMap.put("SearchEnumMultiSelectCustomField", "SearchEnumMultiSelectFieldOperator");
     }
 
+    protected SearchFieldAdapter<?> registerSearchFieldPopulator(String fieldType) {
+        SearchFieldAdapter<?> fieldPopulator;
+        Class<?> fieldClass = getSearchFieldClass(fieldType);
+        if ("SearchBooleanField".equals(fieldType) || "SearchBooleanCustomField".equals(fieldType)) {
+            fieldPopulator = new SearchBooleanFieldAdapter<>(this, fieldType, fieldClass);
+        } else if ("SearchStringField".equals(fieldType) || "SearchStringCustomField".equals(fieldType)) {
+            fieldPopulator = new SearchStringFieldAdapter<>(this, fieldType, fieldClass);
+        } else if ("SearchTextNumberField".equals(fieldType)) {
+            fieldPopulator = new SearchTextNumberFieldAdapter<>(this, fieldType, fieldClass);
+        } else if ("SearchLongField".equals(fieldType) || "SearchLongCustomField".equals(fieldType)) {
+            fieldPopulator = new SearchLongFieldAdapter<>(this, fieldType, fieldClass);
+        } else if ("SearchDoubleField".equals(fieldType) || "SearchDoubleCustomField".equals(fieldType)) {
+            fieldPopulator = new SearchDoubleFieldAdapter<>(this, fieldType, fieldClass);
+        } else if ("SearchDateField".equals(fieldType) || "SearchDateCustomField".equals(fieldType)) {
+            fieldPopulator = new SearchDateFieldAdapter<>(this, fieldType, fieldClass);
+        } else if ("SearchMultiSelectField".equals(fieldType) || "SearchMultiSelectCustomField".equals(fieldType)) {
+            fieldPopulator = new SearchMultiSelectFieldAdapter<>(this, fieldType, fieldClass);
+        } else if ("SearchEnumMultiSelectField".equals(fieldType) || "SearchEnumMultiSelectCustomField".equals(fieldType)) {
+            fieldPopulator = new SearchEnumMultiSelectFieldAdapter<>(this, fieldType, fieldClass);
+        } else {
+            throw new IllegalArgumentException("Invalid search field type: " + fieldType);
+        }
+        searchFieldPopulatorMap.put(fieldType, fieldPopulator);
+        return fieldPopulator;
+    }
+
+    protected void registerCustomFieldRefTypes() {
+        customFieldRefTypeMap.put("_checkBox", CustomFieldRefType.BOOLEAN);
+        customFieldRefTypeMap.put("_currency", CustomFieldRefType.DOUBLE);
+        customFieldRefTypeMap.put("_date", CustomFieldRefType.DATE);
+        customFieldRefTypeMap.put("_datetime", CustomFieldRefType.DATE);
+        customFieldRefTypeMap.put("_decimalNumber", CustomFieldRefType.LONG);
+        customFieldRefTypeMap.put("_document", CustomFieldRefType.STRING);
+        customFieldRefTypeMap.put("_eMailAddress", CustomFieldRefType.STRING);
+        customFieldRefTypeMap.put("_freeFormText", CustomFieldRefType.STRING);
+        customFieldRefTypeMap.put("_help", CustomFieldRefType.STRING);
+        customFieldRefTypeMap.put("_hyperlink", CustomFieldRefType.STRING);
+        customFieldRefTypeMap.put("_image", CustomFieldRefType.STRING);
+        customFieldRefTypeMap.put("_inlineHTML", CustomFieldRefType.STRING);
+        customFieldRefTypeMap.put("_integerNumber", CustomFieldRefType.LONG);
+        customFieldRefTypeMap.put("_listRecord", CustomFieldRefType.SELECT);
+        customFieldRefTypeMap.put("_longText", CustomFieldRefType.STRING);
+        customFieldRefTypeMap.put("_multipleSelect", CustomFieldRefType.MULTI_SELECT);
+        customFieldRefTypeMap.put("_password", CustomFieldRefType.STRING);
+        customFieldRefTypeMap.put("_percent", CustomFieldRefType.DOUBLE);
+        customFieldRefTypeMap.put("_phoneNumber", CustomFieldRefType.STRING);
+        customFieldRefTypeMap.put("_richText", CustomFieldRefType.STRING);
+        customFieldRefTypeMap.put("_textArea", CustomFieldRefType.STRING);
+        customFieldRefTypeMap.put("_timeOfDay", CustomFieldRefType.DATE);
+        customFieldRefTypeMap.put("DEFAULT", CustomFieldRefType.STRING);
+    }
+
+    protected void registerCustomFieldAdapters() {
+        registerCustomFieldAdapter(new CrmCustomFieldAdapter<>(this));
+        registerCustomFieldAdapter(new EntityCustomFieldAdapter<>(this));
+        registerCustomFieldAdapter(new ItemCustomFieldAdapter<>(this));
+        registerCustomFieldAdapter(new ItemOptionCustomFieldAdapter<>(this));
+        registerCustomFieldAdapter(new TransactionBodyCustomFieldAdapter<>(this));
+        registerCustomFieldAdapter(new TransactionColumnCustomFieldAdapter<>(this));
+        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>(this, "customList"));
+        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>(this, "customRecord"));
+        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>(this, "customRecordType"));
+        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>(this, "otherCustomField"));
+        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>(this, "itemNumberCustomField"));
+    }
+
+    protected void registerCustomFieldAdapter(CustomFieldAdapter<?> adapter) {
+        customFieldAdapterMap.put(adapter.getType(), adapter);
+    }
+
     protected void buildModel() throws NetSuiteException {
         registerRecordTypes();
         registerSearchRecords();
         registerRecordSearchTypeMapping();
         registerSearchFields();
         registerSearchFieldOperatorTypes();
+        registerCustomFieldRefTypes();
+        registerCustomFieldAdapters();
     }
 
     public static <T> SearchFieldOperatorTypeInfo<T> createSearchFieldOperatorTypeInfo(
@@ -360,6 +454,10 @@ public abstract class RuntimeModelProviderBaseImpl implements RuntimeModelProvid
 
     @Override public Collection<String> getRecordTypes() {
         return Collections.unmodifiableCollection(recordTypeMap.keySet());
+    }
+
+    @Override public boolean isRecord(String typeName) {
+        return recordTypeMap.containsKey(typeName);
     }
 
     @Override public RecordTypeInfo getRecordTypeInfo(String recordType) {
@@ -407,36 +505,22 @@ public abstract class RuntimeModelProviderBaseImpl implements RuntimeModelProvid
         return Collections.unmodifiableSet(names);
     }
 
-    @Override public SearchFieldPopulator<?> getSearchFieldPopulator(String fieldType) {
-        return createSearchFieldPopulator(fieldType);
+    @Override public SearchFieldAdapter<?> getSearchFieldPopulator(String fieldType) {
+        return searchFieldPopulatorMap.get(fieldType);
     }
 
-    private SearchFieldPopulator<?> createSearchFieldPopulator(String fieldType) {
-        SearchFieldPopulator<?> fieldPopulator = searchFieldPopulatorMap.get(fieldType);
-        if (fieldPopulator == null) {
-            Class<?> fieldClass = getSearchFieldClass(fieldType);
-            if ("SearchBooleanField".equals(fieldType) || "SearchBooleanCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchBooleanFieldPopulator<>(this, fieldType, fieldClass);
-            } else if ("SearchStringField".equals(fieldType) || "SearchStringCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchStringFieldPopulator<>(this, fieldType, fieldClass);
-            } else if ("SearchTextNumberField".equals(fieldType)) {
-                fieldPopulator = new SearchTextNumberFieldPopulator<>(this, fieldType, fieldClass);
-            } else if ("SearchLongField".equals(fieldType) || "SearchLongCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchLongFieldPopulator<>(this, fieldType, fieldClass);
-            } else if ("SearchDoubleField".equals(fieldType) || "SearchDoubleCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchDoubleFieldPopulator<>(this, fieldType, fieldClass);
-            } else if ("SearchDateField".equals(fieldType) || "SearchDateCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchDateFieldPopulator<>(this, fieldType, fieldClass);
-            } else if ("SearchMultiSelectField".equals(fieldType) || "SearchMultiSelectCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchMultiSelectFieldPopulator<>(this, fieldType, fieldClass);
-            } else if ("SearchEnumMultiSelectField".equals(fieldType) || "SearchEnumMultiSelectCustomField".equals(fieldType)) {
-                fieldPopulator = new SearchEnumMultiSelectFieldPopulator<>(this, fieldType, fieldClass);
-            } else {
-                throw new IllegalArgumentException("Invalid search field type: " + fieldType);
-            }
-            searchFieldPopulatorMap.put(fieldType, fieldPopulator);
+    @Override
+    public CustomFieldRefType getCustomFieldRefType(String customizationType) {
+        return customFieldRefTypeMap.get(customizationType);
+    }
+
+    @Override
+    public CustomFieldRefType getCustomFieldRefType(String recordType, String customFieldType, Object customField) {
+        CustomFieldAdapter customFieldAdapter = customFieldAdapterMap.get(customFieldType);
+        if (customFieldAdapter.appliesTo(recordType, customField)) {
+            return customFieldAdapter.apply(customField);
         }
-        return fieldPopulator;
+        return null;
     }
 
     protected boolean isKeyField(Class<?> entityClass, PropertyInfo propertyInfo) {

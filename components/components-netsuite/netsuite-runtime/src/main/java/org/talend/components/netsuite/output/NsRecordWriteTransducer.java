@@ -1,6 +1,6 @@
 package org.talend.components.netsuite.output;
 
-import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ public class NsRecordWriteTransducer {
                     Object value = indexedRecord.get(field.pos());
                     Object nsValue = converter.convertToDatum(value);
                     if (nsValue != null) {
-                        setBeanProperty(object, field.name(), nsValue);
+                        setProperty(object, field.name(), nsValue);
                     } else {
                         nullFieldList.add(fieldInfo.getName());
                     }

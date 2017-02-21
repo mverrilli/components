@@ -8,8 +8,9 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.talend.components.netsuite.client.model.custom.CustomFieldInfo;
 import org.talend.components.netsuite.client.query.SearchResultSet;
-import org.talend.components.netsuite.client.model.SearchRecordInfo;
+import org.talend.components.netsuite.client.model.search.SearchRecordInfo;
 import org.talend.components.netsuite.client.query.SearchCondition;
 import org.talend.daikon.NamedThing;
 
@@ -19,7 +20,7 @@ import com.netsuite.webservices.v2016_2.platform.core.Record;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.talend.components.netsuite.client.NetSuiteFactory.getBeanProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
 
 /**
  *
@@ -62,7 +63,7 @@ public class NetSuiteClientServiceIT {
         while (rs.next()) {
             Record record = rs.get();
 
-            assertEquals(AccountType.BANK, getBeanProperty(record, "acctType"));
+            assertEquals(AccountType.BANK, getProperty(record, "acctType"));
 
             count++;
         }
@@ -92,9 +93,17 @@ public class NetSuiteClientServiceIT {
     public void testLoadCustomizations() throws Exception {
         NetSuiteClientService connection = webServiceTestFixture.getClientService();
 
-        Collection<NamedThing> recordTypes = connection.getRecordTypes();
-        for (NamedThing recordType : recordTypes) {
-            System.out.println(recordType);
-        }
+        long start = System.currentTimeMillis();
+        connection.updateCustomMetaData();
+        long end = System.currentTimeMillis();
+        System.out.println("Meta data updated: " + (end - start));
+
+//        Collection<NamedThing> recordTypes = connection.getRecordTypes();
+//        for (NamedThing recordType : recordTypes) {
+//            System.out.println(recordType);
+//        }
+
+        Collection<CustomFieldInfo> customFieldInfos = connection.getCustomFieldsForRecordType("Account");
+        System.out.println(customFieldInfos);
     }
 }

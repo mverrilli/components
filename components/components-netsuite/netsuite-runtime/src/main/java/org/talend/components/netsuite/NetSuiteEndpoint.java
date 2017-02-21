@@ -12,7 +12,7 @@ import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 public class NetSuiteEndpoint {
 
     private NetSuiteConnectionProperties properties;
-    private NetSuiteClientService connection;
+    private NetSuiteClientService clientService;
 
     public NetSuiteEndpoint(NetSuiteConnectionProperties properties) {
         this.properties = properties;
@@ -49,15 +49,16 @@ public class NetSuiteEndpoint {
         credentials.setAccount(account);
         credentials.setApplicationId(applicationId);
 
-        connection = connect(endpointUrl, credentials);
-        return connection;
+        clientService = connect(endpointUrl, credentials);
+
+        return clientService;
     }
 
-    public NetSuiteClientService getConnection() throws NetSuiteException {
-        if (connection == null) {
-            connect();
+    public NetSuiteClientService getClientService() throws NetSuiteException {
+        if (clientService == null) {
+            clientService = connect();
         }
-        return connection;
+        return clientService;
     }
 
     protected NetSuiteClientService connect(String endpointUrl, NetSuiteCredentials credentials)
@@ -66,6 +67,8 @@ public class NetSuiteEndpoint {
         NetSuiteClientService clientService = NetSuiteClientService.create("2016.2");
         clientService.setEndpointUrl(endpointUrl);
         clientService.setCredentials(credentials);
+        clientService.login();
+
         return clientService;
     }
 

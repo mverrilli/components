@@ -9,7 +9,7 @@ import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.client.common.ResultSet;
-import org.talend.components.netsuite.client.model.SearchRecordInfo;
+import org.talend.components.netsuite.client.model.search.SearchRecordInfo;
 
 /**
  *

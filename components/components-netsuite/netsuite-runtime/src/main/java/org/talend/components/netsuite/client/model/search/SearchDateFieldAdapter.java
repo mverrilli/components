@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.client.model;
+package org.talend.components.netsuite.client.model.search;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -11,18 +11,19 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.talend.components.netsuite.client.NetSuiteException;
+import org.talend.components.netsuite.client.model.MetaDataProvider;
 
-import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
 
 /**
  *
  */
-public class SearchDateFieldPopulator<T> extends SearchFieldPopulator<T> {
+public class SearchDateFieldAdapter<T> extends SearchFieldAdapter<T> {
 
     private DatatypeFactory datatypeFactory;
 
-    public SearchDateFieldPopulator(RuntimeModelProvider runtimeModelProvider, String fieldType, Class<T> fieldClass) {
-        super(runtimeModelProvider, fieldType, fieldClass);
+    public SearchDateFieldAdapter(MetaDataProvider metaDataProvider, String fieldType, Class<T> fieldClass) {
+        super(metaDataProvider, fieldType, fieldClass);
 
         try {
             datatypeFactory = DatatypeFactory.newInstance();
@@ -39,8 +40,8 @@ public class SearchDateFieldPopulator<T> extends SearchFieldPopulator<T> {
                 new SearchFieldOperatorTypeInfo.QualifiedName(operatorName);
 
         if (operatorQName.getDataType().equals("PredefinedDate")) {
-            setBeanProperty(nsObject, "predefinedSearchValue",
-                    runtimeModelProvider.getSearchFieldOperatorByName(fieldType, operatorName));
+            setProperty(nsObject, "predefinedSearchValue",
+                    metaDataProvider.getSearchFieldOperatorByName(fieldType, operatorName));
         } else {
             if (values != null && values.size() != 0) {
                 Calendar calValue = Calendar.getInstance();
@@ -77,7 +78,7 @@ public class SearchDateFieldPopulator<T> extends SearchFieldPopulator<T> {
                 xts.setMillisecond(calValue.get(Calendar.MILLISECOND));
                 xts.setTimezone(calValue.get(Calendar.ZONE_OFFSET) / 60000);
 
-                setBeanProperty(nsObject,"searchValue", xts);
+                setProperty(nsObject,"searchValue", xts);
 
                 if (values.size() > 1) {
                     try {
@@ -96,11 +97,11 @@ public class SearchDateFieldPopulator<T> extends SearchFieldPopulator<T> {
                     xts2.setMillisecond(calValue.get(Calendar.MILLISECOND));
                     xts2.setTimezone(calValue.get(Calendar.ZONE_OFFSET) / 60000);
 
-                    setBeanProperty(nsObject, "searchValue2", xts2);
+                    setProperty(nsObject, "searchValue2", xts2);
                 }
             }
 
-            setBeanProperty(nsObject, "operator", runtimeModelProvider.getSearchFieldOperatorByName(fieldType, operatorName));
+            setProperty(nsObject, "operator", metaDataProvider.getSearchFieldOperatorByName(fieldType, operatorName));
         }
 
         return nsObject;

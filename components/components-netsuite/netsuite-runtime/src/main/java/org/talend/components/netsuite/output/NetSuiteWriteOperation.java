@@ -14,7 +14,6 @@ import org.talend.components.netsuite.NetSuiteSink;
 public class NetSuiteWriteOperation implements WriteOperation<Result> {
 
     private final NetSuiteSink sink;
-    private RuntimeContainer runtimeContainer;
     private NetSuiteOutputProperties properties;
 
     public NetSuiteWriteOperation(NetSuiteSink sink, NetSuiteOutputProperties properties) {
@@ -24,7 +23,7 @@ public class NetSuiteWriteOperation implements WriteOperation<Result> {
 
     @Override
     public void initialize(RuntimeContainer adaptor) {
-        this.runtimeContainer = adaptor;
+        // do nothing
     }
 
     @Override
@@ -40,10 +39,6 @@ public class NetSuiteWriteOperation implements WriteOperation<Result> {
     @Override
     public NetSuiteSink getSink() {
         return sink;
-    }
-
-    public RuntimeContainer getRuntimeContainer() {
-        return runtimeContainer;
     }
 
     public NetSuiteOutputProperties getProperties() {

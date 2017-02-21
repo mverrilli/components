@@ -40,7 +40,7 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
     public ValidationResult validate(RuntimeContainer container) {
         ValidationResult result = new ValidationResult();
         try {
-            connect(container);
+            endpoint.connect();
         } catch (NetSuiteException e) {
             throw new ComponentException(exceptionToValidationResult(e));
         }
@@ -50,7 +50,7 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
     @Override
     public List<NamedThing> getSchemaNames(RuntimeContainer container) throws IOException {
         try {
-            SchemaService schemaService = new SchemaServiceImpl(endpoint.getConnection());
+            SchemaService schemaService = new SchemaServiceImpl(endpoint.getClientService());
             return schemaService.getSchemaNames();
         } catch (NetSuiteException e) {
             throw new IOException(e);
@@ -60,7 +60,7 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
     @Override
     public Schema getEndpointSchema(RuntimeContainer container, String schemaName) throws IOException {
         try {
-            SchemaService schemaService = new SchemaServiceImpl(endpoint.getConnection());
+            SchemaService schemaService = new SchemaServiceImpl(getClientService());
             return schemaService.getSchema(schemaName);
         } catch (NetSuiteException e) {
             throw new IOException(e);
@@ -75,12 +75,8 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
         return properties;
     }
 
-    public NetSuiteClientService connect(RuntimeContainer container) throws NetSuiteException {
-        return endpoint.connect();
-    }
-
-    public NetSuiteClientService getConnection() throws NetSuiteException {
-        return endpoint.getConnection();
+    public NetSuiteClientService getClientService() throws NetSuiteException {
+        return endpoint.getClientService();
     }
 
     protected static ValidationResult exceptionToValidationResult(Exception ex) {

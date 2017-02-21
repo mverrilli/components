@@ -1,7 +1,5 @@
 package org.talend.components.netsuite.client.model;
 
-import org.talend.components.netsuite.client.NetSuiteFactory;
-
 /**
  *
  */
@@ -11,7 +9,13 @@ public class RecordTypeInfo {
     private Class<?> recordClass;
 
     public RecordTypeInfo(String recordType, Class<?> recordClass) {
-        this.name = NetSuiteFactory.toInitialUpper(recordType);
+        this.name = BeanUtils.toInitialUpper(recordType);
+        this.recordType = recordType;
+        this.recordClass = recordClass;
+    }
+
+    public RecordTypeInfo(String name, String recordType, Class<?> recordClass) {
+        this.name = name;
         this.recordType = recordType;
         this.recordClass = recordClass;
     }

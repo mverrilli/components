@@ -6,11 +6,16 @@ import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.model.RuntimeModelProviderBaseImpl;
+import org.talend.components.netsuite.client.model.MetaDataProviderBaseImpl;
 
+import com.netsuite.webservices.v2016_2.platform.core.BooleanCustomFieldRef;
 import com.netsuite.webservices.v2016_2.platform.core.CustomRecordRef;
 import com.netsuite.webservices.v2016_2.platform.core.CustomizationRef;
+import com.netsuite.webservices.v2016_2.platform.core.DateCustomFieldRef;
+import com.netsuite.webservices.v2016_2.platform.core.DoubleCustomFieldRef;
 import com.netsuite.webservices.v2016_2.platform.core.ListOrRecordRef;
+import com.netsuite.webservices.v2016_2.platform.core.LongCustomFieldRef;
+import com.netsuite.webservices.v2016_2.platform.core.MultiSelectCustomFieldRef;
 import com.netsuite.webservices.v2016_2.platform.core.Record;
 import com.netsuite.webservices.v2016_2.platform.core.RecordRef;
 import com.netsuite.webservices.v2016_2.platform.core.SearchBooleanCustomField;
@@ -31,6 +36,8 @@ import com.netsuite.webservices.v2016_2.platform.core.SearchRecordBasic;
 import com.netsuite.webservices.v2016_2.platform.core.SearchStringCustomField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchStringField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchTextNumberField;
+import com.netsuite.webservices.v2016_2.platform.core.SelectCustomFieldRef;
+import com.netsuite.webservices.v2016_2.platform.core.StringCustomFieldRef;
 import com.netsuite.webservices.v2016_2.platform.core.types.RecordType;
 import com.netsuite.webservices.v2016_2.platform.core.types.SearchDate;
 import com.netsuite.webservices.v2016_2.platform.core.types.SearchDateFieldOperator;
@@ -45,15 +52,15 @@ import com.netsuite.webservices.v2016_2.platform.core.types.SearchTextNumberFiel
 /**
  *
  */
-public class RuntimeModelProviderImpl extends RuntimeModelProviderBaseImpl {
+public class MetaDataProviderImpl extends MetaDataProviderBaseImpl {
 
-    private static final LazyInitializer<RuntimeModelProviderImpl> initializer = new LazyInitializer<RuntimeModelProviderImpl>() {
-        @Override protected RuntimeModelProviderImpl initialize() throws ConcurrentException {
-            return new RuntimeModelProviderImpl();
+    private static final LazyInitializer<MetaDataProviderImpl> initializer = new LazyInitializer<MetaDataProviderImpl>() {
+        @Override protected MetaDataProviderImpl initialize() throws ConcurrentException {
+            return new MetaDataProviderImpl();
         }
     };
 
-    public static RuntimeModelProviderImpl getInstance() {
+    public static MetaDataProviderImpl getInstance() {
         try {
             return initializer.get();
         } catch (ConcurrentException e) {
@@ -61,7 +68,7 @@ public class RuntimeModelProviderImpl extends RuntimeModelProviderBaseImpl {
         }
     }
 
-    public RuntimeModelProviderImpl() {
+    public MetaDataProviderImpl() {
         logger.info("Initializing standard metadata...");
         long startTime = System.currentTimeMillis();
 
@@ -86,6 +93,8 @@ public class RuntimeModelProviderImpl extends RuntimeModelProviderBaseImpl {
                 "CustomerMessage",
                 "CustomerStatus",
                 "CustomList",
+                "CustomRecordType",
+                "CustomTransactionType",
                 "Department",
                 "Employee",
                 "EntityGroup",
@@ -316,11 +325,19 @@ public class RuntimeModelProviderImpl extends RuntimeModelProviderBaseImpl {
         registerType(CustomizationRef.class, null);
         registerType(SearchCustomFieldList.class, null);
 
+        registerType(BooleanCustomFieldRef.class, null);
+        registerType(StringCustomFieldRef.class, null);
+        registerType(LongCustomFieldRef.class, null);
+        registerType(DoubleCustomFieldRef.class, null);
+        registerType(DateCustomFieldRef.class, null);
+        registerType(SelectCustomFieldRef.class, null);
+        registerType(MultiSelectCustomFieldRef.class, null);
+
         long endTime = System.currentTimeMillis();
         logger.info("Initialized standard metadata: " + (endTime - startTime));
     }
 
     public static void main(String... args) throws Exception {
-        new RuntimeModelProviderImpl();
+        new MetaDataProviderImpl();
     }
 }

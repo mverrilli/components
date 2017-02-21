@@ -1,7 +1,7 @@
 package org.talend.components.netsuite.client.query;
 
-import static org.talend.components.netsuite.client.NetSuiteFactory.getBeanProperty;
-import static org.talend.components.netsuite.client.NetSuiteFactory.setBeanProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,9 +14,9 @@ import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
-import org.talend.components.netsuite.client.model.SearchFieldOperatorTypeInfo;
-import org.talend.components.netsuite.client.model.SearchFieldPopulator;
-import org.talend.components.netsuite.client.model.SearchRecordInfo;
+import org.talend.components.netsuite.client.model.search.SearchFieldOperatorTypeInfo;
+import org.talend.components.netsuite.client.model.search.SearchFieldAdapter;
+import org.talend.components.netsuite.client.model.search.SearchRecordInfo;
 
 /**
  *
@@ -75,7 +75,7 @@ public class SearchQuery<SearchT, RecT> {
             if (savedSearchId != null && savedSearchId.length() > 0) {
                 if (searchRecordInfo.getSearchAdvancedClass() != null) {
                     searchAdvanced = (SearchT) searchRecordInfo.getSearchAdvancedClass().newInstance();
-                    setBeanProperty(searchAdvanced, "savedSearchId", savedSearchId);
+                    setProperty(searchAdvanced, "savedSearchId", savedSearchId);
                 } else {
                     throw new NetSuiteException("Advanced search not available: " + recordTypeName);
                 }
@@ -108,7 +108,7 @@ public class SearchQuery<SearchT, RecT> {
 
         if (fieldMetaData != null) {
             Object searchField = processConditionForSearchRecord(searchBasic, condition);
-            setBeanProperty(searchBasic, condition.getFieldName(), searchField);
+            setProperty(searchBasic, condition.getFieldName(), searchField);
 
         } else {
             String dataType = operatorQName.getDataType();
@@ -149,7 +149,7 @@ public class SearchQuery<SearchT, RecT> {
             String searchOperator = condition.getOperatorName();
             List<String> searchValue = condition.getValues();
 
-            SearchFieldPopulator<?> fieldPopulator = clientService.getSearchFieldPopulator(fieldType);
+            SearchFieldAdapter<?> fieldPopulator = clientService.getSearchFieldPopulator(fieldType);
             Object searchField = fieldPopulator.populate(searchFieldName, searchOperator, searchValue);
 
             return searchField;
@@ -162,27 +162,27 @@ public class SearchQuery<SearchT, RecT> {
         initSearch();
 
         if (searchRecordInfo.getSearchRecordType().equals("transaction")) {
-            SearchFieldPopulator<?> populator = clientService.getSearchFieldPopulator("SearchEnumMultiSelectField");
+            SearchFieldAdapter<?> populator = clientService.getSearchFieldPopulator("SearchEnumMultiSelectField");
             Object searchTypeField = populator.populate(
                     "List.anyOf", Arrays.asList(recordTypeInfo.getRecordType()));
-            setBeanProperty(searchBasic, "type", searchTypeField);
+            setProperty(searchBasic, "type", searchTypeField);
         }
 
         if (!customFieldList.isEmpty()) {
             Object customFieldList = clientService.createType("SearchCustomFieldList");
-            List<Object> list = (List<Object>) getBeanProperty(customFieldList, "customField");
+            List<Object> list = (List<Object>) getProperty(customFieldList, "customField");
             for (Object customCriteria : this.customFieldList) {
                 list.add(customCriteria);
             }
-            setBeanProperty(searchBasic, "customFieldList", customFieldList);
+            setProperty(searchBasic, "customFieldList", customFieldList);
         }
 
         SearchT searchRecord;
         if (searchRecordInfo.getSearchClass() != null) {
-            setBeanProperty(search, "basic", searchBasic);
+            setProperty(search, "basic", searchBasic);
             searchRecord = search;
             if (searchAdvanced != null) {
-                setBeanProperty(searchAdvanced, "condition", search);
+                setProperty(searchAdvanced, "condition", search);
                 searchRecord = searchAdvanced;
             }
         } else {

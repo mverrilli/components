@@ -13,7 +13,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
-import org.talend.components.netsuite.client.model.SearchRecordInfo;
+import org.talend.components.netsuite.client.model.search.SearchRecordInfo;
 import org.talend.components.netsuite.client.v2016_2.NetSuiteClientServiceImpl;
 import org.talend.components.netsuite.test.AssertMatcher;
 
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.talend.components.netsuite.client.NetSuiteFactory.toInitialUpper;
+import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
 
 /**
  *
