@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.talend.components.netsuite.client.query.SearchResultSet;
-import org.talend.components.netsuite.client.model.search.SearchRecordTypeEx;
+import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
 import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.client.v2016_2.NetSuiteClientServiceImpl;
 

@@ -1,7 +1,5 @@
 package org.talend.components.netsuite.client.model;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.getEnumFromStringMapper;
-import static org.talend.components.netsuite.client.model.BeanUtils.getEnumToStringMapper;
 import static org.talend.components.netsuite.client.model.ClassUtils.collectXmlTypes;
 
 import java.util.ArrayList;
@@ -18,27 +16,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.beans.BeanManager;
-import org.talend.components.netsuite.beans.Mapper;
 import org.talend.components.netsuite.beans.PropertyInfo;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.model.custom.CrmCustomFieldAdapter;
-import org.talend.components.netsuite.client.model.custom.CustomFieldAdapter;
-import org.talend.components.netsuite.client.model.custom.CustomFieldRefType;
-import org.talend.components.netsuite.client.model.custom.DefaultCustomFieldAdapter;
-import org.talend.components.netsuite.client.model.custom.EntityCustomFieldAdapter;
-import org.talend.components.netsuite.client.model.custom.ItemCustomFieldAdapter;
-import org.talend.components.netsuite.client.model.custom.ItemOptionCustomFieldAdapter;
-import org.talend.components.netsuite.client.model.custom.TransactionBodyCustomFieldAdapter;
-import org.talend.components.netsuite.client.model.custom.TransactionColumnCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.customfield.CrmCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.customfield.CustomFieldAdapter;
+import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
+import org.talend.components.netsuite.client.model.customfield.DefaultCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.customfield.EntityCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.customfield.ItemCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.customfield.ItemOptionCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.customfield.TransactionBodyCustomFieldAdapter;
+import org.talend.components.netsuite.client.model.customfield.TransactionColumnCustomFieldAdapter;
 import org.talend.components.netsuite.client.model.search.SearchBooleanFieldAdapter;
 import org.talend.components.netsuite.client.model.search.SearchDateFieldAdapter;
 import org.talend.components.netsuite.client.model.search.SearchDoubleFieldAdapter;
 import org.talend.components.netsuite.client.model.search.SearchEnumMultiSelectFieldAdapter;
 import org.talend.components.netsuite.client.model.search.SearchFieldAdapter;
 import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
+import org.talend.components.netsuite.client.model.search.SearchFieldType;
 import org.talend.components.netsuite.client.model.search.SearchLongFieldAdapter;
 import org.talend.components.netsuite.client.model.search.SearchMultiSelectFieldAdapter;
-import org.talend.components.netsuite.client.model.search.SearchRecordTypeEx;
 import org.talend.components.netsuite.client.model.search.SearchStringFieldAdapter;
 import org.talend.components.netsuite.client.model.search.SearchTextNumberFieldAdapter;
 
@@ -98,7 +95,7 @@ public abstract class AbstractMetaData implements MetaData {
         for (Pair<String, Class<?>> spec : searchFieldOperatorTypes) {
             String dataType = spec.getLeft();
             Class<?> clazz = spec.getRight();
-            SearchFieldOperatorType operatorTypeInfo = createSearchFieldOperatorTypeInfo(dataType, clazz);
+            SearchFieldOperatorType operatorTypeInfo = SearchFieldOperatorType.createForEnum(dataType, clazz);
             searchFieldOperatorTypeList.add(operatorTypeInfo);
         }
 
@@ -112,10 +109,10 @@ public abstract class AbstractMetaData implements MetaData {
             searchFieldOperatorTypeMap.put(info.getTypeName(), info);
         }
 
-        searchFieldOperatorMap.put("SearchMultiSelectField", "SearchMultiSelectFieldOperator");
-        searchFieldOperatorMap.put("SearchMultiSelectCustomField", "SearchMultiSelectFieldOperator");
-        searchFieldOperatorMap.put("SearchEnumMultiSelectField", "SearchEnumMultiSelectFieldOperator");
-        searchFieldOperatorMap.put("SearchEnumMultiSelectCustomField", "SearchEnumMultiSelectFieldOperator");
+        searchFieldOperatorMap.put(SearchFieldType.MULTI_SELECT.getFieldTypeName(), "SearchMultiSelectFieldOperator");
+        searchFieldOperatorMap.put(SearchFieldType.CUSTOM_MULTI_SELECT.getFieldTypeName(), "SearchMultiSelectFieldOperator");
+        searchFieldOperatorMap.put(SearchFieldType.SELECT.getFieldTypeName(), "SearchEnumMultiSelectFieldOperator");
+        searchFieldOperatorMap.put(SearchFieldType.CUSTOM_SELECT.getFieldTypeName(), "SearchEnumMultiSelectFieldOperator");
     }
 
     protected SearchFieldAdapter<?> registerSearchFieldPopulator(String fieldType) {
@@ -160,13 +157,6 @@ public abstract class AbstractMetaData implements MetaData {
 
     protected void registerCustomFieldAdapter(CustomFieldAdapter<?> adapter) {
         customFieldAdapterMap.put(adapter.getType(), adapter);
-    }
-
-    public static <T> SearchFieldOperatorType<T> createSearchFieldOperatorTypeInfo(
-            String dataType, Class<T> clazz) {
-        return new SearchFieldOperatorType<>(dataType, clazz,
-                (Mapper<T, String>) getEnumToStringMapper((Class<Enum>) clazz),
-                (Mapper<String, T>) getEnumFromStringMapper((Class<Enum>) clazz));
     }
 
     protected Class<?> getTypeClass(String typeName) {

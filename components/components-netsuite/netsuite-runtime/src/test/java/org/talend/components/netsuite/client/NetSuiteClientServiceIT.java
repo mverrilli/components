@@ -2,16 +2,19 @@ package org.talend.components.netsuite.client;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.talend.components.netsuite.client.model.custom.CustomFieldInfo;
+import org.talend.components.netsuite.client.model.RecordTypeEx;
+import org.talend.components.netsuite.client.model.customfield.CustomFieldInfo;
 import org.talend.components.netsuite.client.query.SearchResultSet;
-import org.talend.components.netsuite.client.model.search.SearchRecordTypeEx;
+import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
 import org.talend.components.netsuite.client.query.SearchCondition;
+import org.talend.components.netsuite.client.v2016_2.RecordTypeEnum;
 import org.talend.daikon.NamedThing;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
@@ -77,7 +80,7 @@ public class NetSuiteClientServiceIT {
 
         connection.login();
 
-        Collection<NamedThing> searches = connection.getSearches();
+        Collection<NamedThing> searches = connection.getSearchableTypes();
 
         for (NamedThing search : searches) {
             assertNotNull(search);
@@ -93,17 +96,22 @@ public class NetSuiteClientServiceIT {
     public void testLoadCustomizations() throws Exception {
         NetSuiteClientService connection = webServiceTestFixture.getClientService();
 
-        long start = System.currentTimeMillis();
-        connection.updateCustomMetaData();
-        long end = System.currentTimeMillis();
-        System.out.println("Meta data updated: " + (end - start));
+//        long start = System.currentTimeMillis();
+//        connection.updateCustomMetaData();
+//        long end = System.currentTimeMillis();
+//        System.out.println("Meta data updated: " + (end - start));
 
 //        Collection<NamedThing> recordTypes = connection.getRecordTypes();
 //        for (NamedThing recordType : recordTypes) {
 //            System.out.println(recordType);
 //        }
 
-        Collection<CustomFieldInfo> customFieldInfos = connection.getCustomFieldsForRecordType("Opportunity");
-        System.out.println(customFieldInfos);
+        for (RecordTypeEx recordType : Arrays.asList(RecordTypeEnum.OPPORTUNITY, RecordTypeEnum.CALENDAR_EVENT)) {
+            long start = System.currentTimeMillis();
+            Map<String, CustomFieldInfo> customFieldMap = connection.getRecordCustomFields(recordType);
+            System.out.println(customFieldMap);
+            long end = System.currentTimeMillis();
+            System.out.println(">>>: " + (end - start));
+        }
     }
 }

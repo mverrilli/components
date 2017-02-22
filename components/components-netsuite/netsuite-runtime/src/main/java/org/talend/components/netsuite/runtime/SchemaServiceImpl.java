@@ -12,8 +12,10 @@ import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.model.FieldInfo;
+import org.talend.components.netsuite.client.model.customfield.CustomFieldInfo;
+import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
 import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
-import org.talend.components.netsuite.client.model.search.SearchRecordTypeEx;
+import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
 import org.talend.components.netsuite.client.model.TypeInfo;
 import org.talend.components.netsuite.schema.NsSchema;
 import org.talend.components.netsuite.schema.NsSchemaImpl;
@@ -61,7 +63,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public List<NamedThing> getSearches() {
         try {
-            List<NamedThing> searches = new ArrayList<>(clientService.getSearches());
+            List<NamedThing> searches = new ArrayList<>(clientService.getSearchableTypes());
             // Sort by display name alphabetically
             Collections.sort(searches, new Comparator<NamedThing>() {
                 @Override public int compare(NamedThing o1, NamedThing o2) {
@@ -138,11 +140,19 @@ public class SchemaServiceImpl implements SchemaService {
                 }
             }
 
-            Class<?> fieldType = fieldInfo.getValueType();
-            if (fieldType == XMLGregorianCalendar.class) {
-                avroField.addProp(SchemaConstants.TALEND_COLUMN_PATTERN, "yyyy-MM-dd'T'HH:mm:ss'.000Z'");
-            } else if (fieldType.isEnum()) {
-                avroField.addProp(SchemaConstants.TALEND_COLUMN_DB_TYPE, fieldType.getName());
+            if (fieldInfo instanceof CustomFieldInfo) {
+                CustomFieldInfo customFieldInfo = (CustomFieldInfo) fieldInfo;
+                CustomFieldRefType customFieldRefType = customFieldInfo.getCustomFieldType();
+
+                if (customFieldRefType == CustomFieldRefType.DATE) {
+                    avroField.addProp(SchemaConstants.TALEND_COLUMN_PATTERN, "yyyy-MM-dd'T'HH:mm:ss'.000Z'");
+                }
+            } else {
+                Class<?> fieldType = fieldInfo.getValueType();
+
+                if (fieldType == XMLGregorianCalendar.class) {
+                    avroField.addProp(SchemaConstants.TALEND_COLUMN_PATTERN, "yyyy-MM-dd'T'HH:mm:ss'.000Z'");
+                }
             }
 
             if (avroField.defaultVal() != null) {
@@ -166,26 +176,46 @@ public class SchemaServiceImpl implements SchemaService {
     public static Schema inferSchemaForField(FieldInfo fieldInfo) {
         Schema base;
 
-        Class<?> fieldType = fieldInfo.getValueType();
+        if (fieldInfo instanceof CustomFieldInfo) {
+            CustomFieldInfo customFieldInfo = (CustomFieldInfo) fieldInfo;
+            CustomFieldRefType customFieldRefType = customFieldInfo.getCustomFieldType();
 
-        if (fieldType == Boolean.TYPE || fieldType == Boolean.class) {
-            base = AvroUtils._boolean();
-        } else if (fieldType == Integer.TYPE || fieldType == Integer.class) {
-            base = AvroUtils._int();
-        } else if (fieldType == Long.TYPE || fieldType == Long.class) {
-            base = AvroUtils._long();
-        } else if (fieldType == Float.TYPE || fieldType == Float.class) {
-            base = AvroUtils._float();
-        } else if (fieldType == Double.TYPE || fieldType == Double.class) {
-            base = AvroUtils._double();
-        } else if (fieldType == XMLGregorianCalendar.class) {
-            base = AvroUtils._logicalTimestamp();
-        } else if (fieldType == String.class) {
-            base = AvroUtils._string();
-        } else if (fieldType.isEnum()) {
-            base = AvroUtils._string();
+            if (customFieldRefType == CustomFieldRefType.BOOLEAN) {
+                base = AvroUtils._boolean();
+            } else if (customFieldRefType == CustomFieldRefType.LONG) {
+                base = AvroUtils._int();
+            } else if (customFieldRefType == CustomFieldRefType.DOUBLE) {
+                base = AvroUtils._double();
+            } else if (customFieldRefType == CustomFieldRefType.DATE) {
+                base = AvroUtils._logicalTimestamp();
+            } else if (customFieldRefType == CustomFieldRefType.STRING) {
+                base = AvroUtils._string();
+            } else {
+                base = AvroUtils._string();
+            }
+
         } else {
-            base = AvroUtils._string();
+            Class<?> fieldType = fieldInfo.getValueType();
+
+            if (fieldType == Boolean.TYPE || fieldType == Boolean.class) {
+                base = AvroUtils._boolean();
+            } else if (fieldType == Integer.TYPE || fieldType == Integer.class) {
+                base = AvroUtils._int();
+            } else if (fieldType == Long.TYPE || fieldType == Long.class) {
+                base = AvroUtils._long();
+            } else if (fieldType == Float.TYPE || fieldType == Float.class) {
+                base = AvroUtils._float();
+            } else if (fieldType == Double.TYPE || fieldType == Double.class) {
+                base = AvroUtils._double();
+            } else if (fieldType == XMLGregorianCalendar.class) {
+                base = AvroUtils._logicalTimestamp();
+            } else if (fieldType == String.class) {
+                base = AvroUtils._string();
+            } else if (fieldType.isEnum()) {
+                base = AvroUtils._string();
+            } else {
+                base = AvroUtils._string();
+            }
         }
 
         base = fieldInfo.isNullable() ? AvroUtils.wrapAsNullable(base) : base;

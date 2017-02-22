@@ -32,7 +32,7 @@ import org.talend.components.netsuite.client.common.NsSearchPreferences;
 import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.client.common.NsStatus;
 import org.talend.components.netsuite.client.common.NsWriteResponse;
-import org.talend.components.netsuite.client.model.custom.CustomFieldInfo;
+import org.talend.components.netsuite.client.model.customfield.CustomFieldInfo;
 
 import com.netsuite.webservices.v2016_2.platform.ExceededRequestSizeFault;
 import com.netsuite.webservices.v2016_2.platform.InsufficientPermissionFault;
@@ -531,22 +531,6 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         nsDetail.setCode(detail.getCode().value());
         nsDetail.setMessage(detail.getMessage());
         return nsDetail;
-    }
-
-    private ConcurrentMap<String, Map<String, NsCustomizationRef>> customizationsByTypeMap = new ConcurrentHashMap<>();
-
-    protected void loadCustomizations() throws NetSuiteException {
-        List<NsCustomizationRef> customRecordTypes = loadCustomizationIds(
-                Arrays.asList("customRecordType", "customTransactionType"));
-    }
-
-    @Override
-    protected Collection<CustomFieldInfo> getCustomFieldsForRecordType(String recordType) throws NetSuiteException {
-        Map<String, CustomFieldInfo> recordCustomFields = recordCustomFieldMap.get(recordType);
-        if (recordCustomFields != null) {
-            return Collections.unmodifiableCollection(recordCustomFields.values());
-        }
-        return Collections.emptySet();
     }
 
     protected List<NsCustomizationRef> loadCustomizationIds(final String type) throws NetSuiteException {

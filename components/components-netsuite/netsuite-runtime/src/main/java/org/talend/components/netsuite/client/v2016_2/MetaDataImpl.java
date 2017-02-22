@@ -10,7 +10,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.model.AbstractMetaData;
 import org.talend.components.netsuite.client.model.RecordTypeEx;
-import org.talend.components.netsuite.client.model.search.SearchRecordTypeEx;
+import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
 
 import com.netsuite.webservices.v2016_2.platform.core.BaseRef;
 import com.netsuite.webservices.v2016_2.platform.core.CustomFieldRef;

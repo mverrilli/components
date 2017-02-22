@@ -1,5 +1,8 @@
 package org.talend.components.netsuite.input;
 
+import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.toInitialLower;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,13 +14,12 @@ import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.IndexedRecord;
 import org.talend.components.netsuite.NetSuiteAvroRegistry;
 import org.talend.components.netsuite.client.NetSuiteClientService;
-import org.talend.components.netsuite.client.model.TypeInfo;
 import org.talend.components.netsuite.client.model.FieldInfo;
+import org.talend.components.netsuite.client.model.TypeInfo;
+import org.talend.components.netsuite.runtime.SchemaServiceImpl;
 import org.talend.daikon.avro.AvroUtils;
 import org.talend.daikon.avro.converter.AvroConverter;
-
-import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
-import static org.talend.components.netsuite.client.model.BeanUtils.toInitialLower;
+import org.talend.daikon.di.DiSchemaConstants;
 
 /**
  *
@@ -97,63 +99,73 @@ public class NsRecordReadTransducer {
     }
 
     protected Schema getDynamicSchema(Object nsObject, String schemaName, Schema designSchema) {
-        TypeInfo typeInfo = clientService.getTypeInfo(nsObject.getClass());
+        String typeName = designSchema.getName();
+        TypeInfo typeInfo = clientService.getTypeInfo(typeName, true);
+        Map<String, FieldInfo> fieldMap = typeInfo.getFieldMap();
 
-        List<String> fieldNames = new ArrayList<>();
-        for (FieldInfo fieldInfo : typeInfo.getFields()) {
-            if (fieldInfo.getName().equals("customFieldList")) {
-                continue;
+        String dynamicPosProp = designSchema.getProp(DiSchemaConstants.TALEND6_DYNAMIC_COLUMN_POSITION);
+        List<Schema.Field> fields = new ArrayList<>();
+
+        if (dynamicPosProp != null) {
+            List<FieldInfo> designFields = new ArrayList<>(designSchema.getFields().size());
+            for (Schema.Field field : designSchema.getFields()) {
+                String fieldName = field.name();
+                FieldInfo fieldInfo = fieldMap.get(fieldName);
+                designFields.add(fieldInfo);
             }
-            fieldNames.add(fieldInfo.getName());
-        }
-        List<?> customFieldList = (List<?>) getProperty(nsObject, "customFieldList.customField");
-        for (Object customField : customFieldList) {
-            String fieldName = (String) getProperty(customField, "scriptId");
-            fieldNames.add(fieldName);
+
+            int dynPos = Integer.parseInt(dynamicPosProp);
+            int dynamicColumnSize = fieldMap.size() - designSchema.getFields().size();
+
+            if (designSchema.getFields().size() > 0) {
+                for (Schema.Field field : designSchema.getFields()) {
+                    // Dynamic column is first or middle column in design schema
+                    if (dynPos == field.pos()) {
+                        for (int i = 0; i < dynamicColumnSize; i++) {
+                            // Add dynamic schema fields
+                            FieldInfo fieldInfo = designFields.get(i + dynPos);
+                            fields.add(createField(fieldInfo));
+                        }
+                    }
+
+                    // Add fields of design schema
+                    Schema.Field avroField = new Schema.Field(field.name(), field.schema(), null, field.defaultVal());
+                    Map<String, Object> fieldProps = field.getObjectProps();
+                    for (String propName : fieldProps.keySet()) {
+                        Object propValue = fieldProps.get(propName);
+                        if (propValue != null) {
+                            avroField.addProp(propName, propValue);
+                        }
+                    }
+
+                    fields.add(avroField);
+
+                    // Dynamic column is last column in design schema
+                    if (field.pos() == (designSchema.getFields().size() - 1) && dynPos == (field.pos() + 1)) {
+                        for (int i = 0; i < dynamicColumnSize; i++) {
+                            // Add dynamic schema fields
+                            FieldInfo fieldInfo = designFields.get(i + dynPos);
+                            fields.add(createField(fieldInfo));
+                        }
+                    }
+                }
+            } else {
+                // All fields are included in dynamic schema
+                for (String fieldName : fieldMap.keySet()) {
+                    FieldInfo fieldInfo = fieldMap.get(fieldName);
+                    fields.add(createField(fieldInfo));
+                }
+            }
         }
 
-//        String dynamicPosProp = designSchema.getProp(DiSchemaConstants.TALEND6_DYNAMIC_COLUMN_POSITION);
-//        List<Schema.Field> fields = new ArrayList<>();
-//        if (dynamicPosProp != null) {
-//            int dynPos = Integer.parseInt(dynamicPosProp);
-//            int dynamicColumnSize = columnsName.length - designSchema.getFields().size();
-//            String defaultValue = null;
-//            if (designSchema.getFields().size() > 0) {
-//                for (Schema.Field field : designSchema.getFields()) {
-//                    // Dynamic column is first or middle column in design schema
-//                    if (dynPos == field.pos()) {
-//                        for (int i = 0; i < dynamicColumnSize; i++) {
-//                            // Add dynamic schema fields
-//                            fields.add(getDefaultField(columnsName[i + dynPos], defaultValue));
-//                        }
-//                    }
-//                    // Add fields of design schema
-//                    Schema.Field avroField = new Schema.Field(field.name(), field.schema(), null, field.defaultVal());
-//                    Map<String, Object> fieldProps = field.getObjectProps();
-//                    for (String propName : fieldProps.keySet()) {
-//                        Object propValue = fieldProps.get(propName);
-//                        if (propValue != null) {
-//                            avroField.addProp(propName, propValue);
-//                        }
-//                    }
-//                    fields.add(avroField);
-//                    // Dynamic column is last column in design schema
-//                    if (field.pos() == (designSchema.getFields().size() - 1) && dynPos == (field.pos() + 1)) {
-//                        for (int i = 0; i < dynamicColumnSize; i++) {
-//                            // Add dynamic schema fields
-//                            fields.add(getDefaultField(columnsName[i + dynPos], defaultValue));
-//                        }
-//                    }
-//                }
-//            } else {
-//                // All fields are included in dynamic schema
-//                for (String columnName : columnsName) {
-//                    fields.add(getDefaultField(columnName, defaultValue));
-//                }
-//            }
-//        }
-//        Schema schema = Schema.createRecord(schemaName, null, null, false, fields);
-//        return schema;
-        return null;
+        Schema schema = Schema.createRecord(schemaName, null, null, false, fields);
+        return schema;
+//        return null;
+    }
+
+    private Schema.Field createField(FieldInfo fieldInfo) {
+        Schema avroFieldType = SchemaServiceImpl.inferSchemaForField(fieldInfo);
+        Schema.Field avroField = new Schema.Field(fieldInfo.getName(), avroFieldType, null, null);
+        return avroField;
     }
 }

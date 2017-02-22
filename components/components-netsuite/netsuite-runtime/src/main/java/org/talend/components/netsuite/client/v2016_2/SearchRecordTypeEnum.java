@@ -248,7 +248,7 @@ import com.netsuite.webservices.v2016_2.transactions.sales.UsageSearchAdvanced;
 import java.lang.Class;
 import java.lang.Override;
 import java.lang.String;
-import org.talend.components.netsuite.client.model.search.SearchRecordTypeEx;
+import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
 
 public enum SearchRecordTypeEnum implements SearchRecordTypeEx {
   ACCOUNT("account", "Account", AccountSearch.class, AccountSearchBasic.class, AccountSearchAdvanced.class),

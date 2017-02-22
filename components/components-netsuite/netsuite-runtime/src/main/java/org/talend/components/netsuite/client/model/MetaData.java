@@ -3,10 +3,9 @@ package org.talend.components.netsuite.client.model;
 import java.util.Collection;
 
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.model.custom.CustomFieldRefType;
+import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
 import org.talend.components.netsuite.client.model.search.SearchFieldAdapter;
 import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
-import org.talend.components.netsuite.client.model.search.SearchRecordTypeEx;
 
 /**
  *

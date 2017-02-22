@@ -13,10 +13,11 @@ import org.talend.components.netsuite.beans.PropertyInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.common.NsSearchResult;
-import org.talend.components.netsuite.client.model.RecordTypeEx;
-import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
-import org.talend.components.netsuite.client.model.search.SearchRecordTypeEx;
+import org.talend.components.netsuite.client.model.RecordTypeInfo;
+import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
 import org.talend.components.netsuite.client.model.search.SearchFieldAdapter;
+import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
+import org.talend.components.netsuite.client.model.search.SearchFieldType;
 
 /**
  *
@@ -26,7 +27,7 @@ public class SearchQuery<SearchT, RecT> {
     protected NetSuiteClientService clientService;
 
     protected String recordTypeName;
-    protected RecordTypeEx recordTypeInfo;
+    protected RecordTypeInfo recordTypeInfo;
     protected SearchRecordTypeEx searchRecordInfo;
 
     protected SearchT search;             // search class' instance
@@ -114,17 +115,17 @@ public class SearchQuery<SearchT, RecT> {
             String dataType = operatorQName.getDataType();
             String searchFieldType = null;
             if ("String".equals(dataType)) {
-                searchFieldType = "SearchStringCustomField";
+                searchFieldType = SearchFieldType.CUSTOM_STRING.getFieldTypeName();
             } else if ("Boolean".equals(dataType)) {
-                searchFieldType = "SearchBooleanCustomField";
+                searchFieldType = SearchFieldType.CUSTOM_BOOLEAN.getFieldTypeName();
             } else if ("Numeric".equals(dataType)) {
-                searchFieldType = "SearchLongCustomField";
+                searchFieldType = SearchFieldType.CUSTOM_LONG.getFieldTypeName();
             } else if ("Double".equals(dataType)) {
-                searchFieldType = "SearchDoubleCustomField";
+                searchFieldType = SearchFieldType.CUSTOM_DOUBLE.getFieldTypeName();
             } else if ("Date".equals(dataType) || "PredefinedDate".equals(dataType)) {
-                searchFieldType = "SearchDateCustomField";
+                searchFieldType = SearchFieldType.CUSTOM_DATE.getFieldTypeName();
             } else if ("List".equals(dataType)) {
-                searchFieldType = "SearchMultiSelectCustomField";
+                searchFieldType = SearchFieldType.CUSTOM_MULTI_SELECT.getFieldTypeName();
             } else {
                 throw new NetSuiteException("Invalid data type: " + searchFieldType);
             }
@@ -162,16 +163,17 @@ public class SearchQuery<SearchT, RecT> {
         initSearch();
 
         if (searchRecordInfo.getType().equals("transaction")) {
-            SearchFieldAdapter<?> populator = clientService.getSearchFieldPopulator("SearchEnumMultiSelectField");
+            SearchFieldAdapter<?> populator = clientService.getSearchFieldPopulator(
+                    SearchFieldType.SELECT.getFieldTypeName());
             Object searchTypeField = populator.populate(
-                    "List.anyOf", Arrays.asList(recordTypeInfo.getType()));
+                    "List.anyOf", Arrays.asList(recordTypeInfo.getRecordType().getType()));
             setProperty(searchBasic, "type", searchTypeField);
         }
 
         if (!customFieldList.isEmpty()) {
-            Object customFieldList = clientService.createType("SearchCustomFieldList");
-            List<Object> list = (List<Object>) getProperty(customFieldList, "customField");
-            for (Object customCriteria : this.customFieldList) {
+            Object customFieldListObject = clientService.createType("SearchCustomFieldList");
+            List<Object> list = (List<Object>) getProperty(customFieldListObject, "customField");
+            for (Object customCriteria : customFieldList) {
                 list.add(customCriteria);
             }
             setProperty(searchBasic, "customFieldList", customFieldList);

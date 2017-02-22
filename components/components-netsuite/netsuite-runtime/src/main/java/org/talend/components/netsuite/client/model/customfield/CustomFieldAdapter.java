@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.client.model.custom;
+package org.talend.components.netsuite.client.model.customfield;
 
 import org.talend.components.netsuite.client.model.MetaData;
 

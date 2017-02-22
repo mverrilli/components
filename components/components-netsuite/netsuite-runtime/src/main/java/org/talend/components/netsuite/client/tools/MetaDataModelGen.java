@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.talend.components.netsuite.beans.EnumAccessor;
 import org.talend.components.netsuite.client.model.BeanUtils;
 import org.talend.components.netsuite.client.model.RecordTypeEx;
-import org.talend.components.netsuite.client.model.search.SearchRecordTypeEx;
+import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;

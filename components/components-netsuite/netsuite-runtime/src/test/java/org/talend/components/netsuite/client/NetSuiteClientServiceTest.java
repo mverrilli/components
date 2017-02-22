@@ -13,7 +13,8 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.netsuite.client.model.RecordTypeEx;
-import org.talend.components.netsuite.client.model.search.SearchRecordTypeEx;
+import org.talend.components.netsuite.client.model.RecordTypeInfo;
+import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
 import org.talend.components.netsuite.client.v2016_2.NetSuiteClientServiceImpl;
 import org.talend.components.netsuite.test.AssertMatcher;
 
@@ -99,11 +100,6 @@ public class NetSuiteClientServiceTest {
         NetSuiteClientService clientService = webServiceTestFixture.getClientService();
 
         Set<SearchRecordType> searchRecordTypeSet = new HashSet<>(Arrays.asList(SearchRecordType.values()));
-//        searchRecordTypeSet.remove(SearchRecordType.ACCOUNTING_TRANSACTION);
-//        searchRecordTypeSet.remove(SearchRecordType.TRANSACTION);
-//        searchRecordTypeSet.remove(SearchRecordType.ITEM);
-//        searchRecordTypeSet.remove(SearchRecordType.CUSTOM_LIST);
-//        searchRecordTypeSet.remove(SearchRecordType.CUSTOM_RECORD);
 
         Set<String> searchRecordTypeNameSet = new HashSet<>();
         for (SearchRecordType searchRecordType : searchRecordTypeSet) {
@@ -123,18 +119,7 @@ public class NetSuiteClientServiceTest {
         }
 
         Set<RecordType> recordTypeSet = new HashSet<>(Arrays.asList(RecordType.values()));
-//        recordTypeSet.remove(RecordType.CRM_CUSTOM_FIELD);
-//        recordTypeSet.remove(RecordType.ENTITY_CUSTOM_FIELD);
-//        recordTypeSet.remove(RecordType.ITEM_CUSTOM_FIELD);
-//        recordTypeSet.remove(RecordType.ITEM_OPTION_CUSTOM_FIELD);
-//        recordTypeSet.remove(RecordType.ITEM_NUMBER_CUSTOM_FIELD);
         recordTypeSet.remove(RecordType.CUSTOM_TRANSACTION_TYPE);
-//        recordTypeSet.remove(RecordType.CUSTOM_TRANSACTION);
-//        recordTypeSet.remove(RecordType.CUSTOM_RECORD);
-//        recordTypeSet.remove(RecordType.CUSTOM_RECORD_CUSTOM_FIELD);
-//        recordTypeSet.remove(RecordType.TRANSACTION_BODY_CUSTOM_FIELD);
-//        recordTypeSet.remove(RecordType.TRANSACTION_COLUMN_CUSTOM_FIELD);
-//        recordTypeSet.remove(RecordType.OTHER_CUSTOM_FIELD);
 
         Set<String> recordTypeNameSet = new HashSet<>();
         for (RecordType recordType : recordTypeSet) {
@@ -145,7 +130,7 @@ public class NetSuiteClientServiceTest {
         recordTypeNameSet.add("TimeEntry");
 
         for (String recordType : recordTypeNameSet) {
-            RecordTypeEx recordTypeInfo = clientService.getRecordType(recordType);
+            RecordTypeInfo recordTypeInfo = clientService.getRecordType(recordType);
             assertNotNull("Record type def found: " + recordType, recordTypeInfo);
         }
     }
