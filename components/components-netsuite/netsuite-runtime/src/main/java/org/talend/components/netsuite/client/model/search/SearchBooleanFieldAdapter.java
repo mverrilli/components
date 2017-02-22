@@ -2,7 +2,7 @@ package org.talend.components.netsuite.client.model.search;
 
 import java.util.List;
 
-import org.talend.components.netsuite.client.model.MetaDataProvider;
+import org.talend.components.netsuite.client.model.MetaData;
 
 import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
 
@@ -11,8 +11,8 @@ import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
  */
 public class SearchBooleanFieldAdapter<T> extends SearchFieldAdapter<T> {
 
-    public SearchBooleanFieldAdapter(MetaDataProvider metaDataProvider, String fieldType, Class<T> fieldClass) {
-        super(metaDataProvider, fieldType, fieldClass);
+    public SearchBooleanFieldAdapter(MetaData metaData, String fieldType, Class<T> fieldClass) {
+        super(metaData, fieldType, fieldClass);
     }
 
     @Override

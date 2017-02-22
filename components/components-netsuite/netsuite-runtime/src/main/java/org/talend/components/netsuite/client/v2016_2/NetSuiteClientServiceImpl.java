@@ -97,7 +97,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
     public NetSuiteClientServiceImpl() {
         super();
 
-        metaDataProvider = MetaDataProviderImpl.getInstance();
+        metaData = MetaDataImpl.getInstance();
     }
 
     @Override

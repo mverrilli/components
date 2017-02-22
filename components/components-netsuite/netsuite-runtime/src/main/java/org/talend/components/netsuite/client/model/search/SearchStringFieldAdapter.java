@@ -2,7 +2,7 @@ package org.talend.components.netsuite.client.model.search;
 
 import java.util.List;
 
-import org.talend.components.netsuite.client.model.MetaDataProvider;
+import org.talend.components.netsuite.client.model.MetaData;
 
 import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
 
@@ -11,8 +11,8 @@ import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
  */
 public class SearchStringFieldAdapter<T> extends SearchFieldAdapter<T> {
 
-    public SearchStringFieldAdapter(MetaDataProvider metaDataProvider, String fieldType, Class<T> fieldClass) {
-        super(metaDataProvider, fieldType, fieldClass);
+    public SearchStringFieldAdapter(MetaData metaData, String fieldType, Class<T> fieldClass) {
+        super(metaData, fieldType, fieldClass);
     }
 
     @Override
@@ -21,7 +21,7 @@ public class SearchStringFieldAdapter<T> extends SearchFieldAdapter<T> {
 
         if (values != null && values.size() != 0) {
             setProperty(nsObject, "searchValue", values.get(0));
-            setProperty(nsObject, "operator", metaDataProvider.getSearchFieldOperatorByName(fieldType, operatorName));
+            setProperty(nsObject, "operator", metaData.getSearchFieldOperatorByName(fieldType, operatorName));
         }
 
         return nsObject;

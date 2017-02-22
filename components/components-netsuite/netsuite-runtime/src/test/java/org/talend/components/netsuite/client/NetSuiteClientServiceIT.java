@@ -10,7 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.netsuite.client.model.custom.CustomFieldInfo;
 import org.talend.components.netsuite.client.query.SearchResultSet;
-import org.talend.components.netsuite.client.model.search.SearchRecordInfo;
+import org.talend.components.netsuite.client.model.search.SearchRecordTypeEx;
 import org.talend.components.netsuite.client.query.SearchCondition;
 import org.talend.daikon.NamedThing;
 
@@ -84,7 +84,7 @@ public class NetSuiteClientServiceIT {
             assertNotNull(search.getName());
             assertNotNull(search.getDisplayName());
 
-            SearchRecordInfo searchRecordInfo = connection.getSearchRecordInfo(search.getName());
+            SearchRecordTypeEx searchRecordInfo = connection.getSearchRecordType(search.getName());
             assertNotNull("Search record def found: " + search.getName(), searchRecordInfo);
         }
     }
@@ -103,7 +103,7 @@ public class NetSuiteClientServiceIT {
 //            System.out.println(recordType);
 //        }
 
-        Collection<CustomFieldInfo> customFieldInfos = connection.getCustomFieldsForRecordType("Account");
+        Collection<CustomFieldInfo> customFieldInfos = connection.getCustomFieldsForRecordType("Opportunity");
         System.out.println(customFieldInfos);
     }
 }

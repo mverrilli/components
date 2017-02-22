@@ -3,7 +3,6 @@ package org.talend.components.netsuite.client.model.custom;
 import java.util.Map;
 
 import org.talend.components.netsuite.client.model.BeanUtils;
-import org.talend.components.netsuite.client.model.MetaDataProvider;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -25,8 +24,8 @@ public class TransactionBodyCustomFieldAdapter<T> extends CustomFieldAdapter<T> 
             .put("vendorPayment", "bodyVendorPayment")
             .build();
 
-    public TransactionBodyCustomFieldAdapter(MetaDataProvider metaDataProvider) {
-        super(metaDataProvider, "transactionBodyCustomField");
+    public TransactionBodyCustomFieldAdapter() {
+        super("transactionBodyCustomField");
     }
 
     @Override

@@ -7,17 +7,20 @@ import java.util.Objects;
 
 import org.talend.components.netsuite.beans.Mapper;
 
+import static org.talend.components.netsuite.client.model.BeanUtils.getEnumFromStringMapper;
+import static org.talend.components.netsuite.client.model.BeanUtils.getEnumToStringMapper;
+
 /**
  *
  */
-public class SearchFieldOperatorTypeInfo<T> {
+public class SearchFieldOperatorType<T> {
     private String dataType;
     private String typeName;
     private Class<T> operatorClass;
     private Mapper<T, String> mapper;
     private Mapper<String, T> reverseMapper;
 
-    public SearchFieldOperatorTypeInfo(String dataType, Class<T> operatorClass,
+    public SearchFieldOperatorType(String dataType, Class<T> operatorClass,
             Mapper<T, String> mapper, Mapper<String, T> reverseMapper) {
 
         this.dataType = dataType;
@@ -104,6 +107,12 @@ public class SearchFieldOperatorTypeInfo<T> {
         } else {
             throw new IllegalStateException("Unsupported operator type: " + operatorClass);
         }
+    }
+
+    public static <T> SearchFieldOperatorType<T> createForEnum(String dataType, Class<T> clazz) {
+        return new SearchFieldOperatorType<>(dataType, clazz,
+                (Mapper<T, String>) getEnumToStringMapper((Class<Enum>) clazz),
+                (Mapper<String, T>) getEnumFromStringMapper((Class<Enum>) clazz));
     }
 
     public static class SearchBooleanFieldOperator {

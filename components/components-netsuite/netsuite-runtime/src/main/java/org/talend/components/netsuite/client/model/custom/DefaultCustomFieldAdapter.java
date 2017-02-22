@@ -1,14 +1,12 @@
 package org.talend.components.netsuite.client.model.custom;
 
-import org.talend.components.netsuite.client.model.MetaDataProvider;
-
 /**
  *
  */
 public class DefaultCustomFieldAdapter<T> extends CustomFieldAdapter<T> {
 
-    public DefaultCustomFieldAdapter(MetaDataProvider metaDataProvider, String type) {
-        super(metaDataProvider, type);
+    public DefaultCustomFieldAdapter(String type) {
+        super(type);
     }
 
     @Override

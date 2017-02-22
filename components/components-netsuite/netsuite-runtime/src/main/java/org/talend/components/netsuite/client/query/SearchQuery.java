@@ -13,10 +13,10 @@ import org.talend.components.netsuite.beans.PropertyInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.common.NsSearchResult;
-import org.talend.components.netsuite.client.model.RecordTypeInfo;
-import org.talend.components.netsuite.client.model.search.SearchFieldOperatorTypeInfo;
+import org.talend.components.netsuite.client.model.RecordTypeEx;
+import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
+import org.talend.components.netsuite.client.model.search.SearchRecordTypeEx;
 import org.talend.components.netsuite.client.model.search.SearchFieldAdapter;
-import org.talend.components.netsuite.client.model.search.SearchRecordInfo;
 
 /**
  *
@@ -26,8 +26,8 @@ public class SearchQuery<SearchT, RecT> {
     protected NetSuiteClientService clientService;
 
     protected String recordTypeName;
-    protected RecordTypeInfo recordTypeInfo;
-    protected SearchRecordInfo searchRecordInfo;
+    protected RecordTypeEx recordTypeInfo;
+    protected SearchRecordTypeEx searchRecordInfo;
 
     protected SearchT search;             // search class' instance
     protected SearchT searchBasic;        // search basic class' instance
@@ -44,8 +44,8 @@ public class SearchQuery<SearchT, RecT> {
     public SearchQuery target(final String recordTypeName) throws NetSuiteException {
         this.recordTypeName = recordTypeName;
 
-        recordTypeInfo = clientService.getRecordTypeInfo(recordTypeName);
-        searchRecordInfo = clientService.getSearchRecordInfo(recordTypeName);
+        recordTypeInfo = clientService.getRecordType(recordTypeName);
+        searchRecordInfo = clientService.getSearchRecordType(recordTypeName);
 
         // search not found or not supported
         if (searchRecordInfo == null) {
@@ -103,8 +103,8 @@ public class SearchQuery<SearchT, RecT> {
 
         PropertyInfo fieldMetaData = searchMetaData.getProperty(condition.getFieldName());
 
-        SearchFieldOperatorTypeInfo.QualifiedName operatorQName =
-                new SearchFieldOperatorTypeInfo.QualifiedName(condition.getOperatorName());
+        SearchFieldOperatorType.QualifiedName operatorQName =
+                new SearchFieldOperatorType.QualifiedName(condition.getOperatorName());
 
         if (fieldMetaData != null) {
             Object searchField = processConditionForSearchRecord(searchBasic, condition);
@@ -161,10 +161,10 @@ public class SearchQuery<SearchT, RecT> {
     public SearchT toNativeQuery() throws NetSuiteException {
         initSearch();
 
-        if (searchRecordInfo.getSearchRecordType().equals("transaction")) {
+        if (searchRecordInfo.getType().equals("transaction")) {
             SearchFieldAdapter<?> populator = clientService.getSearchFieldPopulator("SearchEnumMultiSelectField");
             Object searchTypeField = populator.populate(
-                    "List.anyOf", Arrays.asList(recordTypeInfo.getRecordType()));
+                    "List.anyOf", Arrays.asList(recordTypeInfo.getType()));
             setProperty(searchBasic, "type", searchTypeField);
         }
 

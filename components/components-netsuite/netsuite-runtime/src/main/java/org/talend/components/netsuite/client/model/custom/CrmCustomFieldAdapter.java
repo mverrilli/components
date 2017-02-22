@@ -3,7 +3,6 @@ package org.talend.components.netsuite.client.model.custom;
 import java.util.Map;
 
 import org.talend.components.netsuite.client.model.BeanUtils;
-import org.talend.components.netsuite.client.model.MetaDataProvider;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -23,8 +22,8 @@ public class CrmCustomFieldAdapter<T> extends CustomFieldAdapter<T> {
             .put("task", "appliesToTask")
             .build();
 
-    public CrmCustomFieldAdapter(MetaDataProvider metaDataProvider) {
-        super(metaDataProvider, "crmCustomField");
+    public CrmCustomFieldAdapter() {
+        super("crmCustomField");
     }
 
     @Override

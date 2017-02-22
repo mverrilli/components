@@ -3,7 +3,6 @@ package org.talend.components.netsuite.client.model.custom;
 import java.util.Map;
 
 import org.talend.components.netsuite.client.model.BeanUtils;
-import org.talend.components.netsuite.client.model.MetaDataProvider;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -26,8 +25,8 @@ public class TransactionColumnCustomFieldAdapter<T> extends CustomFieldAdapter<T
             .put("timeBill", "colTime")
             .build();
 
-    public TransactionColumnCustomFieldAdapter(MetaDataProvider metaDataProvider) {
-        super(metaDataProvider, "transactionColumnCustomField");
+    public TransactionColumnCustomFieldAdapter() {
+        super("transactionColumnCustomField");
     }
 
     @Override

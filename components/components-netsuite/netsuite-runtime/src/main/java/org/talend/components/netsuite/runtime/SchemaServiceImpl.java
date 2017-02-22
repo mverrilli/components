@@ -12,8 +12,8 @@ import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.model.FieldInfo;
-import org.talend.components.netsuite.client.model.search.SearchFieldOperatorTypeInfo;
-import org.talend.components.netsuite.client.model.search.SearchRecordInfo;
+import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
+import org.talend.components.netsuite.client.model.search.SearchRecordTypeEx;
 import org.talend.components.netsuite.client.model.TypeInfo;
 import org.talend.components.netsuite.schema.NsSchema;
 import org.talend.components.netsuite.schema.NsSchemaImpl;
@@ -77,7 +77,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public NsSchema getSearchRecordSchema(String typeName) {
         try {
-            final SearchRecordInfo searchInfo = clientService.getSearchRecordInfo(typeName);
+            final SearchRecordTypeEx searchInfo = clientService.getSearchRecordType(typeName);
             final TypeInfo searchRecordInfo = clientService.getTypeInfo(searchInfo.getSearchBasicClass());
             List<FieldInfo> searchFieldInfos = searchRecordInfo.getFields();
             return new NsSchemaImpl(searchRecordInfo.getTypeName(), searchFieldInfos);
@@ -98,10 +98,10 @@ public class SchemaServiceImpl implements SchemaService {
 
     @Override
     public List<String> getSearchFieldOperators() {
-        List<SearchFieldOperatorTypeInfo.QualifiedName> operatorList =
+        List<SearchFieldOperatorType.QualifiedName> operatorList =
                 new ArrayList<>(clientService.getSearchOperatorNames());
         List<String> operatorNames = new ArrayList<>(operatorList.size());
-        for (SearchFieldOperatorTypeInfo.QualifiedName operatorName : operatorList) {
+        for (SearchFieldOperatorType.QualifiedName operatorName : operatorList) {
             operatorNames.add(operatorName.getQualifiedName());
         }
         return operatorNames;

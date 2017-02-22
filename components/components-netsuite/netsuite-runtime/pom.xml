@@ -61,6 +61,13 @@
             <!--<artifactId>beam-runners-direct-java</artifactId>-->
         <!--</dependency>-->
 
+        <dependency>
+            <groupId>com.squareup</groupId>
+            <artifactId>javapoet</artifactId>
+            <version>1.8.0</version>
+            <!--<scope>provided</scope>-->
+        </dependency>
+
         <!-- To include in dependencies.txt. -->
         <dependency>
             <groupId>org.apache.commons</groupId>

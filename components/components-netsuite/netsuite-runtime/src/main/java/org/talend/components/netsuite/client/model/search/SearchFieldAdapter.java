@@ -5,7 +5,7 @@ import java.util.List;
 import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.beans.BeanManager;
-import org.talend.components.netsuite.client.model.MetaDataProvider;
+import org.talend.components.netsuite.client.model.MetaData;
 
 import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
 
@@ -13,12 +13,12 @@ import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
  *
  */
 public abstract class SearchFieldAdapter<T> {
-    protected MetaDataProvider metaDataProvider;
+    protected MetaData metaData;
     protected String fieldType;
     protected Class<T> fieldClass;
 
-    public SearchFieldAdapter(MetaDataProvider metaDataProvider, String fieldType, Class<T> fieldClass) {
-        this.metaDataProvider = metaDataProvider;
+    public SearchFieldAdapter(MetaData metaData, String fieldType, Class<T> fieldClass) {
+        this.metaData = metaData;
         this.fieldType = fieldType;
         this.fieldClass = fieldClass;
     }

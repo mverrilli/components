@@ -4,15 +4,15 @@ import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
 
 import java.util.List;
 
-import org.talend.components.netsuite.client.model.MetaDataProvider;
+import org.talend.components.netsuite.client.model.MetaData;
 
 /**
  *
  */
 public class SearchTextNumberFieldAdapter<T> extends SearchFieldAdapter<T> {
 
-    public SearchTextNumberFieldAdapter(MetaDataProvider metaDataProvider, String fieldType, Class<T> fieldClass) {
-        super(metaDataProvider, fieldType, fieldClass);
+    public SearchTextNumberFieldAdapter(MetaData metaData, String fieldType, Class<T> fieldClass) {
+        super(metaData, fieldType, fieldClass);
     }
 
     @Override
@@ -24,7 +24,7 @@ public class SearchTextNumberFieldAdapter<T> extends SearchFieldAdapter<T> {
             if (values.size() > 1) {
                 setProperty(nsObject, "searchValue2", values.get(1));
             }
-            setProperty(nsObject, "operator", metaDataProvider.getSearchFieldOperatorByName(fieldType, operatorName));
+            setProperty(nsObject, "operator", metaData.getSearchFieldOperatorByName(fieldType, operatorName));
         }
 
         return nsObject;
