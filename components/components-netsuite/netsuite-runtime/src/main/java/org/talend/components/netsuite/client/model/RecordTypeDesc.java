@@ -3,7 +3,7 @@ package org.talend.components.netsuite.client.model;
 /**
  *
  */
-public interface RecordTypeEx {
+public interface RecordTypeDesc {
 
     String getType();
 

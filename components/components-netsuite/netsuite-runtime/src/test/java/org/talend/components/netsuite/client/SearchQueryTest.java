@@ -45,14 +45,14 @@ public class SearchQueryTest {
 
         SearchQuery s1 = clientService.newSearch();
         s1.target("Account");
-        s1.condition(new SearchCondition("type", "List.anyOf", Arrays.asList("bank")));
-        s1.condition(new SearchCondition("balance", "Double.greaterThanOrEqualTo", Arrays.asList("10000.0")));
-        s1.condition(new SearchCondition("legalName", "String.contains", Arrays.asList("Acme")));
-        s1.condition(new SearchCondition("isInactive", "Boolean", Arrays.asList("true")));
+        s1.condition(new SearchCondition("Type", "List.anyOf", Arrays.asList("bank")));
+        s1.condition(new SearchCondition("Balance", "Double.greaterThanOrEqualTo", Arrays.asList("10000.0")));
+        s1.condition(new SearchCondition("LegalName", "String.contains", Arrays.asList("Acme")));
+        s1.condition(new SearchCondition("IsInactive", "Boolean", Arrays.asList("true")));
 
-        s1.condition(new SearchCondition("customBooleanField1", "Boolean", Arrays.asList("true")));
-        s1.condition(new SearchCondition("customStringField1", "String.doesNotContain", Arrays.asList("Foo")));
-        s1.condition(new SearchCondition("customLongField1", "Numeric.lessThan", Arrays.asList("100")));
+        s1.condition(new SearchCondition("CustomBooleanField1", "Boolean", Arrays.asList("true")));
+        s1.condition(new SearchCondition("CustomStringField1", "String.doesNotContain", Arrays.asList("Foo")));
+        s1.condition(new SearchCondition("CustomLongField1", "Numeric.lessThan", Arrays.asList("100")));
 
         SearchRecord sr1 = (SearchRecord) s1.toNativeQuery();
         assertNotNull(sr1);
@@ -101,8 +101,8 @@ public class SearchQueryTest {
 
         SearchQuery s1 = clientService.newSearch();
         s1.target("Address");
-        s1.condition(new SearchCondition("country", "List.anyOf", Arrays.asList("Ukraine")));
-        s1.condition(new SearchCondition("customStringField1", "String.contains", Arrays.asList("abc")));
+        s1.condition(new SearchCondition("Country", "List.anyOf", Arrays.asList("Ukraine")));
+        s1.condition(new SearchCondition("CustomStringField1", "String.contains", Arrays.asList("abc")));
 
         SearchRecord sr1 = (SearchRecord) s1.toNativeQuery();
         assertNotNull(sr1);
@@ -135,8 +135,8 @@ public class SearchQueryTest {
 
         SearchQuery s1 = clientService.newSearch();
         s1.target("Check");
-        s1.condition(new SearchCondition("tranDate", "PredefinedDate.lastBusinessWeek", null));
-        s1.condition(new SearchCondition("customDateField1", "PredefinedDate.lastBusinessWeek", null));
+        s1.condition(new SearchCondition("TranDate", "PredefinedDate.lastBusinessWeek", null));
+        s1.condition(new SearchCondition("CustomDateField1", "PredefinedDate.lastBusinessWeek", null));
 
         SearchRecord sr1 = (SearchRecord) s1.toNativeQuery();
         assertNotNull(sr1);

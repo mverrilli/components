@@ -8,7 +8,6 @@ import org.talend.components.api.exception.ComponentException;
 import org.talend.components.api.properties.ComponentPropertiesImpl;
 import org.talend.components.common.SchemaProperties;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
-import org.talend.components.netsuite.runtime.SchemaService;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.java8.Function;
 import org.talend.daikon.properties.ValidationResult;

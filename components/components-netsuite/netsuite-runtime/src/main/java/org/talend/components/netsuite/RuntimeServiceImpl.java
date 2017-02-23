@@ -1,7 +1,6 @@
-package org.talend.components.netsuite.runtime;
+package org.talend.components.netsuite;
 
 import org.talend.components.api.exception.ComponentException;
-import org.talend.components.netsuite.NetSuiteEndpoint;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.daikon.properties.ValidationResult;

@@ -1,5 +1,14 @@
 package org.talend.components.netsuite.client;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -12,9 +21,9 @@ import org.apache.cxf.headers.Header;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.talend.components.netsuite.client.model.RecordTypeEx;
+import org.talend.components.netsuite.NetSuiteMockTestBase;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
-import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
+import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.client.v2016_2.NetSuiteClientServiceImpl;
 import org.talend.components.netsuite.test.AssertMatcher;
 
@@ -26,39 +35,28 @@ import com.netsuite.webservices.v2016_2.platform.messages.LoginRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.LoginResponse;
 import com.netsuite.webservices.v2016_2.platform.messages.SessionResponse;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
-
 /**
  *
  */
-public class NetSuiteClientServiceTest {
-
+public class NetSuiteClientServiceTest extends NetSuiteMockTestBase {
     private static NetSuiteWebServiceMockTestFixture webServiceTestFixture;
 
-    @BeforeClass public static void classSetUp() throws Exception {
+    @BeforeClass
+    public static void classSetUp() throws Exception {
         webServiceTestFixture = new NetSuiteWebServiceMockTestFixture();
-        webServiceTestFixture.setUp();
+        classScopedTestFixtures.add(webServiceTestFixture);
+        setUpClassScopedTestFixtures();
     }
 
-    @AfterClass public static void classTearDown() throws Exception {
-        if (webServiceTestFixture != null) {
-            webServiceTestFixture.tearDown();
-        }
+    @AfterClass
+    public static void classTearDown() throws Exception {
+        tearDownClassScopedTestFixtures();
     }
 
-    @Test
     /**
      * TODO Verify headers (applicationInfo etc.)
      */
+    @Test
     public void testConnectAndLogin() throws Exception {
         final NetSuiteCredentials credentials = webServiceTestFixture.getCredentials();
         final NetSuitePortType port = webServiceTestFixture.getPortMock();
@@ -82,8 +80,8 @@ public class NetSuiteClientServiceTest {
                 assertNotNull(messageContext);
                 List<Header> headers = (List<Header>) messageContext.get(Header.HEADER_LIST);
                 assertNotNull(headers);
-                Header appInfoHeader = NetSuiteWebServiceMockTestFixture
-                        .getHeader(headers, new QName(NetSuiteClientServiceImpl.NS_URI_PLATFORM_MESSAGES, "applicationInfo"));
+                Header appInfoHeader = NetSuiteWebServiceMockTestFixture.getHeader(headers, new QName(
+                        NetSuiteClientServiceImpl.NS_URI_PLATFORM_MESSAGES, "applicationInfo"));
                 assertNotNull(appInfoHeader);
             }
         }))).thenReturn(response);
@@ -111,7 +109,7 @@ public class NetSuiteClientServiceTest {
 
         for (String searchRecordType : searchRecordTypeNameSet) {
             try {
-                SearchRecordTypeEx searchRecordInfo = clientService.getSearchRecordType(searchRecordType);
+                SearchRecordTypeDesc searchRecordInfo = clientService.getSearchRecordType(searchRecordType);
                 assertNotNull("Search record def found: " + searchRecordType, searchRecordInfo);
             } catch (Exception e) {
                 throw new AssertionError("Search record type: " + searchRecordType, e);

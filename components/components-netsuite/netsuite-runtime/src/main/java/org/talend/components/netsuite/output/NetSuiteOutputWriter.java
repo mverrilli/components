@@ -24,7 +24,7 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
 
     protected NetSuiteClientService clientService;
     protected NetSuiteOutputProperties.OutputAction action;
-    protected NsRecordWriteTransducer transducer;
+    protected NsObjectOutputTransducer transducer;
     protected int dataCount = 0;
 
     public NetSuiteOutputWriter(NetSuiteWriteOperation writeOperation) {
@@ -51,12 +51,12 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
                     || action == NetSuiteOutputProperties.OutputAction.UPSERT) {
 
                 String typeName = writeOperation.getProperties().module.moduleName.getValue();
-                transducer = new NsRecordWriteTransducer(clientService, typeName);
+                transducer = new NsObjectOutputTransducer(clientService, typeName);
 
             } else if (action == NetSuiteOutputProperties.OutputAction.DELETE) {
 
                 String typeName = writeOperation.getProperties().module.moduleName.getValue();
-                transducer = new NsRecordWriteTransducer(clientService, typeName);
+                transducer = new NsObjectOutputTransducer(clientService, typeName);
             }
         } catch (NetSuiteException e) {
             throw new IOException(e);

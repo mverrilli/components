@@ -1,16 +1,17 @@
-package org.talend.components.netsuite.client.model.customfield;
+package org.talend.components.netsuite.client.model;
 
 import org.talend.components.netsuite.client.common.NsCustomizationRef;
-import org.talend.components.netsuite.client.model.FieldInfo;
+import org.talend.components.netsuite.client.model.FieldDesc;
+import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
 
 /**
  *
  */
-public class CustomFieldInfo extends FieldInfo {
+public class CustomFieldDesc extends FieldDesc {
     private NsCustomizationRef customizationRef;
     private CustomFieldRefType customFieldType;
 
-    public CustomFieldInfo() {
+    public CustomFieldDesc() {
     }
 
     public NsCustomizationRef getCustomizationRef() {

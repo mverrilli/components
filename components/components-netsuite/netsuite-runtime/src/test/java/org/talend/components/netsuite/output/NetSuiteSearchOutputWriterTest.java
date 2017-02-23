@@ -2,7 +2,6 @@ package org.talend.components.netsuite.output;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -11,16 +10,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.UUID;
-
-import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.GenericRecord;
 import org.apache.avro.generic.IndexedRecord;
-import org.joda.time.DateTime;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -28,18 +23,14 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.talend.components.api.component.runtime.Result;
 import org.talend.components.api.container.RuntimeContainer;
-import org.talend.components.netsuite.NetSuiteAvroRegistry;
+import org.talend.components.netsuite.NetSuiteMockTestBase;
 import org.talend.components.netsuite.NetSuiteSink;
-import org.talend.components.netsuite.input.NsRecordReadTransducer;
-import org.talend.components.netsuite.beans.BeanInfo;
+import org.talend.components.netsuite.RuntimeService;
+import org.talend.components.netsuite.RuntimeServiceImpl;
+import org.talend.components.netsuite.SchemaService;
 import org.talend.components.netsuite.client.NetSuiteClientService;
-import org.talend.components.netsuite.client.model.BeanUtils;
 import org.talend.components.netsuite.client.NetSuiteWebServiceMockTestFixture;
-import org.talend.components.netsuite.beans.PropertyInfo;
-import org.talend.components.netsuite.beans.BeanManager;
-import org.talend.components.netsuite.runtime.RuntimeService;
-import org.talend.components.netsuite.runtime.RuntimeServiceImpl;
-import org.talend.components.netsuite.runtime.SchemaService;
+import org.talend.components.netsuite.input.NsObjectInputTransducer;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.Account;
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
@@ -56,23 +47,19 @@ import com.netsuite.webservices.v2016_2.platform.messages.WriteResponse;
 /**
  *
  */
-public class NetSuiteSearchOutputWriterTest {
-
+public class NetSuiteSearchOutputWriterTest extends NetSuiteMockTestBase {
     private static NetSuiteWebServiceMockTestFixture webServiceTestFixture;
-
-    private static Random rnd = new Random(System.currentTimeMillis());
 
     @BeforeClass
     public static void classSetUp() throws Exception {
         webServiceTestFixture = new NetSuiteWebServiceMockTestFixture();
-        webServiceTestFixture.setUp();
+        classScopedTestFixtures.add(webServiceTestFixture);
+        setUpClassScopedTestFixtures();
     }
 
     @AfterClass
     public static void classTearDown() throws Exception {
-        if (webServiceTestFixture != null) {
-            webServiceTestFixture.tearDown();
-        }
+        tearDownClassScopedTestFixtures();
     }
 
     @Test
@@ -155,7 +142,7 @@ public class NetSuiteSearchOutputWriterTest {
     }
 
     private List<IndexedRecord> makeRecords(NetSuiteClientService clientService, Schema schema, int count) throws Exception {
-        NsRecordReadTransducer transducer = new NsRecordReadTransducer(clientService, schema);
+        NsObjectInputTransducer transducer = new NsObjectInputTransducer(clientService, schema);
 
         List<IndexedRecord> recordList = new ArrayList<>();
 
@@ -178,70 +165,6 @@ public class NetSuiteSearchOutputWriterTest {
         }
 
         return recordList;
-    }
-
-    private <T> T composeObject(Class<T> clazz) throws Exception {
-        BeanInfo beanInfo = BeanManager.getBeanInfo(clazz);
-        List<PropertyInfo> propertyInfoList = beanInfo.getProperties();
-
-        T obj = clazz.newInstance();
-
-        for (PropertyInfo propertyInfo : propertyInfoList) {
-            if (propertyInfo.getWriteType() != null) {
-                Object value = composeValue(propertyInfo.getWriteType());
-                BeanUtils.setProperty(obj, propertyInfo.getName(), value);
-            }
-        }
-
-        return obj;
-    }
-
-    private static Object composeValue(Class<?> clazz) throws Exception {
-        if (clazz == Boolean.class) {
-            return Boolean.valueOf(rnd.nextBoolean());
-        }
-        if (clazz == Long.class) {
-            return Long.valueOf(rnd.nextLong());
-        }
-        if (clazz == Double.class) {
-            return Double.valueOf(rnd.nextLong());
-        }
-        if (clazz == Integer.class) {
-            return Integer.valueOf(rnd.nextInt());
-        }
-        if (clazz == String.class) {
-            int len = 10 + rnd.nextInt(100);
-            StringBuilder sb = new StringBuilder(len);
-            for (int i = 0; i < len; i++) {
-                sb.append((char) (32 + rnd.nextInt(127 - 32)));
-            }
-            return sb.toString();
-        }
-        if (clazz == XMLGregorianCalendar.class) {
-            return composeDateTime();
-        }
-        if (clazz.isEnum()) {
-            Object[] values = clazz.getEnumConstants();
-            return values[rnd.nextInt(values.length)];
-        }
-        return null;
-    }
-
-    private static XMLGregorianCalendar composeDateTime() throws Exception {
-        DateTime dateTime = DateTime.now();
-
-        XMLGregorianCalendar xts = NetSuiteAvroRegistry.getInstance().getDatatypeFactory().newXMLGregorianCalendar();
-        xts.setYear(dateTime.getYear());
-        xts.setMonth(dateTime.getMonthOfYear());
-        xts.setDay(dateTime.getDayOfMonth());
-        xts.setHour(dateTime.getHourOfDay());
-        xts.setMinute(dateTime.getMinuteOfHour());
-        xts.setSecond(dateTime.getSecondOfMinute());
-        xts.setMillisecond(dateTime.getMillisOfSecond());
-        xts.setTimezone(dateTime.getZone().toTimeZone().getRawOffset() / 60000);
-
-        return xts;
-
     }
 
 }

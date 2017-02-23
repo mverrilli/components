@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.junit.Test;
 import org.talend.components.netsuite.client.query.SearchResultSet;
-import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
+import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.client.v2016_2.NetSuiteClientServiceImpl;
 
@@ -77,7 +77,7 @@ public class SearchResultSetTest {
         when(conn.searchMoreWithId(eq("abc123"), eq(2))).thenReturn(nsSearchResult2);
 
         NetSuiteClientService clientService = NetSuiteClientService.create("2016.2");
-        SearchRecordTypeEx searchInfo = clientService.getSearchRecordType("Account");
+        SearchRecordTypeDesc searchInfo = clientService.getSearchRecordType("Account");
 
         SearchResultSet<Record> resultSet = new SearchResultSet<>(conn, searchInfo, nsSearchResult1);
 

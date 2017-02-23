@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.runtime;
+package org.talend.components.netsuite;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,14 +11,14 @@ import org.apache.avro.Schema;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.model.FieldInfo;
-import org.talend.components.netsuite.client.model.customfield.CustomFieldInfo;
+import org.talend.components.netsuite.client.model.FieldDesc;
+import org.talend.components.netsuite.client.model.TypeDesc;
+import org.talend.components.netsuite.client.model.CustomFieldDesc;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
 import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
-import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
-import org.talend.components.netsuite.client.model.TypeInfo;
+import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
+import org.talend.components.netsuite.schema.NsField;
 import org.talend.components.netsuite.schema.NsSchema;
-import org.talend.components.netsuite.schema.NsSchemaImpl;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.avro.AvroUtils;
 import org.talend.daikon.avro.SchemaConstants;
@@ -52,7 +52,7 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public Schema getSchema(String typeName) {
         try {
-            TypeInfo def = clientService.getTypeInfo(typeName);
+            TypeDesc def = clientService.getTypeInfo(typeName);
             Schema schema = inferSchemaForRecord(def.getTypeName(), def.getFields());
             return schema;
         } catch (NetSuiteException e) {
@@ -61,7 +61,7 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
-    public List<NamedThing> getSearches() {
+    public List<NamedThing> getSearchableTypes() {
         try {
             List<NamedThing> searches = new ArrayList<>(clientService.getSearchableTypes());
             // Sort by display name alphabetically
@@ -77,22 +77,48 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
-    public NsSchema getSearchRecordSchema(String typeName) {
+    public NsSchema getSchemaForSearch(String typeName) {
         try {
-            final SearchRecordTypeEx searchInfo = clientService.getSearchRecordType(typeName);
-            final TypeInfo searchRecordInfo = clientService.getTypeInfo(searchInfo.getSearchBasicClass());
-            List<FieldInfo> searchFieldInfos = searchRecordInfo.getFields();
-            return new NsSchemaImpl(searchRecordInfo.getTypeName(), searchFieldInfos);
+            final SearchRecordTypeDesc searchInfo = clientService.getSearchRecordType(typeName);
+            final TypeDesc searchRecordInfo = clientService.getTypeInfo(searchInfo.getSearchBasicClass());
+            List<FieldDesc> searchFieldDescs = searchRecordInfo.getFields();
+            List<NsField> fields = new ArrayList<>(searchFieldDescs.size());
+            for (FieldDesc fieldDesc : searchFieldDescs) {
+                NsField field = new NsField(fieldDesc.getName(), fieldDesc.getValueType());
+                fields.add(field);
+            }
+            return new NsSchema(searchRecordInfo.getTypeName(), fields);
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }
     }
 
     @Override
-    public NsSchema getDeleteRecordSchema(String typeName) {
+    public NsSchema getSchemaForUpdate(String typeName) {
         try {
-            final TypeInfo def = clientService.getTypeInfo("RecordRef");
-            return new NsSchemaImpl(def.getTypeName(), def.getFields());
+            final TypeDesc typeDesc = clientService.getCustomizedTypeInfo(typeName);
+            List<FieldDesc> fieldDescList = typeDesc.getFields();
+            List<NsField> fields = new ArrayList<>(fieldDescList.size());
+            for (FieldDesc fieldDesc : fieldDescList) {
+                NsField field = new NsField(fieldDesc.getName(), fieldDesc.getValueType());
+                fields.add(field);
+            }
+            return new NsSchema(typeDesc.getTypeName(), fields);
+        } catch (NetSuiteException e) {
+            throw new ComponentException(e);
+        }
+    }
+
+    @Override
+    public NsSchema getSchemaForDelete(String typeName) {
+        try {
+            final TypeDesc typeDesc = clientService.getTypeInfo("RecordRef");
+            List<NsField> fields = new ArrayList<>(typeDesc.getFields().size());
+            for (FieldDesc fieldDesc : typeDesc.getFields()) {
+                NsField field = new NsField(fieldDesc.getName(), fieldDesc.getValueType());
+                fields.add(field);
+            }
+            return new NsSchema(typeDesc.getTypeName(), fields);
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }
@@ -116,13 +142,13 @@ public class SchemaServiceImpl implements SchemaService {
      * @param name name of a record.
      * @return the schema for data given from the object.
      */
-    public static Schema inferSchemaForRecord(String name, List<FieldInfo> fieldInfoList) {
+    public static Schema inferSchemaForRecord(String name, List<FieldDesc> fieldDescList) {
         List<Schema.Field> fields = new ArrayList<>();
 
-        for (FieldInfo fieldInfo : fieldInfoList) {
+        for (FieldDesc fieldDesc : fieldDescList) {
 
-            Schema.Field avroField = new Schema.Field(fieldInfo.getName(),
-                    inferSchemaForField(fieldInfo), null, (Object) null);
+            Schema.Field avroField = new Schema.Field(fieldDesc.getName(),
+                    inferSchemaForField(fieldDesc), null, (Object) null);
             // Add some Talend6 custom properties to the schema.
             Schema avroFieldSchema = avroField.schema();
             if (avroFieldSchema.getType() == Schema.Type.UNION) {
@@ -135,20 +161,20 @@ public class SchemaServiceImpl implements SchemaService {
             }
 
             if (AvroUtils.isSameType(avroFieldSchema, AvroUtils._string())) {
-                if (fieldInfo.getLength() != 0) {
-                    avroField.addProp(SchemaConstants.TALEND_COLUMN_DB_LENGTH, String.valueOf(fieldInfo.getLength()));
+                if (fieldDesc.getLength() != 0) {
+                    avroField.addProp(SchemaConstants.TALEND_COLUMN_DB_LENGTH, String.valueOf(fieldDesc.getLength()));
                 }
             }
 
-            if (fieldInfo instanceof CustomFieldInfo) {
-                CustomFieldInfo customFieldInfo = (CustomFieldInfo) fieldInfo;
+            if (fieldDesc instanceof CustomFieldDesc) {
+                CustomFieldDesc customFieldInfo = (CustomFieldDesc) fieldDesc;
                 CustomFieldRefType customFieldRefType = customFieldInfo.getCustomFieldType();
 
                 if (customFieldRefType == CustomFieldRefType.DATE) {
                     avroField.addProp(SchemaConstants.TALEND_COLUMN_PATTERN, "yyyy-MM-dd'T'HH:mm:ss'.000Z'");
                 }
             } else {
-                Class<?> fieldType = fieldInfo.getValueType();
+                Class<?> fieldType = fieldDesc.getValueType();
 
                 if (fieldType == XMLGregorianCalendar.class) {
                     avroField.addProp(SchemaConstants.TALEND_COLUMN_PATTERN, "yyyy-MM-dd'T'HH:mm:ss'.000Z'");
@@ -166,18 +192,18 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     /**
-     * Infers an Avro schema for the given FieldInfo. This can be an expensive operation so the schema should be
-     * cached where possible. The return type will be the Avro Schema that can contain the fieldInfo data without loss of
+     * Infers an Avro schema for the given FieldDesc. This can be an expensive operation so the schema should be
+     * cached where possible. The return type will be the Avro Schema that can contain the fieldDesc data without loss of
      * precision.
      *
-     * @param fieldInfo the <code>FieldInfo</code> to analyse.
-     * @return the schema for data that the fieldInfo describes.
+     * @param fieldDesc the <code>FieldDesc</code> to analyse.
+     * @return the schema for data that the fieldDesc describes.
      */
-    public static Schema inferSchemaForField(FieldInfo fieldInfo) {
+    public static Schema inferSchemaForField(FieldDesc fieldDesc) {
         Schema base;
 
-        if (fieldInfo instanceof CustomFieldInfo) {
-            CustomFieldInfo customFieldInfo = (CustomFieldInfo) fieldInfo;
+        if (fieldDesc instanceof CustomFieldDesc) {
+            CustomFieldDesc customFieldInfo = (CustomFieldDesc) fieldDesc;
             CustomFieldRefType customFieldRefType = customFieldInfo.getCustomFieldType();
 
             if (customFieldRefType == CustomFieldRefType.BOOLEAN) {
@@ -195,7 +221,7 @@ public class SchemaServiceImpl implements SchemaService {
             }
 
         } else {
-            Class<?> fieldType = fieldInfo.getValueType();
+            Class<?> fieldType = fieldDesc.getValueType();
 
             if (fieldType == Boolean.TYPE || fieldType == Boolean.class) {
                 base = AvroUtils._boolean();
@@ -218,7 +244,7 @@ public class SchemaServiceImpl implements SchemaService {
             }
         }
 
-        base = fieldInfo.isNullable() ? AvroUtils.wrapAsNullable(base) : base;
+        base = fieldDesc.isNullable() ? AvroUtils.wrapAsNullable(base) : base;
 
         return base;
     }

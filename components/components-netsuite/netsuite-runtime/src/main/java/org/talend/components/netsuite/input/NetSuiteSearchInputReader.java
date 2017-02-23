@@ -17,7 +17,6 @@ import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.query.SearchCondition;
 import org.talend.components.netsuite.client.query.SearchQuery;
 import org.talend.components.netsuite.client.common.ResultSet;
-import org.talend.daikon.avro.AvroUtils;
 
 /**
  *
@@ -26,20 +25,20 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
 
     private transient NetSuiteClientService clientService;
 
-    private transient NsRecordReadTransducer transducer;
+    private transient NsObjectInputTransducer transducer;
 
-    protected transient Schema searchSchema;
+    private transient Schema searchSchema;
 
-    protected NetSuiteInputProperties properties;
+    private NetSuiteInputProperties properties;
 
-    protected int dataCount;
+    private int dataCount;
 
-    protected RuntimeContainer container;
+    private RuntimeContainer container;
 
-    protected ResultSet<?> resultSet;
+    private ResultSet<?> resultSet;
 
-    protected Object currentRecord;
-    protected IndexedRecord currentIndexedRecord;
+    private Object currentRecord;
+    private IndexedRecord currentIndexedRecord;
 
     public NetSuiteSearchInputReader(RuntimeContainer container,
             NetSuiteSource source, NetSuiteInputProperties properties) {
@@ -97,7 +96,9 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
     }
 
     protected ResultSet<?> search() throws NetSuiteException {
-        transducer = new NsRecordReadTransducer(clientService, searchSchema);
+        searchSchema = properties.module.main.schema.getValue();
+
+        transducer = new NsObjectInputTransducer(clientService, searchSchema);
 
         SearchQuery search = clientService.newSearch();
         search.target(properties.module.moduleName.getValue());

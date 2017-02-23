@@ -15,37 +15,36 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteSource;
+import org.talend.components.netsuite.NetSuiteTestBase;
+import org.talend.components.netsuite.RuntimeServiceImpl;
+import org.talend.components.netsuite.SchemaService;
 import org.talend.components.netsuite.client.NetSuiteWebServiceTestFixture;
-import org.talend.components.netsuite.runtime.SchemaService;
-import org.talend.components.netsuite.runtime.RuntimeServiceImpl;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
 
 /**
  *
  */
-public class NetSuiteSearchInputReaderIT {
-
+public class NetSuiteSearchInputReaderIT extends NetSuiteTestBase {
     private static NetSuiteWebServiceTestFixture webServiceTestFixture;
 
     @BeforeClass
     public static void classSetUp() throws Exception {
         webServiceTestFixture = new NetSuiteWebServiceTestFixture();
-        webServiceTestFixture.setUp();
+        classScopedTestFixtures.add(webServiceTestFixture);
+        setUpClassScopedTestFixtures();
     }
 
     @AfterClass
     public static void classTearDown() throws Exception {
-        if (webServiceTestFixture != null) {
-            webServiceTestFixture.tearDown();
-        }
+        tearDownClassScopedTestFixtures();
     }
 
     @Test
     public void testInput() throws Exception {
         RuntimeContainer container = mock(RuntimeContainer.class);
 
-        NetSuiteInputProperties properties = new NetSuiteInputProperties("NetSuite");
+        NetSuiteInputProperties properties = new NetSuiteInputProperties("test");
         properties.init();
         properties.connection.endpoint.setValue(webServiceTestFixture.getEndpointUrl());
         properties.connection.email.setValue(webServiceTestFixture.getCredentials().getEmail());
@@ -61,7 +60,7 @@ public class NetSuiteSearchInputReaderIT {
         properties.module.main.schema.setValue(schema);
 
         properties.module.afterModuleName();
-        properties.searchConditionTable.field.setValue(Arrays.asList("type"));
+        properties.searchConditionTable.field.setValue(Arrays.asList("Type"));
         properties.searchConditionTable.operator.setValue(Arrays.asList("List.anyOf"));
         properties.searchConditionTable.value1.setValue(Arrays.asList("Bank"));
         properties.searchConditionTable.value2.setValue(Arrays.asList((String) null));
@@ -79,22 +78,13 @@ public class NetSuiteSearchInputReaderIT {
 
         List<Schema.Field> fields = record.getSchema().getFields();
         for (int i = 0; i < fields.size(); i++) {
-            Schema.Field typeField = getFieldByName(fields, "acctType");
+            Schema.Field typeField = getFieldByName(fields, "AcctType");
             Object value = record.get(typeField.pos());
             assertNotNull(value);
             assertEquals(AccountType.BANK.value(), value);
 
             System.out.println(fields.get(i) + ": " + record.get(i));
         }
-    }
-
-    private static Schema.Field getFieldByName(List<Schema.Field> fields, String name) {
-        for (Schema.Field field : fields) {
-            if (field.name().equals(name)) {
-                return field;
-            }
-        }
-        return null;
     }
 
 }

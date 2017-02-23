@@ -9,11 +9,14 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.model.AbstractMetaData;
-import org.talend.components.netsuite.client.model.RecordTypeEx;
-import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
+import org.talend.components.netsuite.client.model.RecordTypeDesc;
+import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 
 import com.netsuite.webservices.v2016_2.platform.core.BaseRef;
+import com.netsuite.webservices.v2016_2.platform.core.CustomFieldList;
 import com.netsuite.webservices.v2016_2.platform.core.CustomFieldRef;
+import com.netsuite.webservices.v2016_2.platform.core.ListOrRecordRef;
+import com.netsuite.webservices.v2016_2.platform.core.NullField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchBooleanCustomField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchBooleanField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchCustomFieldList;
@@ -68,6 +71,10 @@ public class MetaDataImpl extends AbstractMetaData {
 
         registerTypes(BaseRef.class);
         registerTypes(CustomFieldRef.class);
+
+        registerType(NullField.class, null);
+        registerType(ListOrRecordRef.class, null);
+        registerType(CustomFieldList.class, null);
         registerType(SearchCustomFieldList.class, null);
 
         registerSearchFields(Arrays.asList(
@@ -104,17 +111,17 @@ public class MetaDataImpl extends AbstractMetaData {
     }
 
     @Override
-    public Collection<RecordTypeEx> getRecordTypes() {
-        return Arrays.<RecordTypeEx>asList(RecordTypeEnum.values());
+    public Collection<RecordTypeDesc> getRecordTypes() {
+        return Arrays.<RecordTypeDesc>asList(RecordTypeEnum.values());
     }
 
     @Override
-    public RecordTypeEx getRecordType(String recordType) {
+    public RecordTypeDesc getRecordType(String recordType) {
         return RecordTypeEnum.getByTypeName(toInitialUpper(recordType));
     }
 
     @Override
-    public SearchRecordTypeEx getSearchRecordType(String searchRecordType) {
+    public SearchRecordTypeDesc getSearchRecordType(String searchRecordType) {
         return SearchRecordTypeEnum.getByTypeName(toInitialUpper(searchRecordType));
     }
 }

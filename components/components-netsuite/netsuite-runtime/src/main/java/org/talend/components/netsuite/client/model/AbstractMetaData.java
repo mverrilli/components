@@ -1,5 +1,6 @@
 package org.talend.components.netsuite.client.model;
 
+import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
 import static org.talend.components.netsuite.client.model.ClassUtils.collectXmlTypes;
 
 import java.util.ArrayList;
@@ -163,10 +164,11 @@ public abstract class AbstractMetaData implements MetaData {
         return typeMap.get(typeName);
     }
 
-    @Override public TypeInfo getTypeInfo(String typeName) {
+    @Override
+    public TypeDesc getTypeInfo(String typeName) {
         Class<?> clazz = getTypeClass(typeName);
         if (clazz == null) {
-            RecordTypeEx recordType = getRecordType(typeName);
+            RecordTypeDesc recordType = getRecordType(typeName);
             if (recordType != null) {
                 clazz = recordType.getRecordClass();
             }
@@ -174,31 +176,37 @@ public abstract class AbstractMetaData implements MetaData {
         return clazz != null ? getTypeInfo(clazz) : null;
     }
 
-    @Override public TypeInfo getTypeInfo(Class<?> clazz) {
+    @Override
+    public TypeDesc getTypeInfo(Class<?> clazz) {
         BeanInfo beanInfo = BeanManager.getBeanInfo(clazz);
         List<PropertyInfo> propertyInfos = beanInfo.getProperties();
-        List<FieldInfo> fields = new ArrayList<>(propertyInfos.size());
+
+        List<FieldDesc> fields = new ArrayList<>(propertyInfos.size());
+
         for (PropertyInfo propertyInfo : propertyInfos) {
-            String fieldName = propertyInfo.getName();
+            String fieldName = toInitialUpper(propertyInfo.getName());
+
             Class fieldValueType = propertyInfo.getReadType();
             if ((fieldName.equals("class") && fieldValueType == Class.class) ||
                     (fieldName.equals("nullFieldList") && fieldValueType.getSimpleName().equals("NullField"))) {
                 continue;
             }
+
             boolean isKeyField = isKeyField(clazz, propertyInfo);
-            FieldInfo fieldInfo = new FieldInfo(fieldName, fieldValueType, isKeyField, true);
-            fields.add(fieldInfo);
+            SimpleFieldDesc fieldDesc = new SimpleFieldDesc(fieldName, fieldValueType, isKeyField, true);
+            fieldDesc.setPropertyName(propertyInfo.getName());
+            fields.add(fieldDesc);
         }
 
-        return new TypeInfo(clazz.getSimpleName(), clazz, fields);
+        return new TypeDesc(clazz.getSimpleName(), clazz, fields);
     }
 
     @Override public boolean isRecord(String typeName) {
         return getRecordType(typeName) != null;
     }
 
-    @Override public SearchRecordTypeEx getSearchRecordType(RecordTypeEx recordType) {
-        SearchRecordTypeEx searchRecordType = getSearchRecordType(recordType.getSearchRecordType());
+    @Override public SearchRecordTypeDesc getSearchRecordType(RecordTypeDesc recordType) {
+        SearchRecordTypeDesc searchRecordType = getSearchRecordType(recordType.getSearchRecordType());
         return searchRecordType;
     }
 

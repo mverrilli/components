@@ -179,9 +179,9 @@ import com.netsuite.webservices.v2016_2.transactions.sales.Usage;
 import java.lang.Class;
 import java.lang.Override;
 import java.lang.String;
-import org.talend.components.netsuite.client.model.RecordTypeEx;
+import org.talend.components.netsuite.client.model.RecordTypeDesc;
 
-public enum RecordTypeEnum implements RecordTypeEx {
+public enum RecordTypeEnum implements RecordTypeDesc {
   ACCOUNT("account", "Account", Account.class, "account"),
 
   ACCOUNTING_PERIOD("accountingPeriod", "AccountingPeriod", AccountingPeriod.class, "accountingPeriod"),

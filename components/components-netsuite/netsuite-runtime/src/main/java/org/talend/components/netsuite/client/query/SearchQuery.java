@@ -2,6 +2,7 @@ package org.talend.components.netsuite.client.query;
 
 import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
 import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.toInitialLower;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +15,7 @@ import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
-import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
+import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.client.model.search.SearchFieldAdapter;
 import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
 import org.talend.components.netsuite.client.model.search.SearchFieldType;
@@ -28,7 +29,7 @@ public class SearchQuery<SearchT, RecT> {
 
     protected String recordTypeName;
     protected RecordTypeInfo recordTypeInfo;
-    protected SearchRecordTypeEx searchRecordInfo;
+    protected SearchRecordTypeDesc searchRecordInfo;
 
     protected SearchT search;             // search class' instance
     protected SearchT searchBasic;        // search basic class' instance
@@ -102,14 +103,15 @@ public class SearchQuery<SearchT, RecT> {
 
         BeanInfo searchMetaData = BeanManager.getBeanInfo(searchRecordInfo.getSearchBasicClass());
 
-        PropertyInfo fieldMetaData = searchMetaData.getProperty(condition.getFieldName());
+        String fieldName = toInitialLower(condition.getFieldName());
+        PropertyInfo propertyInfo = searchMetaData.getProperty(fieldName);
 
         SearchFieldOperatorType.QualifiedName operatorQName =
                 new SearchFieldOperatorType.QualifiedName(condition.getOperatorName());
 
-        if (fieldMetaData != null) {
+        if (propertyInfo != null) {
             Object searchField = processConditionForSearchRecord(searchBasic, condition);
-            setProperty(searchBasic, condition.getFieldName(), searchField);
+            setProperty(searchBasic, fieldName, searchField);
 
         } else {
             String dataType = operatorQName.getDataType();
@@ -130,23 +132,24 @@ public class SearchQuery<SearchT, RecT> {
                 throw new NetSuiteException("Invalid data type: " + searchFieldType);
             }
 
-            Object criteria = processCondition(searchFieldType, condition);
-            customFieldList.add(criteria);
+            Object searchField = processCondition(searchFieldType, condition);
+            customFieldList.add(searchField);
         }
 
         return this;
     }
 
     private Object processConditionForSearchRecord(Object searchRecord, SearchCondition condition) throws NetSuiteException {
-        BeanInfo searchMetaData = BeanManager.getBeanInfo(searchRecord.getClass());
-        Class<?> searchFieldClass = searchMetaData.getProperty(condition.getFieldName()).getWriteType();
-        Object criteria = processCondition(searchFieldClass.getSimpleName(), condition);
-        return criteria;
+        String fieldName = toInitialLower(condition.getFieldName());
+        BeanInfo beanInfo = BeanManager.getBeanInfo(searchRecord.getClass());
+        Class<?> searchFieldClass = beanInfo.getProperty(fieldName).getWriteType();
+        Object searchField = processCondition(searchFieldClass.getSimpleName(), condition);
+        return searchField;
     }
 
     private Object processCondition(String fieldType, SearchCondition condition) throws NetSuiteException {
         try {
-            String searchFieldName = condition.getFieldName();
+            String searchFieldName = toInitialLower(condition.getFieldName());
             String searchOperator = condition.getOperatorName();
             List<String> searchValue = condition.getValues();
 
@@ -171,12 +174,12 @@ public class SearchQuery<SearchT, RecT> {
         }
 
         if (!customFieldList.isEmpty()) {
-            Object customFieldListObject = clientService.createType("SearchCustomFieldList");
-            List<Object> list = (List<Object>) getProperty(customFieldListObject, "customField");
-            for (Object customCriteria : customFieldList) {
-                list.add(customCriteria);
+            Object customFieldListWrapper = clientService.createType("SearchCustomFieldList");
+            List<Object> customFields = (List<Object>) getProperty(customFieldListWrapper, "customField");
+            for (Object customField : customFieldList) {
+                customFields.add(customField);
             }
-            setProperty(searchBasic, "customFieldList", customFieldList);
+            setProperty(searchBasic, "customFieldList", customFieldListWrapper);
         }
 
         SearchT searchRecord;

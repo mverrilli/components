@@ -2,6 +2,7 @@ package org.talend.components.netsuite.client;
 
 import java.util.Properties;
 
+import org.talend.components.netsuite.test.TestFixture;
 import org.talend.components.netsuite.test.TestUtils;
 
 import static org.talend.components.netsuite.client.NetSuiteClientService.MESSAGE_LOGGING_ENABLED_PROPERTY_NAME;
@@ -9,12 +10,13 @@ import static org.talend.components.netsuite.client.NetSuiteClientService.MESSAG
 /**
  *
  */
-public class NetSuiteWebServiceTestFixture {
+public class NetSuiteWebServiceTestFixture implements TestFixture {
 
     protected Properties properties;
     protected NetSuiteCredentials credentials;
     protected NetSuiteClientService clientService;
 
+    @Override
     public void setUp() throws Exception {
         System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
 
@@ -33,6 +35,7 @@ public class NetSuiteWebServiceTestFixture {
         clientService.setMessageLoggingEnabled(messageLoggingEnabled);
     }
 
+    @Override
     public void tearDown() throws Exception {
 
     }

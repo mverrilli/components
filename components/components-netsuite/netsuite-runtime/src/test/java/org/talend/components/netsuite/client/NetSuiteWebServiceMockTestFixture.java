@@ -7,6 +7,7 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.Endpoint;
 
 import org.apache.cxf.headers.Header;
+import org.talend.components.netsuite.test.TestFixture;
 
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
 import com.netsuite.webservices.v2016_2.platform.NetSuiteService;
@@ -20,7 +21,7 @@ import static org.talend.components.netsuite.client.NetSuiteClientService.MESSAG
 /**
  *
  */
-public class NetSuiteWebServiceMockTestFixture {
+public class NetSuiteWebServiceMockTestFixture implements TestFixture {
 
     private Endpoint endpoint;
     private NetSuiteService service;
@@ -29,6 +30,7 @@ public class NetSuiteWebServiceMockTestFixture {
     private NetSuitePortType portMock;
     private NetSuiteClientService clientService;
 
+    @Override
     public void setUp() throws Exception {
         System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
 
@@ -62,6 +64,18 @@ public class NetSuiteWebServiceMockTestFixture {
 
     }
 
+    @Override
+    public void tearDown() throws Exception {
+        // Unpublish the SOAP Web Service
+        if (endpoint != null) {
+            endpoint.stop();
+            assertFalse(endpoint.isPublished());
+        }
+
+        service = null;
+        portMockAdapter = null;
+    }
+
     public NetSuiteCredentials getCredentials() {
         return credentials;
     }
@@ -80,17 +94,6 @@ public class NetSuiteWebServiceMockTestFixture {
 
     public NetSuiteClientService getClientService() {
         return clientService;
-    }
-
-    public void tearDown() throws Exception {
-        // Unpublish the SOAP Web Service
-        if (endpoint != null) {
-            endpoint.stop();
-            assertFalse(endpoint.isPublished());
-        }
-
-        service = null;
-        portMockAdapter = null;
     }
 
     public static Header getHeader(List<Header> headers, QName name) {

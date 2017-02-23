@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.runtime;
+package org.talend.components.netsuite;
 
 import java.util.List;
 
@@ -15,11 +15,13 @@ public interface SchemaService {
 
     Schema getSchema(String typeName);
 
-    List<NamedThing> getSearches();
+    List<NamedThing> getSearchableTypes();
 
-    NsSchema getSearchRecordSchema(String typeName);
+    NsSchema getSchemaForSearch(String typeName);
 
-    NsSchema getDeleteRecordSchema(String typeName);
+    NsSchema getSchemaForUpdate(String typeName);
+
+    NsSchema getSchemaForDelete(String typeName);
 
     List<String> getSearchFieldOperators();
 

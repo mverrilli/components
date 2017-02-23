@@ -2,12 +2,12 @@ package org.talend.components.netsuite.client.tools;
 
 import static org.talend.components.netsuite.client.model.BeanUtils.toInitialLower;
 import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
+import static org.talend.components.netsuite.client.model.ClassUtils.collectXmlTypes;
 
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -23,10 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.netsuite.beans.EnumAccessor;
 import org.talend.components.netsuite.client.model.BeanUtils;
-import org.talend.components.netsuite.client.model.RecordTypeEx;
-import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
+import org.talend.components.netsuite.client.model.RecordTypeDesc;
+import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
@@ -90,28 +91,10 @@ public class MetaDataModelGen {
         this.recordRefClass = recordRefClass;
     }
 
-    protected static void traverseXmlTypes(Class<?> rootClass, Class<?> clazz, Set<Class<?>> classes) {
-        if (classes.contains(clazz)) {
-            return;
-        }
-
-        if (clazz != rootClass && rootClass.isAssignableFrom(clazz) && !Modifier.isAbstract(clazz.getModifiers())) {
-            classes.add(clazz);
-        }
-
-        XmlSeeAlso xmlSeeAlso = clazz.getAnnotation(XmlSeeAlso.class);
-        if (xmlSeeAlso != null) {
-            Collection<Class<?>> referencedClasses = new HashSet<>(Arrays.<Class<?>>asList(xmlSeeAlso.value()));
-            for (Class<?> referencedClass : referencedClasses) {
-                traverseXmlTypes(rootClass, referencedClass, classes);
-            }
-        }
-    }
-
     public void genRecordTypeMetaDataModel() {
 
         Set<Class<?>> recordClasses = new HashSet<>();
-        traverseXmlTypes(recordBaseClass, recordBaseClass, recordClasses);
+        collectXmlTypes(recordBaseClass, recordBaseClass, recordClasses);
 
         Set<String> unresolvedTypeNames = new HashSet<>();
 
@@ -274,7 +257,7 @@ public class MetaDataModelGen {
         });
 
         TypeSpec.Builder builder = TypeSpec.enumBuilder(recordTypeEnumClassName.simpleName())
-                .addSuperinterface(RecordTypeEx.class)
+                .addSuperinterface(RecordTypeDesc.class)
                 .addModifiers(javax.lang.model.element.Modifier.PUBLIC)
                 .addField(String.class, "type",
                         javax.lang.model.element.Modifier.PRIVATE, javax.lang.model.element.Modifier.FINAL)
@@ -331,20 +314,20 @@ public class MetaDataModelGen {
                 .addModifiers(javax.lang.model.element.Modifier.PUBLIC, javax.lang.model.element.Modifier.STATIC)
                 .returns(recordTypeEnumClassName)
                 .addParameter(String.class, "typeName")
-                .addCode("for ($T value : values()) {\n" +
-                        "    if (value.typeName.equals($N)) {\n" +
-                        "      return value;\n" +
-                        "    }\n" +
-                        "}\n" +
-                        "return null;\n",
-                        recordTypeEnumClassName, "typeName"
-                )
+                .addCode(CodeBlock.builder()
+                        .beginControlFlow("for ($T value : values())", recordTypeEnumClassName)
+                        .beginControlFlow("if (value.typeName.equals($N))", "typeName")
+                        .addStatement("return value")
+                        .endControlFlow()
+                        .endControlFlow()
+                        .addStatement("return null")
+                        .build())
                 .build());
 
         TypeSpec typeSpec = builder.build();
-//        System.out.println(typeSpec.toString());
 
-        JavaFile jfile = JavaFile.builder(recordTypeEnumClassName.packageName(), typeSpec).build();
+        JavaFile jfile = JavaFile.builder(recordTypeEnumClassName.packageName(), typeSpec)
+                .indent("    ").build();
 
         jfile.writeTo(outputFolder);
     }
@@ -358,7 +341,7 @@ public class MetaDataModelGen {
         });
 
         TypeSpec.Builder builder = TypeSpec.enumBuilder(searchRecordTypeEnumClassName.simpleName())
-                .addSuperinterface(SearchRecordTypeEx.class)
+                .addSuperinterface(SearchRecordTypeDesc.class)
                 .addModifiers(javax.lang.model.element.Modifier.PUBLIC)
                 .addField(String.class, "type",
                         javax.lang.model.element.Modifier.PRIVATE, javax.lang.model.element.Modifier.FINAL)
@@ -431,21 +414,21 @@ public class MetaDataModelGen {
                 .addModifiers(javax.lang.model.element.Modifier.PUBLIC, javax.lang.model.element.Modifier.STATIC)
                 .returns(searchRecordTypeEnumClassName)
                 .addParameter(String.class, "typeName")
-                .addCode("for ($T value : values()) {\n" +
-                                "    if (value.typeName.equals($N)) {\n" +
-                                "      return value;\n" +
-                                "    }\n" +
-                                "}\n" +
-                                "return null;\n",
-                        searchRecordTypeEnumClassName, "typeName"
-                )
+                .addCode(CodeBlock.builder()
+                        .beginControlFlow("for ($T value : values())", searchRecordTypeEnumClassName)
+                        .beginControlFlow("if (value.typeName.equals($N))", "typeName")
+                        .addStatement("return value")
+                        .endControlFlow()
+                        .endControlFlow()
+                        .addStatement("return null")
+                        .build())
                 .build());
 
 
         TypeSpec typeSpec = builder.build();
-//        System.out.println(typeSpec.toString());
 
-        JavaFile jfile = JavaFile.builder(searchRecordTypeEnumClassName.packageName(), typeSpec).build();
+        JavaFile jfile = JavaFile.builder(searchRecordTypeEnumClassName.packageName(), typeSpec)
+                .indent("    ").build();
 
         jfile.writeTo(outputFolder);
 

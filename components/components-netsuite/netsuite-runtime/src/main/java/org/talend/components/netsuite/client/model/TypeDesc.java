@@ -8,20 +8,20 @@ import java.util.Map;
 /**
  *
  */
-public class TypeInfo {
+public class TypeDesc {
     private String typeName;
     private Class<?> typeClass;
-    private List<FieldInfo> fields;
-    private Map<String, FieldInfo> fieldMap;
+    private List<FieldDesc> fields;
+    private Map<String, FieldDesc> fieldMap;
 
-    public TypeInfo(String typeName, Class<?> typeClass, List<FieldInfo> fields) {
+    public TypeDesc(String typeName, Class<?> typeClass, List<FieldDesc> fields) {
         this.typeName = typeName;
         this.typeClass = typeClass;
         this.fields = fields;
 
         fieldMap = new HashMap<>(fields.size());
-        for (FieldInfo fieldInfo : fields) {
-            fieldMap.put(fieldInfo.getName(), fieldInfo);
+        for (FieldDesc fieldDesc : fields) {
+            fieldMap.put(fieldDesc.getName(), fieldDesc);
         }
     }
 
@@ -33,15 +33,15 @@ public class TypeInfo {
         return typeClass;
     }
 
-    public FieldInfo getField(String name) {
+    public FieldDesc getField(String name) {
         return fieldMap.get(name);
     }
 
-    public Map<String, FieldInfo> getFieldMap() {
+    public Map<String, FieldDesc> getFieldMap() {
         return Collections.unmodifiableMap(fieldMap);
     }
 
-    public List<FieldInfo> getFields() {
+    public List<FieldDesc> getFields() {
         return Collections.unmodifiableList(fields);
     }
 }

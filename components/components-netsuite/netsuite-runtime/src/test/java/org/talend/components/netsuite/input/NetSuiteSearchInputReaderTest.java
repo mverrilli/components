@@ -1,103 +1,69 @@
 package org.talend.components.netsuite.input;
 
-import java.util.ArrayList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
+
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.UUID;
 
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
-import org.joda.time.DateTime;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.talend.components.api.component.ComponentDefinition;
-import org.talend.components.api.container.RuntimeContainer;
-import org.talend.components.netsuite.NetSuiteAvroRegistry;
+import org.talend.components.netsuite.NetSuiteMockTestBase;
+import org.talend.components.netsuite.NetSuiteComponentMockTestFixture;
 import org.talend.components.netsuite.NetSuiteSource;
-import org.talend.components.netsuite.beans.BeanInfo;
+import org.talend.components.netsuite.RuntimeService;
+import org.talend.components.netsuite.RuntimeServiceImpl;
+import org.talend.components.netsuite.SchemaService;
+import org.talend.components.netsuite.beans.Mapper;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.BeanUtils;
-import org.talend.components.netsuite.client.model.TypeInfo;
-import org.talend.components.netsuite.client.model.FieldInfo;
-import org.talend.components.netsuite.client.NetSuiteWebServiceMockTestFixture;
-import org.talend.components.netsuite.beans.Mapper;
-import org.talend.components.netsuite.beans.PropertyInfo;
-import org.talend.components.netsuite.beans.BeanManager;
-import org.talend.components.netsuite.runtime.RuntimeService;
-import org.talend.components.netsuite.runtime.RuntimeServiceImpl;
-import org.talend.components.netsuite.runtime.SchemaService;
+import org.talend.components.netsuite.client.model.FieldDesc;
+import org.talend.components.netsuite.client.model.TypeDesc;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.Account;
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
-import com.netsuite.webservices.v2016_2.platform.core.RecordList;
 import com.netsuite.webservices.v2016_2.platform.core.SearchResult;
-import com.netsuite.webservices.v2016_2.platform.core.Status;
-import com.netsuite.webservices.v2016_2.platform.messages.LoginRequest;
-import com.netsuite.webservices.v2016_2.platform.messages.LoginResponse;
 import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreWithIdRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreWithIdResponse;
 import com.netsuite.webservices.v2016_2.platform.messages.SearchRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.SearchResponse;
-import com.netsuite.webservices.v2016_2.platform.messages.SessionResponse;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  *
  */
-public class NetSuiteSearchInputReaderTest {
-
-    private static NetSuiteWebServiceMockTestFixture webServiceTestFixture;
-
-    private static Random rnd = new Random(System.currentTimeMillis());
+public class NetSuiteSearchInputReaderTest extends NetSuiteMockTestBase {
+    private static NetSuiteComponentMockTestFixture mockTestFixture;
 
     @BeforeClass
     public static void classSetUp() throws Exception {
-        webServiceTestFixture = new NetSuiteWebServiceMockTestFixture();
-        webServiceTestFixture.setUp();
+        mockTestFixture = new NetSuiteComponentMockTestFixture();
+        classScopedTestFixtures.add(mockTestFixture);
+        setUpClassScopedTestFixtures();
     }
 
     @AfterClass
     public static void classTearDown() throws Exception {
-        if (webServiceTestFixture != null) {
-            webServiceTestFixture.tearDown();
-        }
+        tearDownClassScopedTestFixtures();
     }
 
     @Test
     public void testInput() throws Exception {
-        final NetSuitePortType port = webServiceTestFixture.getPortMock();
-
-        SessionResponse sessionResponse = new SessionResponse();
-        Status status = new Status();
-        status.setIsSuccess(true);
-        sessionResponse.setStatus(status);
-        LoginResponse response = new LoginResponse();
-        response.setSessionResponse(sessionResponse);
-
-        when(port.login(any(LoginRequest.class))).thenReturn(response);
-
-        RuntimeContainer container = mock(RuntimeContainer.class);
+        final NetSuitePortType port = mockTestFixture.getPortMock();
 
         NetSuiteInputProperties properties = new NetSuiteInputProperties("NetSuite");
         properties.init();
-        properties.connection.endpoint.setValue(webServiceTestFixture.getEndpointAddress().toString());
-        properties.connection.email.setValue("test@test.com");
-        properties.connection.password.setValue("123");
-        properties.connection.role.setValue(3);
-        properties.connection.account.setValue("test");
-        properties.connection.applicationId.setValue("00000000-0000-0000-0000-000000000000");
+        properties.connection.copyValuesFrom(mockTestFixture.getConnectionProperties());
         properties.module.moduleName.setValue("Account");
 
         RuntimeService runtimeService = new RuntimeServiceImpl();
@@ -108,9 +74,9 @@ public class NetSuiteSearchInputReaderTest {
         properties.module.main.schema.setValue(schema);
 
         NetSuiteSource source = new NetSuiteSource();
-        source.initialize(container, properties);
+        source.initialize(mockTestFixture.getRuntimeContainer(), properties);
 
-        final List<SearchResult> pageResults = makeRecordPages(150, 100);
+        final List<SearchResult> pageResults = makeRecordPages(Account.class, 150, 100);
         when(port.search(any(SearchRequest.class))).then(new Answer<SearchResponse>() {
             @Override public SearchResponse answer(InvocationOnMock invocationOnMock) throws Throwable {
                 SearchResponse response = new SearchResponse();
@@ -128,9 +94,10 @@ public class NetSuiteSearchInputReaderTest {
         });
 
         NetSuiteClientService clientService = source.getClientService();
-        TypeInfo entityInfo = clientService.getTypeInfo(Account.class);
+        TypeDesc entityInfo = clientService.getTypeInfo(Account.class);
 
-        NetSuiteSearchInputReader reader = (NetSuiteSearchInputReader) source.createReader(container);
+        NetSuiteSearchInputReader reader = (NetSuiteSearchInputReader) source.createReader(
+                mockTestFixture.getRuntimeContainer());
 
         boolean started = reader.start();
         assertTrue(started);
@@ -145,8 +112,8 @@ public class NetSuiteSearchInputReaderTest {
             List<Schema.Field> fields = record.getSchema().getFields();
             for (int i = 0; i < fields.size(); i++) {
                 Schema.Field field = fields.get(i);
-                FieldInfo fieldInfo = entityInfo.getField(field.name());
-                Class<?> datumClass = fieldInfo.getValueType();
+                FieldDesc fieldDesc = entityInfo.getField(field.name());
+                Class<?> datumClass = fieldDesc.getValueType();
 
                 Object value = record.get(i);
 
@@ -182,116 +149,6 @@ public class NetSuiteSearchInputReaderTest {
         assertNotNull(readerResult);
 
         assertEquals(150, readerResult.get(ComponentDefinition.RETURN_TOTAL_RECORD_COUNT));
-    }
-
-    private List<SearchResult> makeRecordPages(int count, int pageSize) throws Exception {
-        int totalPages = count / pageSize;
-        if (count % pageSize != 0) {
-            totalPages += 1;
-        }
-
-        String searchId = UUID.randomUUID().toString();
-
-        Status status = new Status();
-        status.setIsSuccess(true);
-
-        List<SearchResult> pageResults = new ArrayList<>();
-        SearchResult result = null;
-        while (count > 0) {
-            Account record = composeObject(Account.class);
-
-            if (result == null) {
-                result = new SearchResult();
-                result.setSearchId(searchId);
-                result.setTotalPages(totalPages);
-                result.setTotalRecords(count);
-                result.setPageIndex(pageResults.size() + 1);
-                result.setPageSize(pageSize);
-                result.setStatus(status);
-            }
-
-            if (result.getRecordList() == null) {
-                result.setRecordList(new RecordList());
-            }
-            result.getRecordList().getRecord().add(record);
-
-            if (result.getRecordList().getRecord().size() == pageSize) {
-                pageResults.add(result);
-                result = null;
-            }
-
-            count--;
-        }
-
-        if (result != null) {
-            pageResults.add(result);
-        }
-
-        return pageResults;
-    }
-
-    private <T> T composeObject(Class<T> clazz) throws Exception {
-        BeanInfo beanInfo = BeanManager.getBeanInfo(clazz);
-        List<PropertyInfo> propertyInfoList = beanInfo.getProperties();
-
-        T obj = clazz.newInstance();
-
-        for (PropertyInfo propertyInfo : propertyInfoList) {
-            if (propertyInfo.getWriteType() != null) {
-                Object value = composeValue(propertyInfo.getWriteType());
-                BeanUtils.setProperty(obj, propertyInfo.getName(), value);
-            }
-        }
-
-        return obj;
-    }
-
-    private static Object composeValue(Class<?> clazz) throws Exception {
-        if (clazz == Boolean.class) {
-            return Boolean.valueOf(rnd.nextBoolean());
-        }
-        if (clazz == Long.class) {
-            return Long.valueOf(rnd.nextLong());
-        }
-        if (clazz == Double.class) {
-            return Double.valueOf(rnd.nextLong());
-        }
-        if (clazz == Integer.class) {
-            return Integer.valueOf(rnd.nextInt());
-        }
-        if (clazz == String.class) {
-            int len = 10 + rnd.nextInt(100);
-            StringBuilder sb = new StringBuilder(len);
-            for (int i = 0; i < len; i++) {
-                sb.append((char) (32 + rnd.nextInt(127 - 32)));
-            }
-            return sb.toString();
-        }
-        if (clazz == XMLGregorianCalendar.class) {
-            return composeDateTime();
-        }
-        if (clazz.isEnum()) {
-            Object[] values = clazz.getEnumConstants();
-            return values[rnd.nextInt(values.length)];
-        }
-        return null;
-    }
-
-    private static XMLGregorianCalendar composeDateTime() throws Exception {
-        DateTime dateTime = DateTime.now();
-
-        XMLGregorianCalendar xts = NetSuiteAvroRegistry.getInstance().getDatatypeFactory().newXMLGregorianCalendar();
-        xts.setYear(dateTime.getYear());
-        xts.setMonth(dateTime.getMonthOfYear());
-        xts.setDay(dateTime.getDayOfMonth());
-        xts.setHour(dateTime.getHourOfDay());
-        xts.setMinute(dateTime.getMinuteOfHour());
-        xts.setSecond(dateTime.getSecondOfMinute());
-        xts.setMillisecond(dateTime.getMillisOfSecond());
-        xts.setTimezone(dateTime.getZone().toTimeZone().getRawOffset() / 60000);
-
-        return xts;
-
     }
 
 }

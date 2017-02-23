@@ -5,14 +5,14 @@ package org.talend.components.netsuite.client.model;
  */
 public class RecordTypeInfo {
     private String name;
-    private RecordTypeEx recordType;
+    private RecordTypeDesc recordType;
 
-    public RecordTypeInfo(RecordTypeEx recordType) {
+    public RecordTypeInfo(RecordTypeDesc recordType) {
         this.name = recordType.getTypeName();
         this.recordType = recordType;
     }
 
-    public RecordTypeInfo(String name, RecordTypeEx recordType) {
+    public RecordTypeInfo(String name, RecordTypeDesc recordType) {
         this.name = name;
         this.recordType = recordType;
     }
@@ -21,7 +21,7 @@ public class RecordTypeInfo {
         return name;
     }
 
-    public RecordTypeEx getRecordType() {
+    public RecordTypeDesc getRecordType() {
         return recordType;
     }
 }

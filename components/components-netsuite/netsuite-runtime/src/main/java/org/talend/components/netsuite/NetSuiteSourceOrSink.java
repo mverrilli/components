@@ -13,8 +13,6 @@ import org.talend.components.api.properties.ComponentProperties;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
-import org.talend.components.netsuite.runtime.SchemaService;
-import org.talend.components.netsuite.runtime.SchemaServiceImpl;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.properties.ValidationResult;
 

@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.talend.components.api.properties.ComponentPropertiesImpl;
 import org.talend.components.api.properties.ComponentReferenceProperties;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
-import org.talend.components.netsuite.runtime.RuntimeService;
+import org.talend.components.netsuite.RuntimeService;
 import org.talend.daikon.java8.Function;
 import org.talend.daikon.properties.PresentationItem;
 import org.talend.daikon.properties.ValidationResult;

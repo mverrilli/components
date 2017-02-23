@@ -7,14 +7,13 @@ import java.util.Set;
 
 import org.talend.components.api.component.Connector;
 import org.talend.components.api.component.PropertyPathConnector;
-import org.talend.components.api.properties.ComponentPropertiesImpl;
 import org.talend.components.common.FixedConnectorsComponentProperties;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.components.netsuite.NetSuiteModuleProperties;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
 import org.talend.components.netsuite.schema.NsField;
 import org.talend.components.netsuite.schema.NsSchema;
-import org.talend.components.netsuite.runtime.SchemaService;
+import org.talend.components.netsuite.SchemaService;
 import org.talend.daikon.java8.Function;
 import org.talend.daikon.properties.ValidationResult;
 import org.talend.daikon.properties.presentation.Form;
@@ -84,10 +83,10 @@ public class NetSuiteInputProperties extends FixedConnectorsComponentProperties
         }
     }
 
-    protected NsSchema<NsField> getSearchSchema(final String typeName) {
+    protected NsSchema getSchemaForSearch(final String typeName) {
         return withSchemaService(new Function<SchemaService, NsSchema>() {
             @Override public NsSchema apply(SchemaService schemaService) {
-                return schemaService.getSearchRecordSchema(typeName);
+                return schemaService.getSchemaForSearch(typeName);
             }
         }, this);
     }
@@ -110,7 +109,7 @@ public class NetSuiteInputProperties extends FixedConnectorsComponentProperties
         public ValidationResult afterModuleName() throws Exception {
             ValidationResult validationResult = super.afterModuleName();
 
-            NsSchema<?> searchSchema = getSearchSchema(moduleName.getValue());
+            NsSchema searchSchema = getSchemaForSearch(moduleName.getValue());
             List<String> fieldNames = new ArrayList<>(searchSchema.getFields().size());
             for (NsField field : searchSchema.getFields()) {
                 fieldNames.add(field.getName());

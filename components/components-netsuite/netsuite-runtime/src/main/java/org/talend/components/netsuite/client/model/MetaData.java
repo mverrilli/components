@@ -12,19 +12,19 @@ import org.talend.components.netsuite.client.model.search.SearchFieldOperatorTyp
  */
 public interface MetaData {
 
-    TypeInfo getTypeInfo(String typeName);
+    TypeDesc getTypeInfo(String typeName);
 
-    TypeInfo getTypeInfo(Class<?> clazz);
+    TypeDesc getTypeInfo(Class<?> clazz);
 
-    Collection<RecordTypeEx> getRecordTypes();
+    Collection<RecordTypeDesc> getRecordTypes();
 
     boolean isRecord(String typeName);
 
-    RecordTypeEx getRecordType(String recordType);
+    RecordTypeDesc getRecordType(String recordType);
 
-    SearchRecordTypeEx getSearchRecordType(RecordTypeEx recordType);
+    SearchRecordTypeDesc getSearchRecordType(RecordTypeDesc recordType);
 
-    SearchRecordTypeEx getSearchRecordType(String searchRecordType);
+    SearchRecordTypeDesc getSearchRecordType(String searchRecordType);
 
     Object getSearchFieldOperatorByName(String searchFieldType, String searchFieldOperatorName);
 

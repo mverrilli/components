@@ -26,13 +26,13 @@ import org.talend.components.netsuite.client.common.NsPreferences;
 import org.talend.components.netsuite.client.common.NsSearchPreferences;
 import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.client.common.NsWriteResponse;
-import org.talend.components.netsuite.client.model.FieldInfo;
+import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.MetaData;
-import org.talend.components.netsuite.client.model.RecordTypeEx;
+import org.talend.components.netsuite.client.model.RecordTypeDesc;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
-import org.talend.components.netsuite.client.model.SearchRecordTypeEx;
-import org.talend.components.netsuite.client.model.TypeInfo;
-import org.talend.components.netsuite.client.model.customfield.CustomFieldInfo;
+import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
+import org.talend.components.netsuite.client.model.TypeDesc;
+import org.talend.components.netsuite.client.model.CustomFieldDesc;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
 import org.talend.components.netsuite.client.model.search.SearchFieldAdapter;
 import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
@@ -232,14 +232,14 @@ public abstract class NetSuiteClientService<PortT> {
     protected boolean recordTypeCustomizationsLoaded = false;
 
     protected Map<String, List<Object>> customFieldMap = new HashMap<>();
-    protected Map<RecordTypeEx, Map<String, CustomFieldInfo>> recordCustomFieldMap = new HashMap<>();
+    protected Map<RecordTypeDesc, Map<String, CustomFieldDesc>> recordCustomFieldMap = new HashMap<>();
     protected boolean fieldCustomizationsLoaded = false;
 
     public Collection<RecordTypeInfo> getRecordTypes() {
         List<RecordTypeInfo> recordTypes = new ArrayList<>();
 
-        Collection<RecordTypeEx> standardRecordTypes = metaData.getRecordTypes();
-        for (RecordTypeEx recordType : standardRecordTypes) {
+        Collection<RecordTypeDesc> standardRecordTypes = metaData.getRecordTypes();
+        for (RecordTypeDesc recordType : standardRecordTypes) {
             recordTypes.add(new RecordTypeInfo(recordType));
         }
 
@@ -261,7 +261,7 @@ public abstract class NetSuiteClientService<PortT> {
         }
 
         for (RecordTypeInfo recordTypeInfo : recordTypes) {
-            SearchRecordTypeEx searchRecordType = metaData.getSearchRecordType(recordTypeInfo.getRecordType());
+            SearchRecordTypeDesc searchRecordType = metaData.getSearchRecordType(recordTypeInfo.getRecordType());
             if (searchRecordType != null) {
                 searches.add(new SimpleNamedThing(recordTypeInfo.getName(), recordTypeInfo.getName()));
             }
@@ -270,36 +270,37 @@ public abstract class NetSuiteClientService<PortT> {
         return searches;
     }
 
-    public TypeInfo getTypeInfo(String typeName) {
+    public TypeDesc getTypeInfo(String typeName) {
         return metaData.getTypeInfo(typeName);
     }
 
-    public TypeInfo getTypeInfo(Class<?> clazz) {
+    public TypeDesc getTypeInfo(Class<?> clazz) {
         return metaData.getTypeInfo(clazz);
     }
 
-    public TypeInfo getTypeInfo(String typeName, boolean includeCustomFields) {
+    public TypeDesc getCustomizedTypeInfo(String typeName) {
         RecordTypeInfo recordTypeInfo = getRecordType(typeName);
         if (recordTypeInfo != null) {
-            TypeInfo typeInfo = metaData.getTypeInfo(typeName);
-            List<FieldInfo> fieldInfoList = typeInfo.getFields();
+            TypeDesc typeDesc = metaData.getTypeInfo(typeName);
+            List<FieldDesc> fieldDescList = typeDesc.getFields();
 
-            List<FieldInfo> resultFieldInfoList = new ArrayList<>(fieldInfoList.size() + 10);
-            for (FieldInfo fieldInfo : fieldInfoList) {
-                String fieldName = fieldInfo.getName();
-                if (includeCustomFields && fieldName.equals("customFieldList")) {
+            List<FieldDesc> resultFieldDescList = new ArrayList<>(fieldDescList.size() + 10);
+            for (FieldDesc fieldDesc : fieldDescList) {
+                String fieldName = fieldDesc.getName();
+                if (fieldName.equals("customFieldList")) {
                     continue;
                 }
+                resultFieldDescList.add(fieldDesc);
             }
 
-            Map<String, CustomFieldInfo> customFieldMap = getRecordCustomFields(recordTypeInfo.getRecordType());
-            for (CustomFieldInfo fieldInfo : customFieldMap.values()) {
-                resultFieldInfoList.add(fieldInfo);
+            Map<String, CustomFieldDesc> customFieldMap = getRecordCustomFields(recordTypeInfo.getRecordType());
+            for (CustomFieldDesc fieldInfo : customFieldMap.values()) {
+                resultFieldDescList.add(fieldInfo);
             }
 
-            return new TypeInfo(typeInfo.getTypeName(), typeInfo.getTypeClass(), resultFieldInfoList);
+            return new TypeDesc(typeDesc.getTypeName(), typeDesc.getTypeClass(), resultFieldDescList);
         } else {
-            return metaData.getTypeInfo(typeName);
+            return getTypeInfo(typeName);
         }
     }
 
@@ -308,7 +309,7 @@ public abstract class NetSuiteClientService<PortT> {
     }
 
     public RecordTypeInfo getRecordType(String typeName) {
-        RecordTypeEx recordType = metaData.getRecordType(typeName);
+        RecordTypeDesc recordType = metaData.getRecordType(typeName);
         if (recordType != null) {
             return new RecordTypeInfo(recordType);
         }
@@ -319,10 +320,10 @@ public abstract class NetSuiteClientService<PortT> {
         return recordTypeInfo;
     }
 
-    public SearchRecordTypeEx getSearchRecordType(String recordTypeName) {
-        SearchRecordTypeEx searchRecordType = metaData.getSearchRecordType(recordTypeName);
+    public SearchRecordTypeDesc getSearchRecordType(String recordTypeName) {
+        SearchRecordTypeDesc searchRecordType = metaData.getSearchRecordType(recordTypeName);
         if (searchRecordType == null) {
-            RecordTypeEx recordType = metaData.getRecordType(recordTypeName);
+            RecordTypeDesc recordType = metaData.getRecordType(recordTypeName);
             if (recordType != null) {
                 searchRecordType = metaData.getSearchRecordType(recordType.getSearchRecordType());
             }
@@ -338,13 +339,13 @@ public abstract class NetSuiteClientService<PortT> {
         return metaData.getSearchFieldPopulator(fieldType);
     }
 
-    protected Map<String, CustomFieldInfo> getRecordCustomFields(RecordTypeEx recordType) throws NetSuiteException {
+    protected Map<String, CustomFieldDesc> getRecordCustomFields(RecordTypeDesc recordType) throws NetSuiteException {
         try {
             lock.lock();
 
             loadFieldCustomizations();
 
-            Map<String, CustomFieldInfo> recordCustomFields = recordCustomFieldMap.get(recordType.getType());
+            Map<String, CustomFieldDesc> recordCustomFields = recordCustomFieldMap.get(recordType.getType());
             if (recordCustomFields == null) {
                 recordCustomFields = new HashMap<>();
 
@@ -357,7 +358,7 @@ public abstract class NetSuiteClientService<PortT> {
                                 .getCustomFieldRefType(recordType.getType(), customizationType, customField);
 
                         if (customFieldRefType != null) {
-                            CustomFieldInfo customFieldInfo = new CustomFieldInfo();
+                            CustomFieldDesc customFieldInfo = new CustomFieldDesc();
 
                             String scriptId = (String) getProperty(customField, "scriptId");
                             String internalId = (String) getProperty(customField, "internalId");
@@ -396,7 +397,7 @@ public abstract class NetSuiteClientService<PortT> {
 
                 for (NsCustomizationRef customizationRef : customRecordTypes) {
                     String recordType = customizationRef.getType();
-                    RecordTypeEx recordTypeInfo = metaData.getRecordType(toInitialUpper(recordType));
+                    RecordTypeDesc recordTypeInfo = metaData.getRecordType(toInitialUpper(recordType));
                     RecordTypeInfo customRecordTypeInfo = new RecordTypeInfo(
                             customizationRef.getScriptId(), recordTypeInfo);
                     customRecordTypeMap.put(customRecordTypeInfo.getName(), customRecordTypeInfo);
