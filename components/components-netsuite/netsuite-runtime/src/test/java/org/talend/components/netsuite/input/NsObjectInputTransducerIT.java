@@ -11,7 +11,7 @@ import org.junit.Test;
 import org.talend.components.netsuite.NetSuiteTestBase;
 import org.talend.components.netsuite.SchemaServiceImpl;
 import org.talend.components.netsuite.client.NetSuiteClientService;
-import org.talend.components.netsuite.client.NetSuiteWebServiceTestFixture;
+import org.talend.components.netsuite.test.NetSuiteWebServiceTestFixture;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.query.SearchResultSet;

@@ -3,52 +3,37 @@ package org.talend.components.netsuite.input;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
+import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.talend.components.api.component.ComponentDefinition;
 import org.talend.components.netsuite.NetSuiteMockTestBase;
-import org.talend.components.netsuite.NetSuiteComponentMockTestFixture;
 import org.talend.components.netsuite.NetSuiteSource;
 import org.talend.components.netsuite.RuntimeService;
 import org.talend.components.netsuite.RuntimeServiceImpl;
 import org.talend.components.netsuite.SchemaService;
-import org.talend.components.netsuite.beans.Mapper;
 import org.talend.components.netsuite.client.NetSuiteClientService;
-import org.talend.components.netsuite.client.model.BeanUtils;
-import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.Account;
-import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
-import com.netsuite.webservices.v2016_2.platform.core.SearchResult;
-import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreWithIdRequest;
-import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreWithIdResponse;
-import com.netsuite.webservices.v2016_2.platform.messages.SearchRequest;
-import com.netsuite.webservices.v2016_2.platform.messages.SearchResponse;
 
 /**
  *
  */
 public class NetSuiteSearchInputReaderTest extends NetSuiteMockTestBase {
-    private static NetSuiteComponentMockTestFixture mockTestFixture;
+    protected NetSuiteInputProperties properties;
 
     @BeforeClass
     public static void classSetUp() throws Exception {
-        mockTestFixture = new NetSuiteComponentMockTestFixture();
-        classScopedTestFixtures.add(mockTestFixture);
+        installWebServiceTestFixture();
         setUpClassScopedTestFixtures();
     }
 
@@ -57,44 +42,39 @@ public class NetSuiteSearchInputReaderTest extends NetSuiteMockTestBase {
         tearDownClassScopedTestFixtures();
     }
 
-    @Test
-    public void testInput() throws Exception {
-        final NetSuitePortType port = mockTestFixture.getPortMock();
+    @Override @Before
+    public void setUp() throws Exception {
+        installMockTestFixture();
+        super.setUp();
 
-        NetSuiteInputProperties properties = new NetSuiteInputProperties("NetSuite");
+        properties = new NetSuiteInputProperties("test");
         properties.init();
         properties.connection.copyValuesFrom(mockTestFixture.getConnectionProperties());
+    }
+
+    @Override @After
+    public void tearDown() throws Exception {
+        super.tearDown();
+    }
+
+    @Test
+    public void testBasic() throws Exception {
         properties.module.moduleName.setValue("Account");
 
         RuntimeService runtimeService = new RuntimeServiceImpl();
         SchemaService schemaService = runtimeService.getSchemaService(properties.getConnectionProperties());
 
         Schema schema = schemaService.getSchema(properties.module.moduleName.getValue());
-
         properties.module.main.schema.setValue(schema);
 
         NetSuiteSource source = new NetSuiteSource();
         source.initialize(mockTestFixture.getRuntimeContainer(), properties);
 
-        final List<SearchResult> pageResults = makeRecordPages(Account.class, 150, 100);
-        when(port.search(any(SearchRequest.class))).then(new Answer<SearchResponse>() {
-            @Override public SearchResponse answer(InvocationOnMock invocationOnMock) throws Throwable {
-                SearchResponse response = new SearchResponse();
-                response.setSearchResult(pageResults.get(0));
-                return response;
-            }
-        });
-        when(port.searchMoreWithId(any(SearchMoreWithIdRequest.class))).then(new Answer<SearchMoreWithIdResponse>() {
-            @Override public SearchMoreWithIdResponse answer(InvocationOnMock invocationOnMock) throws Throwable {
-                SearchMoreWithIdRequest request = (SearchMoreWithIdRequest) invocationOnMock.getArguments()[0];
-                SearchMoreWithIdResponse response = new SearchMoreWithIdResponse();
-                response.setSearchResult(pageResults.get(request.getPageIndex() - 1));
-                return response;
-            }
-        });
+        List<Account> recordList = makeNsObjects(new SimpleObjectComposer<>(Account.class), 150);
+        mockSearchRequestResults(recordList, 100);
 
         NetSuiteClientService clientService = source.getClientService();
-        TypeDesc entityInfo = clientService.getTypeInfo(Account.class);
+        TypeDesc typeDesc = clientService.getTypeInfo(Account.class);
 
         NetSuiteSearchInputReader reader = (NetSuiteSearchInputReader) source.createReader(
                 mockTestFixture.getRuntimeContainer());
@@ -107,42 +87,8 @@ public class NetSuiteSearchInputReaderTest extends NetSuiteMockTestBase {
 
         while (reader.advance()) {
             record = reader.getCurrent();
-            assertNotNull(record);
 
-            List<Schema.Field> fields = record.getSchema().getFields();
-            for (int i = 0; i < fields.size(); i++) {
-                Schema.Field field = fields.get(i);
-                FieldDesc fieldDesc = entityInfo.getField(field.name());
-                Class<?> datumClass = fieldDesc.getValueType();
-
-                Object value = record.get(i);
-
-                if (datumClass == Boolean.class) {
-                    assertNotNull(value);
-                }
-                if (datumClass == Integer.class) {
-                    assertNotNull(value);
-                }
-                if (datumClass == Long.class) {
-                    assertNotNull(value);
-                }
-                if (datumClass == Double.class) {
-                    assertNotNull(value);
-                }
-                if (datumClass == String.class) {
-                    assertNotNull(value);
-                }
-                if (datumClass == XMLGregorianCalendar.class) {
-                    assertNotNull(value);
-                }
-                if (datumClass.isEnum()) {
-                    assertNotNull(value);
-                    Mapper<String, Enum> enumAccessor = BeanUtils.getEnumFromStringMapper((Class<Enum>) datumClass);
-                    Enum modelValue = enumAccessor.map((String) value);
-                    assertNotNull(modelValue);
-                }
-//                System.out.println(fields.get(i) + ": " + value);
-            }
+            assertIndexedRecord(typeDesc, record);
         }
 
         Map<String, Object> readerResult = reader.getReturnValues();

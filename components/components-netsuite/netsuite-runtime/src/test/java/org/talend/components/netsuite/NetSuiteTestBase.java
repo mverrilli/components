@@ -2,6 +2,7 @@ package org.talend.components.netsuite;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
@@ -16,6 +17,7 @@ import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.beans.BeanManager;
 import org.talend.components.netsuite.beans.PropertyInfo;
 import org.talend.components.netsuite.client.model.BeanUtils;
+import org.talend.components.netsuite.test.NetSuitePortTypeMockAdapter;
 import org.talend.components.netsuite.test.TestFixture;
 import org.talend.daikon.avro.AvroUtils;
 
@@ -89,9 +91,14 @@ public abstract class NetSuiteTestBase {
         return null;
     }
 
-    protected <T extends Record> List<SearchResult> makeRecordPages(
-            Class<T> clazz, int count, int pageSize) throws Exception {
+    public static Status createSuccessStatus() {
+        return NetSuitePortTypeMockAdapter.createSuccessStatus();
+    }
 
+    protected static <T extends Record> List<SearchResult> makeRecordPages(List<T> recordList, int pageSize)
+            throws Exception {
+
+        int count = recordList.size();
         int totalPages = count / pageSize;
         if (count % pageSize != 0) {
             totalPages += 1;
@@ -99,13 +106,13 @@ public abstract class NetSuiteTestBase {
 
         String searchId = UUID.randomUUID().toString();
 
-        Status status = new Status();
-        status.setIsSuccess(true);
-
         List<SearchResult> pageResults = new ArrayList<>();
         SearchResult result = null;
-        while (count > 0) {
-            Record record = composeObject(clazz);
+
+        Iterator<T> recordIterator = recordList.iterator();
+
+        while (recordIterator.hasNext() && count > 0) {
+            T record = recordIterator.next();
 
             if (result == null) {
                 result = new SearchResult();
@@ -114,7 +121,7 @@ public abstract class NetSuiteTestBase {
                 result.setTotalRecords(count);
                 result.setPageIndex(pageResults.size() + 1);
                 result.setPageSize(pageSize);
-                result.setStatus(status);
+                result.setStatus(createSuccessStatus());
             }
 
             if (result.getRecordList() == null) {
@@ -137,7 +144,17 @@ public abstract class NetSuiteTestBase {
         return pageResults;
     }
 
-    protected <T> T composeObject(Class<T> clazz) throws Exception {
+    protected static <T> List<T> makeNsObjects(SimpleObjectComposer<T> composer, int count) throws Exception {
+        List<T> recordList = new ArrayList<>();
+        while (count > 0) {
+            T record = composer.composeObject();
+            recordList.add(record);
+            count--;
+        }
+        return recordList;
+    }
+
+    protected static <T> T composeObject(Class<T> clazz) throws Exception {
         BeanInfo beanInfo = BeanManager.getBeanInfo(clazz);
         List<PropertyInfo> propertyInfoList = beanInfo.getProperties();
 
@@ -201,4 +218,21 @@ public abstract class NetSuiteTestBase {
 
     }
 
+    public interface ObjectComposer<T> {
+
+        T composeObject() throws Exception;
+    }
+
+    public static class SimpleObjectComposer<T> implements ObjectComposer<T> {
+        protected Class<T> clazz;
+
+        public SimpleObjectComposer(Class<T> clazz) {
+            this.clazz = clazz;
+        }
+
+        @Override
+        public T composeObject() throws Exception {
+            return NetSuiteTestBase.composeObject(clazz);
+        }
+    }
 }

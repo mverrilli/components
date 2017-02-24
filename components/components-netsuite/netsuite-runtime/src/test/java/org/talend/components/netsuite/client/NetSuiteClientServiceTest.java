@@ -26,9 +26,10 @@ import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.client.v2016_2.NetSuiteClientServiceImpl;
 import org.talend.components.netsuite.test.AssertMatcher;
+import org.talend.components.netsuite.test.MessageContextHolder;
+import org.talend.components.netsuite.test.NetSuiteWebServiceMockTestFixture;
 
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
-import com.netsuite.webservices.v2016_2.platform.core.Status;
 import com.netsuite.webservices.v2016_2.platform.core.types.RecordType;
 import com.netsuite.webservices.v2016_2.platform.core.types.SearchRecordType;
 import com.netsuite.webservices.v2016_2.platform.messages.LoginRequest;
@@ -62,9 +63,7 @@ public class NetSuiteClientServiceTest extends NetSuiteMockTestBase {
         final NetSuitePortType port = webServiceTestFixture.getPortMock();
 
         SessionResponse sessionResponse = new SessionResponse();
-        Status status = new Status();
-        status.setIsSuccess(true);
-        sessionResponse.setStatus(status);
+        sessionResponse.setStatus(createSuccessStatus());
         LoginResponse response = new LoginResponse();
         response.setSessionResponse(sessionResponse);
 

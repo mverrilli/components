@@ -26,6 +26,7 @@ import org.talend.components.netsuite.client.common.NsPreferences;
 import org.talend.components.netsuite.client.common.NsSearchPreferences;
 import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.client.common.NsWriteResponse;
+import org.talend.components.netsuite.client.model.CustomRecordTypeInfo;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.MetaData;
 import org.talend.components.netsuite.client.model.RecordTypeDesc;
@@ -228,7 +229,7 @@ public abstract class NetSuiteClientService<PortT> {
     // Meta data
     /////////////////////////////////////////////////////////////
 
-    protected Map<String, RecordTypeInfo> customRecordTypeMap = new HashMap<>();
+    protected Map<String, CustomRecordTypeInfo> customRecordTypeMap = new HashMap<>();
     protected boolean recordTypeCustomizationsLoaded = false;
 
     protected Map<String, List<Object>> customFieldMap = new HashMap<>();
@@ -261,9 +262,12 @@ public abstract class NetSuiteClientService<PortT> {
         }
 
         for (RecordTypeInfo recordTypeInfo : recordTypes) {
-            SearchRecordTypeDesc searchRecordType = metaData.getSearchRecordType(recordTypeInfo.getRecordType());
-            if (searchRecordType != null) {
-                searches.add(new SimpleNamedThing(recordTypeInfo.getName(), recordTypeInfo.getName()));
+            RecordTypeDesc recordTypeDesc = recordTypeInfo.getRecordType();
+            if (recordTypeDesc.getSearchRecordType() != null) {
+                SearchRecordTypeDesc searchRecordType = metaData.getSearchRecordType(recordTypeDesc);
+                if (searchRecordType != null) {
+                    searches.add(new SimpleNamedThing(recordTypeInfo.getName(), recordTypeInfo.getName()));
+                }
             }
         }
 
@@ -322,13 +326,24 @@ public abstract class NetSuiteClientService<PortT> {
 
     public SearchRecordTypeDesc getSearchRecordType(String recordTypeName) {
         SearchRecordTypeDesc searchRecordType = metaData.getSearchRecordType(recordTypeName);
-        if (searchRecordType == null) {
-            RecordTypeDesc recordType = metaData.getRecordType(recordTypeName);
-            if (recordType != null) {
-                searchRecordType = metaData.getSearchRecordType(recordType.getSearchRecordType());
-            }
+        if (searchRecordType != null) {
+            return searchRecordType;
         }
-        return searchRecordType;
+        RecordTypeInfo recordTypeInfo = getRecordType(recordTypeName);
+        if (recordTypeInfo != null) {
+            return getSearchRecordType(recordTypeInfo.getRecordType());
+        }
+        return null;
+    }
+
+    public SearchRecordTypeDesc getSearchRecordType(RecordTypeDesc recordType) {
+        if (recordType.getSearchRecordType() != null) {
+            return metaData.getSearchRecordType(recordType.getSearchRecordType());
+        }
+        if (recordType.getType().equals("customRecordType")) {
+            return metaData.getSearchRecordType("customRecord");
+        }
+        return null;
     }
 
     public Collection<SearchFieldOperatorType.QualifiedName> getSearchOperatorNames() {
@@ -397,9 +412,9 @@ public abstract class NetSuiteClientService<PortT> {
 
                 for (NsCustomizationRef customizationRef : customRecordTypes) {
                     String recordType = customizationRef.getType();
-                    RecordTypeDesc recordTypeInfo = metaData.getRecordType(toInitialUpper(recordType));
-                    RecordTypeInfo customRecordTypeInfo = new RecordTypeInfo(
-                            customizationRef.getScriptId(), recordTypeInfo);
+                    RecordTypeDesc recordTypeDesc = metaData.getRecordType(toInitialUpper(recordType));
+                    CustomRecordTypeInfo customRecordTypeInfo = new CustomRecordTypeInfo(
+                            customizationRef.getScriptId(), recordTypeDesc, customizationRef);
                     customRecordTypeMap.put(customRecordTypeInfo.getName(), customRecordTypeInfo);
                 }
 

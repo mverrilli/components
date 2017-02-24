@@ -1,7 +1,5 @@
 package org.talend.components.netsuite.test;
 
-import junit.framework.AssertionFailedError;
-
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 

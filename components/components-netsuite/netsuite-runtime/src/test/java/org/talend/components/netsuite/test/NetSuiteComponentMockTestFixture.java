@@ -1,4 +1,4 @@
-package org.talend.components.netsuite;
+package org.talend.components.netsuite.test;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.spy;
@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import org.talend.components.api.container.DefaultComponentRuntimeContainerImpl;
 import org.talend.components.api.container.RuntimeContainer;
-import org.talend.components.netsuite.client.NetSuiteWebServiceMockTestFixture;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
@@ -18,15 +17,31 @@ import com.netsuite.webservices.v2016_2.platform.messages.SessionResponse;
 /**
  *
  */
-public class NetSuiteComponentMockTestFixture extends NetSuiteWebServiceMockTestFixture {
+public class NetSuiteComponentMockTestFixture implements TestFixture {
+    protected NetSuiteWebServiceMockTestFixture webServiceMockTestFixture;
+    protected boolean reinstall;
     protected RuntimeContainer runtimeContainer;
     protected NetSuiteConnectionProperties connectionProperties;
 
+    public NetSuiteComponentMockTestFixture(NetSuiteWebServiceMockTestFixture webServiceMockTestFixture) {
+        this.webServiceMockTestFixture = webServiceMockTestFixture;
+    }
+
+    public boolean isReinstall() {
+        return reinstall;
+    }
+
+    public void setReinstall(boolean reinstall) {
+        this.reinstall = reinstall;
+    }
+
     @Override
     public void setUp() throws Exception {
-        super.setUp();
+        if (reinstall) {
+            webServiceMockTestFixture.reinstall();
+        }
 
-        final NetSuitePortType port = getPortMock();
+        final NetSuitePortType port = webServiceMockTestFixture.getPortMock();
 
         SessionResponse sessionResponse = new SessionResponse();
         Status status = new Status();
@@ -41,7 +56,7 @@ public class NetSuiteComponentMockTestFixture extends NetSuiteWebServiceMockTest
 
         connectionProperties = new NetSuiteConnectionProperties("test");
         connectionProperties.init();
-        connectionProperties.endpoint.setValue(getEndpointAddress().toString());
+        connectionProperties.endpoint.setValue(webServiceMockTestFixture.getEndpointAddress().toString());
         connectionProperties.email.setValue("test@test.com");
         connectionProperties.password.setValue("123");
         connectionProperties.role.setValue(3);
@@ -51,7 +66,7 @@ public class NetSuiteComponentMockTestFixture extends NetSuiteWebServiceMockTest
 
     @Override
     public void tearDown() throws Exception {
-        super.tearDown();
+        // do nothing
     }
 
     public RuntimeContainer getRuntimeContainer() {

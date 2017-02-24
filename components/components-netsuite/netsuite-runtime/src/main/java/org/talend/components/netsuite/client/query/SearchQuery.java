@@ -13,7 +13,9 @@ import org.talend.components.netsuite.beans.BeanManager;
 import org.talend.components.netsuite.beans.PropertyInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
+import org.talend.components.netsuite.client.common.NsCustomizationRef;
 import org.talend.components.netsuite.client.common.NsSearchResult;
+import org.talend.components.netsuite.client.model.CustomRecordTypeInfo;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.client.model.search.SearchFieldAdapter;
@@ -171,7 +173,18 @@ public class SearchQuery<SearchT, RecT> {
             Object searchTypeField = populator.populate(
                     "List.anyOf", Arrays.asList(recordTypeInfo.getRecordType().getType()));
             setProperty(searchBasic, "type", searchTypeField);
+
+        } else if (searchRecordInfo.getType().equals("customRecord")) {
+            CustomRecordTypeInfo customRecordTypeInfo = (CustomRecordTypeInfo) recordTypeInfo;
+            NsCustomizationRef customizationRef = customRecordTypeInfo.getCustomizationRef();
+
+            Object recType = clientService.createType("CustomizationRef");
+            setProperty(recType, "scriptId", customizationRef.getScriptId());
+            setProperty(recType, "internalId", customizationRef.getInternalId());
+
+            setProperty(searchBasic, "recType", recType);
         }
+
 
         if (!customFieldList.isEmpty()) {
             Object customFieldListWrapper = clientService.createType("SearchCustomFieldList");

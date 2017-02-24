@@ -1,5 +1,7 @@
 package org.talend.components.netsuite.client.v2016_2;
 
+import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
+
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -41,8 +43,6 @@ import com.netsuite.webservices.v2016_2.platform.core.types.SearchLongFieldOpera
 import com.netsuite.webservices.v2016_2.platform.core.types.SearchMultiSelectFieldOperator;
 import com.netsuite.webservices.v2016_2.platform.core.types.SearchStringFieldOperator;
 import com.netsuite.webservices.v2016_2.platform.core.types.SearchTextNumberFieldOperator;
-
-import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
 
 /**
  *

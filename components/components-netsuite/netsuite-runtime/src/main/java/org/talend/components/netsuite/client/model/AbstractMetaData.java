@@ -161,18 +161,26 @@ public abstract class AbstractMetaData implements MetaData {
     }
 
     protected Class<?> getTypeClass(String typeName) {
-        return typeMap.get(typeName);
+        Class<?> clazz = typeMap.get(typeName);
+        if (clazz != null) {
+            return clazz;
+        }
+        RecordTypeDesc recordType = getRecordType(typeName);
+        if (recordType != null) {
+            return recordType.getRecordClass();
+        }
+        return null;
     }
 
     @Override
     public TypeDesc getTypeInfo(String typeName) {
         Class<?> clazz = getTypeClass(typeName);
-        if (clazz == null) {
-            RecordTypeDesc recordType = getRecordType(typeName);
-            if (recordType != null) {
-                clazz = recordType.getRecordClass();
-            }
-        }
+//        if (clazz == null) {
+//            RecordTypeDesc recordType = getRecordType(typeName);
+//            if (recordType != null) {
+//                clazz = recordType.getRecordClass();
+//            }
+//        }
         return clazz != null ? getTypeInfo(clazz) : null;
     }
 

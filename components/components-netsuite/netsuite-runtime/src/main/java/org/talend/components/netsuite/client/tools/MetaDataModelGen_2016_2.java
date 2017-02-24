@@ -37,8 +37,8 @@ public class MetaDataModelGen_2016_2 extends MetaDataModelGen {
                 "CustomerMessage",
                 "CustomerStatus",
                 "CustomList",
-                "CustomRecordType",
-                "CustomTransactionType",
+                "CustomRecord",
+                "CustomTransaction",
                 "Department",
                 "Employee",
                 "EntityGroup",
@@ -150,22 +150,14 @@ public class MetaDataModelGen_2016_2 extends MetaDataModelGen {
                 "CampaignSubscription",
                 "CampaignVertical",
                 "CostCategory",
-                "CrmCustomField",
                 "Currency",
-                "CustomFieldType",
-                "CustomRecordCustomField",
-                "CustomRecordType",
                 "DescriptionItem",
                 "DiscountItem",
                 "DownloadItem",
-                "EntityCustomField",
                 "GiftCertificateItem",
                 "InterCompanyTransferOrder",
                 "InventoryItem",
-                "ItemCustomField",
                 "ItemGroup",
-                "ItemNumberCustomField",
-                "ItemOptionCustomField",
                 "KitItem",
                 "LandedCost",
                 "LeadSource",
@@ -178,7 +170,6 @@ public class MetaDataModelGen_2016_2 extends MetaDataModelGen {
                 "OtherChargePurchaseItem",
                 "OtherChargeResaleItem",
                 "OtherChargeSaleItem",
-                "OtherCustomField",
                 "PaymentItem",
                 "SalesTaxItem",
                 "SerializedAssemblyItem",
@@ -195,9 +186,7 @@ public class MetaDataModelGen_2016_2 extends MetaDataModelGen {
                 "SupportCaseType",
                 "TaxAcct",
                 "TaxGroup",
-                "TaxType",
-                "TransactionBodyCustomField",
-                "TransactionColumnCustomField"
+                "TaxType"
         ));
 
         additionalRecordTypes.putAll(ImmutableMap.<String, String>builder()
@@ -210,6 +199,10 @@ public class MetaDataModelGen_2016_2 extends MetaDataModelGen {
                 .put("address", "ADDRESS")
                 .put("inventoryDetail", "INVENTORY_DETAIL")
                 .put("timeEntry", "TIME_ENTRY")
+                .build());
+
+        additionalRecordTypeSearchMappings.putAll(ImmutableMap.<String, String>builder()
+                .put("CustomTransaction", "transaction")
                 .build());
 
         setRecordBaseClass(Record.class);

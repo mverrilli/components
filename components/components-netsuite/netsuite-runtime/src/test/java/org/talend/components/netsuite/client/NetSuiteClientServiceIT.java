@@ -9,16 +9,20 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
+import org.apache.commons.lang3.time.StopWatch;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.netsuite.NetSuiteTestBase;
 import org.talend.components.netsuite.client.model.CustomFieldDesc;
 import org.talend.components.netsuite.client.model.RecordTypeDesc;
+import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.client.query.SearchCondition;
+import org.talend.components.netsuite.client.query.SearchQuery;
 import org.talend.components.netsuite.client.query.SearchResultSet;
 import org.talend.components.netsuite.client.v2016_2.RecordTypeEnum;
+import org.talend.components.netsuite.test.NetSuiteWebServiceTestFixture;
 import org.talend.daikon.NamedThing;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
@@ -45,7 +49,6 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
     @Test
     public void testConnectAndLogin() throws Exception {
         NetSuiteClientService connection = webServiceTestFixture.getClientService();
-
         connection.login();
 
         SearchResultSet<Record> rs = connection.newSearch()
@@ -53,22 +56,41 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
                 .condition(new SearchCondition("Type", "List.anyOf", Arrays.asList("Bank")))
                 .search();
 
-        int count = 0;
-        while (rs.next()) {
+        int count = 10;
+        int retrievedCount = 0;
+        while (rs.next() && count-- > 0) {
             Record record = rs.get();
 
             assertEquals(AccountType.BANK, getProperty(record, "acctType"));
 
-            count++;
+            retrievedCount++;
         }
-        System.out.println("Retrieved records: " + count);
-        assertTrue(count > 1);
+        System.out.println("Retrieved records: " + retrievedCount);
+        assertTrue(retrievedCount > 1);
     }
 
     @Test
-    public void testGetSearches() throws Exception {
+    public void testSearchCustomRecord() throws Exception {
         NetSuiteClientService connection = webServiceTestFixture.getClientService();
+        connection.login();
 
+        Collection<RecordTypeInfo> recordTypes = connection.getRecordTypes();
+        RecordTypeInfo recordType = getCustomRecordType(recordTypes, "customrecord_campaign_revenue");
+
+        SearchQuery searchQuery = connection.newSearch();
+        searchQuery.target(recordType.getName());
+
+        SearchResultSet<Record> rs = searchQuery.search();
+        int count = 10;
+        while (rs.next() && count-- > 0) {
+            Record record = rs.get();
+            System.out.println(record);
+        }
+    }
+
+    @Test
+    public void testGetSearchableTypes() throws Exception {
+        NetSuiteClientService connection = webServiceTestFixture.getClientService();
         connection.login();
 
         Collection<NamedThing> searches = connection.getSearchableTypes();
@@ -84,15 +106,42 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
     }
 
     @Test
-    public void testLoadCustomizations() throws Exception {
+    public void testLoadCustomRecordTypes() throws Exception {
         NetSuiteClientService connection = webServiceTestFixture.getClientService();
+        connection.login();
 
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        Collection<RecordTypeInfo> recordTypes = connection.getRecordTypes();
+        stopWatch.stop();
+        System.out.println("Total time: " + stopWatch);
+
+        for (RecordTypeInfo recordType : recordTypes) {
+            System.out.println(recordType.getName());
+        }
+    }
+
+    @Test
+    public void testLoadAllCustomizations() throws Exception {
+        NetSuiteClientService connection = webServiceTestFixture.getClientService();
+        connection.login();
+
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         for (RecordTypeDesc recordType : Arrays.asList(RecordTypeEnum.OPPORTUNITY, RecordTypeEnum.CALENDAR_EVENT)) {
-            long start = System.currentTimeMillis();
             Map<String, CustomFieldDesc> customFieldMap = connection.getRecordCustomFields(recordType);
             System.out.println(customFieldMap);
-            long end = System.currentTimeMillis();
-            System.out.println(">>>: " + (end - start));
         }
+        stopWatch.stop();
+        System.out.println("Total time: " + stopWatch);
+    }
+
+    protected RecordTypeInfo getCustomRecordType(Collection<RecordTypeInfo> recordTypes, String name) {
+        for (RecordTypeInfo recordType : recordTypes) {
+            if (recordType.getName().equals(name)) {
+                return recordType;
+            }
+        }
+        return null;
     }
 }

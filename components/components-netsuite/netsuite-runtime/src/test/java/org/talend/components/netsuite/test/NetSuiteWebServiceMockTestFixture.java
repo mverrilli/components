@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.client;
+package org.talend.components.netsuite.test;
 
 import java.net.URL;
 import java.util.List;
@@ -7,7 +7,8 @@ import javax.xml.namespace.QName;
 import javax.xml.ws.Endpoint;
 
 import org.apache.cxf.headers.Header;
-import org.talend.components.netsuite.test.TestFixture;
+import org.talend.components.netsuite.client.NetSuiteClientService;
+import org.talend.components.netsuite.client.NetSuiteCredentials;
 
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
 import com.netsuite.webservices.v2016_2.platform.NetSuiteService;
@@ -51,17 +52,7 @@ public class NetSuiteWebServiceMockTestFixture implements TestFixture {
                 "test@test.com", "12345", "test", "3");
         credentials.setApplicationId("00000000-0000-0000-0000-000000000000");
 
-        portMock = mock(NetSuitePortType.class);
-        portMockAdapter.setPort(portMock);
-
-        clientService = NetSuiteClientService.create("2016.2");
-        clientService.setEndpointUrl(endpointAddress.toString());
-        clientService.setCredentials(credentials);
-
-        boolean messageLoggingEnabled = Boolean.valueOf(
-                System.getProperty(MESSAGE_LOGGING_ENABLED_PROPERTY_NAME, "false"));
-        clientService.setMessageLoggingEnabled(messageLoggingEnabled);
-
+        reinstall();
     }
 
     @Override
@@ -74,6 +65,23 @@ public class NetSuiteWebServiceMockTestFixture implements TestFixture {
 
         service = null;
         portMockAdapter = null;
+    }
+
+    public NetSuitePortType createPortMock() {
+        return mock(NetSuitePortType.class);
+    }
+
+    public void reinstall() {
+        portMock = createPortMock();
+        portMockAdapter.setPort(portMock);
+
+        clientService = NetSuiteClientService.create("2016.2");
+        clientService.setEndpointUrl(getEndpointAddress().toString());
+        clientService.setCredentials(credentials);
+
+        boolean messageLoggingEnabled = Boolean.valueOf(
+                System.getProperty(MESSAGE_LOGGING_ENABLED_PROPERTY_NAME, "false"));
+        clientService.setMessageLoggingEnabled(messageLoggingEnabled);
     }
 
     public NetSuiteCredentials getCredentials() {

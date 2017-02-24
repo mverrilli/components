@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.client;
+package org.talend.components.netsuite.test;
 
 import java.net.URL;
 
@@ -77,6 +77,7 @@ import com.netsuite.webservices.v2016_2.platform.messages.LogoutRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.LogoutResponse;
 import com.netsuite.webservices.v2016_2.platform.messages.MapSsoRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.MapSsoResponse;
+import com.netsuite.webservices.v2016_2.platform.messages.ReadResponseList;
 import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreResponse;
 import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreWithIdRequest;
@@ -283,9 +284,7 @@ public class NetSuitePortTypeMockAdapter {
         if (response == null) {
             response = new GetCustomizationIdResponse();
             GetCustomizationIdResult result = new GetCustomizationIdResult();
-            Status status = new Status();
-            status.setIsSuccess(true);
-            result.setStatus(status);
+            result.setStatus(createSuccessStatus());
             result.setTotalRecords(0);
             result.setCustomizationRefList(new CustomizationRefList());
             response.setGetCustomizationIdResult(result);
@@ -491,7 +490,20 @@ public class NetSuitePortTypeMockAdapter {
             throws InvalidSessionFault, ExceededUsageLimitFault, UnexpectedErrorFault, ExceededRequestLimitFault,
             ExceededRequestSizeFault, ExceededConcurrentRequestLimitFault, InvalidCredentialsFault, InsufficientPermissionFault,
             ExceededRecordCountFault {
-        return port.getList(parameters);
+
+        GetListResponse response = null;
+        if (port != null) {
+            response = port.getList(parameters);
+        }
+
+        if (response == null) {
+            response = new GetListResponse();
+            ReadResponseList readResponseList = new ReadResponseList();
+            readResponseList.setStatus(createSuccessStatus());
+            response.setReadResponseList(readResponseList);
+        }
+
+        return response;
     }
 
     public GetDeletedResponse getDeleted(GetDeletedRequest parameters)
@@ -499,6 +511,12 @@ public class NetSuitePortTypeMockAdapter {
             ExceededRequestSizeFault, ExceededConcurrentRequestLimitFault, InvalidCredentialsFault, InsufficientPermissionFault,
             ExceededRecordCountFault {
         return port.getDeleted(parameters);
+    }
+
+    public static Status createSuccessStatus() {
+        Status status = new Status();
+        status.setIsSuccess(true);
+        return status;
     }
 
 }

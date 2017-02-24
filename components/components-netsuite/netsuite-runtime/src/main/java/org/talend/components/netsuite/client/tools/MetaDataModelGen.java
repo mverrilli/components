@@ -55,6 +55,8 @@ public class MetaDataModelGen {
     protected Map<String, String> additionalRecordTypes = new HashMap<>();
     protected Map<String, RecordTypeSpec> recordTypeMap = new HashMap<>();
 
+    protected Map<String, String> additionalRecordTypeSearchMappings = new HashMap<>();
+
     protected Map<String, String> additionalSearchRecordTypes = new HashMap<>();
     protected Map<String, SearchRecordTypeSpec> searchRecordTypeMap = new HashMap<>();
 
@@ -66,7 +68,7 @@ public class MetaDataModelGen {
     protected File outputFolder;
 
     public MetaDataModelGen() {
-        outputFolder = new File("./components/components-netsuite/netsuite-runtime/src/main/gen");
+        outputFolder = new File("./components/components-netsuite/netsuite-runtime/src/main/java");
     }
 
     public void setRecordBaseClass(Class<?> recordBaseClass) {
@@ -142,7 +144,7 @@ public class MetaDataModelGen {
                         Enum<?> searchRecordType = searchRecordTypeEnumAccessor.mapFromString(recordTypeName);
                         searchRecordTypeName = searchRecordTypeEnumAccessor.mapToString(searchRecordType);
                     } catch (IllegalArgumentException e) {
-                        logger.error("Invalid entity record type: '" + recordTypeName + "'");
+                        logger.warn("Couldn't automatically determine search record type: '" + recordTypeName + "'");
                     }
                 } else if (standardTransactionTypes.contains(recordTypeNameCapitalized)) {
                     searchRecordTypeName = "transaction";
@@ -152,14 +154,16 @@ public class MetaDataModelGen {
 
                 if (additionalSearchRecordTypes.containsKey(recordTypeName)) {
                     searchRecordTypeName = recordTypeName;
+                } else if (additionalRecordTypeSearchMappings.containsKey(recordTypeNameCapitalized)) {
+                    searchRecordTypeName = additionalRecordTypeSearchMappings.get(recordTypeNameCapitalized);
                 }
 
-                spec.name = recordTypeName;
-                spec.typeName = recordTypeClassSimpleName;
-                spec.enumValue = recordTypeEnumValue;
-                spec.enumConstantName = recordTypeEnumConstantName;
-                spec.recordClass = clazz;
-                spec.searchRecordTypeName = searchRecordTypeName;
+                spec.setName(recordTypeName);
+                spec.setTypeName(recordTypeClassSimpleName);
+                spec.setEnumValue(recordTypeEnumValue);
+                spec.setEnumConstantName(recordTypeEnumConstantName);
+                spec.setRecordClass(clazz);
+                spec.setSearchRecordTypeName(searchRecordTypeName);
 
                 recordTypeMap.put(recordTypeName, spec);
             }
@@ -233,14 +237,14 @@ public class MetaDataModelGen {
             }
 
             SearchRecordTypeSpec spec = new SearchRecordTypeSpec();
-            spec.name = searchRecordType;
-            spec.typeName = searchRecordTypeName;
-            spec.enumConstantName = searchRecordTypeEnumConstantName;
-            spec.searchClass = searchClass;
-            spec.searchBasicClass = searchBasicClass;
-            spec.searchAdvancedClass = searchAdvancedClass;
+            spec.setName(searchRecordType);
+            spec.setTypeName(searchRecordTypeName);
+            spec.setEnumConstantName(searchRecordTypeEnumConstantName);
+            spec.setSearchClass(searchClass);
+            spec.setSearchBasicClass(searchBasicClass);
+            spec.setSearchAdvancedClass(searchAdvancedClass);
 
-            searchRecordTypeMap.put(spec.name, spec);
+            searchRecordTypeMap.put(spec.getName(), spec);
         }
 
         if (!unresolvedSearchRecords.isEmpty()) {
@@ -252,7 +256,7 @@ public class MetaDataModelGen {
         List<RecordTypeSpec> specs = new ArrayList<>(recordTypeMap.values());
         Collections.sort(specs, new Comparator<RecordTypeSpec>() {
             @Override public int compare(RecordTypeSpec o1, RecordTypeSpec o2) {
-                return o1.enumConstantName.compareTo(o2.enumConstantName);
+                return o1.getEnumConstantName().compareTo(o2.getEnumConstantName());
             }
         });
 
@@ -269,9 +273,9 @@ public class MetaDataModelGen {
                         javax.lang.model.element.Modifier.PRIVATE, javax.lang.model.element.Modifier.FINAL);
 
         for (RecordTypeSpec spec : specs) {
-            builder.addEnumConstant(spec.enumConstantName, TypeSpec.anonymousClassBuilder(
-                    "$S, $S, $T.class, $S",
-                    spec.name, spec.typeName, spec.recordClass, spec.searchRecordTypeName).build());
+            builder.addEnumConstant(spec.getEnumConstantName(), TypeSpec.anonymousClassBuilder(
+                    "$S, $S, $T.class, $S", spec.getName(), spec.getTypeName(), spec.getRecordClass(),
+                    spec.getSearchRecordTypeName()).build());
         }
 
         builder.addMethod(MethodSpec.constructorBuilder()
@@ -324,6 +328,8 @@ public class MetaDataModelGen {
                         .build())
                 .build());
 
+        builder.addJavadoc("Generated by $T\n", getClass());
+
         TypeSpec typeSpec = builder.build();
 
         JavaFile jfile = JavaFile.builder(recordTypeEnumClassName.packageName(), typeSpec)
@@ -336,7 +342,7 @@ public class MetaDataModelGen {
         List<SearchRecordTypeSpec> specs = new ArrayList<>(searchRecordTypeMap.values());
         Collections.sort(specs, new Comparator<SearchRecordTypeSpec>() {
             @Override public int compare(SearchRecordTypeSpec o1, SearchRecordTypeSpec o2) {
-                return o1.enumConstantName.compareTo(o2.enumConstantName);
+                return o1.getEnumConstantName().compareTo(o2.getEnumConstantName());
             }
         });
 
@@ -356,14 +362,14 @@ public class MetaDataModelGen {
 
         for (SearchRecordTypeSpec spec : specs) {
             TypeSpec enumTypeSpec;
-            if (spec.searchClass != null && spec.searchAdvancedClass != null) {
-                enumTypeSpec = TypeSpec.anonymousClassBuilder("$S, $S, $T.class, $T.class, $T.class",
-                        spec.name, spec.typeName, spec.searchClass, spec.searchBasicClass, spec.searchAdvancedClass).build();
+            if (spec.getSearchClass() != null && spec.getSearchAdvancedClass() != null) {
+                enumTypeSpec = TypeSpec.anonymousClassBuilder("$S, $S, $T.class, $T.class, $T.class", spec.getName(),
+                        spec.getTypeName(), spec.getSearchClass(), spec.getSearchBasicClass(), spec.getSearchAdvancedClass()).build();
             } else {
-                enumTypeSpec = TypeSpec.anonymousClassBuilder("$S, $S, null, $T.class, null",
-                        spec.name, spec.typeName, spec.searchBasicClass).build();
+                enumTypeSpec = TypeSpec.anonymousClassBuilder("$S, $S, null, $T.class, null", spec.getName(), spec.getTypeName(),
+                        spec.getSearchBasicClass()).build();
             }
-            builder.addEnumConstant(spec.enumConstantName, enumTypeSpec);
+            builder.addEnumConstant(spec.getEnumConstantName(), enumTypeSpec);
         }
 
         builder.addMethod(MethodSpec.constructorBuilder()
@@ -424,6 +430,7 @@ public class MetaDataModelGen {
                         .build())
                 .build());
 
+        builder.addJavadoc("Generated by $T\n", getClass());
 
         TypeSpec typeSpec = builder.build();
 
@@ -434,23 +441,127 @@ public class MetaDataModelGen {
 
     }
 
-    static class RecordTypeSpec {
-        String name;
-        String typeName;
-        Enum<?> enumValue;
-        String enumConstantName;
-        Class<?> recordClass;
-        String searchRecordTypeName;
+    protected static class RecordTypeSpec {
+        protected String name;
+        protected String typeName;
+        protected Enum<?> enumValue;
+        protected String enumConstantName;
+        protected Class<?> recordClass;
+        protected String searchRecordTypeName;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getTypeName() {
+            return typeName;
+        }
+
+        public void setTypeName(String typeName) {
+            this.typeName = typeName;
+        }
+
+        public Enum<?> getEnumValue() {
+            return enumValue;
+        }
+
+        public void setEnumValue(Enum<?> enumValue) {
+            this.enumValue = enumValue;
+        }
+
+        public String getEnumConstantName() {
+            return enumConstantName;
+        }
+
+        public void setEnumConstantName(String enumConstantName) {
+            this.enumConstantName = enumConstantName;
+        }
+
+        public Class<?> getRecordClass() {
+            return recordClass;
+        }
+
+        public void setRecordClass(Class<?> recordClass) {
+            this.recordClass = recordClass;
+        }
+
+        public String getSearchRecordTypeName() {
+            return searchRecordTypeName;
+        }
+
+        public void setSearchRecordTypeName(String searchRecordTypeName) {
+            this.searchRecordTypeName = searchRecordTypeName;
+        }
     }
 
-    static class SearchRecordTypeSpec {
-        String name;
-        String typeName;
-        Enum<?> enumValue;
-        String enumConstantName;
-        Class<?> searchClass;
-        Class<?> searchBasicClass;
-        Class<?> searchAdvancedClass;
+    protected static class SearchRecordTypeSpec {
+        protected String name;
+        protected String typeName;
+        protected Enum<?> enumValue;
+        protected String enumConstantName;
+        protected Class<?> searchClass;
+        protected Class<?> searchBasicClass;
+        protected Class<?> searchAdvancedClass;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getTypeName() {
+            return typeName;
+        }
+
+        public void setTypeName(String typeName) {
+            this.typeName = typeName;
+        }
+
+        public Enum<?> getEnumValue() {
+            return enumValue;
+        }
+
+        public void setEnumValue(Enum<?> enumValue) {
+            this.enumValue = enumValue;
+        }
+
+        public String getEnumConstantName() {
+            return enumConstantName;
+        }
+
+        public void setEnumConstantName(String enumConstantName) {
+            this.enumConstantName = enumConstantName;
+        }
+
+        public Class<?> getSearchClass() {
+            return searchClass;
+        }
+
+        public void setSearchClass(Class<?> searchClass) {
+            this.searchClass = searchClass;
+        }
+
+        public Class<?> getSearchBasicClass() {
+            return searchBasicClass;
+        }
+
+        public void setSearchBasicClass(Class<?> searchBasicClass) {
+            this.searchBasicClass = searchBasicClass;
+        }
+
+        public Class<?> getSearchAdvancedClass() {
+            return searchAdvancedClass;
+        }
+
+        public void setSearchAdvancedClass(Class<?> searchAdvancedClass) {
+            this.searchAdvancedClass = searchAdvancedClass;
+        }
     }
 
     public void run(String...args) throws Exception {
