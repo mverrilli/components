@@ -1,5 +1,8 @@
 package org.talend.components.netsuite.output;
 
+import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -14,32 +17,59 @@ import org.talend.components.netsuite.beans.BeanManager;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.model.FieldDesc;
+import org.talend.components.netsuite.client.model.RecordTypeDesc;
+import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.TypeDesc;
-
-import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
-import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
 
 /**
  *
  */
 public class NsObjectOutputTransducer extends NsObjectTransducer {
-    private String typeName;
+    protected String typeName;
+    protected boolean reference;
+
+    protected TypeDesc typeDesc;
+    protected Map<String, FieldDesc> fieldMap;
+    protected BeanInfo beanInfo;
+
+    protected String referencedTypeName;
+    protected RecordTypeInfo referencedRecordTypeInfo;
 
     public NsObjectOutputTransducer(NetSuiteClientService clientService, String typeName) {
+        this(clientService, typeName, false);
+    }
+
+    public NsObjectOutputTransducer(NetSuiteClientService clientService, String typeName, boolean reference) {
         super(clientService);
 
         this.typeName = typeName;
+        this.reference = reference;
+    }
+
+    protected void prepare() {
+        if (typeDesc != null) {
+            return;
+        }
+
+        if (reference) {
+            referencedTypeName = typeName;
+            referencedRecordTypeInfo = clientService.getRecordType(referencedTypeName);
+            typeDesc = clientService.getTypeInfo("RecordRef");
+        } else {
+            typeDesc = clientService.getTypeInfo(typeName);
+        }
+
+        beanInfo = BeanManager.getBeanInfo(typeDesc.getTypeClass());
+        fieldMap = typeDesc.getFieldMap();
     }
 
     public Object write(IndexedRecord indexedRecord) {
+        prepare();
+
         Schema schema = indexedRecord.getSchema();
 
         try {
-            Object nsObject = clientService.createType(typeName);
-
-            TypeDesc typeDesc = clientService.getTypeInfo(typeName);
-            BeanInfo beanInfo = BeanManager.getBeanInfo(typeDesc.getTypeClass());
-            Map<String, FieldDesc> fieldMap = typeDesc.getFieldMap();
+            Object nsObject = clientService.createType(typeDesc.getTypeName());
 
             Set<String> nullFieldNames = new HashSet<>();
 
@@ -62,6 +92,14 @@ public class NsObjectOutputTransducer extends NsObjectTransducer {
                 }
                 List<String> nullFields = (List<String>) getProperty(nullFieldListWrapper, "name");
                 nullFields.addAll(nullFieldNames);
+            }
+
+            if (reference) {
+                if ("RecordRef".equals(typeDesc.getTypeName())) {
+                    FieldDesc recTypeFieldDesc = typeDesc.getField("Type");
+                    RecordTypeDesc recordTypeDesc = referencedRecordTypeInfo.getRecordType();
+                    writeField(nsObject, recTypeFieldDesc, recordTypeDesc.getType());
+                }
             }
 
             return nsObject;

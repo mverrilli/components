@@ -241,25 +241,25 @@
                 </configuration>
             </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-deps-m2-repo</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/dependency/.m2/repository</outputDirectory>
-                            <includeScope>runtime</includeScope>
-                            <useRepositoryLayout>true</useRepositoryLayout>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+            <!--<plugin>-->
+                <!--<groupId>org.apache.maven.plugins</groupId>-->
+                <!--<artifactId>maven-dependency-plugin</artifactId>-->
+                <!--<version>3.0.0</version>-->
+                <!--<executions>-->
+                    <!--<execution>-->
+                        <!--<id>copy-deps-m2-repo</id>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>copy-dependencies</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<outputDirectory>${project.build.directory}/dependency/.m2/repository</outputDirectory>-->
+                            <!--<includeScope>runtime</includeScope>-->
+                            <!--<useRepositoryLayout>true</useRepositoryLayout>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
+                <!--</executions>-->
+            <!--</plugin>-->
 
             <plugin>
                 <groupId>org.apache.felix</groupId>
@@ -281,56 +281,6 @@
                                     {maven-resources},META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt=target/classes/META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt
                                 </Include-Resource>
                                 <Service-Component>*</Service-Component>
-                                <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
-                            </instructions>
-                        </configuration>
-                    </execution>
-
-                    <!-- Build OSGI bundle -->
-                    <!--
-                    <execution>
-                        <id>osgi-bundle</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>bundle</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>bundle</classifier>
-                            <instructions>
-                                <Bundle-SymbolicName>org.talend.components.netsuite.runtime</Bundle-SymbolicName>
-                                <Service-Component>*</Service-Component>
-                                <Import-Package>!org.apache.cxf.*,!org.springframework*,!com.sun*,!org.talend.components.netsuite*,!com.netsuite.webservices.*,!javax.jws*,!javax.xml*,!javax.wsdl*,!com.fasterxml.jackson*,!javassist*,*</Import-Package>
-                                <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!netsuite-definition-*|components*|cxf-*|slf4j-*</Embed-Dependency>
-                                <Include-Resource>
-                                    {maven-resources},META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt=target/classes/META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt
-                                </Include-Resource>
-                                <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
-                            </instructions>
-                        </configuration>
-                    </execution>
-                    -->
-
-                    <!-- Build OSGI bundle which combines definition and runtime -->
-                    <execution>
-                        <id>osgi-bundle</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>bundle</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>bundle</classifier>
-                            <instructions>
-                                <Bundle-SymbolicName>org.talend.components.netsuite</Bundle-SymbolicName>
-                                <Service-Component>*</Service-Component>
-                                <Export-Package>org.talend.components.netsuite.*</Export-Package>
-                                <!--<Import-Package>!*internal,!org.talend.components.netsuite*,!com.netsuite.webservices.*,*</Import-Package>-->
-                                <Import-Package>!*internal,!org.joda.time*,!org.apache.cxf*,!org.springframework*,!com.sun*,!com.ctc*,!javax*,!com.fasterxml.jackson*,!javassist*,*</Import-Package>
-                                <!--<Import-Package>!*internal,!org.talend.components.netsuite*,!com.netsuite.webservices*,!org.springframework*,org.talend*,org.slf4j*,org.joda.time*,org.apache.commons*,org.apache.avro.*,org.apache.cxf*,com.sun*,com.ctc*,javax.xml.bind*,com.fasterxml.jackson*,javassist*,*</Import-Package>-->
-                                <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*|cxf-*|commons-*</Embed-Dependency>
-                                <!--<Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*|commons-*</Embed-Dependency>-->
-                                <Include-Resource>
-                                    {maven-resources},META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt=target/classes/META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt
-                                </Include-Resource>
                                 <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
                             </instructions>
                         </configuration>
@@ -373,7 +323,7 @@
                         <version>2.8</version>
                         <executions>
                             <execution>
-                                <id>copy-to-plugins</id>
+                                <id>copy-to-repo</id>
                                 <phase>install</phase>
                                 <goals>
                                     <goal>copy</goal>
@@ -386,31 +336,24 @@
                                             <version>${project.version}</version>
                                             <type>${project.packaging}</type>
                                             <classifier>bundle</classifier>
-                                            <outputDirectory>${tos-di.plugins.dir}</outputDirectory>
+                                            <outputDirectory>${tos-di.dir}\configuration\.m2\repository\org\talend\components\${project.artifactId}\${project.version}</outputDirectory>
+                                            <destFileName>${project.artifactId}-${project.version}.${project.packaging}</destFileName>
                                         </artifactItem>
                                     </artifactItems>
                                 </configuration>
                             </execution>
-                            <!--<execution>-->
-                                <!--<id>copy-to-repo</id>-->
-                                <!--<phase>install</phase>-->
-                                <!--<goals>-->
-                                    <!--<goal>copy</goal>-->
-                                <!--</goals>-->
-                                <!--<configuration>-->
-                                    <!--<artifactItems>-->
-                                        <!--<artifactItem>-->
-                                            <!--<groupId>${project.groupId}</groupId>-->
-                                            <!--<artifactId>${project.artifactId}</artifactId>-->
-                                            <!--<version>${project.version}</version>-->
-                                            <!--<type>${project.packaging}</type>-->
-                                            <!--<classifier>bundle</classifier>-->
-                                            <!--<outputDirectory>${tos-di.dir}\configuration\.m2\repository\org\talend\components\${project.artifactId}\${project.version}</outputDirectory>-->
-                                            <!--<destFileName>${project.artifactId}-${project.version}.${project.packaging}</destFileName>-->
-                                        <!--</artifactItem>-->
-                                    <!--</artifactItems>-->
-                                <!--</configuration>-->
-                            <!--</execution>-->
+                            <execution>
+                                <id>copy-deps-m2-repo</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-dependencies</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/dependency/.m2/repository</outputDirectory>
+                                    <includeScope>runtime</includeScope>
+                                    <useRepositoryLayout>true</useRepositoryLayout>
+                                </configuration>
+                            </execution>
                         </executions>
                     </plugin>
                 </plugins>

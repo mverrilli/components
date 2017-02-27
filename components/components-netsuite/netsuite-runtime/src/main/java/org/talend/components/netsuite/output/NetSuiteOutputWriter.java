@@ -10,6 +10,7 @@ import org.talend.components.api.component.runtime.WriteOperation;
 import org.talend.components.api.component.runtime.WriterWithFeedback;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
+import org.talend.components.netsuite.client.model.TypeDesc;
 
 /**
  * TODO Implement bulk Add/Update/Upsert/Delete
@@ -24,7 +25,10 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
 
     protected NetSuiteClientService clientService;
     protected NetSuiteOutputProperties.OutputAction action;
+
+    protected TypeDesc typeDesc;
     protected NsObjectOutputTransducer transducer;
+
     protected int dataCount = 0;
 
     public NetSuiteOutputWriter(NetSuiteWriteOperation writeOperation) {
@@ -46,18 +50,16 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
         try {
             clientService = writeOperation.getSink().getClientService();
             action = writeOperation.getProperties().action.getValue();
-            if (action == NetSuiteOutputProperties.OutputAction.ADD
-                    || action == NetSuiteOutputProperties.OutputAction.UPDATE
-                    || action == NetSuiteOutputProperties.OutputAction.UPSERT) {
 
-                String typeName = writeOperation.getProperties().module.moduleName.getValue();
-                transducer = new NsObjectOutputTransducer(clientService, typeName);
+            String typeName = writeOperation.getProperties().module.moduleName.getValue();
+            typeDesc = clientService.getCustomizedTypeInfo(typeName);
 
-            } else if (action == NetSuiteOutputProperties.OutputAction.DELETE) {
-
-                String typeName = writeOperation.getProperties().module.moduleName.getValue();
-                transducer = new NsObjectOutputTransducer(clientService, typeName);
+            if (action == NetSuiteOutputProperties.OutputAction.DELETE) {
+                transducer = new NsObjectOutputTransducer(clientService, typeDesc.getTypeName(), true);
+            } else {
+                transducer = new NsObjectOutputTransducer(clientService, typeDesc.getTypeName());
             }
+
         } catch (NetSuiteException e) {
             throw new IOException(e);
         }

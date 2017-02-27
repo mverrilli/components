@@ -117,6 +117,7 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
 
     protected void assertNsObject(TypeDesc typeDesc, Object nsObject) throws Exception {
         assertNotNull(nsObject);
+        assertEquals(typeDesc.getTypeClass(), nsObject.getClass());
 
         for (FieldDesc fieldDesc : typeDesc.getFields()) {
             String fieldName = fieldDesc.getName();

@@ -1,5 +1,7 @@
 package org.talend.components.netsuite.output;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -87,19 +89,49 @@ public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
         RuntimeService runtimeService = new RuntimeServiceImpl();
         SchemaService schemaService = runtimeService.getSchemaService(mockTestFixture.getConnectionProperties());
 
+        Collection<String> typeNames = Arrays.asList("RecordRef", "CustomizationRef");
+
+        for (String typeName : typeNames) {
+            TypeDesc typeDesc = clientService.getTypeInfo(typeName);
+
+            Schema schema = schemaService.getSchema(typeDesc.getTypeName());
+
+            NsObjectOutputTransducer transducer = new NsObjectOutputTransducer(webServiceMockTestFixture.getClientService(),
+                    typeDesc.getTypeName());
+
+            List<IndexedRecord> indexedRecordList = makeIndexedRecords(clientService, schema,
+                    new SimpleObjectComposer<>(typeDesc.getTypeClass()), 10);
+
+            for (IndexedRecord indexedRecord : indexedRecordList) {
+                Object nsObject = transducer.write(indexedRecord);
+                assertNsObject(typeDesc, nsObject);
+            }
+        }
+    }
+
+    @Test
+    public void testRecordRef() throws Exception {
+
+        RuntimeService runtimeService = new RuntimeServiceImpl();
+        SchemaService schemaService = runtimeService.getSchemaService(mockTestFixture.getConnectionProperties());
+
         TypeDesc typeDesc = clientService.getTypeInfo("RecordRef");
+        TypeDesc referencedTypeDesc = clientService.getTypeInfo("Opportunity");
 
         Schema schema = schemaService.getSchema(typeDesc.getTypeName());
 
-        NsObjectOutputTransducer transducer = new NsObjectOutputTransducer(
-                webServiceMockTestFixture.getClientService(), typeDesc.getTypeName());
+        NsObjectOutputTransducer transducer = new NsObjectOutputTransducer(webServiceMockTestFixture.getClientService(),
+                referencedTypeDesc.getTypeName(), true);
 
         List<IndexedRecord> indexedRecordList = makeIndexedRecords(clientService, schema,
-                new SimpleObjectComposer<>(RecordRef.class), 10);
+                new SimpleObjectComposer<>(typeDesc.getTypeClass()), 10);
 
         for (IndexedRecord indexedRecord : indexedRecordList) {
-            RecordRef record = (RecordRef) transducer.write(indexedRecord);
-            assertNsObject(typeDesc, record);
+            Object nsObject = transducer.write(indexedRecord);
+            assertNsObject(typeDesc, nsObject);
+
+            RecordRef ref = (RecordRef) nsObject;
+            assertEquals(RecordType.OPPORTUNITY, ref.getType());
         }
     }
 

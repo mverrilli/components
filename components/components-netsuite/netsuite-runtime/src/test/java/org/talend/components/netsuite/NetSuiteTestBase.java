@@ -26,6 +26,8 @@ import com.netsuite.webservices.v2016_2.platform.core.RecordList;
 import com.netsuite.webservices.v2016_2.platform.core.SearchResult;
 import com.netsuite.webservices.v2016_2.platform.core.Status;
 
+import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
+
 /**
  *
  */
@@ -163,7 +165,7 @@ public abstract class NetSuiteTestBase {
         for (PropertyInfo propertyInfo : propertyInfoList) {
             if (propertyInfo.getWriteType() != null) {
                 Object value = composeValue(propertyInfo.getWriteType());
-                BeanUtils.setProperty(obj, propertyInfo.getName(), value);
+                setProperty(obj, propertyInfo.getName(), value);
             }
         }
 
@@ -233,6 +235,21 @@ public abstract class NetSuiteTestBase {
         @Override
         public T composeObject() throws Exception {
             return NetSuiteTestBase.composeObject(clazz);
+        }
+    }
+
+    public static class RecordRefComposer<T> implements ObjectComposer<T> {
+        protected Class<T> clazz;
+
+        public RecordRefComposer(Class<T> clazz) {
+            this.clazz = clazz;
+        }
+
+        @Override
+        public T composeObject() throws Exception {
+            T nsObject = NetSuiteTestBase.composeObject(clazz);
+            setProperty(nsObject, "type", null);
+            return nsObject;
         }
     }
 }
