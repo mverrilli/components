@@ -26,7 +26,7 @@ public class OsgiNetSuiteInputTestIT extends NetSuiteInputTestBase {
 
         return options(composite(ComponentsPaxExamOptions.getOptions()), //
                 linkBundle("org.talend.components-components-common-bundle"), //
-                linkBundle("org.talend.components-netsuite-bundle"));
+                linkBundle("org.talend.components-netsuite-definition-bundle"));
     }
 
 }

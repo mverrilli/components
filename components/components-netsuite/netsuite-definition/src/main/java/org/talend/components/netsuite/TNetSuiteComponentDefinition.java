@@ -29,7 +29,7 @@ public abstract class TNetSuiteComponentDefinition extends AbstractComponentDefi
             "org.talend.components.netsuite.NetSuiteSink";
 
     public static final String RUNTIME_SERVICE_CLASS =
-            "org.talend.components.netsuite.runtime.RuntimeServiceImpl";
+            "org.talend.components.netsuite.RuntimeServiceImpl";
 
     protected TNetSuiteComponentDefinition(String componentName, ExecutionEngine engine1, ExecutionEngine... engines) {
         super(componentName, engine1, engines);

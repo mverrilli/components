@@ -17,6 +17,6 @@ public class NetSuiteInputTestBase extends AbstractComponentTest {
     
     @Test
     public void componentHasBeenRegistered(){
-        assertComponentIsRegistered("tNetSuiteInput_POC");
+        assertComponentIsRegistered("tNetSuiteInput_DEV");
     }
 }
