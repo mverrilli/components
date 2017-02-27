@@ -322,26 +322,26 @@
                         <artifactId>maven-dependency-plugin</artifactId>
                         <version>2.8</version>
                         <executions>
-                            <execution>
-                                <id>copy-to-repo</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>copy</goal>
-                                </goals>
-                                <configuration>
-                                    <artifactItems>
-                                        <artifactItem>
-                                            <groupId>${project.groupId}</groupId>
-                                            <artifactId>${project.artifactId}</artifactId>
-                                            <version>${project.version}</version>
-                                            <type>${project.packaging}</type>
-                                            <classifier>bundle</classifier>
-                                            <outputDirectory>${tos-di.dir}\configuration\.m2\repository\org\talend\components\${project.artifactId}\${project.version}</outputDirectory>
-                                            <destFileName>${project.artifactId}-${project.version}.${project.packaging}</destFileName>
-                                        </artifactItem>
-                                    </artifactItems>
-                                </configuration>
-                            </execution>
+                            <!--<execution>-->
+                                <!--<id>copy-to-repo</id>-->
+                                <!--<phase>install</phase>-->
+                                <!--<goals>-->
+                                    <!--<goal>copy</goal>-->
+                                <!--</goals>-->
+                                <!--<configuration>-->
+                                    <!--<artifactItems>-->
+                                        <!--<artifactItem>-->
+                                            <!--<groupId>${project.groupId}</groupId>-->
+                                            <!--<artifactId>${project.artifactId}</artifactId>-->
+                                            <!--<version>${project.version}</version>-->
+                                            <!--<type>${project.packaging}</type>-->
+                                            <!--&lt;!&ndash;<classifier>bundle</classifier>&ndash;&gt;-->
+                                            <!--<outputDirectory>${tos-di.dir}\configuration\.m2\repository\org\talend\components\${project.artifactId}\${project.version}</outputDirectory>-->
+                                            <!--<destFileName>${project.artifactId}-${project.version}.${project.packaging}</destFileName>-->
+                                        <!--</artifactItem>-->
+                                    <!--</artifactItems>-->
+                                <!--</configuration>-->
+                            <!--</execution>-->
                             <execution>
                                 <id>copy-deps-m2-repo</id>
                                 <phase>package</phase>

@@ -181,26 +181,26 @@
                             </instructions>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>osgi-bundle</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>bundle</goal>
-                        </goals>
-                        <configuration>
-                            <classifier>bundle</classifier>
-                            <instructions>
-                                <Bundle-SymbolicName>org.talend.components.netsuite.definition</Bundle-SymbolicName>
-                                <Service-Component>*</Service-Component>
-                                <Import-Package>!*internal,*</Import-Package>
-                                <Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*</Embed-Dependency>
-                                <Include-Resource>
-                                    {maven-resources},META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt=target/classes/META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt
-                                </Include-Resource>
-                                <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
-                            </instructions>
-                        </configuration>
-                    </execution>
+                    <!--<execution>-->
+                        <!--<id>osgi-bundle</id>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>bundle</goal>-->
+                        <!--</goals>-->
+                        <!--<configuration>-->
+                            <!--<classifier>bundle</classifier>-->
+                            <!--<instructions>-->
+                                <!--<Bundle-SymbolicName>org.talend.components.netsuite.definition</Bundle-SymbolicName>-->
+                                <!--<Service-Component>*</Service-Component>-->
+                                <!--<Import-Package>!*internal,*</Import-Package>-->
+                                <!--<Embed-Dependency>*;scope=compile|runtime;inline=false;artifactId=!components-*|slf4j-*</Embed-Dependency>-->
+                                <!--<Include-Resource>-->
+                                    <!--{maven-resources},META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt=target/classes/META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt-->
+                                <!--</Include-Resource>-->
+                                <!--<Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>-->
+                            <!--</instructions>-->
+                        <!--</configuration>-->
+                    <!--</execution>-->
                 </executions>
             </plugin>
         </plugins>
@@ -223,25 +223,25 @@
                         <artifactId>maven-dependency-plugin</artifactId>
                         <version>2.8</version>
                         <executions>
-                            <!--<execution>-->
-                                <!--<id>copy-to-plugins</id>-->
-                                <!--<phase>install</phase>-->
-                                <!--<goals>-->
-                                    <!--<goal>copy</goal>-->
-                                <!--</goals>-->
-                                <!--<configuration>-->
-                                    <!--<artifactItems>-->
-                                        <!--<artifactItem>-->
-                                            <!--<groupId>${project.groupId}</groupId>-->
-                                            <!--<artifactId>${project.artifactId}</artifactId>-->
-                                            <!--<version>${project.version}</version>-->
-                                            <!--<type>${project.packaging}</type>-->
+                            <execution>
+                                <id>copy-to-plugins</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>copy</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>${project.groupId}</groupId>
+                                            <artifactId>${project.artifactId}</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>${project.packaging}</type>
                                             <!--<classifier>bundle</classifier>-->
-                                            <!--<outputDirectory>${tos-di.plugins.dir}</outputDirectory>-->
-                                        <!--</artifactItem>-->
-                                    <!--</artifactItems>-->
-                                <!--</configuration>-->
-                            <!--</execution>-->
+                                            <outputDirectory>${tos-di.plugins.dir}</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
                             <!--<execution>-->
                                 <!--<id>copy-to-repo</id>-->
                                 <!--<phase>install</phase>-->
