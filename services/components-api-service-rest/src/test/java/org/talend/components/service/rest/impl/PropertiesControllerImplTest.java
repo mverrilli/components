@@ -1,4 +1,4 @@
-//==============================================================================
+// ==============================================================================
 //
 // Copyright (C) 2006-2017 Talend Inc. - www.talend.com
 //
@@ -9,19 +9,24 @@
 // along with this program; if not, write to Talend SA
 // 9 rue Pages 92150 Suresnes, France
 //
-//==============================================================================
+// ==============================================================================
 
 package org.talend.components.service.rest.impl;
-
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.jayway.restassured.response.Response;
-import org.junit.Test;
-import org.talend.components.service.rest.AbstractSpringIntegrationTests;
 
 import static com.jayway.restassured.RestAssured.given;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8_VALUE;
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
+import static org.talend.components.service.rest.PropertiesController.IMAGE_SVG_VALUE;
+
+import org.hamcrest.Matchers;
+import org.junit.Test;
+import org.talend.components.service.rest.AbstractSpringIntegrationTests;
+import org.talend.daikon.definition.DefinitionImageType;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.jayway.restassured.response.Response;
 
 public class PropertiesControllerImplTest extends AbstractSpringIntegrationTests {
 
@@ -35,11 +40,47 @@ public class PropertiesControllerImplTest extends AbstractSpringIntegrationTests
     }
 
     @Test
+    public void testGetIcon_imageTypeNotFound() throws Exception {
+        given().expect() //
+                .statusCode(404) //
+                .log().ifValidationFails() //
+                .get("/properties/{name}/icon/{type}", DATA_STORE_DEFINITION_NAME, DefinitionImageType.SVG_ICON);
+    }
+
+    @Test
+    public void testGetIcon_pngImageTypeFound() throws Exception {
+        given().expect() //
+                .contentType(IMAGE_PNG_VALUE) //
+                .body(Matchers.startsWith("\uFFFDPNG")) // Magic header for PNG files.
+                .statusCode(200).log().ifError() //
+                .get("/properties/{name}/icon/{type}", DATA_STORE_DEFINITION_NAME, DefinitionImageType.PALETTE_ICON_32X32);
+    }
+
+    @Test
+    public void testGetIcon_svgImageTypeFound() throws Exception {
+        given().expect() //
+                .statusCode(200).log().ifError() //
+                .body(Matchers.containsString("</svg>")) //
+                .contentType(IMAGE_SVG_VALUE) //
+                .get("/properties/{name}/icon/{type}", DATA_SET_DEFINITION_NAME, DefinitionImageType.SVG_ICON);
+    }
+
+    @Test
+    public void testGetConnectors_badDefinition() throws Exception {
+        given().expect() //
+                .statusCode(400) //
+                .log().ifValidationFails() //
+                // TODO: check returned error
+                .body(Matchers.containsString("definitionClass")) //
+                .get("/properties/{name}/connectors", DATA_SET_DEFINITION_NAME);
+    }
+
+    @Test
     public void testValidateProperties() throws Exception {
         ObjectNode validationResult = given().accept(APPLICATION_JSON_UTF8_VALUE) //
                 .expect() //
                 .statusCode(200).log().ifError() //
-                .with().port(localServerPort) //
+                .with() //
                 .content(buildTestDataStoreFormData()) //
                 .contentType(APPLICATION_JSON_UTF8_VALUE) //
                 .post("/properties/{name}/validate", DATA_STORE_DEFINITION_NAME).as(ObjectNode.class);
@@ -54,7 +95,7 @@ public class PropertiesControllerImplTest extends AbstractSpringIntegrationTests
         Response response = given().accept(APPLICATION_JSON_UTF8_VALUE) //
                 .expect() //
                 .statusCode(200).log().ifError() //
-                .with().port(localServerPort) //
+                .with() //
                 .content(buildTestDataStoreFormData()) //
                 .contentType(APPLICATION_JSON_UTF8_VALUE) //
                 .post("/properties/{name}/{callback}/{propName}", DATA_STORE_DEFINITION_NAME, callback, propName);
@@ -70,8 +111,8 @@ public class PropertiesControllerImplTest extends AbstractSpringIntegrationTests
         ApiError errorContainer = given().accept(APPLICATION_JSON_UTF8_VALUE) //
                 .expect() //
                 .statusCode(400)
-                .with()
-                .port(localServerPort) //
+                .log().ifValidationFails() //
+                .with() //
                 .content(buildTestDataStoreFormData()) //
                 .contentType(APPLICATION_JSON_UTF8_VALUE) //
                 .post("/properties/{name}/{callback}/{propName}", DATA_STORE_DEFINITION_NAME, callback, propName)
@@ -87,7 +128,7 @@ public class PropertiesControllerImplTest extends AbstractSpringIntegrationTests
         given().accept(APPLICATION_JSON_UTF8_VALUE) //
                 .expect() //
                 .statusCode(200).log().ifError() //
-                .with().port(localServerPort) //
+                .with() //
                 .content(buildTestDataStoreFormData()) //
                 .contentType(APPLICATION_JSON_UTF8_VALUE) //
                 .post("/properties/{name}/dataset", DATA_STORE_DEFINITION_NAME);
@@ -99,8 +140,8 @@ public class PropertiesControllerImplTest extends AbstractSpringIntegrationTests
         ApiError errorContainer = given().accept(APPLICATION_JSON_UTF8_VALUE) //
                 .expect() //
                 .statusCode(500) //
-                .with()
-                .port(localServerPort) //
+                .log().ifValidationFails() //
+                .with() //
                 .content(buildTestDataStoreFormData()) //
                 .contentType(APPLICATION_JSON_UTF8_VALUE) //
                 .post("/properties/{name}/dataset", dataStoreName).as(ApiError.class);

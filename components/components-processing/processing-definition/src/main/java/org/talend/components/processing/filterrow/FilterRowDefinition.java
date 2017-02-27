@@ -25,7 +25,7 @@ import org.talend.components.api.component.runtime.JarRuntimeInfo;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.api.exception.error.ComponentsErrorCode;
 import org.talend.components.api.properties.ComponentProperties;
-import org.talend.components.processing.definition.ProcessingFamilyDefinition;
+import org.talend.components.processing.ProcessingFamilyDefinition;
 import org.talend.daikon.exception.TalendRuntimeException;
 import org.talend.daikon.properties.property.Property;
 import org.talend.daikon.runtime.RuntimeInfo;
@@ -53,22 +53,26 @@ public class FilterRowDefinition extends AbstractComponentDefinition {
     }
 
     @Override
-    public RuntimeInfo getRuntimeInfo(ExecutionEngine engine, ComponentProperties properties,
-            ConnectorTopology connectorTopology) {
+    public String getIconKey() {
+        return "filter-row";
+    }
+
+    @Override
+    public RuntimeInfo getRuntimeInfo(ExecutionEngine engine, ComponentProperties properties, ConnectorTopology connectorTopology) {
         assertEngineCompatibility(engine);
         if (ConnectorTopology.INCOMING_AND_OUTGOING.equals(connectorTopology)) {
             try {
                 return new JarRuntimeInfo(new URL("mvn:org.talend.components/components-runtime"),
-                    DependenciesReader.computeDependenciesFilePath("org.talend.components", "components-runtime"),
-                    "org.talend.components.processing.runtime.filterrow.FilterRowRuntime");
+                        DependenciesReader.computeDependenciesFilePath("org.talend.components", "components-runtime"),
+                        "org.talend.components.processing.runtime.filterrow.FilterRowRuntime");
             } catch (MalformedURLException e) {
                 throw new ComponentException(e);
             }
         } else {
             TalendRuntimeException.build(ComponentsErrorCode.WRONG_CONNECTOR) //
-            .put("component", getName()) //
-            .put("requested", connectorTopology == null ? "null" : connectorTopology.toString()) //
-            .put("available", ConnectorTopology.INCOMING_AND_OUTGOING.toString()).throwIt();
+                    .put("component", getName()) //
+                    .put("requested", connectorTopology == null ? "null" : connectorTopology.toString()) //
+                    .put("available", ConnectorTopology.INCOMING_AND_OUTGOING.toString()).throwIt();
             return null;
         }
     }

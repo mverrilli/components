@@ -24,7 +24,7 @@ import org.talend.components.api.component.runtime.ExecutionEngine;
 import org.talend.components.api.component.runtime.JarRuntimeInfo;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.api.properties.ComponentProperties;
-import org.talend.components.processing.definition.ProcessingFamilyDefinition;
+import org.talend.components.processing.ProcessingFamilyDefinition;
 import org.talend.daikon.properties.property.Property;
 import org.talend.daikon.runtime.RuntimeInfo;
 
@@ -50,22 +50,25 @@ public class PythonRowDefinition extends AbstractComponentDefinition {
         return new Property[] {};
     }
 
-    public RuntimeInfo getRuntimeInfo(ExecutionEngine engine, ComponentProperties properties,
-            ConnectorTopology connectorTopology) {
+    public RuntimeInfo getRuntimeInfo(ExecutionEngine engine, ComponentProperties properties, ConnectorTopology connectorTopology) {
         assertEngineCompatibility(engine);
         assertConnectorTopologyCompatibility(connectorTopology);
         try {
             return new JarRuntimeInfo(new URL("mvn:org.talend.components/processing-runtime"),
-                    DependenciesReader.computeDependenciesFilePath(ProcessingFamilyDefinition.MAVEN_GROUP_ID, ProcessingFamilyDefinition.MAVEN_ARTIFACT_ID),
+                    DependenciesReader.computeDependenciesFilePath(ProcessingFamilyDefinition.MAVEN_GROUP_ID,
+                            ProcessingFamilyDefinition.MAVEN_ARTIFACT_ID),
                     "org.talend.components.processing.runtime.pythonrow.PythonRowRDoFn");
         } catch (MalformedURLException e) {
             throw new ComponentException(e);
         }
     }
-   
 
     public Set<ConnectorTopology> getSupportedConnectorTopologies() {
         return EnumSet.of(ConnectorTopology.INCOMING_AND_OUTGOING);
     }
 
+    @Override
+    public String getIconKey() {
+        return "python";
+    }
 }
