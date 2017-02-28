@@ -1,6 +1,7 @@
 package org.talend.components.netsuite;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -11,15 +12,17 @@ import org.apache.avro.Schema;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.model.FieldDesc;
-import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.model.CustomFieldDesc;
+import org.talend.components.netsuite.client.model.FieldDesc;
+import org.talend.components.netsuite.client.model.RecordTypeInfo;
+import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
+import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
 import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
-import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.schema.NsField;
 import org.talend.components.netsuite.schema.NsSchema;
 import org.talend.daikon.NamedThing;
+import org.talend.daikon.SimpleNamedThing;
 import org.talend.daikon.avro.AvroUtils;
 import org.talend.daikon.avro.SchemaConstants;
 
@@ -34,9 +37,15 @@ public class SchemaServiceImpl implements SchemaService {
     }
 
     @Override
-    public List<NamedThing> getSchemaNames() {
+    public List<NamedThing> getRecordTypes() {
         try {
-            List<NamedThing> recordTypes = new ArrayList<>(clientService.getRecordTypes());
+            Collection<RecordTypeInfo> recordTypeList = clientService.getRecordTypes();
+
+            List<NamedThing> recordTypes = new ArrayList<>(recordTypeList.size());
+            for (RecordTypeInfo recordTypeInfo : recordTypeList) {
+                recordTypes.add(new SimpleNamedThing(recordTypeInfo.getName(), recordTypeInfo.getDisplayName()));
+            }
+
             // Sort by display name alphabetically
             Collections.sort(recordTypes, new Comparator<NamedThing>() {
                 @Override public int compare(NamedThing o1, NamedThing o2) {
@@ -52,8 +61,17 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public Schema getSchema(String typeName) {
         try {
-            TypeDesc def = clientService.getTypeInfo(typeName);
-            Schema schema = inferSchemaForRecord(def.getTypeName(), def.getFields());
+            TypeDesc typeDesc = clientService.getTypeInfo(typeName);
+
+            List<FieldDesc> fieldDescList = new ArrayList<>(typeDesc.getFields());
+            // Sort by name alphabetically
+            Collections.sort(fieldDescList, new Comparator<FieldDesc>() {
+                @Override public int compare(FieldDesc o1, FieldDesc o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
+
+            Schema schema = inferSchemaForRecord(typeDesc.getTypeName(), typeDesc.getFields());
             return schema;
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
@@ -63,14 +81,14 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public List<NamedThing> getSearchableTypes() {
         try {
-            List<NamedThing> searches = new ArrayList<>(clientService.getSearchableTypes());
+            List<NamedThing> searchableTypes = new ArrayList<>(clientService.getSearchableTypes());
             // Sort by display name alphabetically
-            Collections.sort(searches, new Comparator<NamedThing>() {
+            Collections.sort(searchableTypes, new Comparator<NamedThing>() {
                 @Override public int compare(NamedThing o1, NamedThing o2) {
                     return o1.getDisplayName().compareTo(o2.getDisplayName());
                 }
             });
-            return searches;
+            return searchableTypes;
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }
@@ -80,14 +98,8 @@ public class SchemaServiceImpl implements SchemaService {
     public NsSchema getSchemaForSearch(String typeName) {
         try {
             final SearchRecordTypeDesc searchInfo = clientService.getSearchRecordType(typeName);
-            final TypeDesc searchRecordInfo = clientService.getTypeInfo(searchInfo.getSearchBasicClass());
-            List<FieldDesc> searchFieldDescs = searchRecordInfo.getFields();
-            List<NsField> fields = new ArrayList<>(searchFieldDescs.size());
-            for (FieldDesc fieldDesc : searchFieldDescs) {
-                NsField field = new NsField(fieldDesc.getName(), fieldDesc.getValueType());
-                fields.add(field);
-            }
-            return new NsSchema(searchRecordInfo.getTypeName(), fields);
+            final TypeDesc searchRecordInfo = clientService.getBasicTypeInfo(searchInfo.getSearchBasicClass());
+            return toNsSchema(searchRecordInfo);
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }
@@ -96,14 +108,8 @@ public class SchemaServiceImpl implements SchemaService {
     @Override
     public NsSchema getSchemaForUpdate(String typeName) {
         try {
-            final TypeDesc typeDesc = clientService.getCustomizedTypeInfo(typeName);
-            List<FieldDesc> fieldDescList = typeDesc.getFields();
-            List<NsField> fields = new ArrayList<>(fieldDescList.size());
-            for (FieldDesc fieldDesc : fieldDescList) {
-                NsField field = new NsField(fieldDesc.getName(), fieldDesc.getValueType());
-                fields.add(field);
-            }
-            return new NsSchema(typeDesc.getTypeName(), fields);
+            final TypeDesc typeDesc = clientService.getTypeInfo(typeName);
+            return toNsSchema(typeDesc);
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }
@@ -113,15 +119,28 @@ public class SchemaServiceImpl implements SchemaService {
     public NsSchema getSchemaForDelete(String typeName) {
         try {
             final TypeDesc typeDesc = clientService.getTypeInfo("RecordRef");
-            List<NsField> fields = new ArrayList<>(typeDesc.getFields().size());
-            for (FieldDesc fieldDesc : typeDesc.getFields()) {
-                NsField field = new NsField(fieldDesc.getName(), fieldDesc.getValueType());
-                fields.add(field);
-            }
-            return new NsSchema(typeDesc.getTypeName(), fields);
+            return toNsSchema(typeDesc);
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }
+    }
+
+    public static NsSchema toNsSchema(final TypeDesc typeDesc) {
+        List<FieldDesc> fieldDescList = typeDesc.getFields();
+
+        List<NsField> fields = new ArrayList<>(fieldDescList.size());
+        for (FieldDesc fieldDesc : fieldDescList) {
+            NsField field = new NsField(fieldDesc.getName(), fieldDesc.getValueType());
+            fields.add(field);
+        }
+        // Sort by name alphabetically
+        Collections.sort(fields, new Comparator<NsField>() {
+            @Override public int compare(NsField o1, NsField o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+
+        return new NsSchema(typeDesc.getTypeName(), fields);
     }
 
     @Override

@@ -22,8 +22,8 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.talend.components.api.component.runtime.Result;
 import org.talend.components.netsuite.NetSuiteSink;
-import org.talend.components.netsuite.RuntimeService;
-import org.talend.components.netsuite.RuntimeServiceImpl;
+import org.talend.components.netsuite.NetSuiteRuntime;
+import org.talend.components.netsuite.NetSuiteRuntimeImpl;
 import org.talend.components.netsuite.SchemaService;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.TypeDesc;
@@ -104,8 +104,8 @@ public class NetSuiteOutputWriterTest extends NetSuiteOutputMockTestBase {
         properties.module.moduleName.setValue(typeDesc.getTypeName());
         properties.action.setValue(NetSuiteOutputProperties.OutputAction.UPDATE);
 
-        RuntimeService runtimeService = new RuntimeServiceImpl();
-        SchemaService schemaService = runtimeService.getSchemaService(properties.getConnectionProperties());
+        NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
+        SchemaService schemaService = netSuiteRuntime.getSchemaService(properties.getConnectionProperties());
 
         Schema schema = schemaService.getSchema(properties.module.moduleName.getValue());
 
@@ -167,8 +167,8 @@ public class NetSuiteOutputWriterTest extends NetSuiteOutputMockTestBase {
             }
         });
 
-        RuntimeService runtimeService = new RuntimeServiceImpl();
-        SchemaService schemaService = runtimeService.getSchemaService(properties.getConnectionProperties());
+        NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
+        SchemaService schemaService = netSuiteRuntime.getSchemaService(properties.getConnectionProperties());
 
         Schema schema = schemaService.getSchema("RecordRef");
 

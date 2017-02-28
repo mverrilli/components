@@ -30,7 +30,7 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
     @Override
     public ValidationResult initialize(RuntimeContainer container, ComponentProperties properties) {
         this.properties = (NetSuiteProvideConnectionProperties) properties;
-        this.endpoint = new NetSuiteEndpoint(getConnectionProperties());
+        this.endpoint = new NetSuiteEndpoint(NetSuiteEndpoint.createConnectionConfig(getConnectionProperties()));
         return ValidationResult.OK;
     }
 
@@ -49,7 +49,7 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
     public List<NamedThing> getSchemaNames(RuntimeContainer container) throws IOException {
         try {
             SchemaService schemaService = new SchemaServiceImpl(endpoint.getClientService());
-            return schemaService.getSchemaNames();
+            return schemaService.getRecordTypes();
         } catch (NetSuiteException e) {
             throw new IOException(e);
         }

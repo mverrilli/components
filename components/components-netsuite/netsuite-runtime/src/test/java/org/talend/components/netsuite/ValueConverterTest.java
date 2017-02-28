@@ -27,7 +27,7 @@ public class ValueConverterTest extends NetSuiteMockTestBase {
 
     @Test
     public void testEnumConverter() throws Exception {
-        TypeDesc typeDesc = clientService.getTypeInfo("Account");
+        TypeDesc typeDesc = clientService.getBasicTypeInfo("Account");
 
         Schema s = SchemaServiceImpl.inferSchemaForRecord(typeDesc.getTypeName(), typeDesc.getFields());
 
@@ -53,7 +53,7 @@ public class ValueConverterTest extends NetSuiteMockTestBase {
 
     @Test
     public void testXMLGregorianCalendarConverter() throws Exception {
-        TypeDesc typeDesc = clientService.getTypeInfo("Account");
+        TypeDesc typeDesc = clientService.getBasicTypeInfo("Account");
 
         Schema s = SchemaServiceImpl.inferSchemaForRecord(typeDesc.getTypeName(), typeDesc.getFields());
 
@@ -75,6 +75,7 @@ public class ValueConverterTest extends NetSuiteMockTestBase {
 
         FieldDesc fieldInfo = typeDesc.getField("TranDate");
         Schema.Field f = s.getField(fieldInfo.getName());
+        assertNotNull(f);
 
         NsObjectInputTransducer transducer = new NsObjectInputTransducer(clientService, s);
 

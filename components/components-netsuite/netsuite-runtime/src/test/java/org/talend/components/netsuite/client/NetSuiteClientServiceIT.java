@@ -7,17 +7,16 @@ import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
 
 import org.apache.commons.lang3.time.StopWatch;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.netsuite.NetSuiteTestBase;
-import org.talend.components.netsuite.client.model.CustomFieldDesc;
 import org.talend.components.netsuite.client.model.RecordTypeDesc;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
+import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.query.SearchCondition;
 import org.talend.components.netsuite.client.query.SearchQuery;
 import org.talend.components.netsuite.client.query.SearchResultSet;
@@ -122,6 +121,23 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
     }
 
     @Test
+    public void testLoadCustomRecordCustomFields() throws Exception {
+        NetSuiteClientService connection = webServiceTestFixture.getClientService();
+        connection.login();
+
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+
+        RecordTypeInfo recordType = connection.getRecordType("customrecord_campaign_revenue");
+
+        TypeDesc typeDesc = connection.getTypeInfo(recordType.getName());
+        System.out.println(typeDesc);
+
+        stopWatch.stop();
+        System.out.println("Total time: " + stopWatch);
+    }
+
+    @Test
     public void testLoadAllCustomizations() throws Exception {
         NetSuiteClientService connection = webServiceTestFixture.getClientService();
         connection.login();
@@ -129,8 +145,8 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
         for (RecordTypeDesc recordType : Arrays.asList(RecordTypeEnum.OPPORTUNITY, RecordTypeEnum.CALENDAR_EVENT)) {
-            Map<String, CustomFieldDesc> customFieldMap = connection.getRecordCustomFields(recordType);
-            System.out.println(customFieldMap);
+            TypeDesc typeDesc = connection.getTypeInfo(recordType.getTypeName());
+            System.out.println(typeDesc);
         }
         stopWatch.stop();
         System.out.println("Total time: " + stopWatch);

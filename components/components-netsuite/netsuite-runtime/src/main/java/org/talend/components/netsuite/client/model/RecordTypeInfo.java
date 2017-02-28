@@ -21,6 +21,10 @@ public class RecordTypeInfo {
         return name;
     }
 
+    public String getDisplayName() {
+        return recordType.getTypeName();
+    }
+
     public RecordTypeDesc getRecordType() {
         return recordType;
     }

@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.talend.components.api.properties.ComponentPropertiesImpl;
 import org.talend.components.api.properties.ComponentReferenceProperties;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
-import org.talend.components.netsuite.RuntimeService;
+import org.talend.components.netsuite.NetSuiteRuntime;
 import org.talend.daikon.java8.Function;
 import org.talend.daikon.properties.PresentationItem;
 import org.talend.daikon.properties.ValidationResult;
@@ -14,7 +14,7 @@ import org.talend.daikon.properties.presentation.Form;
 import org.talend.daikon.properties.presentation.Widget;
 import org.talend.daikon.properties.property.Property;
 
-import static org.talend.components.netsuite.TNetSuiteComponentDefinition.withRuntimeService;
+import static org.talend.components.netsuite.TNetSuiteComponentDefinition.withRuntime;
 import static org.talend.daikon.properties.presentation.Widget.widget;
 import static org.talend.daikon.properties.property.PropertyFactory.newInteger;
 import static org.talend.daikon.properties.property.PropertyFactory.newProperty;
@@ -129,7 +129,8 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
 
     @Override
     public NetSuiteConnectionProperties getConnectionProperties() {
-        return this;
+        String refComponentId = getReferencedComponentId();
+        return refComponentId != null ? getReferencedConnectionProperties() : this;
     }
 
     public String getReferencedComponentId() {
@@ -150,8 +151,8 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
     }
 
     public ValidationResult validateTestConnection() throws Exception {
-        ValidationResult vr = withRuntimeService(new Function<RuntimeService, ValidationResult>() {
-            @Override public ValidationResult apply(RuntimeService runtimeService) {
+        ValidationResult vr = withRuntime(new Function<NetSuiteRuntime, ValidationResult>() {
+            @Override public ValidationResult apply(NetSuiteRuntime runtimeService) {
                 return runtimeService.validateConnection(NetSuiteConnectionProperties.this);
             }
         });

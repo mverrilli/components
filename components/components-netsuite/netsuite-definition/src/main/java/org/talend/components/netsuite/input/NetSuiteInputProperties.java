@@ -1,5 +1,8 @@
 package org.talend.components.netsuite.input;
 
+import static org.talend.components.netsuite.TNetSuiteComponentDefinition.withSchemaService;
+import static org.talend.daikon.properties.presentation.Widget.widget;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -8,21 +11,18 @@ import java.util.Set;
 import org.talend.components.api.component.Connector;
 import org.talend.components.api.component.PropertyPathConnector;
 import org.talend.components.common.FixedConnectorsComponentProperties;
-import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.components.netsuite.NetSuiteModuleProperties;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
+import org.talend.components.netsuite.SchemaService;
+import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.components.netsuite.schema.NsField;
 import org.talend.components.netsuite.schema.NsSchema;
-import org.talend.components.netsuite.SchemaService;
 import org.talend.daikon.java8.Function;
 import org.talend.daikon.properties.ValidationResult;
 import org.talend.daikon.properties.presentation.Form;
 import org.talend.daikon.properties.presentation.Widget;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import static org.talend.components.netsuite.TNetSuiteComponentDefinition.withSchemaService;
-import static org.talend.daikon.properties.presentation.Widget.widget;
 
 /**
  *
@@ -65,7 +65,7 @@ public class NetSuiteInputProperties extends FixedConnectorsComponentProperties
 
     @Override
     public NetSuiteConnectionProperties getConnectionProperties() {
-        return connection;
+        return connection.getConnectionProperties();
     }
 
     @Override
@@ -81,14 +81,6 @@ public class NetSuiteInputProperties extends FixedConnectorsComponentProperties
         for (Form childForm : searchConditionTable.getForms()) {
             searchConditionTable.refreshLayout(childForm);
         }
-    }
-
-    protected NsSchema getSchemaForSearch(final String typeName) {
-        return withSchemaService(new Function<SchemaService, NsSchema>() {
-            @Override public NsSchema apply(SchemaService schemaService) {
-                return schemaService.getSchemaForSearch(typeName);
-            }
-        }, this);
     }
 
     protected List<String> getSearchFieldOperators() {

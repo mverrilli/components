@@ -25,12 +25,11 @@ public class SchemaServiceTest extends NetSuiteMockTestBase {
     private NetSuiteClientService clientService = NetSuiteClientService.create("2016.2");
 
     @Test
-    public void testInferSchemaForEntity() throws Exception {
-        TypeDesc typeDesc = clientService.getTypeInfo("Account");
+    public void testInferSchemaForRecordBasic() throws Exception {
+        TypeDesc typeDesc = clientService.getBasicTypeInfo("Account");
 
         Schema s = SchemaServiceImpl.inferSchemaForRecord(typeDesc.getTypeName(), typeDesc.getFields());
-
-        System.out.println(s);
+//        System.out.println(s);
 
         assertThat(s.getType(), is(Schema.Type.RECORD));
         assertThat(s.getName(), is("Account"));

@@ -15,8 +15,8 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.talend.components.netsuite.RuntimeService;
-import org.talend.components.netsuite.RuntimeServiceImpl;
+import org.talend.components.netsuite.NetSuiteRuntime;
+import org.talend.components.netsuite.NetSuiteRuntimeImpl;
 import org.talend.components.netsuite.SchemaService;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.TypeDesc;
@@ -64,8 +64,8 @@ public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
     @Test
     public void testBasic() throws Exception {
 
-        RuntimeService runtimeService = new RuntimeServiceImpl();
-        SchemaService schemaService = runtimeService.getSchemaService(mockTestFixture.getConnectionProperties());
+        NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
+        SchemaService schemaService = netSuiteRuntime.getSchemaService(mockTestFixture.getConnectionProperties());
 
         TypeDesc typeDesc = clientService.getTypeInfo("Opportunity");
 
@@ -86,8 +86,8 @@ public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
     @Test
     public void testNonRecordObjects() throws Exception {
 
-        RuntimeService runtimeService = new RuntimeServiceImpl();
-        SchemaService schemaService = runtimeService.getSchemaService(mockTestFixture.getConnectionProperties());
+        NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
+        SchemaService schemaService = netSuiteRuntime.getSchemaService(mockTestFixture.getConnectionProperties());
 
         Collection<String> typeNames = Arrays.asList("RecordRef", "CustomizationRef");
 
@@ -112,8 +112,8 @@ public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
     @Test
     public void testRecordRef() throws Exception {
 
-        RuntimeService runtimeService = new RuntimeServiceImpl();
-        SchemaService schemaService = runtimeService.getSchemaService(mockTestFixture.getConnectionProperties());
+        NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
+        SchemaService schemaService = netSuiteRuntime.getSchemaService(mockTestFixture.getConnectionProperties());
 
         TypeDesc typeDesc = clientService.getTypeInfo("RecordRef");
         TypeDesc referencedTypeDesc = clientService.getTypeInfo("Opportunity");
@@ -138,10 +138,10 @@ public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
     @Test
     public void testCustomFields() throws Exception {
 
-        RuntimeService runtimeService = new RuntimeServiceImpl();
-        SchemaService schemaService = runtimeService.getSchemaService(mockTestFixture.getConnectionProperties());
+        NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
+        SchemaService schemaService = netSuiteRuntime.getSchemaService(mockTestFixture.getConnectionProperties());
 
-        TypeDesc typeDesc = clientService.getTypeInfo("Opportunity");
+        TypeDesc basicTypeDesc = clientService.getBasicTypeInfo("Opportunity");
 
         final Map<String, CustomFieldSpec> customFieldSpecs = createCustomFieldSpecs();
         mockCustomizationRequestResults(customFieldSpecs);
@@ -150,19 +150,19 @@ public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
                 new RecordComposer<>(Opportunity.class, customFieldSpecs), 10);
         mockSearchRequestResults(recordList, 100);
 
-        TypeDesc customizedTypeDesc = clientService.getCustomizedTypeInfo(typeDesc.getTypeName());
+        TypeDesc customizedTypeDesc = clientService.getTypeInfo(basicTypeDesc.getTypeName());
 
         Schema schema = schemaService.getSchema(customizedTypeDesc.getTypeName());
 
         NsObjectOutputTransducer transducer = new NsObjectOutputTransducer(
-                webServiceMockTestFixture.getClientService(), typeDesc.getTypeName());
+                webServiceMockTestFixture.getClientService(), basicTypeDesc.getTypeName());
 
         List<IndexedRecord> indexedRecordList = makeIndexedRecords(clientService, schema,
                 new RecordComposer<>(Opportunity.class, customFieldSpecs), 10);
 
         for (IndexedRecord indexedRecord : indexedRecordList) {
             Opportunity record = (Opportunity) transducer.write(indexedRecord);
-            assertNsObject(typeDesc, record);
+            assertNsObject(basicTypeDesc, record);
         }
     }
 

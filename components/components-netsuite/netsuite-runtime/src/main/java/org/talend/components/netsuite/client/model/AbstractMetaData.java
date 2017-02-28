@@ -149,11 +149,12 @@ public abstract class AbstractMetaData implements MetaData {
         registerCustomFieldAdapter(new ItemOptionCustomFieldAdapter<>());
         registerCustomFieldAdapter(new TransactionBodyCustomFieldAdapter<>());
         registerCustomFieldAdapter(new TransactionColumnCustomFieldAdapter<>());
-        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>("customList"));
-        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>("customRecord"));
-        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>("customRecordType"));
-        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>("otherCustomField"));
-        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>("itemNumberCustomField"));
+        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>("customList", false));
+        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>("customRecord", true));
+        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>("customRecordType", true));
+        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>("customTransactionType", true));
+        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>("otherCustomField", false));
+        registerCustomFieldAdapter(new DefaultCustomFieldAdapter<>("itemNumberCustomField", false));
     }
 
     protected void registerCustomFieldAdapter(CustomFieldAdapter<?> adapter) {
@@ -195,8 +196,7 @@ public abstract class AbstractMetaData implements MetaData {
             String fieldName = toInitialUpper(propertyInfo.getName());
 
             Class fieldValueType = propertyInfo.getReadType();
-            if ((fieldName.equals("class") && fieldValueType == Class.class) ||
-                    (fieldName.equals("nullFieldList") && fieldValueType.getSimpleName().equals("NullField"))) {
+            if ((propertyInfo.getName().equals("class") && fieldValueType == Class.class)) {
                 continue;
             }
 

@@ -75,7 +75,7 @@ public class NsObjectInputTransducerIT extends NetSuiteTestBase {
                 .target(typeDesc.getTypeName())
                 .search();
 
-        TypeDesc customizedTypeDesc = connection.getCustomizedTypeInfo(typeDesc.getTypeName());
+        TypeDesc customizedTypeDesc = connection.getTypeInfo(typeDesc.getTypeName());
 
         int count = 0;
         while (count++ < connection.getSearchPageSize() && rs.next()) {

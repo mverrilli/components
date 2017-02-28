@@ -11,11 +11,11 @@ import org.talend.daikon.NamedThing;
  */
 public interface SchemaService {
 
-    List<NamedThing> getSchemaNames();
-
-    Schema getSchema(String typeName);
+    List<NamedThing> getRecordTypes();
 
     List<NamedThing> getSearchableTypes();
+
+    Schema getSchema(String typeName);
 
     NsSchema getSchemaForSearch(String typeName);
 

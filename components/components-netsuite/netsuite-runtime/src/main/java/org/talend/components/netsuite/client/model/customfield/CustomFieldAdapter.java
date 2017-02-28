@@ -1,7 +1,5 @@
 package org.talend.components.netsuite.client.model.customfield;
 
-import org.talend.components.netsuite.client.model.MetaData;
-
 import static org.talend.components.netsuite.client.model.BeanUtils.getEnumAccessor;
 import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
 
@@ -9,11 +7,9 @@ import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
  *
  */
 public abstract class CustomFieldAdapter<T> {
-    protected MetaData metaData;
     protected String type;
 
     public CustomFieldAdapter(String type) {
-        this.metaData = metaData;
         this.type = type;
     }
 

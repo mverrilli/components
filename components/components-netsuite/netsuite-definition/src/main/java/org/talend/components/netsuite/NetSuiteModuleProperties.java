@@ -8,6 +8,7 @@ import org.talend.components.api.exception.ComponentException;
 import org.talend.components.api.properties.ComponentPropertiesImpl;
 import org.talend.components.common.SchemaProperties;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
+import org.talend.components.netsuite.schema.NsSchema;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.java8.Function;
 import org.talend.daikon.properties.ValidationResult;
@@ -75,8 +76,8 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
 
     public ValidationResult beforeModuleName() throws Exception {
         try {
-            List<NamedThing> moduleNames = getSchemaNames();
-            moduleName.setPossibleNamedThingValues(moduleNames);
+            List<NamedThing> searchableTypes = getSearchableTypes();
+            moduleName.setPossibleNamedThingValues(searchableTypes);
         } catch (ComponentException ex) {
             return exceptionToValidationResult(ex);
         }
@@ -95,13 +96,13 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
 
     @Override
     public NetSuiteConnectionProperties getConnectionProperties() {
-        return connection;
+        return connection.getConnectionProperties();
     }
 
-    protected List<NamedThing> getSchemaNames() {
+    protected List<NamedThing> getSearchableTypes() {
         return TNetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, List<NamedThing>>() {
             @Override public List<NamedThing> apply(SchemaService schemaService) {
-                return schemaService.getSchemaNames();
+                return schemaService.getSearchableTypes();
             }
         }, this);
     }
@@ -110,6 +111,14 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
         return TNetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, Schema>() {
             @Override public Schema apply(SchemaService schemaService) {
                 return schemaService.getSchema(typeName);
+            }
+        }, this);
+    }
+
+    protected NsSchema getSchemaForSearch(final String typeName) {
+        return TNetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, NsSchema>() {
+            @Override public NsSchema apply(SchemaService schemaService) {
+                return schemaService.getSchemaForSearch(typeName);
             }
         }, this);
     }

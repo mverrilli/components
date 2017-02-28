@@ -8,12 +8,12 @@ import org.talend.daikon.properties.ValidationResult;
 /**
  *
  */
-public class RuntimeServiceImpl implements RuntimeService {
+public class NetSuiteRuntimeImpl implements NetSuiteRuntime {
 
     @Override
     public SchemaService getSchemaService(NetSuiteConnectionProperties properties) {
         try {
-            NetSuiteEndpoint endpoint = new NetSuiteEndpoint(properties);
+            NetSuiteEndpoint endpoint = getEndpoint(properties);
             return new SchemaServiceImpl(endpoint.connect());
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
@@ -23,7 +23,7 @@ public class RuntimeServiceImpl implements RuntimeService {
     @Override
     public ValidationResult validateConnection(NetSuiteConnectionProperties properties) {
         try {
-            NetSuiteEndpoint endpoint = new NetSuiteEndpoint(properties);
+            NetSuiteEndpoint endpoint = getEndpoint(properties);
             endpoint.connect();
             return ValidationResult.OK;
         } catch (NetSuiteException e) {
@@ -32,5 +32,13 @@ public class RuntimeServiceImpl implements RuntimeService {
             result.setMessage(e.getMessage());
             return result;
         }
+    }
+
+    protected NetSuiteEndpoint getEndpoint(NetSuiteConnectionProperties properties) throws NetSuiteException {
+        System.setProperty("com.sun.xml.bind.v2.runtime.JAXBContextImpl.fastBoot", "true");
+        System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
+
+        NetSuiteEndpoint endpoint = new NetSuiteEndpoint(NetSuiteEndpoint.createConnectionConfig(properties));
+        return endpoint;
     }
 }

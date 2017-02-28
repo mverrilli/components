@@ -13,6 +13,10 @@ public class CustomRecordTypeInfo extends RecordTypeInfo {
         this.customizationRef = customizationRef;
     }
 
+    public String getDisplayName() {
+        return customizationRef.getName();
+    }
+
     public NsCustomizationRef getCustomizationRef() {
         return customizationRef;
     }

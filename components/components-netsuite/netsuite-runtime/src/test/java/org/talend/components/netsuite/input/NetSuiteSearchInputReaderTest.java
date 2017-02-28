@@ -17,8 +17,8 @@ import org.junit.Test;
 import org.talend.components.api.component.ComponentDefinition;
 import org.talend.components.netsuite.NetSuiteMockTestBase;
 import org.talend.components.netsuite.NetSuiteSource;
-import org.talend.components.netsuite.RuntimeService;
-import org.talend.components.netsuite.RuntimeServiceImpl;
+import org.talend.components.netsuite.NetSuiteRuntime;
+import org.talend.components.netsuite.NetSuiteRuntimeImpl;
 import org.talend.components.netsuite.SchemaService;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.TypeDesc;
@@ -61,8 +61,8 @@ public class NetSuiteSearchInputReaderTest extends NetSuiteMockTestBase {
     public void testBasic() throws Exception {
         properties.module.moduleName.setValue("Account");
 
-        RuntimeService runtimeService = new RuntimeServiceImpl();
-        SchemaService schemaService = runtimeService.getSchemaService(properties.getConnectionProperties());
+        NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
+        SchemaService schemaService = netSuiteRuntime.getSchemaService(properties.getConnectionProperties());
 
         Schema schema = schemaService.getSchema(properties.module.moduleName.getValue());
         properties.module.main.schema.setValue(schema);

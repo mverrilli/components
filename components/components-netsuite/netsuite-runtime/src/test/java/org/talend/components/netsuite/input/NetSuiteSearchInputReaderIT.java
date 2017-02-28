@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteSource;
 import org.talend.components.netsuite.NetSuiteTestBase;
-import org.talend.components.netsuite.RuntimeServiceImpl;
+import org.talend.components.netsuite.NetSuiteRuntimeImpl;
 import org.talend.components.netsuite.SchemaService;
 import org.talend.components.netsuite.test.NetSuiteWebServiceTestFixture;
 
@@ -54,7 +54,7 @@ public class NetSuiteSearchInputReaderIT extends NetSuiteTestBase {
         properties.connection.applicationId.setValue(webServiceTestFixture.getCredentials().getApplicationId());
         properties.module.moduleName.setValue("Account");
 
-        SchemaService schemaService = new RuntimeServiceImpl()
+        SchemaService schemaService = new NetSuiteRuntimeImpl()
                 .getSchemaService(properties.getConnectionProperties());
         Schema schema = schemaService.getSchema(properties.module.moduleName.getValue());
         properties.module.main.schema.setValue(schema);

@@ -77,7 +77,7 @@ public class NetSuiteOutputProperties extends FixedConnectorsComponentProperties
 
     @Override
     public NetSuiteConnectionProperties getConnectionProperties() {
-        return connection;
+        return connection.getConnectionProperties();
     }
 
     @Override

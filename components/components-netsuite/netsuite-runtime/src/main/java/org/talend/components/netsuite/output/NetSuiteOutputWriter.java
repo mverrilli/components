@@ -52,7 +52,7 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
             action = writeOperation.getProperties().action.getValue();
 
             String typeName = writeOperation.getProperties().module.moduleName.getValue();
-            typeDesc = clientService.getCustomizedTypeInfo(typeName);
+            typeDesc = clientService.getTypeInfo(typeName);
 
             if (action == NetSuiteOutputProperties.OutputAction.DELETE) {
                 transducer = new NsObjectOutputTransducer(clientService, typeDesc.getTypeName(), true);

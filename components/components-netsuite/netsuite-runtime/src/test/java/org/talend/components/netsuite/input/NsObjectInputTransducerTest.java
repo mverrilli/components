@@ -21,7 +21,6 @@ import org.talend.components.netsuite.client.model.customfield.CustomFieldRefTyp
 import org.talend.components.netsuite.client.query.SearchResultSet;
 
 import com.netsuite.webservices.v2016_2.platform.core.Record;
-import com.netsuite.webservices.v2016_2.platform.core.RecordRef;
 import com.netsuite.webservices.v2016_2.platform.core.types.RecordType;
 import com.netsuite.webservices.v2016_2.setup.customization.TransactionBodyCustomField;
 import com.netsuite.webservices.v2016_2.setup.customization.types.CustomizationFieldType;
@@ -114,7 +113,7 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
                 new RecordComposer<>(Opportunity.class, customFieldSpecs), 10);
         mockSearchRequestResults(recordList, 100);
 
-        TypeDesc customizedTypeDesc = connection.getCustomizedTypeInfo(typeDesc.getTypeName());
+        TypeDesc customizedTypeDesc = connection.getTypeInfo(typeDesc.getTypeName());
 
         Schema schema = getDynamicSchema();
 

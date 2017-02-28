@@ -28,6 +28,8 @@ import org.talend.components.netsuite.client.common.NsSearchPreferences;
 import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.client.common.NsStatus;
 import org.talend.components.netsuite.client.common.NsWriteResponse;
+import org.talend.components.netsuite.client.model.CustomFieldDesc;
+import org.talend.components.netsuite.client.model.RecordTypeDesc;
 
 import com.netsuite.webservices.v2016_2.platform.ExceededRequestSizeFault;
 import com.netsuite.webservices.v2016_2.platform.InsufficientPermissionFault;
@@ -77,6 +79,7 @@ import com.netsuite.webservices.v2016_2.platform.messages.UpsertListRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.UpsertRequest;
 import com.netsuite.webservices.v2016_2.platform.messages.WriteResponse;
 import com.netsuite.webservices.v2016_2.platform.messages.WriteResponseList;
+import com.netsuite.webservices.v2016_2.setup.customization.CustomRecordType;
 
 /**
  *
@@ -541,7 +544,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
                     return port.getCustomizationId(request).getGetCustomizationIdResult();
                 } finally {
                     stopWatch.stop();
-                    System.out.println("loadCustomizationIds: " + stopWatch);
+                    logger.debug("loadCustomizationIds: {}", stopWatch);
                 }
             }
         });
@@ -591,7 +594,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
                     return toNsReadResponseList(port.getList(request).getReadResponseList());
                 } finally {
                     stopWatch.stop();
-                    System.out.println("loadCustomizations: " + stopWatch);
+                    logger.debug("loadCustomizations: {}", stopWatch);
                 }
             }
         });
@@ -608,5 +611,25 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         } else {
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    protected Map<String, CustomFieldDesc> loadCustomRecordCustomFields(
+            RecordTypeDesc recordType, NsCustomizationRef nsCustomizationRef) throws NetSuiteException {
+
+        List<CustomRecordType> customizationList = loadCustomizations(Collections.singletonList(nsCustomizationRef));
+
+        if (customizationList.isEmpty()) {
+            return null;
+        }
+
+        CustomRecordType customRecordType = customizationList.get(0);
+
+        List<?> customFieldList = customRecordType.getCustomFieldList().getCustomField();
+
+        Map<String, CustomFieldDesc> customFieldDescMap =
+                createCustomFieldDescMap(recordType, nsCustomizationRef.getType(), customFieldList);
+
+        return customFieldDescMap;
     }
 }
