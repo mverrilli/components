@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.input;
+package org.talend.components.netsuite.output;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -6,19 +6,19 @@ import java.util.Set;
 import org.talend.components.api.component.ConnectorTopology;
 import org.talend.components.api.component.runtime.ExecutionEngine;
 import org.talend.components.api.properties.ComponentProperties;
-import org.talend.components.netsuite.connection.TNetSuiteConnectionDefinition;
-import org.talend.components.netsuite.TNetSuiteComponentDefinition;
 import org.talend.components.netsuite.NetSuiteModuleProperties;
+import org.talend.components.netsuite.connection.NetSuiteConnectionDefinition;
+import org.talend.components.netsuite.NetSuiteComponentDefinition;
 import org.talend.daikon.runtime.RuntimeInfo;
 
 /**
  *
  */
-public class TNetSuiteInputDefinition extends TNetSuiteComponentDefinition {
+public class NetSuiteOutputDefinition extends NetSuiteComponentDefinition {
 
-    public static final String COMPONENT_NAME = "tNetSuiteInput_DEV"; //$NON-NLS-1$
+    public static final String COMPONENT_NAME = "tNetSuiteOutput_DEV"; //$NON-NLS-1$
 
-    public TNetSuiteInputDefinition() {
+    public NetSuiteOutputDefinition() {
         super(COMPONENT_NAME, ExecutionEngine.DI, ExecutionEngine.BEAM);
     }
 
@@ -33,7 +33,7 @@ public class TNetSuiteInputDefinition extends TNetSuiteComponentDefinition {
         assertEngineCompatibility(engine);
         if (connectorTopology != null && connectorTopology != ConnectorTopology.NONE) {
             assertConnectorTopologyCompatibility(connectorTopology);
-            return getRuntimeInfo(TNetSuiteConnectionDefinition.SOURCE_CLASS);
+            return getRuntimeInfo(NetSuiteConnectionDefinition.SINK_CLASS);
         }
         return null;
     }
@@ -50,7 +50,7 @@ public class TNetSuiteInputDefinition extends TNetSuiteComponentDefinition {
 
     @Override
     public Class<? extends ComponentProperties> getPropertyClass() {
-        return NetSuiteInputProperties.class;
+        return NetSuiteOutputProperties.class;
     }
 
 }

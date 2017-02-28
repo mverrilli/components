@@ -176,12 +176,6 @@ public abstract class AbstractMetaData implements MetaData {
     @Override
     public TypeDesc getTypeInfo(String typeName) {
         Class<?> clazz = getTypeClass(typeName);
-//        if (clazz == null) {
-//            RecordTypeDesc recordType = getRecordType(typeName);
-//            if (recordType != null) {
-//                clazz = recordType.getRecordClass();
-//            }
-//        }
         return clazz != null ? getTypeInfo(clazz) : null;
     }
 
@@ -200,8 +194,8 @@ public abstract class AbstractMetaData implements MetaData {
                 continue;
             }
 
-            boolean isKeyField = isKeyField(clazz, propertyInfo);
-            SimpleFieldDesc fieldDesc = new SimpleFieldDesc(fieldName, fieldValueType, isKeyField, true);
+            boolean isKey = isKeyField(clazz, propertyInfo);
+            SimpleFieldDesc fieldDesc = new SimpleFieldDesc(fieldName, fieldValueType, isKey, true);
             fieldDesc.setPropertyName(propertyInfo.getName());
             fields.add(fieldDesc);
         }

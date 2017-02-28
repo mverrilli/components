@@ -66,7 +66,7 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
         final List<Opportunity> recordList = makeNsObjects(
                 new RecordComposer<>(Opportunity.class, customFieldSpecs), 10);
 
-        Schema schema = SchemaServiceImpl.inferSchemaForRecord(typeDesc.getTypeName(), typeDesc.getFields());
+        Schema schema = SchemaServiceImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
         NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema);
 
@@ -88,7 +88,7 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
 
             final List<?> nsObjects = makeNsObjects(new SimpleObjectComposer<>(typeDesc.getTypeClass()), 10);
 
-            Schema schema = SchemaServiceImpl.inferSchemaForRecord(typeDesc.getTypeName(), typeDesc.getFields());
+            Schema schema = SchemaServiceImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
             NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema);
 

@@ -1,5 +1,6 @@
 package org.talend.components.netsuite.test;
 
+import java.util.Arrays;
 import java.util.Properties;
 
 import org.talend.components.netsuite.client.NetSuiteClientService;
@@ -22,11 +23,16 @@ public class NetSuiteWebServiceTestFixture implements TestFixture {
     public void setUp() throws Exception {
         System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
 
-        String configurationLocation = System.getProperty(
-                "netsuite.configuration.location", "/sandbox.properties");
-        properties = TestUtils.loadPropertiesFromLocation(configurationLocation);
+        properties = TestUtils.loadProperties(System.getProperties(), Arrays.asList(
+                "netsuite.endpoint.url",
+                "netsuite.endpoint.2016_2.url",
+                "netsuite.endpoint.2014_2.url",
+                "netsuite.email", "netsuite.password",
+                "netsuite.account", "netsuite.roleId",
+                "netsuite.applicationId"
+        ));
 
-        credentials = NetSuiteCredentials.loadFromProperties(properties, "credentials.");
+        credentials = NetSuiteCredentials.loadFromProperties(properties, "netsuite.");
 
         clientService = NetSuiteClientService.create("2016.2");
         clientService.setEndpointUrl(getEndpointUrl());
@@ -51,7 +57,8 @@ public class NetSuiteWebServiceTestFixture implements TestFixture {
     }
 
     public String getEndpointUrl() {
-        return properties.getProperty("endpoint.url");
+        return properties.getProperty("netsuite.endpoint.2016_2.url",
+                properties.getProperty("netsuite.endpoint.url"));
     }
 
     public NetSuiteClientService getClientService() {

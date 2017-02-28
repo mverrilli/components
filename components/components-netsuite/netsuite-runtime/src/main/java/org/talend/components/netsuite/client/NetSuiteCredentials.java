@@ -165,8 +165,8 @@ public class NetSuiteCredentials {
         credentials.setEmail(properties.getProperty(prefix + "email"));
         credentials.setPassword(properties.getProperty(prefix + "password"));
         credentials.setRoleId(properties.getProperty(prefix + "roleId"));
-        credentials.setApplicationId(properties.getProperty(prefix + "applicationId"));
         credentials.setAccount(properties.getProperty(prefix + "account"));
+        credentials.setApplicationId(properties.getProperty(prefix + "applicationId"));
         return credentials;
     }
 

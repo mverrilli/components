@@ -71,7 +71,7 @@ public class SchemaServiceImpl implements SchemaService {
                 }
             });
 
-            Schema schema = inferSchemaForRecord(typeDesc.getTypeName(), typeDesc.getFields());
+            Schema schema = inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
             return schema;
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
@@ -151,17 +151,23 @@ public class SchemaServiceImpl implements SchemaService {
         for (SearchFieldOperatorType.QualifiedName operatorName : operatorList) {
             operatorNames.add(operatorName.getQualifiedName());
         }
+        // Sort by name alphabetically
+        Collections.sort(operatorNames, new Comparator<String>() {
+            @Override public int compare(String o1, String o2) {
+                return o1.compareTo(o2);
+            }
+        });
         return operatorNames;
     }
 
     /**
-     * Infers an Avro schema for the given NsObject. This can be an expensive operation so the schema
+     * Infers an Avro schema for the given type. This can be an expensive operation so the schema
      * should be cached where possible. This is always an {@link Schema.Type#RECORD}.
      *
      * @param name name of a record.
      * @return the schema for data given from the object.
      */
-    public static Schema inferSchemaForRecord(String name, List<FieldDesc> fieldDescList) {
+    public static Schema inferSchemaForType(String name, List<FieldDesc> fieldDescList) {
         List<Schema.Field> fields = new ArrayList<>();
 
         for (FieldDesc fieldDesc : fieldDescList) {
@@ -202,6 +208,10 @@ public class SchemaServiceImpl implements SchemaService {
 
             if (avroField.defaultVal() != null) {
                 avroField.addProp(SchemaConstants.TALEND_COLUMN_DEFAULT, String.valueOf(avroField.defaultVal()));
+            }
+
+            if (fieldDesc.isKey()) {
+                avroField.addProp(SchemaConstants.TALEND_COLUMN_IS_KEY, Boolean.TRUE.toString());
             }
 
             fields.add(avroField);

@@ -8,7 +8,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.apache.avro.Schema;
 import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.FieldDesc;
@@ -29,7 +28,7 @@ public class ValueConverterTest extends NetSuiteMockTestBase {
     public void testEnumConverter() throws Exception {
         TypeDesc typeDesc = clientService.getBasicTypeInfo("Account");
 
-        Schema s = SchemaServiceImpl.inferSchemaForRecord(typeDesc.getTypeName(), typeDesc.getFields());
+        Schema s = SchemaServiceImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
         NsObjectInputTransducer transducer = new NsObjectInputTransducer(clientService, s);
 
@@ -55,7 +54,7 @@ public class ValueConverterTest extends NetSuiteMockTestBase {
     public void testXMLGregorianCalendarConverter() throws Exception {
         TypeDesc typeDesc = clientService.getBasicTypeInfo("Account");
 
-        Schema s = SchemaServiceImpl.inferSchemaForRecord(typeDesc.getTypeName(), typeDesc.getFields());
+        Schema s = SchemaServiceImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
         DateTimeZone tz1 = DateTimeZone.forID("EET");
 

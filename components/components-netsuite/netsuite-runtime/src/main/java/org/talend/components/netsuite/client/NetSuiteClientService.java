@@ -372,9 +372,8 @@ public abstract class NetSuiteClientService<PortT> {
     }
 
     protected Map<String, CustomFieldDesc> getRecordCustomFields(RecordTypeInfo recordTypeInfo) throws NetSuiteException {
+        lock.lock();
         try {
-            lock.lock();
-
             RecordTypeDesc recordType = recordTypeInfo.getRecordType();
 
             Map<String, CustomFieldDesc> recordCustomFields;
@@ -438,6 +437,8 @@ public abstract class NetSuiteClientService<PortT> {
                 customFieldInfo.setName(customizationRef.getScriptId());
                 customFieldInfo.setCustomFieldType(customFieldRefType);
 
+                customFieldInfo.setNullable(true);
+
                 customFieldDescMap.put(customFieldInfo.getName(), customFieldInfo);
             }
         }
@@ -448,6 +449,7 @@ public abstract class NetSuiteClientService<PortT> {
     protected void loadCustomRecordTypes() throws NetSuiteException {
         try {
             lock.lock();
+
             if (!customRecordTypesLoaded) {
                 List<NsCustomizationRef> customTypes = new ArrayList<>();
 
@@ -479,9 +481,8 @@ public abstract class NetSuiteClientService<PortT> {
     }
 
     protected void loadCustomFields() throws NetSuiteException {
+        lock.lock();
         try {
-            lock.lock();
-
             if (!customFieldsLoaded) {
                 Map<String, List<NsCustomizationRef>> fieldCustomizationRefs = new HashMap<>(32);
                 for (String customizationType : fieldCustomizationTypes) {
@@ -503,9 +504,8 @@ public abstract class NetSuiteClientService<PortT> {
     }
 
     protected void loadCustomRecordCustomFields(CustomRecordTypeInfo recordTypeInfo) throws NetSuiteException {
+        lock.lock();
         try {
-            lock.lock();
-
             Map<String, CustomFieldDesc> recordCustomFieldMap = customRecordCustomFieldMap.get(recordTypeInfo.getName());
 
             if (recordCustomFieldMap != null) {

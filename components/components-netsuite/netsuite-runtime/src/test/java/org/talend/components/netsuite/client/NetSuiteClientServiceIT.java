@@ -64,7 +64,7 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
 
             retrievedCount++;
         }
-        System.out.println("Retrieved records: " + retrievedCount);
+//        System.out.println("Retrieved records: " + retrievedCount);
         assertTrue(retrievedCount > 1);
     }
 
@@ -83,7 +83,8 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
         int count = 10;
         while (rs.next() && count-- > 0) {
             Record record = rs.get();
-            System.out.println(record);
+            assertNotNull(record);
+//            System.out.println(record);
         }
     }
 
@@ -113,7 +114,7 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
         stopWatch.start();
         Collection<RecordTypeInfo> recordTypes = connection.getRecordTypes();
         stopWatch.stop();
-        System.out.println("Total time: " + stopWatch);
+//        System.out.println("Total time: " + stopWatch);
 
         for (RecordTypeInfo recordType : recordTypes) {
             System.out.println(recordType.getName());
@@ -134,7 +135,7 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
         System.out.println(typeDesc);
 
         stopWatch.stop();
-        System.out.println("Total time: " + stopWatch);
+//        System.out.println("Total time: " + stopWatch);
     }
 
     @Test
@@ -149,7 +150,7 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
             System.out.println(typeDesc);
         }
         stopWatch.stop();
-        System.out.println("Total time: " + stopWatch);
+//        System.out.println("Total time: " + stopWatch);
     }
 
     protected RecordTypeInfo getCustomRecordType(Collection<RecordTypeInfo> recordTypes, String name) {

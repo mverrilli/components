@@ -42,7 +42,7 @@ public class NsObjectInputTransducerIT extends NetSuiteTestBase {
         connection.login();
 
         TypeDesc typeDesc = connection.getTypeInfo("Opportunity");
-        Schema schema = SchemaServiceImpl.inferSchemaForRecord(typeDesc.getTypeName(), typeDesc.getFields());
+        Schema schema = SchemaServiceImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
         NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema);
 

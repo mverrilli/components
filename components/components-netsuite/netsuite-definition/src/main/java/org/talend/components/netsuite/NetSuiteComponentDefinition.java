@@ -15,7 +15,7 @@ import org.talend.daikon.sandbox.SandboxedInstance;
 /**
  *
  */
-public abstract class TNetSuiteComponentDefinition extends AbstractComponentDefinition {
+public abstract class NetSuiteComponentDefinition extends AbstractComponentDefinition {
 
     public static final String MAVEN_GROUP_ID = "org.talend.components";
     public static final String MAVEN_ARTIFACT_ID = "netsuite-runtime";
@@ -30,7 +30,7 @@ public abstract class TNetSuiteComponentDefinition extends AbstractComponentDefi
     public static final String RUNTIME_CLASS =
             "org.talend.components.netsuite.NetSuiteRuntimeImpl";
 
-    protected TNetSuiteComponentDefinition(String componentName, ExecutionEngine engine1, ExecutionEngine... engines) {
+    protected NetSuiteComponentDefinition(String componentName, ExecutionEngine engine1, ExecutionEngine... engines) {
         super(componentName, engine1, engines);
     }
 
@@ -64,7 +64,7 @@ public abstract class TNetSuiteComponentDefinition extends AbstractComponentDefi
     public static <R> R withRuntime(final Function<NetSuiteRuntime, R> func) {
         RuntimeInfo runtimeInfo = getRuntimeInfo(RUNTIME_CLASS);
         try (SandboxedInstance sandboxI = RuntimeUtil.createRuntimeClass(runtimeInfo,
-                TNetSuiteComponentDefinition.class.getClassLoader())) {
+                NetSuiteComponentDefinition.class.getClassLoader())) {
             NetSuiteRuntime netSuiteRuntime = (NetSuiteRuntime) sandboxI.getInstance();
             return func.apply(netSuiteRuntime);
         }

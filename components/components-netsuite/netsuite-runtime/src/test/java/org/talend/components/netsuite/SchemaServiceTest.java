@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 
 import java.util.ArrayList;
@@ -28,7 +29,7 @@ public class SchemaServiceTest extends NetSuiteMockTestBase {
     public void testInferSchemaForRecordBasic() throws Exception {
         TypeDesc typeDesc = clientService.getBasicTypeInfo("Account");
 
-        Schema s = SchemaServiceImpl.inferSchemaForRecord(typeDesc.getTypeName(), typeDesc.getFields());
+        Schema s = SchemaServiceImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 //        System.out.println(s);
 
         assertThat(s.getType(), is(Schema.Type.RECORD));
@@ -56,6 +57,16 @@ public class SchemaServiceTest extends NetSuiteMockTestBase {
         assertUnionType(f.schema(), Arrays.asList(Schema.Type.LONG, Schema.Type.NULL));
         assertThat(f.getObjectProps().keySet(), containsInAnyOrder(SchemaConstants.TALEND_COLUMN_PATTERN));
         assertThat(f.getProp(SchemaConstants.TALEND_COLUMN_PATTERN), is("yyyy-MM-dd'T'HH:mm:ss'.000Z'"));
+    }
+
+    @Test
+    public void testGetSearchFieldOperators() {
+        SchemaService schemaService = new SchemaServiceImpl(clientService);
+        List<String> operators = schemaService.getSearchFieldOperators();
+        for (String operator : operators) {
+            assertNotNull(operator);
+//            System.out.println(operator);
+        }
     }
 
     private static void assertUnionType(Schema schema, List<Schema.Type> types) {

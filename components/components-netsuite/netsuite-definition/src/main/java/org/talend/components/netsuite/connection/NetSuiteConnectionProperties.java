@@ -14,7 +14,7 @@ import org.talend.daikon.properties.presentation.Form;
 import org.talend.daikon.properties.presentation.Widget;
 import org.talend.daikon.properties.property.Property;
 
-import static org.talend.components.netsuite.TNetSuiteComponentDefinition.withRuntime;
+import static org.talend.components.netsuite.NetSuiteComponentDefinition.withRuntime;
 import static org.talend.daikon.properties.presentation.Widget.widget;
 import static org.talend.daikon.properties.property.PropertyFactory.newInteger;
 import static org.talend.daikon.properties.property.PropertyFactory.newProperty;
@@ -33,7 +33,7 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
 
     public static final String DEFAULT_API_VERSION = "2016.2";
 
-    public Property<String> name = newString("name").setRequired();
+//    public Property<String> name = newString("name").setRequired();
 
     public Property<String> endpoint = newString("endpoint").setRequired();
 
@@ -53,7 +53,7 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
     public PresentationItem testConnection = new PresentationItem("testConnection", "Test connection");
 
     public ComponentReferenceProperties<NetSuiteConnectionProperties> referencedComponent =
-            new ComponentReferenceProperties("referencedComponent", TNetSuiteConnectionDefinition.COMPONENT_NAME);
+            new ComponentReferenceProperties("referencedComponent", NetSuiteConnectionDefinition.COMPONENT_NAME);
 
     public NetSuiteConnectionProperties(String name) {
         super(name);
@@ -93,7 +93,7 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
 
         // Wizard
         Form wizardForm = Form.create(this, FORM_WIZARD);
-        wizardForm.addRow(name);
+//        wizardForm.addRow(name);
         wizardForm.addRow(endpoint);
         wizardForm.addRow(email);
         wizardForm.addRow(widget(password)
@@ -111,7 +111,7 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
 
         String refComponentId = getReferencedComponentId();
         boolean refConnectionUsed = refComponentId != null
-                && refComponentId.startsWith(TNetSuiteConnectionDefinition.COMPONENT_NAME);
+                && refComponentId.startsWith(NetSuiteConnectionDefinition.COMPONENT_NAME);
 
         if (form.getName().equals(Form.MAIN) || form.getName().equals(FORM_WIZARD)) {
             form.getWidget(endpoint.getName()).setHidden(refConnectionUsed);

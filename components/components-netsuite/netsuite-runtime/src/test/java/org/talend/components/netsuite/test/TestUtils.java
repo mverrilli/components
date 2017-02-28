@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.Properties;
 
 /**
@@ -21,6 +22,17 @@ public class TestUtils {
             }
         }
         return loadPropertiesFromLocation(uri);
+    }
+
+    public static Properties loadProperties(Properties source, Collection<String> propertyNames) {
+        Properties properties = new Properties();
+        for (String propertyName : propertyNames) {
+            String value = source.getProperty(propertyName);
+            if (value != null) {
+                properties.setProperty(propertyName, value);
+            }
+        }
+        return properties;
     }
 
     public static Properties loadPropertiesFromLocation(URI location) throws IOException {

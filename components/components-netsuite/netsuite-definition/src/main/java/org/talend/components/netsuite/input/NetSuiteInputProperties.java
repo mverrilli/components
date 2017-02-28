@@ -1,6 +1,6 @@
 package org.talend.components.netsuite.input;
 
-import static org.talend.components.netsuite.TNetSuiteComponentDefinition.withSchemaService;
+import static org.talend.components.netsuite.NetSuiteComponentDefinition.withSchemaService;
 import static org.talend.daikon.properties.presentation.Widget.widget;
 
 import java.util.ArrayList;

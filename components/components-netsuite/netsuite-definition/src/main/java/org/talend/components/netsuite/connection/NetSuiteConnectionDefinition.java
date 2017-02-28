@@ -6,18 +6,18 @@ import java.util.Set;
 import org.talend.components.api.component.ConnectorTopology;
 import org.talend.components.api.component.runtime.ExecutionEngine;
 import org.talend.components.api.properties.ComponentProperties;
-import org.talend.components.netsuite.TNetSuiteComponentDefinition;
+import org.talend.components.netsuite.NetSuiteComponentDefinition;
 import org.talend.daikon.properties.property.Property;
 import org.talend.daikon.runtime.RuntimeInfo;
 
 /**
  *
  */
-public class TNetSuiteConnectionDefinition extends TNetSuiteComponentDefinition {
+public class NetSuiteConnectionDefinition extends NetSuiteComponentDefinition {
 
     public static final String COMPONENT_NAME = "tNetSuiteConnection_DEV"; //$NON-NLS-1$
 
-    public TNetSuiteConnectionDefinition() {
+    public NetSuiteConnectionDefinition() {
         super(COMPONENT_NAME, ExecutionEngine.DI);
     }
 
@@ -41,7 +41,7 @@ public class TNetSuiteConnectionDefinition extends TNetSuiteComponentDefinition 
             ConnectorTopology connectorTopology) {
         assertEngineCompatibility(engine);
         assertConnectorTopologyCompatibility(connectorTopology);
-        return getRuntimeInfo(TNetSuiteConnectionDefinition.SOURCE_OR_SINK_CLASS);
+        return getRuntimeInfo(NetSuiteConnectionDefinition.SOURCE_OR_SINK_CLASS);
     }
 
     @Override

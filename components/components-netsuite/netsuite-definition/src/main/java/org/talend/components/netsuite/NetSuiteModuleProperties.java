@@ -100,7 +100,7 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
     }
 
     protected List<NamedThing> getSearchableTypes() {
-        return TNetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, List<NamedThing>>() {
+        return NetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, List<NamedThing>>() {
             @Override public List<NamedThing> apply(SchemaService schemaService) {
                 return schemaService.getSearchableTypes();
             }
@@ -108,7 +108,7 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
     }
 
     protected Schema getSchema(final String typeName) {
-        return TNetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, Schema>() {
+        return NetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, Schema>() {
             @Override public Schema apply(SchemaService schemaService) {
                 return schemaService.getSchema(typeName);
             }
@@ -116,7 +116,7 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
     }
 
     protected NsSchema getSchemaForSearch(final String typeName) {
-        return TNetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, NsSchema>() {
+        return NetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, NsSchema>() {
             @Override public NsSchema apply(SchemaService schemaService) {
                 return schemaService.getSchemaForSearch(typeName);
             }

@@ -8,10 +8,9 @@ import org.talend.components.api.component.PropertyPathConnector;
 import org.talend.components.common.FixedConnectorsComponentProperties;
 import org.talend.components.common.SchemaProperties;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
-import org.talend.components.netsuite.TNetSuiteComponentDefinition;
+import org.talend.components.netsuite.NetSuiteComponentDefinition;
 import org.talend.components.netsuite.NetSuiteModuleProperties;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
-import org.talend.components.netsuite.schema.NsField;
 import org.talend.components.netsuite.schema.NsSchema;
 import org.talend.components.netsuite.SchemaService;
 import org.talend.daikon.java8.Function;
@@ -98,7 +97,7 @@ public class NetSuiteOutputProperties extends FixedConnectorsComponentProperties
     }
 
     protected NsSchema getSchemaForUpdate(final String typeName) {
-        return TNetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, NsSchema>() {
+        return NetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, NsSchema>() {
             @Override public NsSchema apply(SchemaService schemaService) {
                 return schemaService.getSchemaForSearch(typeName);
             }
@@ -106,7 +105,7 @@ public class NetSuiteOutputProperties extends FixedConnectorsComponentProperties
     }
 
     protected NsSchema getSchemaForDelete(final String typeName) {
-        return TNetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, NsSchema>() {
+        return NetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, NsSchema>() {
             @Override public NsSchema apply(SchemaService schemaService) {
                 return schemaService.getSchemaForSearch(typeName);
             }
