@@ -29,6 +29,7 @@
         <module>components-filedelimited</module>
         <module>components-elasticsearch</module>
         <module>components-filterrow</module>
+        <module>components-bigquery</module>
         <module>components-netsuite</module>
     </modules>
 </project>
