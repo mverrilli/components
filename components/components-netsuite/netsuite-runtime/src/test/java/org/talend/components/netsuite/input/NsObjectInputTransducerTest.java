@@ -68,7 +68,7 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
 
         Schema schema = SchemaServiceImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
-        NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema);
+        NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema, typeDesc.getTypeName());
 
         for (Record record : recordList) {
             IndexedRecord indexedRecord = transducer.read(record);
@@ -90,7 +90,7 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
 
             Schema schema = SchemaServiceImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
-            NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema);
+            NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema, typeDesc.getTypeName());
 
             for (Object record : nsObjects) {
                 IndexedRecord indexedRecord = transducer.read(record);
@@ -104,7 +104,7 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
         NetSuiteClientService connection = webServiceMockTestFixture.getClientService();
         connection.login();
 
-        TypeDesc typeDesc = connection.getTypeInfo("Opportunity");
+        TypeDesc basicTypeDesc = connection.getTypeInfo("Opportunity");
 
         final Map<String, CustomFieldSpec> customFieldSpecs = createCustomFieldSpecs();
         mockCustomizationRequestResults(customFieldSpecs);
@@ -113,21 +113,21 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
                 new RecordComposer<>(Opportunity.class, customFieldSpecs), 10);
         mockSearchRequestResults(recordList, 100);
 
-        TypeDesc customizedTypeDesc = connection.getTypeInfo(typeDesc.getTypeName());
+        TypeDesc typeDesc = connection.getTypeInfo(basicTypeDesc.getTypeName());
 
         Schema schema = getDynamicSchema();
 
-        NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema);
+        NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema, typeDesc.getTypeName());
 
         SearchResultSet<Record> rs = connection.newSearch()
-                .target(typeDesc.getTypeName())
+                .target(basicTypeDesc.getTypeName())
                 .search();
 
         while (rs.next()) {
             Record record = rs.get();
 
             IndexedRecord indexedRecord = transducer.read(record);
-            assertIndexedRecord(customizedTypeDesc, indexedRecord);
+            assertIndexedRecord(typeDesc, indexedRecord);
         }
     }
 

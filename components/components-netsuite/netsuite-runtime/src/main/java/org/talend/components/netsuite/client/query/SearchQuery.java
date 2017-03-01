@@ -67,6 +67,16 @@ public class SearchQuery<SearchT, RecT> {
         return this;
     }
 
+    public RecordTypeInfo getRecordTypeInfo() {
+        initSearch();
+        return recordTypeInfo;
+    }
+
+    public SearchRecordTypeDesc getSearchRecordInfo() {
+        initSearch();
+        return searchRecordInfo;
+    }
+
     private void initSearch() throws NetSuiteException {
         if (searchBasic != null) {
             return;

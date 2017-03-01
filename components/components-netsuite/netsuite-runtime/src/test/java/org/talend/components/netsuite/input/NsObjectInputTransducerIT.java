@@ -44,7 +44,7 @@ public class NsObjectInputTransducerIT extends NetSuiteTestBase {
         TypeDesc typeDesc = connection.getTypeInfo("Opportunity");
         Schema schema = SchemaServiceImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
-        NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema);
+        NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema, typeDesc.getTypeName());
 
         SearchResultSet<Record> rs = connection.newSearch()
                 .target(typeDesc.getTypeName())
@@ -69,7 +69,7 @@ public class NsObjectInputTransducerIT extends NetSuiteTestBase {
         TypeDesc typeDesc = connection.getTypeInfo("Opportunity");
         Schema schema = getDynamicSchema();
 
-        NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema);
+        NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema, typeDesc.getTypeName());
 
         SearchResultSet<Record> rs = connection.newSearch()
                 .target(typeDesc.getTypeName())

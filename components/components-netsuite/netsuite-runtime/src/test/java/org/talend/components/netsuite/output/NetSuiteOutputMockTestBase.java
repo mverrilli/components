@@ -20,7 +20,7 @@ public abstract class NetSuiteOutputMockTestBase extends NetSuiteMockTestBase {
             NetSuiteClientService clientService, Schema schema,
             ObjectComposer<T> objectComposer, int count) throws Exception {
 
-        NsObjectInputTransducer transducer = new NsObjectInputTransducer(clientService, schema);
+        NsObjectInputTransducer transducer = new NsObjectInputTransducer(clientService, schema, schema.getName());
 
         List<IndexedRecord> recordList = new ArrayList<>();
 

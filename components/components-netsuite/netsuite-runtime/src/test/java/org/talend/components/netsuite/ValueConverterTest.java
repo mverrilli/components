@@ -30,7 +30,7 @@ public class ValueConverterTest extends NetSuiteMockTestBase {
 
         Schema s = SchemaServiceImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
-        NsObjectInputTransducer transducer = new NsObjectInputTransducer(clientService, s);
+        NsObjectInputTransducer transducer = new NsObjectInputTransducer(clientService, s, typeDesc.getTypeName());
 
         FieldDesc fieldDesc = typeDesc.getField("AcctType");
         NsObjectTransducer.ValueConverter<Enum<AccountType>, String> converter1 =
@@ -76,7 +76,7 @@ public class ValueConverterTest extends NetSuiteMockTestBase {
         Schema.Field f = s.getField(fieldInfo.getName());
         assertNotNull(f);
 
-        NsObjectInputTransducer transducer = new NsObjectInputTransducer(clientService, s);
+        NsObjectInputTransducer transducer = new NsObjectInputTransducer(clientService, s, typeDesc.getTypeName());
 
         NsObjectTransducer.ValueConverter<XMLGregorianCalendar, Long> converter1 =
                 (NsObjectTransducer.ValueConverter<XMLGregorianCalendar, Long>) transducer.getValueConverter(fieldInfo);

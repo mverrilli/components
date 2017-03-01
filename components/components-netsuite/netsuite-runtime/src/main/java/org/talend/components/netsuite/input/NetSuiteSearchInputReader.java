@@ -14,6 +14,7 @@ import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteSource;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
+import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.query.SearchCondition;
 import org.talend.components.netsuite.client.query.SearchQuery;
 import org.talend.components.netsuite.client.common.ResultSet;
@@ -98,10 +99,10 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
     protected ResultSet<?> search() throws NetSuiteException {
         searchSchema = properties.module.main.schema.getValue();
 
-        transducer = new NsObjectInputTransducer(clientService, searchSchema);
+        String target = properties.module.moduleName.getStringValue();
 
         SearchQuery search = clientService.newSearch();
-        search.target(properties.module.moduleName.getValue());
+        search.target(target);
 
         List<String> fieldNames = properties.searchConditionTable.field.getValue();
         if (fieldNames != null && !fieldNames.isEmpty()) {
@@ -117,6 +118,9 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
                 search.condition(new SearchCondition(fieldName, operator, values));
             }
         }
+
+        RecordTypeInfo recordTypeInfo = search.getRecordTypeInfo();
+        transducer = new NsObjectInputTransducer(clientService, searchSchema, recordTypeInfo.getName());
 
         ResultSet<?> resultSet = search.search();
         return resultSet;

@@ -18,12 +18,14 @@ import org.talend.daikon.avro.AvroUtils;
 public class NsObjectInputTransducer extends NsObjectTransducer {
     private Schema schema;
     private Schema runtimeSchema;
+    private String typeName;
     private TypeDesc typeDesc;
 
-    public NsObjectInputTransducer(NetSuiteClientService clientService, Schema schema) {
+    public NsObjectInputTransducer(NetSuiteClientService clientService, Schema schema, String typeName) {
         super(clientService);
 
         this.schema = schema;
+        this.typeName = typeName;
     }
 
     public Schema getSchema() {
@@ -59,7 +61,7 @@ public class NsObjectInputTransducer extends NsObjectTransducer {
             typeDesc = clientService.getTypeInfo(typeDescByClass.getTypeName());
             runtimeSchema = getDynamicSchema(typeDesc, schema, typeDesc.getTypeName());
         } else {
-            typeDesc = clientService.getTypeInfo(schema.getName());
+            typeDesc = clientService.getTypeInfo(typeName);
             runtimeSchema = schema;
         }
     }
