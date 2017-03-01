@@ -286,7 +286,7 @@ public abstract class NetSuiteClientService<PortT> {
 
     public TypeDesc getTypeInfo(final String typeName) {
         TypeDesc baseTypeDesc;
-        String targetTypeName;
+        String targetTypeName = null;
         Class<?> targetTypeClass;
         List<FieldDesc> baseFieldDescList;
 
@@ -295,6 +295,7 @@ public abstract class NetSuiteClientService<PortT> {
             if (recordTypeInfo instanceof CustomRecordTypeInfo) {
                 CustomRecordTypeInfo customRecordTypeInfo = (CustomRecordTypeInfo) recordTypeInfo;
                 baseTypeDesc = basicMetaData.getTypeInfo(customRecordTypeInfo.getRecordType().getTypeName());
+                targetTypeName = customRecordTypeInfo.getName();
             } else {
                 baseTypeDesc = basicMetaData.getTypeInfo(typeName);
             }
@@ -302,7 +303,9 @@ public abstract class NetSuiteClientService<PortT> {
             baseTypeDesc = basicMetaData.getTypeInfo(typeName);
         }
 
-        targetTypeName = baseTypeDesc.getTypeName();
+        if (targetTypeName == null) {
+            targetTypeName = baseTypeDesc.getTypeName();
+        }
         targetTypeClass = baseTypeDesc.getTypeClass();
         baseFieldDescList = baseTypeDesc.getFields();
 

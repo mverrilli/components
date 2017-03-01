@@ -239,7 +239,7 @@ public class SchemaServiceImpl implements SchemaService {
             if (customFieldRefType == CustomFieldRefType.BOOLEAN) {
                 base = AvroUtils._boolean();
             } else if (customFieldRefType == CustomFieldRefType.LONG) {
-                base = AvroUtils._int();
+                base = AvroUtils._long();
             } else if (customFieldRefType == CustomFieldRefType.DOUBLE) {
                 base = AvroUtils._double();
             } else if (customFieldRefType == CustomFieldRefType.DATE) {
