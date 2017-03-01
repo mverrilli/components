@@ -2,7 +2,7 @@ package org.talend.components.netsuite.client.model.search;
 
 import java.util.List;
 
-import org.talend.components.netsuite.client.model.MetaData;
+import org.talend.components.netsuite.client.model.BasicMetaData;
 
 import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
 import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
@@ -12,7 +12,7 @@ import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
  */
 public class SearchEnumMultiSelectFieldAdapter<T> extends SearchFieldAdapter<T> {
 
-    public SearchEnumMultiSelectFieldAdapter(MetaData metaData, String fieldType, Class<T> fieldClass) {
+    public SearchEnumMultiSelectFieldAdapter(BasicMetaData metaData, SearchFieldType fieldType, Class<T> fieldClass) {
         super(metaData, fieldType, fieldClass);
     }
 
@@ -22,7 +22,7 @@ public class SearchEnumMultiSelectFieldAdapter<T> extends SearchFieldAdapter<T> 
 
         List<String> searchValue = (List<String>) getProperty(nsObject, "searchValue");
         searchValue.addAll(values);
-        setProperty(nsObject, "operator", metaData.getSearchFieldOperatorByName(fieldType, operatorName));
+        setProperty(nsObject, "operator", metaData.getSearchFieldOperatorByName(fieldType.getFieldTypeName(), operatorName));
 
         return nsObject;
     }

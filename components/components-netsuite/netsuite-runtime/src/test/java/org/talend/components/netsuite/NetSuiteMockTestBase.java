@@ -19,6 +19,7 @@ import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.CustomFieldDesc;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
+import org.talend.components.netsuite.client.model.TypeUtils;
 import org.talend.components.netsuite.test.NetSuiteComponentMockTestFixture;
 import org.talend.components.netsuite.test.NetSuiteWebServiceMockTestFixture;
 import org.talend.components.netsuite.client.model.BeanUtils;
@@ -260,7 +261,8 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
 
         Map<String, CustomFieldRef> map = new HashMap<>();
         for (CustomFieldSpec spec : customFieldSpecs.values()) {
-            CustomFieldRef fieldRef = (CustomFieldRef) clientService.createType(spec.getFieldRefType().getTypeName());
+            CustomFieldRef fieldRef = TypeUtils.createInstance(clientService.getBasicMetaData(),
+                    spec.getFieldRefType().getTypeName());
 
             fieldRef.setScriptId(spec.getScriptId());
             fieldRef.setInternalId(spec.getInternalId());

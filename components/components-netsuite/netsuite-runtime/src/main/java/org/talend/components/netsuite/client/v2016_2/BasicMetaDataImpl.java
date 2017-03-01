@@ -7,12 +7,12 @@ import java.util.Collection;
 
 import org.apache.commons.lang3.concurrent.ConcurrentException;
 import org.apache.commons.lang3.concurrent.LazyInitializer;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.model.AbstractMetaData;
+import org.talend.components.netsuite.client.model.BasicMetaData;
 import org.talend.components.netsuite.client.model.RecordTypeDesc;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
+import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
+import org.talend.components.netsuite.client.model.search.SearchFieldOperatorTypeDesc;
 
 import com.netsuite.webservices.v2016_2.platform.core.BaseRef;
 import com.netsuite.webservices.v2016_2.platform.core.CustomFieldList;
@@ -47,15 +47,15 @@ import com.netsuite.webservices.v2016_2.platform.core.types.SearchTextNumberFiel
 /**
  *
  */
-public class MetaDataImpl extends AbstractMetaData {
+public class BasicMetaDataImpl extends BasicMetaData {
 
-    private static final LazyInitializer<MetaDataImpl> initializer = new LazyInitializer<MetaDataImpl>() {
-        @Override protected MetaDataImpl initialize() throws ConcurrentException {
-            return new MetaDataImpl();
+    private static final LazyInitializer<BasicMetaDataImpl> initializer = new LazyInitializer<BasicMetaDataImpl>() {
+        @Override protected BasicMetaDataImpl initialize() throws ConcurrentException {
+            return new BasicMetaDataImpl();
         }
     };
 
-    public static MetaDataImpl getInstance() {
+    public static BasicMetaDataImpl getInstance() {
         try {
             return initializer.get();
         } catch (ConcurrentException e) {
@@ -63,21 +63,19 @@ public class MetaDataImpl extends AbstractMetaData {
         }
     }
 
-    public MetaDataImpl() {
+    public BasicMetaDataImpl() {
         logger.info("Initializing standard metadata...");
         long startTime = System.currentTimeMillis();
 
-        registerCustomFieldAdapters();
+        bindTypeTree(BaseRef.class);
+        bindTypeTree(CustomFieldRef.class);
 
-        registerTypes(BaseRef.class);
-        registerTypes(CustomFieldRef.class);
+        bindType(NullField.class, null);
+        bindType(ListOrRecordRef.class, null);
+        bindType(CustomFieldList.class, null);
+        bindType(SearchCustomFieldList.class, null);
 
-        registerType(NullField.class, null);
-        registerType(ListOrRecordRef.class, null);
-        registerType(CustomFieldList.class, null);
-        registerType(SearchCustomFieldList.class, null);
-
-        registerSearchFields(Arrays.asList(
+        bindSearchFields(Arrays.asList(
                 SearchBooleanCustomField.class,
                 SearchBooleanField.class,
                 SearchDateCustomField.class,
@@ -95,15 +93,15 @@ public class MetaDataImpl extends AbstractMetaData {
                 SearchTextNumberField.class
         ));
 
-        registerSearchFieldOperatorTypes(Arrays.<Pair<String, Class<?>>>asList(
-                ImmutablePair.<String, Class<?>>of("Date", SearchDateFieldOperator.class),
-                ImmutablePair.<String, Class<?>>of("PredefinedDate", SearchDate.class),
-                ImmutablePair.<String, Class<?>>of("Numeric", SearchLongFieldOperator.class),
-                ImmutablePair.<String, Class<?>>of("Double", SearchDoubleFieldOperator.class),
-                ImmutablePair.<String, Class<?>>of("String", SearchStringFieldOperator.class),
-                ImmutablePair.<String, Class<?>>of("TextNumber", SearchTextNumberFieldOperator.class),
-                ImmutablePair.<String, Class<?>>of("List", SearchMultiSelectFieldOperator.class),
-                ImmutablePair.<String, Class<?>>of("List", SearchEnumMultiSelectFieldOperator.class)
+        bindSearchFieldOperatorTypes(Arrays.<SearchFieldOperatorTypeDesc>asList(
+                SearchFieldOperatorTypeDesc.createForEnum(SearchFieldOperatorType.DATE, SearchDateFieldOperator.class),
+                SearchFieldOperatorTypeDesc.createForEnum(SearchFieldOperatorType.PREDEFINED_DATE, SearchDate.class),
+                SearchFieldOperatorTypeDesc.createForEnum(SearchFieldOperatorType.LONG, SearchLongFieldOperator.class),
+                SearchFieldOperatorTypeDesc.createForEnum(SearchFieldOperatorType.DOUBLE, SearchDoubleFieldOperator.class),
+                SearchFieldOperatorTypeDesc.createForEnum(SearchFieldOperatorType.STRING, SearchStringFieldOperator.class),
+                SearchFieldOperatorTypeDesc.createForEnum(SearchFieldOperatorType.TEXT_NUMBER, SearchTextNumberFieldOperator.class),
+                SearchFieldOperatorTypeDesc.createForEnum(SearchFieldOperatorType.MULTI_SELECT, SearchMultiSelectFieldOperator.class),
+                SearchFieldOperatorTypeDesc.createForEnum(SearchFieldOperatorType.ENUM_MULTI_SELECT, SearchEnumMultiSelectFieldOperator.class)
         ));
 
         long endTime = System.currentTimeMillis();

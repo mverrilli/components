@@ -141,7 +141,7 @@ public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
         NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
         SchemaService schemaService = netSuiteRuntime.getSchemaService(mockTestFixture.getConnectionProperties());
 
-        TypeDesc basicTypeDesc = clientService.getBasicTypeInfo("Opportunity");
+        TypeDesc basicTypeDesc = clientService.getBasicMetaData().getTypeInfo("Opportunity");
 
         final Map<String, CustomFieldSpec> customFieldSpecs = createCustomFieldSpecs();
         mockCustomizationRequestResults(customFieldSpecs);

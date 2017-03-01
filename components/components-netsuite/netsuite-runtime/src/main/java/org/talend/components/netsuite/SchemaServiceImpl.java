@@ -18,7 +18,7 @@ import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
-import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
+import org.talend.components.netsuite.client.model.search.SearchFieldOperatorName;
 import org.talend.components.netsuite.schema.NsField;
 import org.talend.components.netsuite.schema.NsSchema;
 import org.talend.daikon.NamedThing;
@@ -98,7 +98,8 @@ public class SchemaServiceImpl implements SchemaService {
     public NsSchema getSchemaForSearch(String typeName) {
         try {
             final SearchRecordTypeDesc searchInfo = clientService.getSearchRecordType(typeName);
-            final TypeDesc searchRecordInfo = clientService.getBasicTypeInfo(searchInfo.getSearchBasicClass());
+            final TypeDesc searchRecordInfo = clientService.getBasicMetaData()
+                    .getTypeInfo(searchInfo.getSearchBasicClass());
             return toNsSchema(searchRecordInfo);
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
@@ -145,10 +146,10 @@ public class SchemaServiceImpl implements SchemaService {
 
     @Override
     public List<String> getSearchFieldOperators() {
-        List<SearchFieldOperatorType.QualifiedName> operatorList =
-                new ArrayList<>(clientService.getSearchOperatorNames());
+        List<SearchFieldOperatorName> operatorList =
+                new ArrayList<>(clientService.getBasicMetaData().getSearchOperatorNames());
         List<String> operatorNames = new ArrayList<>(operatorList.size());
-        for (SearchFieldOperatorType.QualifiedName operatorName : operatorList) {
+        for (SearchFieldOperatorName operatorName : operatorList) {
             operatorNames.add(operatorName.getQualifiedName());
         }
         // Sort by name alphabetically

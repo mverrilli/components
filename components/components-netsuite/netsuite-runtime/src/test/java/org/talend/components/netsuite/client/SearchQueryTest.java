@@ -52,7 +52,7 @@ public class SearchQueryTest {
 
         s1.condition(new SearchCondition("CustomBooleanField1", "Boolean", Arrays.asList("true")));
         s1.condition(new SearchCondition("CustomStringField1", "String.doesNotContain", Arrays.asList("Foo")));
-        s1.condition(new SearchCondition("CustomLongField1", "Numeric.lessThan", Arrays.asList("100")));
+        s1.condition(new SearchCondition("CustomLongField1", "Long.lessThan", Arrays.asList("100")));
 
         SearchRecord sr1 = (SearchRecord) s1.toNativeQuery();
         assertNotNull(sr1);

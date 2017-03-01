@@ -1,5 +1,7 @@
 package org.talend.components.netsuite.client.model.customfield;
 
+import org.talend.components.netsuite.client.model.BasicRecordType;
+
 import static org.talend.components.netsuite.client.model.BeanUtils.getEnumAccessor;
 import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
 
@@ -7,13 +9,13 @@ import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
  *
  */
 public abstract class CustomFieldAdapter<T> {
-    protected String type;
+    protected BasicRecordType type;
 
-    public CustomFieldAdapter(String type) {
+    public CustomFieldAdapter(BasicRecordType type) {
         this.type = type;
     }
 
-    public String getType() {
+    public BasicRecordType getType() {
         return type;
     }
 

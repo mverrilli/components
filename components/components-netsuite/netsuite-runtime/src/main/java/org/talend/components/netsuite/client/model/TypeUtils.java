@@ -8,10 +8,12 @@ import java.util.Set;
 
 import javax.xml.bind.annotation.XmlSeeAlso;
 
+import org.talend.components.netsuite.client.NetSuiteException;
+
 /**
  *
  */
-public abstract class ClassUtils {
+public abstract class TypeUtils {
 
     public static void collectXmlTypes(Class<?> rootClass, Class<?> clazz, Set<Class<?>> classes) {
         if (classes.contains(clazz)) {
@@ -31,5 +33,21 @@ public abstract class ClassUtils {
         }
     }
 
+    public static <T> T createInstance(BasicMetaData basicMetaData, String typeName) throws NetSuiteException {
+        Class<?> clazz = basicMetaData.getTypeClass(typeName);
+        if (clazz == null) {
+            throw new NetSuiteException("Unknown type: " + typeName);
+        }
+        return (T) createInstance(clazz);
+    }
+
+    public static <T> T createInstance(Class<T> clazz) throws NetSuiteException {
+        try {
+            T target = clazz.cast(clazz.newInstance());
+            return target;
+        } catch (IllegalAccessException | InstantiationException e) {
+            throw new NetSuiteException("Failed to instantiate object: " + clazz, e);
+        }
+    }
 
 }

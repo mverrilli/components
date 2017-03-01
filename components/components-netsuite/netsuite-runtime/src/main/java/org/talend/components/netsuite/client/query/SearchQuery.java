@@ -15,10 +15,13 @@ import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.common.NsCustomizationRef;
 import org.talend.components.netsuite.client.common.NsSearchResult;
+import org.talend.components.netsuite.client.model.BasicRecordType;
 import org.talend.components.netsuite.client.model.CustomRecordTypeInfo;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
+import org.talend.components.netsuite.client.model.TypeUtils;
 import org.talend.components.netsuite.client.model.search.SearchFieldAdapter;
+import org.talend.components.netsuite.client.model.search.SearchFieldOperatorName;
 import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
 import org.talend.components.netsuite.client.model.search.SearchFieldType;
 
@@ -53,7 +56,7 @@ public class SearchQuery<SearchT, RecT> {
 
         // search not found or not supported
         if (searchRecordInfo == null) {
-            throw new IllegalArgumentException("Search entity not found: " + this.recordTypeName);
+            throw new IllegalArgumentException("Search record type not found: " + this.recordTypeName);
         }
 
         return this;
@@ -108,8 +111,8 @@ public class SearchQuery<SearchT, RecT> {
         String fieldName = toInitialLower(condition.getFieldName());
         PropertyInfo propertyInfo = searchMetaData.getProperty(fieldName);
 
-        SearchFieldOperatorType.QualifiedName operatorQName =
-                new SearchFieldOperatorType.QualifiedName(condition.getOperatorName());
+        SearchFieldOperatorName operatorQName =
+                new SearchFieldOperatorName(condition.getOperatorName());
 
         if (propertyInfo != null) {
             Object searchField = processConditionForSearchRecord(searchBasic, condition);
@@ -117,19 +120,22 @@ public class SearchQuery<SearchT, RecT> {
 
         } else {
             String dataType = operatorQName.getDataType();
-            String searchFieldType = null;
-            if ("String".equals(dataType)) {
-                searchFieldType = SearchFieldType.CUSTOM_STRING.getFieldTypeName();
-            } else if ("Boolean".equals(dataType)) {
-                searchFieldType = SearchFieldType.CUSTOM_BOOLEAN.getFieldTypeName();
-            } else if ("Numeric".equals(dataType)) {
-                searchFieldType = SearchFieldType.CUSTOM_LONG.getFieldTypeName();
-            } else if ("Double".equals(dataType)) {
-                searchFieldType = SearchFieldType.CUSTOM_DOUBLE.getFieldTypeName();
-            } else if ("Date".equals(dataType) || "PredefinedDate".equals(dataType)) {
-                searchFieldType = SearchFieldType.CUSTOM_DATE.getFieldTypeName();
-            } else if ("List".equals(dataType)) {
-                searchFieldType = SearchFieldType.CUSTOM_MULTI_SELECT.getFieldTypeName();
+            SearchFieldType searchFieldType = null;
+            if (SearchFieldOperatorType.STRING.dataTypeEquals(dataType)) {
+                searchFieldType = SearchFieldType.CUSTOM_STRING;
+            } else if (SearchFieldOperatorType.BOOLEAN.dataTypeEquals(dataType)) {
+                searchFieldType = SearchFieldType.CUSTOM_BOOLEAN;
+            } else if (SearchFieldOperatorType.LONG.dataTypeEquals(dataType)) {
+                searchFieldType = SearchFieldType.CUSTOM_LONG;
+            } else if (SearchFieldOperatorType.DOUBLE.dataTypeEquals(dataType)) {
+                searchFieldType = SearchFieldType.CUSTOM_DOUBLE;
+            } else if (SearchFieldOperatorType.DATE.dataTypeEquals(dataType) ||
+                    SearchFieldOperatorType.PREDEFINED_DATE.dataTypeEquals(dataType)) {
+                searchFieldType = SearchFieldType.CUSTOM_DATE;
+            } else if (SearchFieldOperatorType.MULTI_SELECT.dataTypeEquals(dataType)) {
+                searchFieldType = SearchFieldType.CUSTOM_MULTI_SELECT;
+            } else if (SearchFieldOperatorType.ENUM_MULTI_SELECT.dataTypeEquals(dataType)) {
+                searchFieldType = SearchFieldType.CUSTOM_SELECT;
             } else {
                 throw new NetSuiteException("Invalid data type: " + searchFieldType);
             }
@@ -145,18 +151,19 @@ public class SearchQuery<SearchT, RecT> {
         String fieldName = toInitialLower(condition.getFieldName());
         BeanInfo beanInfo = BeanManager.getBeanInfo(searchRecord.getClass());
         Class<?> searchFieldClass = beanInfo.getProperty(fieldName).getWriteType();
-        Object searchField = processCondition(searchFieldClass.getSimpleName(), condition);
+        SearchFieldType fieldType = SearchFieldType.getByFieldTypeName(searchFieldClass.getSimpleName());
+        Object searchField = processCondition(fieldType, condition);
         return searchField;
     }
 
-    private Object processCondition(String fieldType, SearchCondition condition) throws NetSuiteException {
+    private Object processCondition(SearchFieldType fieldType, SearchCondition condition) throws NetSuiteException {
         try {
             String searchFieldName = toInitialLower(condition.getFieldName());
             String searchOperator = condition.getOperatorName();
             List<String> searchValue = condition.getValues();
 
-            SearchFieldAdapter<?> fieldPopulator = clientService.getSearchFieldPopulator(fieldType);
-            Object searchField = fieldPopulator.populate(searchFieldName, searchOperator, searchValue);
+            SearchFieldAdapter<?> fieldAdapter = clientService.getBasicMetaData().getSearchFieldAdapter(fieldType);
+            Object searchField = fieldAdapter.populate(searchFieldName, searchOperator, searchValue);
 
             return searchField;
         } catch (IllegalArgumentException e) {
@@ -167,18 +174,20 @@ public class SearchQuery<SearchT, RecT> {
     public SearchT toNativeQuery() throws NetSuiteException {
         initSearch();
 
-        if (searchRecordInfo.getType().equals("transaction")) {
-            SearchFieldAdapter<?> populator = clientService.getSearchFieldPopulator(
-                    SearchFieldType.SELECT.getFieldTypeName());
-            Object searchTypeField = populator.populate(
+        BasicRecordType basicRecordType = BasicRecordType.getByType(searchRecordInfo.getType());
+        if (BasicRecordType.TRANSACTION == basicRecordType) {
+            SearchFieldAdapter<?> fieldAdapter = clientService.getBasicMetaData()
+                    .getSearchFieldAdapter(SearchFieldType.SELECT);
+            Object searchTypeField = fieldAdapter.populate(
                     "List.anyOf", Arrays.asList(recordTypeInfo.getRecordType().getType()));
             setProperty(searchBasic, "type", searchTypeField);
 
-        } else if (searchRecordInfo.getType().equals("customRecord")) {
+        } else if (BasicRecordType.CUSTOM_RECORD == basicRecordType) {
             CustomRecordTypeInfo customRecordTypeInfo = (CustomRecordTypeInfo) recordTypeInfo;
             NsCustomizationRef customizationRef = customRecordTypeInfo.getCustomizationRef();
 
-            Object recType = clientService.createType("CustomizationRef");
+            Object recType = TypeUtils.createInstance(
+                    clientService.getBasicMetaData(),"CustomizationRef");
             setProperty(recType, "scriptId", customizationRef.getScriptId());
             setProperty(recType, "internalId", customizationRef.getInternalId());
 
@@ -187,7 +196,8 @@ public class SearchQuery<SearchT, RecT> {
 
 
         if (!customFieldList.isEmpty()) {
-            Object customFieldListWrapper = clientService.createType("SearchCustomFieldList");
+            Object customFieldListWrapper = TypeUtils.createInstance(
+                    clientService.getBasicMetaData(),"SearchCustomFieldList");
             List<Object> customFields = (List<Object>) getProperty(customFieldListWrapper, "customField");
             for (Object customField : customFieldList) {
                 customFields.add(customField);

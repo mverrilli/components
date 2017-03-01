@@ -11,7 +11,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.model.MetaData;
+import org.talend.components.netsuite.client.model.BasicMetaData;
 
 import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
 
@@ -22,7 +22,7 @@ public class SearchDateFieldAdapter<T> extends SearchFieldAdapter<T> {
 
     private DatatypeFactory datatypeFactory;
 
-    public SearchDateFieldAdapter(MetaData metaData, String fieldType, Class<T> fieldClass) {
+    public SearchDateFieldAdapter(BasicMetaData metaData, SearchFieldType fieldType, Class<T> fieldClass) {
         super(metaData, fieldType, fieldClass);
 
         try {
@@ -36,12 +36,12 @@ public class SearchDateFieldAdapter<T> extends SearchFieldAdapter<T> {
     public T populate(T fieldObject, String internalId, String operatorName, List<String> values) {
         T nsObject = fieldObject != null ? fieldObject : createField(internalId);
 
-        SearchFieldOperatorType.QualifiedName operatorQName =
-                new SearchFieldOperatorType.QualifiedName(operatorName);
+        SearchFieldOperatorName operatorQName =
+                new SearchFieldOperatorName(operatorName);
 
         if (operatorQName.getDataType().equals("PredefinedDate")) {
             setProperty(nsObject, "predefinedSearchValue",
-                    metaData.getSearchFieldOperatorByName(fieldType, operatorName));
+                    metaData.getSearchFieldOperatorByName(fieldType.getFieldTypeName(), operatorName));
         } else {
             if (values != null && values.size() != 0) {
                 Calendar calValue = Calendar.getInstance();
@@ -101,7 +101,7 @@ public class SearchDateFieldAdapter<T> extends SearchFieldAdapter<T> {
                 }
             }
 
-            setProperty(nsObject, "operator", metaData.getSearchFieldOperatorByName(fieldType, operatorName));
+            setProperty(nsObject, "operator", metaData.getSearchFieldOperatorByName(fieldType.getFieldTypeName(), operatorName));
         }
 
         return nsObject;

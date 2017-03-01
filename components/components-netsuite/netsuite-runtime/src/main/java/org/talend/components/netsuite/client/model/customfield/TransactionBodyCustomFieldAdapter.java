@@ -2,6 +2,7 @@ package org.talend.components.netsuite.client.model.customfield;
 
 import java.util.Map;
 
+import org.talend.components.netsuite.client.model.BasicRecordType;
 import org.talend.components.netsuite.client.model.BeanUtils;
 
 import com.google.common.collect.ImmutableMap;
@@ -25,7 +26,7 @@ public class TransactionBodyCustomFieldAdapter<T> extends CustomFieldAdapter<T> 
             .build();
 
     public TransactionBodyCustomFieldAdapter() {
-        super("transactionBodyCustomField");
+        super(BasicRecordType.TRANSACTION_BODY_CUSTOM_FIELD);
     }
 
     @Override

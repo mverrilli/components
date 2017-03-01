@@ -28,6 +28,7 @@ import org.talend.components.netsuite.client.common.NsSearchPreferences;
 import org.talend.components.netsuite.client.common.NsSearchResult;
 import org.talend.components.netsuite.client.common.NsStatus;
 import org.talend.components.netsuite.client.common.NsWriteResponse;
+import org.talend.components.netsuite.client.model.BasicRecordType;
 import org.talend.components.netsuite.client.model.CustomFieldDesc;
 import org.talend.components.netsuite.client.model.RecordTypeDesc;
 
@@ -95,7 +96,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
     public NetSuiteClientServiceImpl() {
         super();
 
-        metaData = MetaDataImpl.getInstance();
+        basicMetaData = BasicMetaDataImpl.getInstance();
     }
 
     @Override
@@ -531,7 +532,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         return nsDetail;
     }
 
-    protected List<NsCustomizationRef> loadCustomizationIds(final String type) throws NetSuiteException {
+    protected List<NsCustomizationRef> loadCustomizationIds(final BasicRecordType type) throws NetSuiteException {
         GetCustomizationIdResult result = execute(new PortOperation<GetCustomizationIdResult, NetSuitePortType>() {
             @Override public GetCustomizationIdResult execute(NetSuitePortType port) throws Exception {
                 StopWatch stopWatch = new StopWatch();
@@ -539,7 +540,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
                     stopWatch.start();
                     final GetCustomizationIdRequest request = new GetCustomizationIdRequest();
                     CustomizationType customizationType = new CustomizationType();
-                    customizationType.setGetCustomizationType(GetCustomizationType.fromValue(type));
+                    customizationType.setGetCustomizationType(GetCustomizationType.fromValue(type.getType()));
                     request.setCustomizationType(customizationType);
                     return port.getCustomizationId(request).getGetCustomizationIdResult();
                 } finally {
@@ -627,8 +628,8 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
 
         List<?> customFieldList = customRecordType.getCustomFieldList().getCustomField();
 
-        Map<String, CustomFieldDesc> customFieldDescMap =
-                createCustomFieldDescMap(recordType, nsCustomizationRef.getType(), customFieldList);
+        Map<String, CustomFieldDesc> customFieldDescMap = createCustomFieldDescMap(recordType,
+                BasicRecordType.getByType(nsCustomizationRef.getType()), customFieldList);
 
         return customFieldDescMap;
     }

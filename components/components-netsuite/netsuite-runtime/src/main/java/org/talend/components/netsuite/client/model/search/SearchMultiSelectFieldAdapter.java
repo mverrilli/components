@@ -2,7 +2,8 @@ package org.talend.components.netsuite.client.model.search;
 
 import java.util.List;
 
-import org.talend.components.netsuite.client.model.MetaData;
+import org.talend.components.netsuite.client.model.BasicMetaData;
+import org.talend.components.netsuite.client.model.TypeUtils;
 
 import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
 import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
@@ -12,7 +13,7 @@ import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
  */
 public class SearchMultiSelectFieldAdapter<T> extends SearchFieldAdapter<T> {
 
-    public SearchMultiSelectFieldAdapter(MetaData metaData, String fieldType, Class<T> fieldClass) {
+    public SearchMultiSelectFieldAdapter(BasicMetaData metaData, SearchFieldType fieldType, Class<T> fieldClass) {
         super(metaData, fieldType, fieldClass);
     }
 
@@ -22,13 +23,14 @@ public class SearchMultiSelectFieldAdapter<T> extends SearchFieldAdapter<T> {
 
         List<Object> searchValue = (List<Object>) getProperty(nsObject, "searchValue");
         for (int i = 0; i < values.size(); i++) {
-            Object item = metaData.createType("ListOrRecordRef");
+            Object item = TypeUtils.createInstance(metaData,"ListOrRecordRef");
             setProperty(item, "name", values.get(i));
             setProperty(item, "internalId", values.get(i));
             searchValue.add(item);
         }
 
-        setProperty(nsObject, "operator", metaData.getSearchFieldOperatorByName(fieldType, operatorName));
+        setProperty(nsObject, "operator", metaData.getSearchFieldOperatorByName(
+                fieldType.getFieldTypeName(), operatorName));
 
         return nsObject;
     }

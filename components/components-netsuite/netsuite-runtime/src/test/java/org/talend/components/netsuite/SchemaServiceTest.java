@@ -27,7 +27,7 @@ public class SchemaServiceTest extends NetSuiteMockTestBase {
 
     @Test
     public void testInferSchemaForRecordBasic() throws Exception {
-        TypeDesc typeDesc = clientService.getBasicTypeInfo("Account");
+        TypeDesc typeDesc = clientService.getBasicMetaData().getTypeInfo("Account");
 
         Schema s = SchemaServiceImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 //        System.out.println(s);

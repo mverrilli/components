@@ -24,6 +24,7 @@ import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.model.CustomFieldDesc;
+import org.talend.components.netsuite.client.model.TypeUtils;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
 import org.talend.daikon.di.DiSchemaConstants;
 
@@ -192,12 +193,14 @@ public abstract class NsObjectTransducer {
 
                 Object customFieldListWrapper = getProperty(nsObject, "customFieldList");
                 if (customFieldListWrapper == null) {
-                    customFieldListWrapper = clientService.createType("CustomFieldList");
+                    customFieldListWrapper = TypeUtils.createInstance(
+                            clientService.getBasicMetaData(), "CustomFieldList");
                     setProperty(nsObject, "customFieldList", customFieldListWrapper);
                 }
                 List<Object> customFieldList = (List<Object>) getProperty(customFieldListWrapper, "customField");
 
-                Object customField = clientService.createType(customFieldRefType.getTypeName());
+                Object customField = TypeUtils.createInstance(
+                        clientService.getBasicMetaData(), customFieldRefType.getTypeName());
                 setProperty(customField, "scriptId", customFieldInfo.getCustomizationRef().getScriptId());
                 setProperty(customField, "internalId", customFieldInfo.getCustomizationRef().getInternalId());
 

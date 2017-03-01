@@ -1,12 +1,14 @@
 package org.talend.components.netsuite.client.model.customfield;
 
+import org.talend.components.netsuite.client.model.BasicRecordType;
+
 /**
  *
  */
 public class DefaultCustomFieldAdapter<T> extends CustomFieldAdapter<T> {
     private boolean applies;
 
-    public DefaultCustomFieldAdapter(String type, boolean applies) {
+    public DefaultCustomFieldAdapter(BasicRecordType type, boolean applies) {
         super(type);
 
         this.applies = applies;

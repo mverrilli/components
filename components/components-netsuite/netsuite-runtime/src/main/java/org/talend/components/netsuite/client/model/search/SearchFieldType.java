@@ -1,5 +1,8 @@
 package org.talend.components.netsuite.client.model.search;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  */
@@ -22,11 +25,34 @@ public enum SearchFieldType {
 
     private final String fieldTypeName;
 
+    private static final Map<SearchFieldType, SearchFieldOperatorType> fieldOperatorMap;
+
+    static {
+        fieldOperatorMap = new HashMap<>();
+        fieldOperatorMap.put(SearchFieldType.MULTI_SELECT, SearchFieldOperatorType.MULTI_SELECT);
+        fieldOperatorMap.put(SearchFieldType.SELECT, SearchFieldOperatorType.ENUM_MULTI_SELECT);
+        fieldOperatorMap.put(SearchFieldType.CUSTOM_MULTI_SELECT, SearchFieldOperatorType.MULTI_SELECT);
+        fieldOperatorMap.put(SearchFieldType.CUSTOM_SELECT, SearchFieldOperatorType.ENUM_MULTI_SELECT);
+    }
+
     SearchFieldType(String fieldTypeName) {
         this.fieldTypeName = fieldTypeName;
     }
 
     public String getFieldTypeName() {
         return fieldTypeName;
+    }
+
+    public static SearchFieldType getByFieldTypeName(String fieldTypeName) {
+        for (SearchFieldType value : values()) {
+            if (value.fieldTypeName.equals(fieldTypeName)) {
+                return value;
+            }
+        }
+        throw new IllegalArgumentException("Unknown field type name: " + fieldTypeName);
+    }
+
+    public static SearchFieldOperatorType getOperatorType(final SearchFieldType searchFieldType) {
+        return fieldOperatorMap.get(searchFieldType);
     }
 }

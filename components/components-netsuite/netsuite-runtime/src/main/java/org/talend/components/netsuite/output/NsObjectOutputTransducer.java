@@ -20,6 +20,7 @@ import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.RecordTypeDesc;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.TypeDesc;
+import org.talend.components.netsuite.client.model.TypeUtils;
 
 /**
  *
@@ -69,7 +70,8 @@ public class NsObjectOutputTransducer extends NsObjectTransducer {
         Schema schema = indexedRecord.getSchema();
 
         try {
-            Object nsObject = clientService.createType(typeDesc.getTypeName());
+            Object nsObject = TypeUtils.createInstance(
+                    clientService.getBasicMetaData(), typeDesc.getTypeName());
 
             Set<String> nullFieldNames = new HashSet<>();
 
@@ -87,7 +89,8 @@ public class NsObjectOutputTransducer extends NsObjectTransducer {
             if (!nullFieldNames.isEmpty() && beanInfo.getProperty("nullFieldList") != null) {
                 Object nullFieldListWrapper = getProperty(nsObject, "nullFieldList");
                 if (nullFieldListWrapper == null) {
-                    nullFieldListWrapper = clientService.createType("NullField");
+                    nullFieldListWrapper = TypeUtils.createInstance(
+                            clientService.getBasicMetaData(),"NullField");
                     setProperty(nsObject, "nullFieldList", nullFieldListWrapper);
                 }
                 List<String> nullFields = (List<String>) getProperty(nullFieldListWrapper, "name");

@@ -2,7 +2,7 @@ package org.talend.components.netsuite.client.tools;
 
 import static org.talend.components.netsuite.client.model.BeanUtils.toInitialLower;
 import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
-import static org.talend.components.netsuite.client.model.ClassUtils.collectXmlTypes;
+import static org.talend.components.netsuite.client.model.TypeUtils.collectXmlTypes;
 
 import java.io.File;
 import java.io.IOException;

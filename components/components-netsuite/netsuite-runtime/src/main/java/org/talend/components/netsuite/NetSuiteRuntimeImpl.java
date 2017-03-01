@@ -35,9 +35,6 @@ public class NetSuiteRuntimeImpl implements NetSuiteRuntime {
     }
 
     protected NetSuiteEndpoint getEndpoint(NetSuiteConnectionProperties properties) throws NetSuiteException {
-        System.setProperty("com.sun.xml.bind.v2.runtime.JAXBContextImpl.fastBoot", "true");
-        System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
-
         NetSuiteEndpoint endpoint = new NetSuiteEndpoint(NetSuiteEndpoint.createConnectionConfig(properties));
         return endpoint;
     }
