@@ -24,19 +24,18 @@ public class JAXBConfigGen {
 
     public static void main(String... args) throws Exception {
         JAXBConfigGen tool = new JAXBConfigGen();
-//        tool.run("2014.2", "_2014_2", "v2014_2");
-        tool.run("2016.2", "_2016_2", "v2016_2");
+        // "file:///D:/ws/talend/dev/components/components/components-netsuite/netsuite-runtime_2014_2/src/main/resources/wsdl/2014.2/netsuite.wsdl", "_2016_2", "v2016_2"
+        tool.run(args);
     }
 
     public void run(String... args) throws Exception {
-        String apiVersion = args[0];
+        String wsdlUrl = args[0];
         String apiVersionPackageSuffix = args[1];
         String apiVersionPackage = args[2];
 
         WSDLReader wsdlReader = WSDLFactory.newInstance().newWSDLReader();
 
-        Definition def = wsdlReader.readWSDL(getClass().getResource(
-                "/wsdl/" + apiVersion + "/netsuite.wsdl").toString());
+        Definition def = wsdlReader.readWSDL(wsdlUrl);
 
         Collection<String> namespaceList = new HashSet<>();
         processSchemas(def, namespaceList);

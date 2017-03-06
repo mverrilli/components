@@ -1,7 +1,7 @@
 package org.talend.components.netsuite.output;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
-import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.getSimpleProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.setSimpleProperty;
 
 import java.util.HashSet;
 import java.util.List;
@@ -87,13 +87,13 @@ public class NsObjectOutputTransducer extends NsObjectTransducer {
             }
 
             if (!nullFieldNames.isEmpty() && beanInfo.getProperty("nullFieldList") != null) {
-                Object nullFieldListWrapper = getProperty(nsObject, "nullFieldList");
+                Object nullFieldListWrapper = getSimpleProperty(nsObject, "nullFieldList");
                 if (nullFieldListWrapper == null) {
                     nullFieldListWrapper = TypeUtils.createInstance(
                             clientService.getBasicMetaData(),"NullField");
-                    setProperty(nsObject, "nullFieldList", nullFieldListWrapper);
+                    setSimpleProperty(nsObject, "nullFieldList", nullFieldListWrapper);
                 }
-                List<String> nullFields = (List<String>) getProperty(nullFieldListWrapper, "name");
+                List<String> nullFields = (List<String>) getSimpleProperty(nullFieldListWrapper, "name");
                 nullFields.addAll(nullFieldNames);
             }
 

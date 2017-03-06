@@ -100,27 +100,27 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
     }
 
     protected List<NamedThing> getSearchableTypes() {
-        return NetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, List<NamedThing>>() {
-            @Override public List<NamedThing> apply(SchemaService schemaService) {
-                return schemaService.getSearchableTypes();
+        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDataSetRuntime, List<NamedThing>>() {
+            @Override public List<NamedThing> apply(NetSuiteDataSetRuntime dataSetRuntime) {
+                return dataSetRuntime.getSearchableTypes();
             }
-        }, this);
+        });
     }
 
     protected Schema getSchema(final String typeName) {
-        return NetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, Schema>() {
-            @Override public Schema apply(SchemaService schemaService) {
-                return schemaService.getSchema(typeName);
+        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDataSetRuntime, Schema>() {
+            @Override public Schema apply(NetSuiteDataSetRuntime dataSetRuntime) {
+                return dataSetRuntime.getSchema(typeName);
             }
-        }, this);
+        });
     }
 
     protected NsSchema getSchemaForSearch(final String typeName) {
-        return NetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, NsSchema>() {
-            @Override public NsSchema apply(SchemaService schemaService) {
-                return schemaService.getSchemaForSearch(typeName);
+        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDataSetRuntime, NsSchema>() {
+            @Override public NsSchema apply(NetSuiteDataSetRuntime dataSetRuntime) {
+                return dataSetRuntime.getSchemaForSearch(typeName);
             }
-        }, this);
+        });
     }
 
 }

@@ -10,7 +10,7 @@ import org.talend.daikon.properties.ValidationResult;
 /**
  *
  */
-public class NetSuiteSink extends NetSuiteSourceOrSink implements Sink {
+public abstract class NetSuiteSink extends NetSuiteSourceOrSink implements Sink {
 
     @Override
     public WriteOperation<?> createWriteOperation() {

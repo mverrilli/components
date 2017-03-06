@@ -1,9 +1,9 @@
 package org.talend.components.netsuite.client.model.customfield;
 
-import org.talend.components.netsuite.client.model.BasicRecordType;
-
 import static org.talend.components.netsuite.client.model.BeanUtils.getEnumAccessor;
-import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.getSimpleProperty;
+
+import org.talend.components.netsuite.client.model.BasicRecordType;
 
 /**
  *
@@ -24,7 +24,7 @@ public abstract class CustomFieldAdapter<T> {
     public abstract CustomFieldRefType apply(T field);
 
     protected CustomFieldRefType getFieldType(T field) {
-        Enum<?> fieldTypeEnumValue = (Enum<?>) getProperty(field, "fieldType");
+        Enum<?> fieldTypeEnumValue = (Enum<?>) getSimpleProperty(field, "fieldType");
         String fieldTypeName = getEnumAccessor(fieldTypeEnumValue.getClass()).mapToString(fieldTypeEnumValue);
         return CustomFieldRefType.getByCustomizationTypeOrDefault(fieldTypeName);
     }

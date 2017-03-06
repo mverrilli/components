@@ -41,7 +41,8 @@ public class NetSuiteConnectionDefinition extends NetSuiteComponentDefinition {
             ConnectorTopology connectorTopology) {
         assertEngineCompatibility(engine);
         assertConnectorTopologyCompatibility(connectorTopology);
-        return getRuntimeInfo(NetSuiteConnectionDefinition.SOURCE_OR_SINK_CLASS);
+        NetSuiteConnectionProperties connectionProperties = (NetSuiteConnectionProperties) properties;
+        return getRuntimeInfo(connectionProperties, NetSuiteConnectionDefinition.SOURCE_OR_SINK_CLASS);
     }
 
     @Override

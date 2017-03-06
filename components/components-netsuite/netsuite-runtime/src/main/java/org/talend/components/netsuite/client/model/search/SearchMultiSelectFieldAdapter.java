@@ -1,12 +1,12 @@
 package org.talend.components.netsuite.client.model.search;
 
+import static org.talend.components.netsuite.client.model.BeanUtils.getSimpleProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
+
 import java.util.List;
 
 import org.talend.components.netsuite.client.model.BasicMetaData;
 import org.talend.components.netsuite.client.model.TypeUtils;
-
-import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
-import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
 
 /**
  *
@@ -21,7 +21,7 @@ public class SearchMultiSelectFieldAdapter<T> extends SearchFieldAdapter<T> {
     public T populate(T fieldObject, String internalId, String operatorName, List<String> values) {
         T nsObject = fieldObject != null ? fieldObject : createField(internalId);
 
-        List<Object> searchValue = (List<Object>) getProperty(nsObject, "searchValue");
+        List<Object> searchValue = (List<Object>) getSimpleProperty(nsObject, "searchValue");
         for (int i = 0; i < values.size(); i++) {
             Object item = TypeUtils.createInstance(metaData,"ListOrRecordRef");
             setProperty(item, "name", values.get(i));

@@ -34,11 +34,6 @@
             <artifactId>netsuite-definition</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.ops4j.pax.url</groupId>
-            <artifactId>pax-url-aether</artifactId>
-            <version>2.4.7</version>
-        </dependency>
 
         <dependency>
             <groupId>org.apache.cxf</groupId>
@@ -107,107 +102,18 @@
 
     <build>
         <plugins>
-            <!-- Add Apache CXF generated sources to sources set. -->
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.12</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.6</version>
                 <executions>
                     <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.build.directory}/generated-sources/cxf</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- Generate classes from WSDL. -->
-            <plugin>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-codegen-plugin</artifactId>
-                <version>3.1.4</version>
-                <executions>
-                    <execution>
-                        <id>generate-sources-v2016.2</id>
-                        <phase>generate-sources</phase>
-                        <configuration>
-                            <sourceRoot>${project.build.directory}/generated-sources/cxf</sourceRoot>
-                            <wsdlOptions>
-                                <wsdlOption>
-                                    <wsdl>${basedir}/src/main/resources/wsdl/2016.2/netsuite.wsdl</wsdl>
-                                    <serviceName>NetSuiteService</serviceName>
-                                    <extraargs>
-                                        <extraarg>-xjc-b,${basedir}/src/main/resources/wsdl/2016.2/bindings.jaxb</extraarg>
-                                        <extraarg>-xjc-Xbg</extraarg>
-                                        <extraarg>-p</extraarg>
-                                        <extraarg>urn:platform_2016_2.webservices.netsuite.com=com.netsuite.webservices.v2016_2.platform</extraarg>
-                                    </extraargs>
-                                </wsdlOption>
-                            </wsdlOptions>
-                        </configuration>
-                        <goals>
-                            <goal>wsdl2java</goal>
+                            <goal>test-jar</goal>
                         </goals>
                     </execution>
                 </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.apache.cxf.xjcplugins</groupId>
-                        <artifactId>cxf-xjc-boolean</artifactId>
-                        <version>3.1.0</version>
-                    </dependency>
-                </dependencies>
             </plugin>
-
-            <!-- Enhance NetSuite domain classes to optimize access for properties and enums. -->
-            <plugin>
-                <groupId>de.icongmbh.oss.maven.plugins</groupId>
-                <artifactId>javassist-maven-plugin</artifactId>
-                <version>1.1.0</version>
-                <configuration>
-                    <includeTestClasses>false</includeTestClasses>
-                    <transformerClasses>
-                        <transformerClass>
-                            <className>org.talend.components.netsuite.codegen.NetSuiteClassTransformer</className>
-                            <properties>
-                                <property>
-                                    <name>output.dir</name>
-                                    <value>${project.build.outputDirectory}</value>
-                                </property>
-                            </properties>
-                        </transformerClass>
-                    </transformerClasses>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>enhance-netsuite-classes</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>javassist</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.talend.components</groupId>
-                        <artifactId>netsuite-codegen</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.talend.components</groupId>
-                        <artifactId>netsuite-common</artifactId>
-                        <version>${project.version}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-failsafe-plugin</artifactId>
@@ -224,57 +130,8 @@
                     <argLine>-Xms512m -Xmx1024m</argLine>
                     <systemPropertyVariables>
                         <pax.exam.karaf.version>4.0.2</pax.exam.karaf.version>
-                        <netsuite.endpoint.2016_2.url>${netsuite.endpoint.2016_2.url}</netsuite.endpoint.2016_2.url>
-                        <netsuite.endpoint.2014_2.url>${netsuite.endpoint.2014_2.url}</netsuite.endpoint.2014_2.url>
-                        <netsuite.email>${netsuite.email}</netsuite.email>
-                        <netsuite.password>${netsuite.password}</netsuite.password>
-                        <netsuite.roleId>${netsuite.roleId}</netsuite.roleId>
-                        <netsuite.account>${netsuite.account}</netsuite.account>
-                        <netsuite.applicationId>${netsuite.applicationId}</netsuite.applicationId>
                     </systemPropertyVariables>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <executions>
-                    <!-- Build Lib bundle -->
-                    <execution>
-                        <id>lib-jar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>bundle</goal>
-                        </goals>
-                        <configuration>
-                            <instructions>
-                                <Bundle-SymbolicName>org.talend.components.netsuite.runtime.lib</Bundle-SymbolicName>
-                                <Bundle-Name>${project.name} lib</Bundle-Name>
-                                <Include-Resource>
-                                    {maven-resources},META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt=target/classes/META-INF/maven/${project.groupId}/${project.artifactId}/dependencies.txt
-                                </Include-Resource>
-                                <Service-Component>*</Service-Component>
-                                <Bundle-ActivationPolicy>lazy</Bundle-ActivationPolicy>
-                            </instructions>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <!-- The following plugins are there to make sure they are launched after
-                the bundle are packaged when used in the package phase.-->
-            <!-- They may be used with the -PgenerateP2 maven profile to build a p2
-                update site for distribution to the Studio -->
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.eclipse.tycho.extras</groupId>
-                <artifactId>tycho-p2-extras-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
@@ -287,7 +144,6 @@
             </activation>
             <properties>
                 <maven.javadoc.skip>true</maven.javadoc.skip>
-                <tos-di.plugins.dir>${tos-di.home}/plugins</tos-di.plugins.dir>
             </properties>
         </profile>
     </profiles>

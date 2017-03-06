@@ -1,6 +1,6 @@
 package org.talend.components.netsuite.input;
 
-import static org.talend.components.netsuite.NetSuiteComponentDefinition.withSchemaService;
+import static org.talend.components.netsuite.NetSuiteComponentDefinition.withDataSetRuntime;
 import static org.talend.daikon.properties.presentation.Widget.widget;
 
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import org.talend.components.api.component.PropertyPathConnector;
 import org.talend.components.common.FixedConnectorsComponentProperties;
 import org.talend.components.netsuite.NetSuiteModuleProperties;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
-import org.talend.components.netsuite.SchemaService;
+import org.talend.components.netsuite.NetSuiteDataSetRuntime;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.components.netsuite.schema.NsField;
 import org.talend.components.netsuite.schema.NsSchema;
@@ -84,11 +84,11 @@ public class NetSuiteInputProperties extends FixedConnectorsComponentProperties
     }
 
     protected List<String> getSearchFieldOperators() {
-        return withSchemaService(new Function<SchemaService, List<String>>() {
-            @Override public List<String> apply(SchemaService schemaService) {
-                return schemaService.getSearchFieldOperators();
+        return withDataSetRuntime(this, new Function<NetSuiteDataSetRuntime, List<String>>() {
+            @Override public List<String> apply(NetSuiteDataSetRuntime dataSetRuntime) {
+                return dataSetRuntime.getSearchFieldOperators();
             }
-        }, this);
+        });
     }
 
     public class ModuleProperties extends NetSuiteModuleProperties {
@@ -107,8 +107,13 @@ public class NetSuiteInputProperties extends FixedConnectorsComponentProperties
                 fieldNames.add(field.getName());
             }
             searchConditionTable.field.setPossibleValues(fieldNames);
+            searchConditionTable.field.setValue(Collections.<String>emptyList());
 
             searchConditionTable.operator.setPossibleValues(getSearchFieldOperators());
+            searchConditionTable.operator.setValue(Collections.<String>emptyList());
+
+            searchConditionTable.value1.setValue(Collections.<String>emptyList());
+            searchConditionTable.value2.setValue(Collections.<String>emptyList());
 
             return validationResult;
         }

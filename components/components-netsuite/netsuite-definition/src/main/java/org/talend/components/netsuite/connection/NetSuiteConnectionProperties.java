@@ -1,8 +1,13 @@
 package org.talend.components.netsuite.connection;
 
+import static org.talend.components.netsuite.NetSuiteComponentDefinition.withRuntime;
+import static org.talend.daikon.properties.presentation.Widget.widget;
+import static org.talend.daikon.properties.property.PropertyFactory.newInteger;
+import static org.talend.daikon.properties.property.PropertyFactory.newProperty;
+import static org.talend.daikon.properties.property.PropertyFactory.newString;
+
 import java.util.EnumSet;
 
-import org.apache.commons.lang3.StringUtils;
 import org.talend.components.api.properties.ComponentPropertiesImpl;
 import org.talend.components.api.properties.ComponentReferenceProperties;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
@@ -13,12 +18,6 @@ import org.talend.daikon.properties.ValidationResult;
 import org.talend.daikon.properties.presentation.Form;
 import org.talend.daikon.properties.presentation.Widget;
 import org.talend.daikon.properties.property.Property;
-
-import static org.talend.components.netsuite.NetSuiteComponentDefinition.withRuntime;
-import static org.talend.daikon.properties.presentation.Widget.widget;
-import static org.talend.daikon.properties.property.PropertyFactory.newInteger;
-import static org.talend.daikon.properties.property.PropertyFactory.newProperty;
-import static org.talend.daikon.properties.property.PropertyFactory.newString;
 
 /**
  *
@@ -31,13 +30,9 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
     public static final String DEFAULT_ENDPOINT_URL =
             "https://webservices.netsuite.com/services/NetSuitePort_2016_2";
 
-    public static final String DEFAULT_API_VERSION = "2016.2";
-
 //    public Property<String> name = newString("name").setRequired();
 
     public Property<String> endpoint = newString("endpoint").setRequired();
-
-    public Property<String> apiVersion = newString("apiVersion");
 
     public Property<String> email = newString("email").setRequired();
 
@@ -64,7 +59,6 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
         super.setupProperties();
 
         endpoint.setValue(DEFAULT_ENDPOINT_URL);
-        apiVersion.setValue(DEFAULT_API_VERSION);
         email.setValue("youremail@yourcompany.com");
         role.setValue(3);
         account.setValue("");
@@ -123,10 +117,6 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
         }
     }
 
-    public String getApiVersion() {
-        return StringUtils.strip(apiVersion.getStringValue(), "\"");
-    }
-
     @Override
     public NetSuiteConnectionProperties getConnectionProperties() {
         String refComponentId = getReferencedComponentId();
@@ -151,7 +141,7 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
     }
 
     public ValidationResult validateTestConnection() throws Exception {
-        ValidationResult vr = withRuntime(new Function<NetSuiteRuntime, ValidationResult>() {
+        ValidationResult vr = withRuntime(this, new Function<NetSuiteRuntime, ValidationResult>() {
             @Override public ValidationResult apply(NetSuiteRuntime runtimeService) {
                 return runtimeService.validateConnection(NetSuiteConnectionProperties.this);
             }

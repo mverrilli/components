@@ -15,9 +15,9 @@ import org.talend.components.netsuite.NetSuiteSource;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
-import org.talend.components.netsuite.client.query.SearchCondition;
-import org.talend.components.netsuite.client.query.SearchQuery;
-import org.talend.components.netsuite.client.common.ResultSet;
+import org.talend.components.netsuite.client.search.SearchCondition;
+import org.talend.components.netsuite.client.search.SearchQuery;
+import org.talend.components.netsuite.client.ResultSet;
 
 /**
  *
@@ -90,10 +90,6 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
         Result result = new Result();
         result.totalCount = dataCount;
         return result.toMap();
-    }
-
-    public Object getCurrentRecord() throws NoSuchElementException {
-        return currentRecord;
     }
 
     protected ResultSet<?> search() throws NetSuiteException {

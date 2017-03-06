@@ -60,15 +60,12 @@ public class MetaDataModelGen {
     protected Map<String, String> additionalSearchRecordTypes = new HashMap<>();
     protected Map<String, SearchRecordTypeSpec> searchRecordTypeMap = new HashMap<>();
 
-    protected ClassName recordTypeEnumClassName = ClassName.get(
-            "org.talend.components.netsuite.client.v2016_2", "RecordTypeEnum");
-    protected ClassName searchRecordTypeEnumClassName = ClassName.get(
-            "org.talend.components.netsuite.client.v2016_2", "SearchRecordTypeEnum");
+    protected ClassName recordTypeEnumClassName;
+    protected ClassName searchRecordTypeEnumClassName;
 
     protected File outputFolder;
 
     public MetaDataModelGen() {
-        outputFolder = new File("./components/components-netsuite/netsuite-runtime/src/main/java");
     }
 
     public void setRecordBaseClass(Class<?> recordBaseClass) {
@@ -171,6 +168,7 @@ public class MetaDataModelGen {
 
         if (!unresolvedTypeNames.isEmpty()) {
             logger.warn("Unresolved record types detected: {}", unresolvedTypeNames);
+            System.out.println("[WARNING] Unresolved record types detected: " + unresolvedTypeNames);
         }
     }
 
@@ -218,37 +216,36 @@ public class MetaDataModelGen {
             unresolvedSearchRecords.remove(searchClass);
 
             searchBasicClass = searchRecordClassMap.get(searchRecordTypeName + "SearchBasic");
-            if (searchBasicClass == null) {
-                throw new IllegalStateException("Search basic class not found: " + searchRecordType + ", " + searchRecordTypeName);
-            } else {
-                unresolvedSearchRecords.remove(searchBasicClass);
-            }
+            unresolvedSearchRecords.remove(searchBasicClass);
 
             searchAdvancedClass = searchRecordClassMap.get(searchRecordTypeName + "SearchAdvanced");
             unresolvedSearchRecords.remove(searchAdvancedClass);
 
-            Enum<?> searchRecordEnumValue = null;
-            String searchRecordTypeEnumConstantName = null;
-            try {
-                searchRecordEnumValue = searchRecordTypeEnumAccessor.mapFromString(searchRecordType);
-                searchRecordTypeEnumConstantName = searchRecordEnumValue.name();
-            } catch (IllegalArgumentException e) {
-                searchRecordTypeEnumConstantName = additionalSearchRecordTypes.get(searchRecordType);
+            if (searchBasicClass != null) {
+                Enum<?> searchRecordEnumValue = null;
+                String searchRecordTypeEnumConstantName = null;
+                try {
+                    searchRecordEnumValue = searchRecordTypeEnumAccessor.mapFromString(searchRecordType);
+                    searchRecordTypeEnumConstantName = searchRecordEnumValue.name();
+                } catch (IllegalArgumentException e) {
+                    searchRecordTypeEnumConstantName = additionalSearchRecordTypes.get(searchRecordType);
+                }
+
+                SearchRecordTypeSpec spec = new SearchRecordTypeSpec();
+                spec.setName(searchRecordType);
+                spec.setTypeName(searchRecordTypeName);
+                spec.setEnumConstantName(searchRecordTypeEnumConstantName);
+                spec.setSearchClass(searchClass);
+                spec.setSearchBasicClass(searchBasicClass);
+                spec.setSearchAdvancedClass(searchAdvancedClass);
+
+                searchRecordTypeMap.put(spec.getName(), spec);
             }
-
-            SearchRecordTypeSpec spec = new SearchRecordTypeSpec();
-            spec.setName(searchRecordType);
-            spec.setTypeName(searchRecordTypeName);
-            spec.setEnumConstantName(searchRecordTypeEnumConstantName);
-            spec.setSearchClass(searchClass);
-            spec.setSearchBasicClass(searchBasicClass);
-            spec.setSearchAdvancedClass(searchAdvancedClass);
-
-            searchRecordTypeMap.put(spec.getName(), spec);
         }
 
         if (!unresolvedSearchRecords.isEmpty()) {
             logger.warn("Unresolved search record types detected: {}", unresolvedSearchRecords);
+            System.out.println("[WARNING] Unresolved search record types detected: " + unresolvedSearchRecords);
         }
     }
 

@@ -8,7 +8,7 @@ import org.talend.daikon.properties.ValidationResult;
  */
 public interface NetSuiteRuntime {
 
-    SchemaService getSchemaService(NetSuiteConnectionProperties properties);
+    NetSuiteDataSetRuntime getDataSet(NetSuiteConnectionProperties properties);
 
     ValidationResult validateConnection(NetSuiteConnectionProperties properties);
 }

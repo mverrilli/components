@@ -3,19 +3,18 @@ package org.talend.components.netsuite.client.model;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import org.apache.commons.beanutils.MethodUtils;
 import org.apache.commons.beanutils.expression.DefaultResolver;
 import org.apache.commons.beanutils.expression.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import org.apache.commons.beanutils.MethodUtils;
 import org.talend.components.netsuite.beans.BeanInfo;
-import org.talend.components.netsuite.beans.PropertyAccessor;
+import org.talend.components.netsuite.beans.BeanManager;
 import org.talend.components.netsuite.beans.EnumAccessor;
 import org.talend.components.netsuite.beans.Mapper;
 import org.talend.components.netsuite.beans.PropertyAccess;
+import org.talend.components.netsuite.beans.PropertyAccessor;
 import org.talend.components.netsuite.beans.PropertyInfo;
-import org.talend.components.netsuite.beans.BeanManager;
 
 /**
  *
@@ -32,18 +31,18 @@ public abstract class BeanUtils {
                 String currExpr = expr;
                 while (propertyResolver.hasNested(currExpr)) {
                     String next = propertyResolver.next(currExpr);
-                    Object obj = getPropertyAccessor(current).get(current, next);
+                    Object obj = getSimpleProperty(current, next);
                     if (obj != null) {
                         current = obj;
                         currExpr = propertyResolver.remove(currExpr);
                     }
                 }
                 if (current != null) {
-                    getPropertyAccessor(current).set(current, currExpr, value);
+                    setSimpleProperty(current, currExpr, value);
                 }
             } else {
                 if (current != null) {
-                    getPropertyAccessor(current).set(current, expr, value);
+                    setSimpleProperty(current, expr, value);
                 }
             }
         } catch (Exception e) {
@@ -58,16 +57,24 @@ public abstract class BeanUtils {
                 String currExpr = expr;
                 while (propertyResolver.hasNested(currExpr) && current != null) {
                     String next = propertyResolver.next(currExpr);
-                    current = getPropertyAccessor(current).get(current, next);
+                    current = getSimpleProperty(current, next);
                     currExpr = propertyResolver.remove(currExpr);
                 }
-                return current != null ? getPropertyAccessor(current).get(current, currExpr) : null;
+                return current != null ? getSimpleProperty(current, currExpr) : null;
             } else {
-                return getPropertyAccessor(current).get(current, expr);
+                return getSimpleProperty(current, expr);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public static Object getSimpleProperty(Object target, String name) {
+        return getPropertyAccessor(target).get(target, name);
+    }
+
+    public static void setSimpleProperty(Object target, String name, Object value) {
+        getPropertyAccessor(target).set(target, name, value);
     }
 
     protected static <T> PropertyAccessor<T> getPropertyAccessor(Class<T> clazz) {

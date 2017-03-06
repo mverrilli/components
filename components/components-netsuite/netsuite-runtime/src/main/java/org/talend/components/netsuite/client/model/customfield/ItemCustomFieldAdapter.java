@@ -36,7 +36,7 @@ public class ItemCustomFieldAdapter<T> extends CustomFieldAdapter<T> {
     @Override
     public boolean appliesTo(String recordType, T field) {
         String propertyName = recordTypePropertyMap.get(recordType);
-        Boolean applies = propertyName != null ? (Boolean) BeanUtils.getProperty(field, propertyName) : Boolean.FALSE;
+        Boolean applies = propertyName != null ? (Boolean) BeanUtils.getSimpleProperty(field, propertyName) : Boolean.FALSE;
         return applies == null ? false : applies.booleanValue();
     }
 

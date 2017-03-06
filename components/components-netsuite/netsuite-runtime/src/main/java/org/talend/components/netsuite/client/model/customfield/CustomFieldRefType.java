@@ -32,7 +32,7 @@ public enum CustomFieldRefType {
         customFieldRefTypeMap.put("_currency", CustomFieldRefType.DOUBLE);
         customFieldRefTypeMap.put("_date", CustomFieldRefType.DATE);
         customFieldRefTypeMap.put("_datetime", CustomFieldRefType.DATE);
-        customFieldRefTypeMap.put("_decimalNumber", CustomFieldRefType.LONG);
+        customFieldRefTypeMap.put("_decimalNumber", CustomFieldRefType.DOUBLE);
         customFieldRefTypeMap.put("_document", CustomFieldRefType.STRING);
         customFieldRefTypeMap.put("_eMailAddress", CustomFieldRefType.STRING);
         customFieldRefTypeMap.put("_freeFormText", CustomFieldRefType.STRING);

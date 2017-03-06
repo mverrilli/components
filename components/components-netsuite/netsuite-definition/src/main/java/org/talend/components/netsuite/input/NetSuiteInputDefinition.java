@@ -6,7 +6,6 @@ import java.util.Set;
 import org.talend.components.api.component.ConnectorTopology;
 import org.talend.components.api.component.runtime.ExecutionEngine;
 import org.talend.components.api.properties.ComponentProperties;
-import org.talend.components.netsuite.connection.NetSuiteConnectionDefinition;
 import org.talend.components.netsuite.NetSuiteComponentDefinition;
 import org.talend.components.netsuite.NetSuiteModuleProperties;
 import org.talend.daikon.runtime.RuntimeInfo;
@@ -33,7 +32,8 @@ public class NetSuiteInputDefinition extends NetSuiteComponentDefinition {
         assertEngineCompatibility(engine);
         if (connectorTopology != null && connectorTopology != ConnectorTopology.NONE) {
             assertConnectorTopologyCompatibility(connectorTopology);
-            return getRuntimeInfo(NetSuiteConnectionDefinition.SOURCE_CLASS);
+            NetSuiteInputProperties inputProperties = (NetSuiteInputProperties) properties;
+            return getRuntimeInfo(inputProperties, NetSuiteComponentDefinition.SOURCE_CLASS);
         }
         return null;
     }

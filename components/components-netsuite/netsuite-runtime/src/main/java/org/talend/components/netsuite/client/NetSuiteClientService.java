@@ -1,6 +1,6 @@
 package org.talend.components.netsuite.client;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.getSimpleProperty;
 import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
 
 import java.util.ArrayList;
@@ -17,17 +17,13 @@ import javax.xml.bind.JAXBException;
 import javax.xml.namespace.QName;
 import javax.xml.ws.BindingProvider;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.cxf.headers.Header;
 import org.apache.cxf.jaxb.JAXBDataBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.beans.BeanManager;
-import org.talend.components.netsuite.client.common.NsCustomizationRef;
-import org.talend.components.netsuite.client.common.NsPreferences;
-import org.talend.components.netsuite.client.common.NsSearchPreferences;
-import org.talend.components.netsuite.client.common.NsSearchResult;
-import org.talend.components.netsuite.client.common.NsWriteResponse;
 import org.talend.components.netsuite.client.model.BasicMetaData;
 import org.talend.components.netsuite.client.model.BasicRecordType;
 import org.talend.components.netsuite.client.model.CustomFieldDesc;
@@ -38,7 +34,7 @@ import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
-import org.talend.components.netsuite.client.query.SearchQuery;
+import org.talend.components.netsuite.client.search.SearchQuery;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.SimpleNamedThing;
 
@@ -98,13 +94,6 @@ public abstract class NetSuiteClientService<PortT> {
 
         System.setProperty("com.sun.xml.bind.v2.runtime.JAXBContextImpl.fastBoot", "true");
         System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
-    }
-
-    public static NetSuiteClientService create(String apiVersion) throws NetSuiteException {
-        if ("2016.2".equals(apiVersion)) {
-            return new org.talend.components.netsuite.client.v2016_2.NetSuiteClientServiceImpl();
-        }
-        throw new NetSuiteException("Invalid api version: " + apiVersion);
     }
 
     public String getEndpointUrl() {
@@ -420,9 +409,9 @@ public abstract class NetSuiteClientService<PortT> {
             if (customFieldRefType != null) {
                 CustomFieldDesc customFieldInfo = new CustomFieldDesc();
 
-                String scriptId = (String) getProperty(customField, "scriptId");
-                String internalId = (String) getProperty(customField, "internalId");
-                String label = (String) getProperty(customField, "label");
+                String scriptId = (String) getSimpleProperty(customField, "scriptId");
+                String internalId = (String) getSimpleProperty(customField, "internalId");
+                String label = (String) getSimpleProperty(customField, "label");
 
                 NsCustomizationRef customizationRef = new NsCustomizationRef();
                 customizationRef.setScriptId(scriptId);
@@ -707,7 +696,7 @@ public abstract class NetSuiteClientService<PortT> {
     }
 
     protected void setLoginHeaders(PortT port) throws NetSuiteException {
-        if (credentials.getApplicationId() != null) {
+        if (!StringUtils.isEmpty(credentials.getApplicationId())) {
             Object applicationInfo = createNativeApplicationInfo(credentials);
             try {
                 if (applicationInfo != null) {

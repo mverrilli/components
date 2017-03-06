@@ -6,13 +6,12 @@ import java.util.Set;
 import org.talend.components.api.component.Connector;
 import org.talend.components.api.component.PropertyPathConnector;
 import org.talend.components.common.FixedConnectorsComponentProperties;
-import org.talend.components.common.SchemaProperties;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.components.netsuite.NetSuiteComponentDefinition;
 import org.talend.components.netsuite.NetSuiteModuleProperties;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
 import org.talend.components.netsuite.schema.NsSchema;
-import org.talend.components.netsuite.SchemaService;
+import org.talend.components.netsuite.NetSuiteDataSetRuntime;
 import org.talend.daikon.java8.Function;
 import org.talend.daikon.properties.presentation.Form;
 import org.talend.daikon.properties.property.Property;
@@ -39,16 +38,6 @@ public class NetSuiteOutputProperties extends FixedConnectorsComponentProperties
 
     protected transient PropertyPathConnector MAIN_CONNECTOR =
             new PropertyPathConnector(Connector.MAIN_NAME, "module.main");
-
-    protected transient PropertyPathConnector FLOW_CONNECTOR =
-            new PropertyPathConnector(Connector.MAIN_NAME, "schemaFlow");
-
-    protected transient PropertyPathConnector REJECT_CONNECTOR =
-            new PropertyPathConnector(Connector.REJECT_NAME, "schemaReject");
-
-    public SchemaProperties schemaFlow = new SchemaProperties("schemaFlow"); //$NON-NLS-1$
-
-    public SchemaProperties schemaReject = new SchemaProperties("schemaReject"); //$NON-NLS-1$
 
     public NetSuiteOutputProperties(@JsonProperty("name") String name) {
         super(name);
@@ -97,28 +86,25 @@ public class NetSuiteOutputProperties extends FixedConnectorsComponentProperties
     }
 
     protected NsSchema getSchemaForUpdate(final String typeName) {
-        return NetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, NsSchema>() {
-            @Override public NsSchema apply(SchemaService schemaService) {
-                return schemaService.getSchemaForSearch(typeName);
+        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDataSetRuntime, NsSchema>() {
+            @Override public NsSchema apply(NetSuiteDataSetRuntime dataSetRuntime) {
+                return dataSetRuntime.getSchemaForSearch(typeName);
             }
-        }, this);
+        });
     }
 
     protected NsSchema getSchemaForDelete(final String typeName) {
-        return NetSuiteComponentDefinition.withSchemaService(new Function<SchemaService, NsSchema>() {
-            @Override public NsSchema apply(SchemaService schemaService) {
-                return schemaService.getSchemaForSearch(typeName);
+        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDataSetRuntime, NsSchema>() {
+            @Override public NsSchema apply(NetSuiteDataSetRuntime dataSetRuntime) {
+                return dataSetRuntime.getSchemaForSearch(typeName);
             }
-        }, this);
+        });
     }
 
     @Override
     protected Set<PropertyPathConnector> getAllSchemaPropertiesConnectors(boolean isOutputConnection) {
         HashSet<PropertyPathConnector> connectors = new HashSet<>();
         if (isOutputConnection) {
-            connectors.add(FLOW_CONNECTOR);
-            connectors.add(REJECT_CONNECTOR);
-        } else {
             connectors.add(MAIN_CONNECTOR);
         }
         return connectors;

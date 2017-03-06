@@ -2,7 +2,8 @@ package org.talend.components.netsuite;
 
 import static org.talend.components.netsuite.client.model.BeanUtils.getEnumAccessor;
 import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
-import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.getSimpleProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.setSimpleProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,9 +22,9 @@ import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.beans.BeanManager;
 import org.talend.components.netsuite.beans.EnumAccessor;
 import org.talend.components.netsuite.client.NetSuiteClientService;
+import org.talend.components.netsuite.client.model.CustomFieldDesc;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
-import org.talend.components.netsuite.client.model.CustomFieldDesc;
 import org.talend.components.netsuite.client.model.TypeUtils;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
 import org.talend.daikon.di.DiSchemaConstants;
@@ -32,9 +33,12 @@ import org.talend.daikon.di.DiSchemaConstants;
  *
  */
 public abstract class NsObjectTransducer {
+
     protected NetSuiteClientService clientService;
 
     protected final DatatypeFactory datatypeFactory;
+
+    protected Map<Class<?>, ValueConverter<?, ?>> valueConverterCache = new HashMap<>();
 
     public NsObjectTransducer(NetSuiteClientService clientService) {
         this.clientService = clientService;
@@ -123,7 +127,7 @@ public abstract class NsObjectTransducer {
     }
 
     protected Schema.Field createSchemaField(FieldDesc fieldDesc) {
-        Schema avroFieldType = SchemaServiceImpl.inferSchemaForField(fieldDesc);
+        Schema avroFieldType = NetSuiteDataSetRuntimeImpl.inferSchemaForField(fieldDesc);
         Schema.Field avroField = new Schema.Field(fieldDesc.getName(), avroFieldType, null, null);
         return avroField;
     }
@@ -143,7 +147,7 @@ public abstract class NsObjectTransducer {
             if (fieldDesc instanceof CustomFieldDesc) {
                 customFieldMap.put(fieldName, (CustomFieldDesc) fieldDesc);
             } else {
-                Object value = getProperty(nsObject, fieldDesc.getInternalName());
+                Object value = getSimpleProperty(nsObject, fieldDesc.getInternalName());
                 valueMap.put(fieldName, value);
             }
         }
@@ -153,7 +157,7 @@ public abstract class NsObjectTransducer {
             List<?> customFieldList = (List<?>) getProperty(nsObject, "customFieldList.customField");
             if (customFieldList != null && !customFieldList.isEmpty()) {
                 for (Object customField : customFieldList) {
-                    String scriptId = (String) getProperty(customField, "scriptId");
+                    String scriptId = (String) getSimpleProperty(customField, "scriptId");
                     CustomFieldDesc customFieldInfo = customFieldMap.get(scriptId);
                     String fieldName = customFieldInfo.getName();
                     if (customFieldInfo != null) {
@@ -172,7 +176,7 @@ public abstract class NsObjectTransducer {
         if (fieldDesc instanceof CustomFieldDesc) {
             Object customField = valueMap.get(fieldName);
             if (customField != null) {
-                Object value = getProperty(customField, "value");
+                Object value = getSimpleProperty(customField, "value");
                 return valueConverter.convertInput(value);
             }
             return null;
@@ -191,20 +195,20 @@ public abstract class NsObjectTransducer {
             if (targetValue != null) {
                 CustomFieldRefType customFieldRefType = customFieldInfo.getCustomFieldType();
 
-                Object customFieldListWrapper = getProperty(nsObject, "customFieldList");
+                Object customFieldListWrapper = getSimpleProperty(nsObject, "customFieldList");
                 if (customFieldListWrapper == null) {
                     customFieldListWrapper = TypeUtils.createInstance(
                             clientService.getBasicMetaData(), "CustomFieldList");
-                    setProperty(nsObject, "customFieldList", customFieldListWrapper);
+                    setSimpleProperty(nsObject, "customFieldList", customFieldListWrapper);
                 }
-                List<Object> customFieldList = (List<Object>) getProperty(customFieldListWrapper, "customField");
+                List<Object> customFieldList = (List<Object>) getSimpleProperty(customFieldListWrapper, "customField");
 
                 Object customField = TypeUtils.createInstance(
                         clientService.getBasicMetaData(), customFieldRefType.getTypeName());
-                setProperty(customField, "scriptId", customFieldInfo.getCustomizationRef().getScriptId());
-                setProperty(customField, "internalId", customFieldInfo.getCustomizationRef().getInternalId());
+                setSimpleProperty(customField, "scriptId", customFieldInfo.getCustomizationRef().getScriptId());
+                setSimpleProperty(customField, "internalId", customFieldInfo.getCustomizationRef().getInternalId());
 
-                setProperty(customField, "value", targetValue);
+                setSimpleProperty(customField, "value", targetValue);
 
                 customFieldList.add(customField);
 
@@ -215,7 +219,7 @@ public abstract class NsObjectTransducer {
             Object targetValue = valueConverter.convertOutput(value);
 
             if (targetValue != null) {
-                setProperty(nsObject, fieldDesc.getInternalName(), targetValue);
+                setSimpleProperty(nsObject, fieldDesc.getInternalName(), targetValue);
                 return targetValue;
             }
         }
@@ -223,40 +227,69 @@ public abstract class NsObjectTransducer {
         return null;
     }
 
-    protected ValueConverter<?, ?> getValueConverter(FieldDesc fieldDesc) {
-        // TODO Improve performance
+    public ValueConverter<?, ?> getValueConverter(FieldDesc fieldDesc) {
+        Class<?> valueClass = null;
 
         if (fieldDesc instanceof CustomFieldDesc) {
             CustomFieldDesc customFieldInfo = (CustomFieldDesc) fieldDesc;
             CustomFieldRefType customFieldRefType = customFieldInfo.getCustomFieldType();
 
-            if (customFieldRefType == CustomFieldRefType.BOOLEAN ||
-                    customFieldRefType == CustomFieldRefType.LONG ||
-                    customFieldRefType == CustomFieldRefType.DOUBLE ||
-                    customFieldRefType == CustomFieldRefType.STRING) {
-                return new IdentityValueConverter<>();
-            } else if (customFieldRefType == CustomFieldRefType.DATE) {
-                return new XMLGregorianCalendarValueConverter(datatypeFactory);
+            switch (customFieldRefType) {
+            case BOOLEAN:
+                valueClass = Boolean.TYPE;
+                break;
+            case STRING:
+                valueClass = String.class;
+                break;
+            case LONG:
+                valueClass = Long.class;
+                break;
+            case DOUBLE:
+                valueClass = Double.class;
+                break;
+            case DATE:
+                valueClass = XMLGregorianCalendar.class;
+                break;
             }
-
         } else {
-            Class<?> fieldType = fieldDesc.getValueType();
-
-            if (fieldType == Boolean.TYPE || fieldType == Boolean.class ||
-                    fieldType == Integer.TYPE || fieldType == Integer.class ||
-                    fieldType == Long.TYPE || fieldType == Long.class ||
-                    fieldType == Double.TYPE || fieldType == Double.class ||
-                    fieldType == String.class) {
-                return new IdentityValueConverter<>();
-            } else if (fieldType == XMLGregorianCalendar.class) {
-                return new XMLGregorianCalendarValueConverter(datatypeFactory);
-            } else if (fieldType.isEnum()) {
-                Class<Enum> enumClass = (Class<Enum>) fieldType;
-                return new EnumValueConverter<>(enumClass, getEnumAccessor(enumClass));
-            }
+            valueClass = fieldDesc.getValueType();
         }
 
-        return new NullValueConverter<>();
+        ValueConverter<?, ?> converter = null;
+        if (valueClass != null) {
+            converter = getValueConverter(valueClass);
+        }
+        if (converter == null) {
+            converter = NullValueConverter.INSTANCE;
+        }
+        return converter;
+    }
+
+    protected ValueConverter<?, ?> getValueConverter(Class<?> valueClass) {
+        ValueConverter<?, ?> converter = valueConverterCache.get(valueClass);
+        if (converter == null) {
+            converter = createValueConverter(valueClass);
+            if (converter != null) {
+                valueConverterCache.put(valueClass, converter);
+            }
+        }
+        return converter;
+    }
+
+    protected ValueConverter<?, ?> createValueConverter(Class<?> valueClass) {
+        if (valueClass == Boolean.TYPE || valueClass == Boolean.class ||
+                valueClass == Integer.TYPE || valueClass == Integer.class ||
+                valueClass == Long.TYPE || valueClass == Long.class ||
+                valueClass == Double.TYPE || valueClass == Double.class ||
+                valueClass == String.class) {
+            return IdentityValueConverter.INSTANCE;
+        } else if (valueClass == XMLGregorianCalendar.class) {
+            return new XMLGregorianCalendarValueConverter(datatypeFactory);
+        } else if (valueClass.isEnum()) {
+            Class<Enum> enumClass = (Class<Enum>) valueClass;
+            return new EnumValueConverter<>(enumClass, getEnumAccessor(enumClass));
+        }
+        return null;
     }
 
     public interface ValueConverter<T, U> {
@@ -267,6 +300,8 @@ public abstract class NsObjectTransducer {
     }
 
     public static class NullValueConverter<T> implements ValueConverter<T, T> {
+
+        public static final NullValueConverter INSTANCE = new NullValueConverter();
 
         @Override
         public T convertInput(T value) {
@@ -280,6 +315,8 @@ public abstract class NsObjectTransducer {
     }
 
     public static class IdentityValueConverter<T> implements ValueConverter<T, T> {
+
+        public static final IdentityValueConverter INSTANCE = new IdentityValueConverter();
 
         @Override
         public T convertInput(T value) {

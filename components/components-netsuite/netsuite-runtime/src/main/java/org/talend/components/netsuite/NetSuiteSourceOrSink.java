@@ -10,19 +10,23 @@ import org.talend.components.api.component.runtime.SourceOrSink;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.api.properties.ComponentProperties;
+import org.talend.components.netsuite.client.NetSuiteClientFactory;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.properties.ValidationResult;
 
+import static org.talend.components.netsuite.util.ComponentExceptions.exceptionToValidationResult;
+
 /**
  *
  */
-public class NetSuiteSourceOrSink implements SourceOrSink {
+public abstract class NetSuiteSourceOrSink implements SourceOrSink {
 
     protected transient final Logger log = LoggerFactory.getLogger(getClass());
 
+    protected NetSuiteClientFactory clientFactory;
     protected NetSuiteProvideConnectionProperties properties;
 
     protected transient NetSuiteEndpoint endpoint;
@@ -30,7 +34,8 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
     @Override
     public ValidationResult initialize(RuntimeContainer container, ComponentProperties properties) {
         this.properties = (NetSuiteProvideConnectionProperties) properties;
-        this.endpoint = new NetSuiteEndpoint(NetSuiteEndpoint.createConnectionConfig(getConnectionProperties()));
+        this.endpoint = new NetSuiteEndpoint(clientFactory,
+                NetSuiteEndpoint.createConnectionConfig(getConnectionProperties()));
         return ValidationResult.OK;
     }
 
@@ -48,8 +53,8 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
     @Override
     public List<NamedThing> getSchemaNames(RuntimeContainer container) throws IOException {
         try {
-            SchemaService schemaService = new SchemaServiceImpl(endpoint.getClientService());
-            return schemaService.getRecordTypes();
+            NetSuiteDataSetRuntime dataSetRuntime = new NetSuiteDataSetRuntimeImpl(endpoint.getClientService());
+            return dataSetRuntime.getRecordTypes();
         } catch (NetSuiteException e) {
             throw new IOException(e);
         }
@@ -58,8 +63,8 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
     @Override
     public Schema getEndpointSchema(RuntimeContainer container, String schemaName) throws IOException {
         try {
-            SchemaService schemaService = new SchemaServiceImpl(getClientService());
-            return schemaService.getSchema(schemaName);
+            NetSuiteDataSetRuntime dataSetRuntime = new NetSuiteDataSetRuntimeImpl(getClientService());
+            return dataSetRuntime.getSchema(schemaName);
         } catch (NetSuiteException e) {
             throw new IOException(e);
         }
@@ -76,13 +81,4 @@ public class NetSuiteSourceOrSink implements SourceOrSink {
     public NetSuiteClientService getClientService() throws NetSuiteException {
         return endpoint.getClientService();
     }
-
-    protected static ValidationResult exceptionToValidationResult(Exception ex) {
-        ValidationResult vr = new ValidationResult();
-        // FIXME - do a better job here
-        vr.setMessage(ex.getMessage());
-        vr.setStatus(ValidationResult.Result.ERROR);
-        return vr;
-    }
-
 }

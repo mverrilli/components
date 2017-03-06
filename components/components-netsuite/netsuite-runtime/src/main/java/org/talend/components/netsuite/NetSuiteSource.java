@@ -15,7 +15,7 @@ import org.talend.daikon.properties.ValidationResult;
 /**
  *
  */
-public class NetSuiteSource extends NetSuiteSourceOrSink implements BoundedSource {
+public abstract class NetSuiteSource extends NetSuiteSourceOrSink implements BoundedSource {
 
     private transient static final Logger LOG = LoggerFactory.getLogger(NetSuiteSource.class);
 

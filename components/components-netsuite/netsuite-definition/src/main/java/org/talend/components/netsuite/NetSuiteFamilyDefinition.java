@@ -5,7 +5,6 @@ import aQute.bnd.annotation.component.Component;
 import org.talend.components.api.AbstractComponentFamilyDefinition;
 import org.talend.components.api.ComponentInstaller;
 import org.talend.components.api.Constants;
-import org.talend.components.netsuite.connection.NetSuiteConnectionDefinition;
 import org.talend.components.netsuite.input.NetSuiteInputDefinition;
 import org.talend.components.netsuite.output.NetSuiteOutputDefinition;
 
@@ -20,8 +19,7 @@ public class NetSuiteFamilyDefinition extends AbstractComponentFamilyDefinition
 
     public NetSuiteFamilyDefinition() {
         super(NAME,
-                // Components
-                new NetSuiteConnectionDefinition(),
+//                new NetSuiteConnectionDefinition(),
                 new NetSuiteInputDefinition(),
                 new NetSuiteOutputDefinition());
     }

@@ -1,6 +1,6 @@
 package org.talend.components.netsuite.client.model;
 
-import org.talend.components.netsuite.client.common.NsCustomizationRef;
+import org.talend.components.netsuite.client.NsCustomizationRef;
 
 /**
  *
