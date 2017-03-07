@@ -107,13 +107,13 @@ public class NetSuiteInputProperties extends FixedConnectorsComponentProperties
                 fieldNames.add(field.getName());
             }
             searchConditionTable.field.setPossibleValues(fieldNames);
-            searchConditionTable.field.setValue(Collections.<String>emptyList());
+            searchConditionTable.field.setValue(new ArrayList<String>());
 
             searchConditionTable.operator.setPossibleValues(getSearchFieldOperators());
-            searchConditionTable.operator.setValue(Collections.<String>emptyList());
+            searchConditionTable.operator.setValue(new ArrayList<String>());
 
-            searchConditionTable.value1.setValue(Collections.<String>emptyList());
-            searchConditionTable.value2.setValue(Collections.<String>emptyList());
+            searchConditionTable.value1.setValue(new ArrayList<String>());
+            searchConditionTable.value2.setValue(new ArrayList<String>());
 
             return validationResult;
         }
