@@ -16,6 +16,7 @@ import org.junit.Test;
 import org.talend.components.netsuite.NetSuiteDataSetRuntime;
 import org.talend.components.netsuite.NetSuiteRuntime;
 import org.talend.components.netsuite.client.NetSuiteClientService;
+import org.talend.components.netsuite.client.model.RefType;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.output.NsObjectOutputTransducer;
 import org.talend.components.netsuite.v2014_2.NetSuiteRuntimeImpl;
@@ -85,7 +86,7 @@ public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
         NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
         NetSuiteDataSetRuntime dataSetRuntime = netSuiteRuntime.getDataSet(mockTestFixture.getConnectionProperties());
 
-        Collection<String> typeNames = Arrays.asList("RecordRef");
+        Collection<String> typeNames = Arrays.asList(RefType.RECORD_REF.getTypeName());
 
         for (String typeName : typeNames) {
             TypeDesc typeDesc = clientService.getTypeInfo(typeName);
@@ -111,7 +112,7 @@ public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
         NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
         NetSuiteDataSetRuntime dataSetRuntime = netSuiteRuntime.getDataSet(mockTestFixture.getConnectionProperties());
 
-        TypeDesc typeDesc = clientService.getTypeInfo("RecordRef");
+        TypeDesc typeDesc = clientService.getTypeInfo(RefType.RECORD_REF.getTypeName());
         TypeDesc referencedTypeDesc = clientService.getTypeInfo("Opportunity");
 
         Schema schema = dataSetRuntime.getSchema(typeDesc.getTypeName());

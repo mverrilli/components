@@ -65,7 +65,6 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
 
             retrievedCount++;
         }
-//        System.out.println("Retrieved records: " + retrievedCount);
         assertTrue(retrievedCount > 1);
     }
 
@@ -85,7 +84,6 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
         while (rs.next() && count-- > 0) {
             Record record = rs.get();
             assertNotNull(record);
-//            System.out.println(record);
         }
     }
 
@@ -107,7 +105,7 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
     }
 
     @Test
-    public void testLoadCustomRecordTypes() throws Exception {
+    public void testRetrieveCustomRecordTypes() throws Exception {
         NetSuiteClientService connection = webServiceTestFixture.getClientService();
         connection.login();
 
@@ -115,15 +113,14 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
         stopWatch.start();
         Collection<RecordTypeInfo> recordTypes = connection.getRecordTypes();
         stopWatch.stop();
-//        System.out.println("Total time: " + stopWatch);
 
         for (RecordTypeInfo recordType : recordTypes) {
-            System.out.println(recordType.getName());
+            logger.debug("Record type info: {}", recordType);
         }
     }
 
     @Test
-    public void testLoadCustomRecordCustomFields() throws Exception {
+    public void testRetrieveCustomRecordCustomFields() throws Exception {
         NetSuiteClientService connection = webServiceTestFixture.getClientService();
         connection.login();
 
@@ -133,14 +130,13 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
         RecordTypeInfo recordType = connection.getRecordType("customrecord_campaign_revenue");
 
         TypeDesc typeDesc = connection.getTypeInfo(recordType.getName());
-        System.out.println(typeDesc);
+        logger.debug("Record type desc: {}", typeDesc.getTypeName());
 
         stopWatch.stop();
-//        System.out.println("Total time: " + stopWatch);
     }
 
     @Test
-    public void testLoadAllCustomizations() throws Exception {
+    public void testRetrieveAllCustomizations() throws Exception {
         NetSuiteClientService connection = webServiceTestFixture.getClientService();
         connection.login();
 
@@ -148,10 +144,9 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
         stopWatch.start();
         for (RecordTypeDesc recordType : Arrays.asList(RecordTypeEnum.OPPORTUNITY, RecordTypeEnum.CALENDAR_EVENT)) {
             TypeDesc typeDesc = connection.getTypeInfo(recordType.getTypeName());
-            System.out.println(typeDesc);
+            logger.debug("Record type desc: {}", typeDesc.getTypeName());
         }
         stopWatch.stop();
-//        System.out.println("Total time: " + stopWatch);
     }
 
     protected RecordTypeInfo getCustomRecordType(Collection<RecordTypeInfo> recordTypes, String name) {

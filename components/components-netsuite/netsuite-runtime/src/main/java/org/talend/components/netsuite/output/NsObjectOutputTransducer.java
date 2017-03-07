@@ -19,6 +19,7 @@ import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.RecordTypeDesc;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
+import org.talend.components.netsuite.client.model.RefType;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.model.TypeUtils;
 
@@ -32,6 +33,8 @@ public class NsObjectOutputTransducer extends NsObjectTransducer {
     protected TypeDesc typeDesc;
     protected Map<String, FieldDesc> fieldMap;
     protected BeanInfo beanInfo;
+
+    protected RefType refType;
 
     protected String referencedTypeName;
     protected RecordTypeInfo referencedRecordTypeInfo;
@@ -55,7 +58,8 @@ public class NsObjectOutputTransducer extends NsObjectTransducer {
         if (reference) {
             referencedTypeName = typeName;
             referencedRecordTypeInfo = clientService.getRecordType(referencedTypeName);
-            typeDesc = clientService.getTypeInfo("RecordRef");
+            refType = RefType.RECORD_REF;
+            typeDesc = clientService.getTypeInfo(refType.getTypeName());
         } else {
             typeDesc = clientService.getTypeInfo(typeName);
         }
@@ -79,6 +83,10 @@ public class NsObjectOutputTransducer extends NsObjectTransducer {
                 String fieldName = field.name();
                 FieldDesc fieldDesc = fieldMap.get(fieldName);
 
+                if (fieldDesc == null) {
+                    continue;
+                }
+
                 Object value = indexedRecord.get(field.pos());
                 Object result = writeField(nsObject, fieldDesc, value);
                 if (result == null) {
@@ -98,7 +106,7 @@ public class NsObjectOutputTransducer extends NsObjectTransducer {
             }
 
             if (reference) {
-                if ("RecordRef".equals(typeDesc.getTypeName())) {
+                if (refType == RefType.RECORD_REF) {
                     FieldDesc recTypeFieldDesc = typeDesc.getField("Type");
                     RecordTypeDesc recordTypeDesc = referencedRecordTypeInfo.getRecordType();
                     writeField(nsObject, recTypeFieldDesc, recordTypeDesc.getType());

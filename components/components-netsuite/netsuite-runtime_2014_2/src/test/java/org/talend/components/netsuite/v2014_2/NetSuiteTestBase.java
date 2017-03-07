@@ -15,6 +15,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.avro.Schema;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.beans.BeanManager;
 import org.talend.components.netsuite.beans.PropertyInfo;
@@ -30,6 +32,8 @@ import com.netsuite.webservices.v2014_2.platform.core.Status;
  *
  */
 public abstract class NetSuiteTestBase {
+
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected static List<TestFixture> classScopedTestFixtures = new ArrayList<>();
     protected List<TestFixture> testFixtures = new ArrayList<>();

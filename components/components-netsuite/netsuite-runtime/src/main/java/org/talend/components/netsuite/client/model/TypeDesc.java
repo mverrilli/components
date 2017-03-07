@@ -44,4 +44,14 @@ public class TypeDesc {
     public List<FieldDesc> getFields() {
         return Collections.unmodifiableList(fields);
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("TypeDesc{");
+        sb.append("typeName='").append(typeName).append('\'');
+        sb.append(", typeClass=").append(typeClass);
+        sb.append(", fields=").append(fields);
+        sb.append('}');
+        return sb.toString();
+    }
 }

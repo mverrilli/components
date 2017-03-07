@@ -25,6 +25,7 @@ import org.talend.components.netsuite.NetSuiteDataSetRuntime;
 import org.talend.components.netsuite.NetSuiteRuntime;
 import org.talend.components.netsuite.NetSuiteSink;
 import org.talend.components.netsuite.client.NetSuiteClientService;
+import org.talend.components.netsuite.client.model.RefType;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.output.NetSuiteOutputProperties;
 import org.talend.components.netsuite.output.NetSuiteOutputWriter;
@@ -146,7 +147,7 @@ public class NetSuiteOutputWriterTest extends NetSuiteOutputMockTestBase {
 
         final TypeDesc typeDesc = webServiceMockTestFixture.getClientService().getTypeInfo(
                 RecordTypeEnum.OPPORTUNITY.getTypeName());
-        final TypeDesc refTypeDesc = webServiceMockTestFixture.getClientService().getTypeInfo("RecordRef");
+        final TypeDesc refTypeDesc = webServiceMockTestFixture.getClientService().getTypeInfo(RefType.RECORD_REF.getTypeName());
 
         properties.module.moduleName.setValue(typeDesc.getTypeName());
         properties.action.setValue(NetSuiteOutputProperties.OutputAction.DELETE);
@@ -174,7 +175,7 @@ public class NetSuiteOutputWriterTest extends NetSuiteOutputMockTestBase {
         NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
         NetSuiteDataSetRuntime dataSetRuntime = netSuiteRuntime.getDataSet(properties.getConnectionProperties());
 
-        Schema schema = dataSetRuntime.getSchema("RecordRef");
+        Schema schema = dataSetRuntime.getSchema(RefType.RECORD_REF.getTypeName());
 
         properties.module.main.schema.setValue(schema);
 

@@ -85,8 +85,6 @@ public class NetSuiteSearchInputReaderIT extends NetSuiteTestBase {
             Object value = record.get(typeField.pos());
             assertNotNull(value);
             assertEquals(AccountType.BANK.value(), value);
-
-            System.out.println(fields.get(i) + ": " + record.get(i));
         }
     }
 

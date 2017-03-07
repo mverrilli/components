@@ -1,6 +1,7 @@
 package org.talend.components.netsuite.v2016_2;
 
 import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
+import static org.talend.components.netsuite.client.model.BeanUtils.setSimpleProperty;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,6 +16,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 
 import org.apache.avro.Schema;
 import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.beans.BeanManager;
 import org.talend.components.netsuite.beans.PropertyInfo;
@@ -30,6 +33,8 @@ import com.netsuite.webservices.v2016_2.platform.core.Status;
  *
  */
 public abstract class NetSuiteTestBase {
+
+    protected final Logger logger = LoggerFactory.getLogger(getClass());
 
     protected static List<TestFixture> classScopedTestFixtures = new ArrayList<>();
     protected List<TestFixture> testFixtures = new ArrayList<>();
@@ -246,7 +251,7 @@ public abstract class NetSuiteTestBase {
         @Override
         public T composeObject() throws Exception {
             T nsObject = NetSuiteTestBase.composeObject(clazz);
-            setProperty(nsObject, "type", null);
+            setSimpleProperty(nsObject, "type", null);
             return nsObject;
         }
     }

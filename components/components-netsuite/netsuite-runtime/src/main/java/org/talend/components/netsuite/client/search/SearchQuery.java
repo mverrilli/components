@@ -13,11 +13,12 @@ import org.talend.components.netsuite.beans.BeanManager;
 import org.talend.components.netsuite.beans.PropertyInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NsCustomizationRef;
+import org.talend.components.netsuite.client.NsRef;
 import org.talend.components.netsuite.client.NsSearchResult;
 import org.talend.components.netsuite.client.model.BasicRecordType;
 import org.talend.components.netsuite.client.model.CustomRecordTypeInfo;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
+import org.talend.components.netsuite.client.model.RefType;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.client.model.TypeUtils;
 import org.talend.components.netsuite.client.model.search.SearchFieldAdapter;
@@ -194,10 +195,10 @@ public class SearchQuery<SearchT, RecT> {
 
         } else if (BasicRecordType.CUSTOM_RECORD == basicRecordType) {
             CustomRecordTypeInfo customRecordTypeInfo = (CustomRecordTypeInfo) recordTypeInfo;
-            NsCustomizationRef customizationRef = customRecordTypeInfo.getCustomizationRef();
+            NsRef customizationRef = customRecordTypeInfo.getRef();
 
             Object recType = TypeUtils.createInstance(
-                    clientService.getBasicMetaData(),"CustomizationRef");
+                    clientService.getBasicMetaData(), RefType.CUSTOMIZATION_REF.getTypeName());
             setProperty(recType, "scriptId", customizationRef.getScriptId());
             setProperty(recType, "internalId", customizationRef.getInternalId());
 

@@ -44,6 +44,10 @@ public class NsObjectInputTransducer extends NsObjectTransducer {
             String fieldName = field.name();
             FieldDesc fieldDesc = fieldMap.get(fieldName);
 
+            if (fieldDesc == null) {
+                continue;
+            }
+
             Object value = readField(mapView, fieldDesc);
             indexedRecord.put(fieldName, value);
         }

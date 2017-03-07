@@ -20,9 +20,9 @@ import org.apache.cxf.feature.LoggingFeature;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NsCustomizationRef;
 import org.talend.components.netsuite.client.NsPreferences;
 import org.talend.components.netsuite.client.NsReadResponse;
+import org.talend.components.netsuite.client.NsRef;
 import org.talend.components.netsuite.client.NsSearchPreferences;
 import org.talend.components.netsuite.client.NsSearchResult;
 import org.talend.components.netsuite.client.NsStatus;
@@ -522,17 +522,17 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         return nsDetail;
     }
 
-    protected List<NsCustomizationRef> loadCustomizationIds(final BasicRecordType type) throws NetSuiteException {
+    protected List<NsRef> retrieveCustomizationIds(final BasicRecordType type) throws NetSuiteException {
         return Collections.emptyList();
     }
 
-    protected <T> List<T> loadCustomizations(final List<NsCustomizationRef> nsCustomizationRefs) throws NetSuiteException {
+    protected <T> List<T> retrieveCustomizations(final List<NsRef> nsCustomizationRefs) throws NetSuiteException {
         return Collections.emptyList();
     }
 
     @Override
-    protected Map<String, CustomFieldDesc> loadCustomRecordCustomFields(
-            RecordTypeDesc recordType, NsCustomizationRef nsCustomizationRef) throws NetSuiteException {
+    protected Map<String, CustomFieldDesc> retrieveCustomRecordCustomFields(
+            RecordTypeDesc recordType, NsRef nsCustomizationRef) throws NetSuiteException {
 
         return Collections.emptyMap();
     }

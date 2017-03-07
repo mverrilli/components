@@ -23,7 +23,18 @@
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
         </dependency>
-
     </dependencies>
+
+    <profiles>
+        <profile>
+            <id>tos-dev-local</id>
+            <activation>
+                <property><name>tos.home</name></property>
+            </activation>
+            <properties>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

@@ -58,7 +58,7 @@ public class NsObjectInputTransducerIT extends NetSuiteTestBase {
         Record record = rs.get();
 
         IndexedRecord indexedRecord = transducer.read(record);
-        System.out.println(indexedRecord);
+        logger.debug("Indexed record: {}", indexedRecord);
     }
 
     @Test
@@ -82,7 +82,7 @@ public class NsObjectInputTransducerIT extends NetSuiteTestBase {
         while (count++ < connection.getSearchPageSize() && rs.next()) {
             Record record = rs.get();
             IndexedRecord indexedRecord = transducer.read(record);
-            System.out.println(indexedRecord);
+            logger.debug("Indexed record: {}", indexedRecord);
 
             Schema recordSchema = indexedRecord.getSchema();
             assertEquals(typeDesc.getFields().size(), recordSchema.getFields().size());

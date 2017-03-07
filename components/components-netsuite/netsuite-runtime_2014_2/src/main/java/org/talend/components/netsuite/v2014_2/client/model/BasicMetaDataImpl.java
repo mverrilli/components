@@ -64,9 +64,6 @@ public class BasicMetaDataImpl extends BasicMetaData {
     }
 
     public BasicMetaDataImpl() {
-        logger.info("Initializing standard metadata...");
-        long startTime = System.currentTimeMillis();
-
         bindTypeTree(BaseRef.class);
         bindTypeTree(CustomFieldRef.class);
 
@@ -103,9 +100,6 @@ public class BasicMetaDataImpl extends BasicMetaData {
                 SearchFieldOperatorTypeDesc.createForEnum(SearchFieldOperatorType.MULTI_SELECT, SearchMultiSelectFieldOperator.class),
                 SearchFieldOperatorTypeDesc.createForEnum(SearchFieldOperatorType.ENUM_MULTI_SELECT, SearchEnumMultiSelectFieldOperator.class)
         ));
-
-        long endTime = System.currentTimeMillis();
-        logger.info("Initialized standard metadata: " + (endTime - startTime));
     }
 
     @Override

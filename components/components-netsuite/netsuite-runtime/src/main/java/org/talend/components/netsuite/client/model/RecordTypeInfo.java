@@ -28,4 +28,14 @@ public class RecordTypeInfo {
     public RecordTypeDesc getRecordType() {
         return recordType;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("RecordTypeInfo{");
+        sb.append("name='").append(name).append('\'');
+        sb.append(", recordType=").append(recordType);
+        sb.append(", displayName='").append(getDisplayName()).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

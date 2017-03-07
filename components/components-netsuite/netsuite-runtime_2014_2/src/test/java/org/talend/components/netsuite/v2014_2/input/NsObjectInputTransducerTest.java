@@ -14,6 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.netsuite.NetSuiteDataSetRuntimeImpl;
 import org.talend.components.netsuite.client.NetSuiteClientService;
+import org.talend.components.netsuite.client.model.RefType;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.search.SearchResultSet;
 import org.talend.components.netsuite.input.NsObjectInputTransducer;
@@ -74,7 +75,7 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
         NetSuiteClientService connection = webServiceMockTestFixture.getClientService();
         connection.login();
 
-        Collection<String> typeNames = Arrays.asList("RecordRef");
+        Collection<String> typeNames = Arrays.asList(RefType.RECORD_REF.getTypeName());
 
         for (String typeName : typeNames) {
             TypeDesc typeDesc = connection.getTypeInfo(typeName);

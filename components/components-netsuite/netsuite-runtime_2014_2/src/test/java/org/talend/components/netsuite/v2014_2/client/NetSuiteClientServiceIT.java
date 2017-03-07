@@ -59,7 +59,6 @@ public class NetSuiteClientServiceIT extends NetSuiteTestBase {
 
             retrievedCount++;
         }
-//        System.out.println("Retrieved records: " + retrievedCount);
         assertTrue(retrievedCount > 1);
     }
 

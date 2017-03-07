@@ -144,6 +144,10 @@ public abstract class NsObjectTransducer {
             String fieldName = field.name();
             FieldDesc fieldDesc = fieldMap.get(fieldName);
 
+            if (fieldDesc == null) {
+                continue;
+            }
+
             if (fieldDesc instanceof CustomFieldDesc) {
                 customFieldMap.put(fieldName, (CustomFieldDesc) fieldDesc);
             } else {
@@ -205,8 +209,8 @@ public abstract class NsObjectTransducer {
 
                 Object customField = TypeUtils.createInstance(
                         clientService.getBasicMetaData(), customFieldRefType.getTypeName());
-                setSimpleProperty(customField, "scriptId", customFieldInfo.getCustomizationRef().getScriptId());
-                setSimpleProperty(customField, "internalId", customFieldInfo.getCustomizationRef().getInternalId());
+                setSimpleProperty(customField, "scriptId", customFieldInfo.getRef().getScriptId());
+                setSimpleProperty(customField, "internalId", customFieldInfo.getRef().getInternalId());
 
                 setSimpleProperty(customField, "value", targetValue);
 

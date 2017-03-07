@@ -28,4 +28,17 @@ public class SimpleFieldDesc extends FieldDesc {
         this.propertyName = propertyName;
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("SimpleFieldDesc{");
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", valueType=").append(valueType);
+        sb.append(", key=").append(key);
+        sb.append(", nullable=").append(nullable);
+        sb.append(", length=").append(length);
+        sb.append(", internalName='").append(getInternalName()).append('\'');
+        sb.append(", propertyName='").append(propertyName).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }

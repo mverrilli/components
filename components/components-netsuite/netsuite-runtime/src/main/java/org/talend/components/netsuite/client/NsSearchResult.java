@@ -5,14 +5,14 @@ import java.util.List;
 /**
  *
  */
-public class NsSearchResult<RecordT> {
+public class NsSearchResult<RecT> {
     protected NsStatus status;
     protected Integer totalRecords;
     protected Integer pageSize;
     protected Integer totalPages;
     protected Integer pageIndex;
     protected String searchId;
-    protected List<RecordT> recordList;
+    protected List<RecT> recordList;
 
     public boolean isSuccess() {
         return status.isSuccess();
@@ -73,11 +73,11 @@ public class NsSearchResult<RecordT> {
         this.searchId = value;
     }
 
-    public List<RecordT> getRecordList() {
+    public List<RecT> getRecordList() {
         return recordList;
     }
 
-    public void setRecordList(List<RecordT> value) {
+    public void setRecordList(List<RecT> value) {
         this.recordList = value;
     }
 

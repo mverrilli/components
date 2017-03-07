@@ -21,17 +21,18 @@ import org.apache.cxf.feature.LoggingFeature;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.client.NsCustomizationRef;
 import org.talend.components.netsuite.client.NsPreferences;
 import org.talend.components.netsuite.client.NsReadResponse;
+import org.talend.components.netsuite.client.NsRef;
 import org.talend.components.netsuite.client.NsSearchPreferences;
 import org.talend.components.netsuite.client.NsSearchResult;
 import org.talend.components.netsuite.client.NsStatus;
 import org.talend.components.netsuite.client.NsWriteResponse;
-import org.talend.components.netsuite.v2016_2.client.model.BasicMetaDataImpl;
 import org.talend.components.netsuite.client.model.BasicRecordType;
 import org.talend.components.netsuite.client.model.CustomFieldDesc;
 import org.talend.components.netsuite.client.model.RecordTypeDesc;
+import org.talend.components.netsuite.client.model.RefType;
+import org.talend.components.netsuite.v2016_2.client.model.BasicMetaDataImpl;
 
 import com.netsuite.webservices.v2016_2.platform.ExceededRequestSizeFault;
 import com.netsuite.webservices.v2016_2.platform.InsufficientPermissionFault;
@@ -533,9 +534,10 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         return nsDetail;
     }
 
-    protected List<NsCustomizationRef> loadCustomizationIds(final BasicRecordType type) throws NetSuiteException {
+    protected List<NsRef> retrieveCustomizationIds(final BasicRecordType type) throws NetSuiteException {
         GetCustomizationIdResult result = execute(new PortOperation<GetCustomizationIdResult, NetSuitePortType>() {
             @Override public GetCustomizationIdResult execute(NetSuitePortType port) throws Exception {
+                logger.debug("Retrieving customization IDs: {}", type.getType());
                 StopWatch stopWatch = new StopWatch();
                 try {
                     stopWatch.start();
@@ -546,17 +548,18 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
                     return port.getCustomizationId(request).getGetCustomizationIdResult();
                 } finally {
                     stopWatch.stop();
-                    logger.debug("loadCustomizationIds: {}", stopWatch);
+                    logger.debug("Retrieved customization IDs: {}, {}", type.getType(), stopWatch);
                 }
             }
         });
         if (result.getStatus().getIsSuccess()) {
-            List<NsCustomizationRef> nsRefs;
+            List<NsRef> nsRefs;
             if (result.getTotalRecords() > 0) {
                 final List<CustomizationRef> refs = result.getCustomizationRefList().getCustomizationRef();
                 nsRefs = new ArrayList<>(refs.size());
                 for (final CustomizationRef ref : refs) {
-                    NsCustomizationRef nsRef = new NsCustomizationRef();
+                    NsRef nsRef = new NsRef();
+                    nsRef.setRefType(RefType.CUSTOMIZATION_REF);
                     nsRef.setScriptId(ref.getScriptId());
                     nsRef.setInternalId(ref.getInternalId());
                     nsRef.setType(ref.getType().value());
@@ -572,13 +575,13 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         }
     }
 
-    protected <T> List<T> loadCustomizations(final List<NsCustomizationRef> nsCustomizationRefs) throws NetSuiteException {
+    protected <T> List<T> retrieveCustomizations(final List<NsRef> nsCustomizationRefs) throws NetSuiteException {
         if (nsCustomizationRefs.isEmpty()) {
             return Collections.emptyList();
         }
 
         final List<CustomizationRef> customizationRefs = new ArrayList<>(nsCustomizationRefs.size());
-        for (NsCustomizationRef nsCustomizationRef : nsCustomizationRefs) {
+        for (NsRef nsCustomizationRef : nsCustomizationRefs) {
             CustomizationRef customizationRef = new CustomizationRef();
             customizationRef.setType(RecordType.fromValue(nsCustomizationRef.getType()));
             customizationRef.setScriptId(nsCustomizationRef.getScriptId());
@@ -588,6 +591,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
 
         List<NsReadResponse<Record>> result = execute(new PortOperation<List<NsReadResponse<Record>>, NetSuitePortType>() {
             @Override public List<NsReadResponse<Record>> execute(NetSuitePortType port) throws Exception {
+                logger.debug("Retrieving customizations: {}", nsCustomizationRefs.size());
                 StopWatch stopWatch = new StopWatch();
                 try {
                     stopWatch.start();
@@ -596,7 +600,7 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
                     return toNsReadResponseList(port.getList(request).getReadResponseList());
                 } finally {
                     stopWatch.stop();
-                    logger.debug("loadCustomizations: {}", stopWatch);
+                    logger.debug("Retrieved customizations: {}, {}", nsCustomizationRefs.size(), stopWatch);
                 }
             }
         });
@@ -616,10 +620,10 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
     }
 
     @Override
-    protected Map<String, CustomFieldDesc> loadCustomRecordCustomFields(
-            RecordTypeDesc recordType, NsCustomizationRef nsCustomizationRef) throws NetSuiteException {
+    protected Map<String, CustomFieldDesc> retrieveCustomRecordCustomFields(
+            RecordTypeDesc recordType, NsRef nsCustomizationRef) throws NetSuiteException {
 
-        List<CustomRecordType> customizationList = loadCustomizations(Collections.singletonList(nsCustomizationRef));
+        List<CustomRecordType> customizationList = retrieveCustomizations(Collections.singletonList(nsCustomizationRef));
 
         if (customizationList.isEmpty()) {
             return null;
