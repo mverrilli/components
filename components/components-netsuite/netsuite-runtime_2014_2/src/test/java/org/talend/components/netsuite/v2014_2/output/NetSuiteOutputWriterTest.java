@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.talend.components.api.component.runtime.Result;
-import org.talend.components.netsuite.NetSuiteDataSetRuntime;
+import org.talend.components.netsuite.NetSuiteDatasetRuntime;
 import org.talend.components.netsuite.NetSuiteRuntime;
 import org.talend.components.netsuite.NetSuiteSink;
 import org.talend.components.netsuite.client.NetSuiteClientService;
@@ -110,7 +110,7 @@ public class NetSuiteOutputWriterTest extends NetSuiteOutputMockTestBase {
         properties.action.setValue(NetSuiteOutputProperties.OutputAction.UPDATE);
 
         NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
-        NetSuiteDataSetRuntime dataSetRuntime = netSuiteRuntime.getDataSet(properties.getConnectionProperties());
+        NetSuiteDatasetRuntime dataSetRuntime = netSuiteRuntime.getDatasetRuntime(properties.getConnectionProperties());
 
         Schema schema = dataSetRuntime.getSchema(properties.module.moduleName.getValue());
 
@@ -173,7 +173,7 @@ public class NetSuiteOutputWriterTest extends NetSuiteOutputMockTestBase {
         });
 
         NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
-        NetSuiteDataSetRuntime dataSetRuntime = netSuiteRuntime.getDataSet(properties.getConnectionProperties());
+        NetSuiteDatasetRuntime dataSetRuntime = netSuiteRuntime.getDatasetRuntime(properties.getConnectionProperties());
 
         Schema schema = dataSetRuntime.getSchema(RefType.RECORD_REF.getTypeName());
 

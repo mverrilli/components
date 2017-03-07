@@ -11,7 +11,7 @@ import org.talend.components.netsuite.NetSuiteComponentDefinition;
 import org.talend.components.netsuite.NetSuiteModuleProperties;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
 import org.talend.components.netsuite.schema.NsSchema;
-import org.talend.components.netsuite.NetSuiteDataSetRuntime;
+import org.talend.components.netsuite.NetSuiteDatasetRuntime;
 import org.talend.daikon.java8.Function;
 import org.talend.daikon.properties.presentation.Form;
 import org.talend.daikon.properties.property.Property;
@@ -86,16 +86,16 @@ public class NetSuiteOutputProperties extends FixedConnectorsComponentProperties
     }
 
     protected NsSchema getSchemaForUpdate(final String typeName) {
-        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDataSetRuntime, NsSchema>() {
-            @Override public NsSchema apply(NetSuiteDataSetRuntime dataSetRuntime) {
+        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDatasetRuntime, NsSchema>() {
+            @Override public NsSchema apply(NetSuiteDatasetRuntime dataSetRuntime) {
                 return dataSetRuntime.getSchemaForSearch(typeName);
             }
         });
     }
 
     protected NsSchema getSchemaForDelete(final String typeName) {
-        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDataSetRuntime, NsSchema>() {
-            @Override public NsSchema apply(NetSuiteDataSetRuntime dataSetRuntime) {
+        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDatasetRuntime, NsSchema>() {
+            @Override public NsSchema apply(NetSuiteDatasetRuntime dataSetRuntime) {
                 return dataSetRuntime.getSchemaForSearch(typeName);
             }
         });

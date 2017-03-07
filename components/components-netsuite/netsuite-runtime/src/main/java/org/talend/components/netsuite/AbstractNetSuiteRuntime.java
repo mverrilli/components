@@ -12,11 +12,19 @@ import org.talend.daikon.properties.ValidationResult;
 public abstract class AbstractNetSuiteRuntime implements NetSuiteRuntime {
     protected NetSuiteClientFactory clientFactory;
 
+    public NetSuiteClientFactory getClientFactory() {
+        return clientFactory;
+    }
+
+    public void setClientFactory(NetSuiteClientFactory clientFactory) {
+        this.clientFactory = clientFactory;
+    }
+
     @Override
-    public NetSuiteDataSetRuntime getDataSet(NetSuiteConnectionProperties properties) {
+    public NetSuiteDatasetRuntime getDatasetRuntime(NetSuiteConnectionProperties properties) {
         try {
             NetSuiteEndpoint endpoint = getEndpoint(properties);
-            return new NetSuiteDataSetRuntimeImpl(endpoint.connect());
+            return new NetSuiteDatasetRuntimeImpl(endpoint.connect());
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }

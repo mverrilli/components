@@ -100,24 +100,24 @@ public class NetSuiteModuleProperties extends ComponentPropertiesImpl implements
     }
 
     protected List<NamedThing> getSearchableTypes() {
-        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDataSetRuntime, List<NamedThing>>() {
-            @Override public List<NamedThing> apply(NetSuiteDataSetRuntime dataSetRuntime) {
+        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDatasetRuntime, List<NamedThing>>() {
+            @Override public List<NamedThing> apply(NetSuiteDatasetRuntime dataSetRuntime) {
                 return dataSetRuntime.getSearchableTypes();
             }
         });
     }
 
     protected Schema getSchema(final String typeName) {
-        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDataSetRuntime, Schema>() {
-            @Override public Schema apply(NetSuiteDataSetRuntime dataSetRuntime) {
+        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDatasetRuntime, Schema>() {
+            @Override public Schema apply(NetSuiteDatasetRuntime dataSetRuntime) {
                 return dataSetRuntime.getSchema(typeName);
             }
         });
     }
 
     protected NsSchema getSchemaForSearch(final String typeName) {
-        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDataSetRuntime, NsSchema>() {
-            @Override public NsSchema apply(NetSuiteDataSetRuntime dataSetRuntime) {
+        return NetSuiteComponentDefinition.withDataSetRuntime(this, new Function<NetSuiteDatasetRuntime, NsSchema>() {
+            @Override public NsSchema apply(NetSuiteDatasetRuntime dataSetRuntime) {
                 return dataSetRuntime.getSchemaForSearch(typeName);
             }
         });

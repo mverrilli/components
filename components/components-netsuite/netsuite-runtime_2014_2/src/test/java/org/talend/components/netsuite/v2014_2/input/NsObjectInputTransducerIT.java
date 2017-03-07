@@ -8,7 +8,7 @@ import org.apache.avro.generic.IndexedRecord;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.talend.components.netsuite.NetSuiteDataSetRuntimeImpl;
+import org.talend.components.netsuite.NetSuiteDatasetRuntimeImpl;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
@@ -43,7 +43,7 @@ public class NsObjectInputTransducerIT extends NetSuiteTestBase {
         connection.login();
 
         TypeDesc typeDesc = connection.getTypeInfo("Opportunity");
-        Schema schema = NetSuiteDataSetRuntimeImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
+        Schema schema = NetSuiteDatasetRuntimeImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
         NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema, typeDesc.getTypeName());
 

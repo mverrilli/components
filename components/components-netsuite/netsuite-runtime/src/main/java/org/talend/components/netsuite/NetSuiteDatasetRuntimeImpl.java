@@ -30,10 +30,10 @@ import org.talend.daikon.avro.SchemaConstants;
 /**
  *
  */
-public class NetSuiteDataSetRuntimeImpl implements NetSuiteDataSetRuntime {
+public class NetSuiteDatasetRuntimeImpl implements NetSuiteDatasetRuntime {
     private NetSuiteClientService clientService;
 
-    public NetSuiteDataSetRuntimeImpl(NetSuiteClientService clientService) throws NetSuiteException {
+    public NetSuiteDatasetRuntimeImpl(NetSuiteClientService clientService) throws NetSuiteException {
         this.clientService = clientService;
     }
 

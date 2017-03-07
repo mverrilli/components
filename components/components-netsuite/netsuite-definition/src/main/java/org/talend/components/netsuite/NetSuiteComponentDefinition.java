@@ -60,10 +60,10 @@ public abstract class NetSuiteComponentDefinition extends AbstractComponentDefin
     }
 
     public static <R> R withDataSetRuntime(final NetSuiteProvideConnectionProperties properties,
-            final Function<NetSuiteDataSetRuntime, R> func) {
+            final Function<NetSuiteDatasetRuntime, R> func) {
         return withRuntime(properties, new Function<NetSuiteRuntime, R>() {
             @Override public R apply(NetSuiteRuntime runtime) {
-                NetSuiteDataSetRuntime dataSetRuntime = runtime.getDataSet(properties.getConnectionProperties());
+                NetSuiteDatasetRuntime dataSetRuntime = runtime.getDatasetRuntime(properties.getConnectionProperties());
                 return func.apply(dataSetRuntime);
             }
         });

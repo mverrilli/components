@@ -3,8 +3,8 @@ package org.talend.components.netsuite.client;
 /**
  *
  */
-public interface NetSuiteClientFactory {
+public interface NetSuiteClientFactory<T> {
 
-    NetSuiteClientService createClient() throws NetSuiteException;
+    NetSuiteClientService<T> createClient() throws NetSuiteException;
 
 }

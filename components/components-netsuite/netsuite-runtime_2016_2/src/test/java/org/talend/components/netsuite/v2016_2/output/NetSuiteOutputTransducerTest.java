@@ -15,7 +15,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.talend.components.netsuite.NetSuiteDataSetRuntime;
+import org.talend.components.netsuite.NetSuiteDatasetRuntime;
 import org.talend.components.netsuite.NetSuiteRuntime;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.RefType;
@@ -67,7 +67,7 @@ public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
     public void testBasic() throws Exception {
 
         NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
-        NetSuiteDataSetRuntime dataSetRuntime = netSuiteRuntime.getDataSet(mockTestFixture.getConnectionProperties());
+        NetSuiteDatasetRuntime dataSetRuntime = netSuiteRuntime.getDatasetRuntime(mockTestFixture.getConnectionProperties());
 
         TypeDesc typeDesc = clientService.getTypeInfo("Opportunity");
 
@@ -89,7 +89,7 @@ public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
     public void testNonRecordObjects() throws Exception {
 
         NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
-        NetSuiteDataSetRuntime dataSetRuntime = netSuiteRuntime.getDataSet(mockTestFixture.getConnectionProperties());
+        NetSuiteDatasetRuntime dataSetRuntime = netSuiteRuntime.getDatasetRuntime(mockTestFixture.getConnectionProperties());
 
         Collection<String> typeNames = Arrays.asList(
                 RefType.RECORD_REF.getTypeName(),
@@ -118,7 +118,7 @@ public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
     public void testRecordRef() throws Exception {
 
         NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
-        NetSuiteDataSetRuntime dataSetRuntime = netSuiteRuntime.getDataSet(mockTestFixture.getConnectionProperties());
+        NetSuiteDatasetRuntime dataSetRuntime = netSuiteRuntime.getDatasetRuntime(mockTestFixture.getConnectionProperties());
 
         TypeDesc typeDesc = clientService.getTypeInfo(RefType.RECORD_REF.getTypeName());
         TypeDesc referencedTypeDesc = clientService.getTypeInfo("Opportunity");
@@ -144,7 +144,7 @@ public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
     public void testCustomFields() throws Exception {
 
         NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
-        NetSuiteDataSetRuntime dataSetRuntime = netSuiteRuntime.getDataSet(mockTestFixture.getConnectionProperties());
+        NetSuiteDatasetRuntime dataSetRuntime = netSuiteRuntime.getDatasetRuntime(mockTestFixture.getConnectionProperties());
 
         TypeDesc basicTypeDesc = clientService.getBasicMetaData().getTypeInfo("Opportunity");
 

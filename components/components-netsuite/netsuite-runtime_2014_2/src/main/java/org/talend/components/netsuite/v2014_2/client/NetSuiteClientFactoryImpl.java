@@ -4,15 +4,17 @@ import org.talend.components.netsuite.client.NetSuiteClientFactory;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 
+import com.netsuite.webservices.v2014_2.platform.NetSuitePortType;
+
 /**
  *
  */
-public class NetSuiteClientFactoryImpl implements NetSuiteClientFactory {
+public class NetSuiteClientFactoryImpl implements NetSuiteClientFactory<NetSuitePortType> {
 
     public static final NetSuiteClientFactoryImpl INSTANCE = new NetSuiteClientFactoryImpl();
 
     @Override
-    public NetSuiteClientService createClient() throws NetSuiteException {
+    public NetSuiteClientService<NetSuitePortType> createClient() throws NetSuiteException {
         return new NetSuiteClientServiceImpl();
     }
 }

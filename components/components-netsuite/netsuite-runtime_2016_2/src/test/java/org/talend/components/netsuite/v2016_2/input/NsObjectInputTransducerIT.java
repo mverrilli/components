@@ -8,7 +8,7 @@ import org.apache.avro.generic.IndexedRecord;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.talend.components.netsuite.NetSuiteDataSetRuntimeImpl;
+import org.talend.components.netsuite.NetSuiteDatasetRuntimeImpl;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
@@ -43,7 +43,7 @@ public class NsObjectInputTransducerIT extends NetSuiteTestBase {
         connection.login();
 
         TypeDesc typeDesc = connection.getTypeInfo("Opportunity");
-        Schema schema = NetSuiteDataSetRuntimeImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
+        Schema schema = NetSuiteDatasetRuntimeImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
         NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema, typeDesc.getTypeName());
 
@@ -52,7 +52,7 @@ public class NsObjectInputTransducerIT extends NetSuiteTestBase {
                 .search();
 
         if (!rs.next()) {
-            throw new IllegalStateException("Not records");
+            throw new IllegalStateException("No records");
         }
 
         Record record = rs.get();
@@ -67,16 +67,16 @@ public class NsObjectInputTransducerIT extends NetSuiteTestBase {
 
         connection.login();
 
-        TypeDesc typeDesc = connection.getTypeInfo("Opportunity");
+        TypeDesc basicTypeDesc = connection.getBasicMetaData().getTypeInfo("Opportunity");
         Schema schema = getDynamicSchema();
 
-        NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema, typeDesc.getTypeName());
+        NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema, basicTypeDesc.getTypeName());
 
         SearchResultSet<Record> rs = connection.newSearch()
-                .target(typeDesc.getTypeName())
+                .target(basicTypeDesc.getTypeName())
                 .search();
 
-        TypeDesc customizedTypeDesc = connection.getTypeInfo(typeDesc.getTypeName());
+        TypeDesc typeDesc = connection.getTypeInfo(basicTypeDesc.getTypeName());
 
         int count = 0;
         while (count++ < connection.getSearchPageSize() && rs.next()) {
@@ -85,9 +85,9 @@ public class NsObjectInputTransducerIT extends NetSuiteTestBase {
             logger.debug("Indexed record: {}", indexedRecord);
 
             Schema recordSchema = indexedRecord.getSchema();
-            assertEquals(customizedTypeDesc.getFields().size(), recordSchema.getFields().size());
+            assertEquals(typeDesc.getFields().size(), recordSchema.getFields().size());
 
-            for (FieldDesc fieldDesc : customizedTypeDesc.getFields()) {
+            for (FieldDesc fieldDesc : typeDesc.getFields()) {
                 String fieldName = fieldDesc.getName();
                 Schema.Field field = recordSchema.getField(fieldName);
                 assertNotNull(field);
@@ -96,7 +96,7 @@ public class NsObjectInputTransducerIT extends NetSuiteTestBase {
             }
         }
         if (count == 0) {
-            throw new IllegalStateException("Not records");
+            throw new IllegalStateException("No records");
         }
     }
 

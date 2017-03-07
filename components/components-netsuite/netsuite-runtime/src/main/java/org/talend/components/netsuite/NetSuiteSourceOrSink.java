@@ -31,6 +31,14 @@ public abstract class NetSuiteSourceOrSink implements SourceOrSink {
 
     protected transient NetSuiteEndpoint endpoint;
 
+    public NetSuiteClientFactory getClientFactory() {
+        return clientFactory;
+    }
+
+    public void setClientFactory(NetSuiteClientFactory clientFactory) {
+        this.clientFactory = clientFactory;
+    }
+
     @Override
     public ValidationResult initialize(RuntimeContainer container, ComponentProperties properties) {
         this.properties = (NetSuiteProvideConnectionProperties) properties;
@@ -53,7 +61,7 @@ public abstract class NetSuiteSourceOrSink implements SourceOrSink {
     @Override
     public List<NamedThing> getSchemaNames(RuntimeContainer container) throws IOException {
         try {
-            NetSuiteDataSetRuntime dataSetRuntime = new NetSuiteDataSetRuntimeImpl(endpoint.getClientService());
+            NetSuiteDatasetRuntime dataSetRuntime = new NetSuiteDatasetRuntimeImpl(endpoint.getClientService());
             return dataSetRuntime.getRecordTypes();
         } catch (NetSuiteException e) {
             throw new IOException(e);
@@ -63,7 +71,7 @@ public abstract class NetSuiteSourceOrSink implements SourceOrSink {
     @Override
     public Schema getEndpointSchema(RuntimeContainer container, String schemaName) throws IOException {
         try {
-            NetSuiteDataSetRuntime dataSetRuntime = new NetSuiteDataSetRuntimeImpl(getClientService());
+            NetSuiteDatasetRuntime dataSetRuntime = new NetSuiteDatasetRuntimeImpl(getClientService());
             return dataSetRuntime.getSchema(schemaName);
         } catch (NetSuiteException e) {
             throw new IOException(e);

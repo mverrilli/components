@@ -15,21 +15,34 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.netsuite.NetSuiteSource;
+import org.talend.components.netsuite.client.NetSuiteClientFactory;
+import org.talend.components.netsuite.client.NetSuiteClientService;
+import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.input.NetSuiteInputProperties;
 import org.talend.components.netsuite.input.NetSuiteSearchInputReader;
 import org.talend.components.netsuite.v2016_2.NetSuiteSourceImpl;
 import org.talend.components.netsuite.v2016_2.NetSuiteTestBase;
 import org.talend.components.netsuite.v2016_2.NetSuiteRuntimeImpl;
-import org.talend.components.netsuite.NetSuiteDataSetRuntime;
+import org.talend.components.netsuite.NetSuiteDatasetRuntime;
 import org.talend.components.netsuite.v2016_2.NetSuiteWebServiceTestFixture;
+import org.talend.components.netsuite.v2016_2.client.NetSuiteClientFactoryImpl;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
+import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
 
 /**
  *
  */
 public class NetSuiteSearchInputReaderIT extends NetSuiteTestBase {
     private static NetSuiteWebServiceTestFixture webServiceTestFixture;
+
+    private final NetSuiteClientFactory<NetSuitePortType> clientFactory = new NetSuiteClientFactoryImpl() {
+        @Override public NetSuiteClientService createClient() throws NetSuiteException {
+            NetSuiteClientService<NetSuitePortType> service = super.createClient();
+            service.setCustomizationEnabled(webServiceTestFixture.getClientService().isCustomizationEnabled());
+            return service;
+        }
+    };
 
     @BeforeClass
     public static void classSetUp() throws Exception {
@@ -44,7 +57,7 @@ public class NetSuiteSearchInputReaderIT extends NetSuiteTestBase {
     }
 
     @Test
-    public void testInput() throws Exception {
+    public void testSearch() throws Exception {
         RuntimeContainer container = mock(RuntimeContainer.class);
 
         NetSuiteInputProperties properties = new NetSuiteInputProperties("test");
@@ -57,8 +70,9 @@ public class NetSuiteSearchInputReaderIT extends NetSuiteTestBase {
         properties.connection.applicationId.setValue(webServiceTestFixture.getCredentials().getApplicationId());
         properties.module.moduleName.setValue("Account");
 
-        NetSuiteDataSetRuntime dataSetRuntime = new NetSuiteRuntimeImpl()
-                .getDataSet(properties.getConnectionProperties());
+        NetSuiteRuntimeImpl runtime = new NetSuiteRuntimeImpl();
+        runtime.setClientFactory(clientFactory);
+        NetSuiteDatasetRuntime dataSetRuntime = runtime.getDatasetRuntime(properties.getConnectionProperties());
         Schema schema = dataSetRuntime.getSchema(properties.module.moduleName.getValue());
         properties.module.main.schema.setValue(schema);
 

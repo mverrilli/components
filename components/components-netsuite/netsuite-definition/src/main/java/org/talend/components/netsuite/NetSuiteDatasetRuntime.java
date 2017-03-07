@@ -9,7 +9,7 @@ import org.talend.daikon.NamedThing;
 /**
  *
  */
-public interface NetSuiteDataSetRuntime {
+public interface NetSuiteDatasetRuntime {
 
     List<NamedThing> getRecordTypes();
 

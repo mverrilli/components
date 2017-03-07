@@ -81,6 +81,8 @@ public abstract class NetSuiteClientService<PortT> {
 
     protected BasicMetaData basicMetaData;
 
+    protected boolean customizationEnabled = true;
+
     protected Map<String, CustomRecordTypeInfo> customRecordTypeMap = new HashMap<>();
     protected boolean customRecordTypesLoaded = false;
 
@@ -168,6 +170,14 @@ public abstract class NetSuiteClientService<PortT> {
 
     public void setUseRequestLevelCredentials(boolean useRequestLevelCredentials) {
         this.useRequestLevelCredentials = useRequestLevelCredentials;
+    }
+
+    public boolean isCustomizationEnabled() {
+        return customizationEnabled;
+    }
+
+    public void setCustomizationEnabled(boolean customizationEnabled) {
+        this.customizationEnabled = customizationEnabled;
     }
 
     public void login() throws NetSuiteException {
@@ -307,10 +317,12 @@ public abstract class NetSuiteClientService<PortT> {
         }
 
         if (recordTypeInfo != null) {
-            // Add custom fields
-            Map<String, CustomFieldDesc> customFieldMap = getRecordCustomFields(recordTypeInfo);
-            for (CustomFieldDesc fieldInfo : customFieldMap.values()) {
-                resultFieldDescList.add(fieldInfo);
+            if (customizationEnabled) {
+                // Add custom fields
+                Map<String, CustomFieldDesc> customFieldMap = getRecordCustomFields(recordTypeInfo);
+                for (CustomFieldDesc fieldInfo : customFieldMap.values()) {
+                    resultFieldDescList.add(fieldInfo);
+                }
             }
         }
 
@@ -323,7 +335,9 @@ public abstract class NetSuiteClientService<PortT> {
             return new RecordTypeInfo(recordType);
         }
 
-        retrieveCustomRecordTypes();
+        if (customizationEnabled) {
+            retrieveCustomRecordTypes();
+        }
 
         RecordTypeInfo recordTypeInfo = customRecordTypeMap.get(typeName);
         return recordTypeInfo;

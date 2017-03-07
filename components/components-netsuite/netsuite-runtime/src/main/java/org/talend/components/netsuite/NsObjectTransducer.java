@@ -127,7 +127,7 @@ public abstract class NsObjectTransducer {
     }
 
     protected Schema.Field createSchemaField(FieldDesc fieldDesc) {
-        Schema avroFieldType = NetSuiteDataSetRuntimeImpl.inferSchemaForField(fieldDesc);
+        Schema avroFieldType = NetSuiteDatasetRuntimeImpl.inferSchemaForField(fieldDesc);
         Schema.Field avroField = new Schema.Field(fieldDesc.getName(), avroFieldType, null, null);
         return avroField;
     }

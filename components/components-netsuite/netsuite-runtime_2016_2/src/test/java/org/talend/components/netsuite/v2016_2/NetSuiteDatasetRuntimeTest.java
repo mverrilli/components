@@ -13,8 +13,8 @@ import java.util.List;
 
 import org.apache.avro.Schema;
 import org.junit.Test;
-import org.talend.components.netsuite.NetSuiteDataSetRuntime;
-import org.talend.components.netsuite.NetSuiteDataSetRuntimeImpl;
+import org.talend.components.netsuite.NetSuiteDatasetRuntime;
+import org.talend.components.netsuite.NetSuiteDatasetRuntimeImpl;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
@@ -24,7 +24,7 @@ import org.talend.daikon.avro.SchemaConstants;
 /**
  *
  */
-public class NetSuiteDataSetRuntimeTest extends NetSuiteMockTestBase {
+public class NetSuiteDatasetRuntimeTest extends NetSuiteMockTestBase {
 
     private NetSuiteClientService clientService = new NetSuiteClientServiceImpl();
 
@@ -32,7 +32,7 @@ public class NetSuiteDataSetRuntimeTest extends NetSuiteMockTestBase {
     public void testInferSchemaForRecordBasic() throws Exception {
         TypeDesc typeDesc = clientService.getBasicMetaData().getTypeInfo("Account");
 
-        Schema s = NetSuiteDataSetRuntimeImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
+        Schema s = NetSuiteDatasetRuntimeImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 //        System.out.println(s);
 
         assertThat(s.getType(), is(Schema.Type.RECORD));
@@ -64,7 +64,7 @@ public class NetSuiteDataSetRuntimeTest extends NetSuiteMockTestBase {
 
     @Test
     public void testGetSearchFieldOperators() {
-        NetSuiteDataSetRuntime dataSetRuntime = new NetSuiteDataSetRuntimeImpl(clientService);
+        NetSuiteDatasetRuntime dataSetRuntime = new NetSuiteDatasetRuntimeImpl(clientService);
         List<String> operators = dataSetRuntime.getSearchFieldOperators();
         for (String operator : operators) {
             assertNotNull(operator);

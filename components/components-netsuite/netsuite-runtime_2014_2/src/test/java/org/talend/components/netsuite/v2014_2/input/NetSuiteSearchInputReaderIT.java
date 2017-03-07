@@ -20,7 +20,7 @@ import org.talend.components.netsuite.input.NetSuiteSearchInputReader;
 import org.talend.components.netsuite.v2014_2.NetSuiteSourceImpl;
 import org.talend.components.netsuite.v2014_2.NetSuiteTestBase;
 import org.talend.components.netsuite.v2014_2.NetSuiteRuntimeImpl;
-import org.talend.components.netsuite.NetSuiteDataSetRuntime;
+import org.talend.components.netsuite.NetSuiteDatasetRuntime;
 import org.talend.components.netsuite.v2014_2.NetSuiteWebServiceTestFixture;
 
 import com.netsuite.webservices.v2014_2.lists.accounting.types.AccountType;
@@ -57,8 +57,8 @@ public class NetSuiteSearchInputReaderIT extends NetSuiteTestBase {
         properties.connection.applicationId.setValue(webServiceTestFixture.getCredentials().getApplicationId());
         properties.module.moduleName.setValue("Account");
 
-        NetSuiteDataSetRuntime dataSetRuntime = new NetSuiteRuntimeImpl()
-                .getDataSet(properties.getConnectionProperties());
+        NetSuiteDatasetRuntime dataSetRuntime = new NetSuiteRuntimeImpl()
+                .getDatasetRuntime(properties.getConnectionProperties());
         Schema schema = dataSetRuntime.getSchema(properties.module.moduleName.getValue());
         properties.module.main.schema.setValue(schema);
 

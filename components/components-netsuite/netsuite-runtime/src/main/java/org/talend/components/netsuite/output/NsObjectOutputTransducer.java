@@ -90,7 +90,7 @@ public class NsObjectOutputTransducer extends NsObjectTransducer {
                 Object value = indexedRecord.get(field.pos());
                 Object result = writeField(nsObject, fieldDesc, value);
                 if (result == null) {
-                    nullFieldNames.add(fieldName);
+                    nullFieldNames.add(fieldDesc.getInternalName());
                 }
             }
 

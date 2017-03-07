@@ -13,7 +13,7 @@ import org.talend.components.api.component.PropertyPathConnector;
 import org.talend.components.common.FixedConnectorsComponentProperties;
 import org.talend.components.netsuite.NetSuiteModuleProperties;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
-import org.talend.components.netsuite.NetSuiteDataSetRuntime;
+import org.talend.components.netsuite.NetSuiteDatasetRuntime;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
 import org.talend.components.netsuite.schema.NsField;
 import org.talend.components.netsuite.schema.NsSchema;
@@ -84,8 +84,8 @@ public class NetSuiteInputProperties extends FixedConnectorsComponentProperties
     }
 
     protected List<String> getSearchFieldOperators() {
-        return withDataSetRuntime(this, new Function<NetSuiteDataSetRuntime, List<String>>() {
-            @Override public List<String> apply(NetSuiteDataSetRuntime dataSetRuntime) {
+        return withDataSetRuntime(this, new Function<NetSuiteDatasetRuntime, List<String>>() {
+            @Override public List<String> apply(NetSuiteDatasetRuntime dataSetRuntime) {
                 return dataSetRuntime.getSearchFieldOperators();
             }
         });

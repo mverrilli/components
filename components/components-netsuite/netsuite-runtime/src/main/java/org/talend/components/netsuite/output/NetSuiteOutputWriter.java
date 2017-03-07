@@ -10,6 +10,7 @@ import org.talend.components.api.component.runtime.WriteOperation;
 import org.talend.components.api.component.runtime.WriterWithFeedback;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
+import org.talend.components.netsuite.client.NsWriteResponse;
 import org.talend.components.netsuite.client.model.TypeDesc;
 
 /**
@@ -69,16 +70,23 @@ public class NetSuiteOutputWriter implements WriterWithFeedback<Result, IndexedR
     public void write(Object object) throws IOException {
         IndexedRecord record = (IndexedRecord) object;
         try {
+            NsWriteResponse<?> writeResponse;
             if (action == NetSuiteOutputProperties.OutputAction.ADD) {
-                clientService.add(transduceRecord(record));
+                writeResponse = clientService.add(transduceRecord(record));
             } else if (action == NetSuiteOutputProperties.OutputAction.UPDATE) {
-                clientService.update(transduceRecord(record));
+                writeResponse = clientService.update(transduceRecord(record));
             } else if (action == NetSuiteOutputProperties.OutputAction.UPSERT) {
-                clientService.upsert(transduceRecord(record));
+                writeResponse = clientService.upsert(transduceRecord(record));
             } else if (action == NetSuiteOutputProperties.OutputAction.DELETE) {
-                clientService.delete(transduceRecord(record));
+                writeResponse = clientService.delete(transduceRecord(record));
+            } else {
+                throw new NetSuiteException("Output operation not implemented: " + action);
             }
-            successfulWrites.add(record);
+            if (writeResponse.getStatus().isSuccess()) {
+                successfulWrites.add(record);
+            } else {
+                rejectedWrites.add(record);
+            }
         } catch (IOException e) {
             rejectedWrites.add(record);
         }

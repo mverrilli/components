@@ -9,7 +9,7 @@ import org.apache.avro.Schema;
 import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
 import org.junit.Test;
-import org.talend.components.netsuite.NetSuiteDataSetRuntimeImpl;
+import org.talend.components.netsuite.NetSuiteDatasetRuntimeImpl;
 import org.talend.components.netsuite.NsObjectTransducer;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.FieldDesc;
@@ -31,7 +31,7 @@ public class ValueConverterTest extends NetSuiteMockTestBase {
     public void testEnumConverter() throws Exception {
         TypeDesc typeDesc = clientService.getBasicMetaData().getTypeInfo("Account");
 
-        Schema s = NetSuiteDataSetRuntimeImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
+        Schema s = NetSuiteDatasetRuntimeImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
         NsObjectInputTransducer transducer = new NsObjectInputTransducer(clientService, s, typeDesc.getTypeName());
 
@@ -57,7 +57,7 @@ public class ValueConverterTest extends NetSuiteMockTestBase {
     public void testXMLGregorianCalendarConverter() throws Exception {
         TypeDesc typeDesc = clientService.getBasicMetaData().getTypeInfo("Account");
 
-        Schema s = NetSuiteDataSetRuntimeImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
+        Schema s = NetSuiteDatasetRuntimeImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
         DateTimeZone tz1 = DateTimeZone.forID("EET");
 

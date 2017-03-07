@@ -519,9 +519,8 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
     public static NsStatus toNsStatus(Status status) {
         NsStatus nsStatus = new NsStatus();
         nsStatus.setSuccess(status.getIsSuccess());
-        List<NsStatus.Detail> details = new ArrayList<>();
         for (StatusDetail detail : status.getStatusDetail()) {
-            details.add(toNsStatusDetail(detail));
+            nsStatus.getDetails().add(toNsStatusDetail(detail));
         }
         return nsStatus;
     }
