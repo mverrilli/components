@@ -1,28 +1,55 @@
-package org.talend.components.netsuite.client.model;
+package org.talend.components.netsuite.client.model.beans;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import org.apache.commons.beanutils.MethodUtils;
 import org.apache.commons.beanutils.expression.DefaultResolver;
 import org.apache.commons.beanutils.expression.Resolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.netsuite.beans.BeanInfo;
-import org.talend.components.netsuite.beans.BeanManager;
-import org.talend.components.netsuite.beans.EnumAccessor;
-import org.talend.components.netsuite.beans.Mapper;
-import org.talend.components.netsuite.beans.PropertyAccess;
-import org.talend.components.netsuite.beans.PropertyAccessor;
-import org.talend.components.netsuite.beans.PropertyInfo;
+import org.talend.components.netsuite.util.Mapper;
 
 /**
  *
  */
-public abstract class BeanUtils {
+public abstract class Beans {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Beans.class);
+
+    private static final ConcurrentMap<Class<?>, BeanInfo> beanInfoCache = new ConcurrentHashMap<>();
+
     private static final Resolver propertyResolver = new DefaultResolver();
 
-    private transient static final Logger LOG = LoggerFactory.getLogger(BeanUtils.class);
+    public static PropertyInfo getPropertyInfo(Object target, String name) {
+        BeanInfo beanInfo = getBeanInfo(target.getClass());
+        return beanInfo != null ? beanInfo.getProperty(name) : null;
+    }
+
+    public static BeanInfo getBeanInfo(Class<?> clazz) {
+        BeanInfo beanInfo = beanInfoCache.get(clazz);
+        if (beanInfo == null) {
+            BeanInfo newBeanInfo = loadBeanInfoForClass(clazz);
+            if (beanInfoCache.putIfAbsent(clazz, newBeanInfo) == null) {
+                beanInfo = newBeanInfo;
+            } else {
+                beanInfo = beanInfoCache.get(clazz);
+            }
+        }
+        return beanInfo;
+    }
+
+    private static BeanInfo loadBeanInfoForClass(Class<?> clazz) {
+        try {
+            List<PropertyInfo> properties = BeanIntrospector.getInstance().getProperties(clazz.getName());
+            return new BeanInfo(properties);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public static void setProperty(Object target, String expr, Object value) {
         try {
@@ -77,16 +104,12 @@ public abstract class BeanUtils {
         getPropertyAccessor(target).set(target, name, value);
     }
 
-    protected static <T> PropertyAccessor<T> getPropertyAccessor(Class<T> clazz) {
-        if (PropertyAccess.class.isAssignableFrom(clazz)) {
-            return (PropertyAccessor<T>) OptimizedPropertyAccessor.INSTANCE;
-        } else {
-            return (PropertyAccessor<T>) ReflectionPropertyAccessor.INSTANCE;
-        }
-    }
-
     protected static <T> PropertyAccessor<T> getPropertyAccessor(T target) {
-        return (PropertyAccessor<T>) BeanUtils.getPropertyAccessor(target.getClass());
+        if (target instanceof PropertyAccess) {
+            return ((PropertyAccess) target).getPropertyAccessor();
+        } else {
+            return (PropertyAccessor<T>) ReflectPropertyAccessor.INSTANCE;
+        }
     }
 
     public static EnumAccessor getEnumAccessor(Class<? extends Enum> clazz) {
@@ -111,7 +134,7 @@ public abstract class BeanUtils {
         if (accessor != null) {
             return new OptimizedEnumAccessor(clazz, accessor);
         } else {
-            return new ReflectionEnumAccessor(clazz);
+            return new ReflectEnumAccessor(clazz);
         }
     }
 
@@ -135,9 +158,8 @@ public abstract class BeanUtils {
         return "_" + toInitialLower(value);
     }
 
-    public static class ReflectionPropertyAccessor implements PropertyAccessor<Object> {
-
-        public static final ReflectionPropertyAccessor INSTANCE = new ReflectionPropertyAccessor();
+    protected static class ReflectPropertyAccessor implements PropertyAccessor<Object> {
+        protected static final ReflectPropertyAccessor INSTANCE = new ReflectPropertyAccessor();
 
         /** An empty class array */
         private static final Class[] EMPTY_CLASS_PARAMETERS = new Class[0];
@@ -151,7 +173,7 @@ public abstract class BeanUtils {
             }
 
             // Retrieve the property getter method for the specified property
-            BeanInfo metaData = BeanManager.getBeanInfo(target.getClass());
+            BeanInfo metaData = Beans.getBeanInfo(target.getClass());
             PropertyInfo descriptor = metaData.getProperty(name);
             if (descriptor == null) {
                 throw new IllegalArgumentException("Unknown property '" +
@@ -179,7 +201,7 @@ public abstract class BeanUtils {
             }
 
             // Retrieve the property setter method for the specified property
-            BeanInfo metaData = BeanManager.getBeanInfo(target.getClass());
+            BeanInfo metaData = Beans.getBeanInfo(target.getClass());
             PropertyInfo descriptor = metaData.getProperty(name);
             if (descriptor == null) {
                 throw new IllegalArgumentException("Unknown property '" +
@@ -275,21 +297,6 @@ public abstract class BeanUtils {
         }
     }
 
-    public static class OptimizedPropertyAccessor implements PropertyAccessor<Object> {
-
-        public static final OptimizedPropertyAccessor INSTANCE = new OptimizedPropertyAccessor();
-
-        @Override
-        public Object get(Object target, String name) {
-            return ((PropertyAccess) target).get(name);
-        }
-
-        @Override
-        public void set(Object target, String name, Object value) {
-            ((PropertyAccess) target).set(name, value);
-        }
-    }
-
     protected static abstract class AbstractEnumAccessor implements EnumAccessor {
         protected Class<?> enumClass;
         protected Mapper<Enum, String> toStringMapper;
@@ -316,26 +323,26 @@ public abstract class BeanUtils {
         protected class ToStringMapper implements Mapper<Enum, String> {
             @Override
             public String map(Enum input) {
-                return mapToString(input);
+                return getStringValue(input);
             }
         }
 
         protected class FromStringMapper implements Mapper<String, Enum> {
             @Override
             public Enum map(String input) {
-                return mapFromString(input);
+                return getEnumValue(input);
             }
         }
     }
 
-    public static class ReflectionEnumAccessor extends AbstractEnumAccessor {
+    public static class ReflectEnumAccessor extends AbstractEnumAccessor {
 
-        public ReflectionEnumAccessor(Class<?> enumClass) {
+        public ReflectEnumAccessor(Class<?> enumClass) {
             super(enumClass);
         }
 
         @Override
-        public String mapToString(Enum enumValue) {
+        public String getStringValue(Enum enumValue) {
             try {
                 return (String) MethodUtils.invokeExactMethod(enumValue, "value", null);
             } catch (InvocationTargetException e) {
@@ -349,7 +356,7 @@ public abstract class BeanUtils {
         }
 
         @Override
-        public Enum mapFromString(String value) {
+        public Enum getEnumValue(String value) {
             try {
                 return (Enum) MethodUtils.invokeExactStaticMethod(enumClass, "fromValue", value);
             } catch (InvocationTargetException e) {
@@ -372,13 +379,13 @@ public abstract class BeanUtils {
         }
 
         @Override
-        public String mapToString(Enum enumValue) {
-            return accessor.mapToString(enumValue);
+        public String getStringValue(Enum enumValue) {
+            return accessor.getStringValue(enumValue);
         }
 
         @Override
-        public Enum mapFromString(String value) {
-            return accessor.mapFromString(value);
+        public Enum getEnumValue(String value) {
+            return accessor.getEnumValue(value);
         }
     }
 }

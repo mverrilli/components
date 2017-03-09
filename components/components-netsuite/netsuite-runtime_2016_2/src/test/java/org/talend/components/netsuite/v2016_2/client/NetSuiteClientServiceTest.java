@@ -7,7 +7,7 @@ import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
+import static org.talend.components.netsuite.client.model.beans.Beans.toInitialUpper;
 
 import java.util.Arrays;
 import java.util.HashSet;

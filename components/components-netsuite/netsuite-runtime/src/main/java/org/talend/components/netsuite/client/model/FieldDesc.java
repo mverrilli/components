@@ -1,6 +1,6 @@
 package org.talend.components.netsuite.client.model;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.toInitialLower;
+import static org.talend.components.netsuite.client.model.beans.Beans.toInitialLower;
 
 /**
  *

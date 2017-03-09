@@ -3,7 +3,7 @@ package org.talend.components.netsuite.v2016_2.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.getProperty;
 
 import java.util.Arrays;
 import java.util.Collection;

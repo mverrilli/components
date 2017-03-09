@@ -1,9 +1,9 @@
 package org.talend.components.netsuite;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.getEnumAccessor;
-import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
-import static org.talend.components.netsuite.client.model.BeanUtils.getSimpleProperty;
-import static org.talend.components.netsuite.client.model.BeanUtils.setSimpleProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.getEnumAccessor;
+import static org.talend.components.netsuite.client.model.beans.Beans.getProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.getSimpleProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.setSimpleProperty;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,14 +18,14 @@ import org.apache.avro.Schema;
 import org.joda.time.DateTimeZone;
 import org.joda.time.MutableDateTime;
 import org.talend.components.api.exception.ComponentException;
-import org.talend.components.netsuite.beans.BeanInfo;
-import org.talend.components.netsuite.beans.BeanManager;
-import org.talend.components.netsuite.beans.EnumAccessor;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.CustomFieldDesc;
+import org.talend.components.netsuite.client.model.beans.EnumAccessor;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.model.TypeUtils;
+import org.talend.components.netsuite.client.model.beans.BeanInfo;
+import org.talend.components.netsuite.client.model.beans.Beans;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
 import org.talend.daikon.di.DiSchemaConstants;
 
@@ -133,7 +133,7 @@ public abstract class NsObjectTransducer {
     }
 
     protected Map<String, Object> getMapView(Object nsObject, Schema schema, TypeDesc typeDesc) {
-        BeanInfo beanInfo = BeanManager.getBeanInfo(typeDesc.getTypeClass());
+        BeanInfo beanInfo = Beans.getBeanInfo(typeDesc.getTypeClass());
 
         Map<String, Object> valueMap = new HashMap<>();
 
@@ -349,7 +349,7 @@ public abstract class NsObjectTransducer {
                 return null;
             }
             try {
-                return (T) enumAccessor.mapFromString(value);
+                return (T) enumAccessor.getEnumValue(value);
             } catch (IllegalArgumentException ex) {
                 // Fallback to .valueOf(String)
                 return Enum.valueOf(clazz, value);
@@ -362,7 +362,7 @@ public abstract class NsObjectTransducer {
                 return null;
             }
             try {
-                return enumAccessor.mapToString(enumValue);
+                return enumAccessor.getStringValue(enumValue);
             } catch (IllegalArgumentException ex) {
                 // Fallback to .name()
                 return enumValue.name();

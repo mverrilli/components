@@ -1,7 +1,7 @@
 package org.talend.components.netsuite.v2016_2;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
-import static org.talend.components.netsuite.client.model.BeanUtils.setSimpleProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.setProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.setSimpleProperty;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,9 +18,9 @@ import org.apache.avro.Schema;
 import org.joda.time.DateTime;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.netsuite.beans.BeanInfo;
-import org.talend.components.netsuite.beans.BeanManager;
-import org.talend.components.netsuite.beans.PropertyInfo;
+import org.talend.components.netsuite.client.model.beans.BeanInfo;
+import org.talend.components.netsuite.client.model.beans.Beans;
+import org.talend.components.netsuite.client.model.beans.PropertyInfo;
 import org.talend.components.netsuite.test.TestFixture;
 import org.talend.daikon.avro.AvroUtils;
 
@@ -160,7 +160,7 @@ public abstract class NetSuiteTestBase {
     }
 
     protected static <T> T composeObject(Class<T> clazz) throws Exception {
-        BeanInfo beanInfo = BeanManager.getBeanInfo(clazz);
+        BeanInfo beanInfo = Beans.getBeanInfo(clazz);
         List<PropertyInfo> propertyInfoList = beanInfo.getProperties();
 
         T obj = clazz.newInstance();

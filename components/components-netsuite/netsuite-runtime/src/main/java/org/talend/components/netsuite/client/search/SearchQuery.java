@@ -1,16 +1,13 @@
 package org.talend.components.netsuite.client.search;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
-import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
-import static org.talend.components.netsuite.client.model.BeanUtils.toInitialLower;
+import static org.talend.components.netsuite.client.model.beans.Beans.getProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.setProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.toInitialLower;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.talend.components.netsuite.beans.BeanInfo;
-import org.talend.components.netsuite.beans.BeanManager;
-import org.talend.components.netsuite.beans.PropertyInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.NsRef;
@@ -21,6 +18,9 @@ import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.RefType;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.client.model.TypeUtils;
+import org.talend.components.netsuite.client.model.beans.BeanInfo;
+import org.talend.components.netsuite.client.model.beans.Beans;
+import org.talend.components.netsuite.client.model.beans.PropertyInfo;
 import org.talend.components.netsuite.client.model.search.SearchFieldAdapter;
 import org.talend.components.netsuite.client.model.search.SearchFieldOperatorName;
 import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
@@ -117,7 +117,7 @@ public class SearchQuery<SearchT, RecT> {
 
         initSearch();
 
-        BeanInfo searchMetaData = BeanManager.getBeanInfo(searchRecordInfo.getSearchBasicClass());
+        BeanInfo searchMetaData = Beans.getBeanInfo(searchRecordInfo.getSearchBasicClass());
 
         String fieldName = toInitialLower(condition.getFieldName());
         PropertyInfo propertyInfo = searchMetaData.getProperty(fieldName);
@@ -160,7 +160,7 @@ public class SearchQuery<SearchT, RecT> {
 
     private Object processConditionForSearchRecord(Object searchRecord, SearchCondition condition) throws NetSuiteException {
         String fieldName = toInitialLower(condition.getFieldName());
-        BeanInfo beanInfo = BeanManager.getBeanInfo(searchRecord.getClass());
+        BeanInfo beanInfo = Beans.getBeanInfo(searchRecord.getClass());
         Class<?> searchFieldClass = beanInfo.getProperty(fieldName).getWriteType();
         SearchFieldType fieldType = SearchFieldType.getByFieldTypeName(searchFieldClass.getSimpleName());
         Object searchField = processCondition(fieldType, condition);

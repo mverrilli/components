@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
-import static org.talend.components.netsuite.client.model.BeanUtils.getProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.getProperty;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -17,17 +17,16 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.talend.components.netsuite.beans.BeanInfo;
-import org.talend.components.netsuite.beans.BeanManager;
-import org.talend.components.netsuite.beans.Mapper;
-import org.talend.components.netsuite.beans.PropertyInfo;
 import org.talend.components.netsuite.client.NetSuiteClientService;
-import org.talend.components.netsuite.client.model.BeanUtils;
 import org.talend.components.netsuite.client.model.CustomFieldDesc;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.model.TypeUtils;
+import org.talend.components.netsuite.client.model.beans.BeanInfo;
+import org.talend.components.netsuite.client.model.beans.Beans;
+import org.talend.components.netsuite.client.model.beans.PropertyInfo;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
+import org.talend.components.netsuite.util.Mapper;
 
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
 import com.netsuite.webservices.v2016_2.platform.core.BaseRef;
@@ -106,7 +105,7 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
                     assertNotNull(value);
                 } else if (datumClass.isEnum()) {
                     assertNotNull(value);
-                    Mapper<String, Enum> enumAccessor = BeanUtils.getEnumFromStringMapper((Class<Enum>) datumClass);
+                    Mapper<String, Enum> enumAccessor = Beans.getEnumFromStringMapper((Class<Enum>) datumClass);
                     Enum modelValue = enumAccessor.map((String) value);
                     assertNotNull(modelValue);
                 }
@@ -243,7 +242,7 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
             T record = super.composeObject();
 
             Map<String, CustomFieldRef> customFields = createCustomFieldRefs(customFieldSpecs);
-            BeanUtils.setProperty(record, "customFieldList", new CustomFieldList());
+            Beans.setProperty(record, "customFieldList", new CustomFieldList());
             List<CustomFieldRef> customFieldList =
                     (List<CustomFieldRef>) getProperty(record, "customFieldList.customField");
             customFieldList.addAll(customFields.values());
@@ -265,12 +264,12 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
             fieldRef.setScriptId(spec.getScriptId());
             fieldRef.setInternalId(spec.getInternalId());
 
-            BeanInfo beanInfo = BeanManager.getBeanInfo(fieldRef.getClass());
+            BeanInfo beanInfo = Beans.getBeanInfo(fieldRef.getClass());
             PropertyInfo valuePropInfo = beanInfo.getProperty("value");
 
             Object value = composeValue(valuePropInfo.getWriteType());
             if (value != null) {
-                BeanUtils.setProperty(fieldRef, "value", value);
+                Beans.setProperty(fieldRef, "value", value);
             }
 
             map.put(fieldRef.getScriptId(), fieldRef);
@@ -303,12 +302,12 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
         for (CustomFieldSpec spec : customFieldSpecs.values()) {
             CustomFieldType fieldRecord = (CustomFieldType) spec.getFieldTypeClass().newInstance();
 
-            BeanUtils.setProperty(fieldRecord, "internalId", spec.getInternalId());
+            Beans.setProperty(fieldRecord, "internalId", spec.getInternalId());
             fieldRecord.setScriptId(spec.getScriptId());
             fieldRecord.setFieldType(spec.getFieldType());
 
             for (String appliesTo : spec.getAppliesTo()) {
-                BeanUtils.setProperty(fieldRecord, appliesTo, Boolean.TRUE);
+                Beans.setProperty(fieldRecord, appliesTo, Boolean.TRUE);
             }
 
             customFieldTypeMap.put(fieldRecord.getScriptId(), fieldRecord);

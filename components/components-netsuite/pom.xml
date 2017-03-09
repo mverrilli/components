@@ -15,7 +15,6 @@
     </properties>
 
     <modules>
-        <module>netsuite-common</module>
         <module>netsuite-definition</module>
         <module>netsuite-runtime</module>
         <module>netsuite-runtime_2016_2</module>

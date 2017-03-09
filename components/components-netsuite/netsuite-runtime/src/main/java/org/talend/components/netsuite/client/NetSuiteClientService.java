@@ -1,7 +1,7 @@
 package org.talend.components.netsuite.client;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.getSimpleProperty;
-import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
+import static org.talend.components.netsuite.client.model.beans.Beans.getSimpleProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.toInitialUpper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,8 +22,6 @@ import org.apache.cxf.headers.Header;
 import org.apache.cxf.jaxb.JAXBDataBinding;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.netsuite.beans.BeanInfo;
-import org.talend.components.netsuite.beans.BeanManager;
 import org.talend.components.netsuite.client.model.BasicMetaData;
 import org.talend.components.netsuite.client.model.BasicRecordType;
 import org.talend.components.netsuite.client.model.CustomFieldDesc;
@@ -34,6 +32,8 @@ import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.RefType;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
+import org.talend.components.netsuite.client.model.beans.BeanInfo;
+import org.talend.components.netsuite.client.model.beans.Beans;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
 import org.talend.components.netsuite.client.search.SearchQuery;
 import org.talend.daikon.NamedThing;
@@ -436,7 +436,7 @@ public abstract class NetSuiteClientService<PortT> {
                 customFieldInfo.setCustomFieldType(customFieldRefType);
 
                 TypeDesc typeDesc = basicMetaData.getTypeInfo(customFieldRefType.getTypeName());
-                BeanInfo beanInfo = BeanManager.getBeanInfo(typeDesc.getTypeClass());
+                BeanInfo beanInfo = Beans.getBeanInfo(typeDesc.getTypeClass());
                 Class<?> valueType = beanInfo.getProperty("value").getWriteType();
                 customFieldInfo.setValueType(valueType);
 

@@ -1,7 +1,7 @@
 package org.talend.components.netsuite.output;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.getSimpleProperty;
-import static org.talend.components.netsuite.client.model.BeanUtils.setSimpleProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.getSimpleProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.setSimpleProperty;
 
 import java.util.HashSet;
 import java.util.List;
@@ -12,8 +12,6 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.NsObjectTransducer;
-import org.talend.components.netsuite.beans.BeanInfo;
-import org.talend.components.netsuite.beans.BeanManager;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.model.FieldDesc;
@@ -22,6 +20,8 @@ import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.RefType;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.model.TypeUtils;
+import org.talend.components.netsuite.client.model.beans.BeanInfo;
+import org.talend.components.netsuite.client.model.beans.Beans;
 
 /**
  *
@@ -64,7 +64,7 @@ public class NsObjectOutputTransducer extends NsObjectTransducer {
             typeDesc = clientService.getTypeInfo(typeName);
         }
 
-        beanInfo = BeanManager.getBeanInfo(typeDesc.getTypeClass());
+        beanInfo = Beans.getBeanInfo(typeDesc.getTypeClass());
         fieldMap = typeDesc.getFieldMap();
     }
 

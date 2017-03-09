@@ -1,7 +1,7 @@
 package org.talend.components.netsuite.client.model.search;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.getSimpleProperty;
-import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.getSimpleProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.setProperty;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package org.talend.components.netsuite.client.model;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
 import static org.talend.components.netsuite.client.model.TypeUtils.collectXmlTypes;
+import static org.talend.components.netsuite.client.model.beans.Beans.toInitialUpper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,9 +14,9 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.netsuite.beans.BeanInfo;
-import org.talend.components.netsuite.beans.BeanManager;
-import org.talend.components.netsuite.beans.PropertyInfo;
+import org.talend.components.netsuite.client.model.beans.BeanInfo;
+import org.talend.components.netsuite.client.model.beans.Beans;
+import org.talend.components.netsuite.client.model.beans.PropertyInfo;
 import org.talend.components.netsuite.client.model.customfield.CrmCustomFieldAdapter;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldAdapter;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
@@ -195,7 +195,7 @@ public abstract class BasicMetaData {
     }
 
     public TypeDesc getTypeInfo(Class<?> clazz) {
-        BeanInfo beanInfo = BeanManager.getBeanInfo(clazz);
+        BeanInfo beanInfo = Beans.getBeanInfo(clazz);
         List<PropertyInfo> propertyInfos = beanInfo.getProperties();
 
         List<FieldDesc> fields = new ArrayList<>(propertyInfos.size());

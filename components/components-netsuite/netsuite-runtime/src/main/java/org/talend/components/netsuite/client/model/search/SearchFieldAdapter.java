@@ -1,13 +1,13 @@
 package org.talend.components.netsuite.client.model.search;
 
+import static org.talend.components.netsuite.client.model.beans.Beans.setProperty;
+
 import java.util.List;
 
-import org.talend.components.netsuite.beans.BeanInfo;
 import org.talend.components.netsuite.client.NetSuiteException;
-import org.talend.components.netsuite.beans.BeanManager;
 import org.talend.components.netsuite.client.model.BasicMetaData;
-
-import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
+import org.talend.components.netsuite.client.model.beans.BeanInfo;
+import org.talend.components.netsuite.client.model.beans.Beans;
 
 /**
  *
@@ -35,7 +35,7 @@ public abstract class SearchFieldAdapter<T> {
 
     protected T createField(String internalId) throws NetSuiteException {
         try {
-            BeanInfo fieldTypeMetaData = BeanManager.getBeanInfo(fieldClass);
+            BeanInfo fieldTypeMetaData = Beans.getBeanInfo(fieldClass);
             T searchField = fieldClass.newInstance();
             if (fieldTypeMetaData.getProperty("internalId") != null && internalId != null) {
                 setProperty(searchField, "internalId", internalId);

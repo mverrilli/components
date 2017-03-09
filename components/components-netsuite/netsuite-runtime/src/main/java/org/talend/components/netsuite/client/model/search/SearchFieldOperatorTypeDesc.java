@@ -1,13 +1,13 @@
 package org.talend.components.netsuite.client.model.search;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.getEnumFromStringMapper;
-import static org.talend.components.netsuite.client.model.BeanUtils.getEnumToStringMapper;
+import static org.talend.components.netsuite.client.model.beans.Beans.getEnumFromStringMapper;
+import static org.talend.components.netsuite.client.model.beans.Beans.getEnumToStringMapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.talend.components.netsuite.beans.Mapper;
+import org.talend.components.netsuite.util.Mapper;
 
 /**
  *

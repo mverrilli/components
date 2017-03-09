@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.beans;
+package org.talend.components.netsuite.client.model.beans;
 
 import java.lang.reflect.Method;
 

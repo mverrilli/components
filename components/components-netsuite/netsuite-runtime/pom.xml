@@ -26,11 +26,6 @@
 
         <dependency>
             <groupId>org.talend.components</groupId>
-            <artifactId>netsuite-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.talend.components</groupId>
             <artifactId>netsuite-definition</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -57,16 +52,15 @@
         </dependency>
 
         <dependency>
-            <groupId>com.squareup</groupId>
-            <artifactId>javapoet</artifactId>
-            <version>1.8.0</version>
-        </dependency>
-
-        <!-- To include in dependencies.txt. -->
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.squareup</groupId>
+            <artifactId>javapoet</artifactId>
+            <version>1.8.0</version>
         </dependency>
 
         <!-- Tests -->

@@ -1,7 +1,7 @@
 package org.talend.components.netsuite.client.tools;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.toInitialLower;
-import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
+import static org.talend.components.netsuite.client.model.beans.Beans.toInitialLower;
+import static org.talend.components.netsuite.client.model.beans.Beans.toInitialUpper;
 import static org.talend.components.netsuite.client.model.TypeUtils.collectXmlTypes;
 
 import java.io.File;
@@ -21,8 +21,8 @@ import javax.xml.bind.annotation.XmlSeeAlso;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.talend.components.netsuite.beans.EnumAccessor;
-import org.talend.components.netsuite.client.model.BeanUtils;
+import org.talend.components.netsuite.client.model.beans.EnumAccessor;
+import org.talend.components.netsuite.client.model.beans.Beans;
 import org.talend.components.netsuite.client.model.RecordTypeDesc;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 
@@ -74,7 +74,7 @@ public class MetaDataModelGen {
 
     public void setRecordTypeEnumClass(Class<? extends Enum> recordTypeEnumClass) {
         this.recordTypeEnumClass = recordTypeEnumClass;
-        this.recordTypeEnumAccessor = BeanUtils.getEnumAccessor(recordTypeEnumClass);
+        this.recordTypeEnumAccessor = Beans.getEnumAccessor(recordTypeEnumClass);
     }
 
     public void setSearchRecordBaseClasses(Collection<Class<?>> searchRecordBaseClasses) {
@@ -83,7 +83,7 @@ public class MetaDataModelGen {
 
     public void setSearchRecordTypeEnumClass(Class<? extends Enum> searchRecordTypeEnumClass) {
         this.searchRecordTypeEnumClass = searchRecordTypeEnumClass;
-        this.searchRecordTypeEnumAccessor = BeanUtils.getEnumAccessor(searchRecordTypeEnumClass);
+        this.searchRecordTypeEnumAccessor = Beans.getEnumAccessor(searchRecordTypeEnumClass);
     }
 
     public void setRecordRefClass(Class<?> recordRefClass) {
@@ -118,10 +118,10 @@ public class MetaDataModelGen {
 
             } else {
                 try {
-                    recordTypeEnumValue = recordTypeEnumAccessor.mapFromString(
+                    recordTypeEnumValue = recordTypeEnumAccessor.getEnumValue(
                             toInitialLower(recordTypeClassSimpleName));
                     recordTypeEnumConstantName = recordTypeEnumValue.name();
-                    recordTypeName = recordTypeEnumAccessor.mapToString(recordTypeEnumValue);
+                    recordTypeName = recordTypeEnumAccessor.getStringValue(recordTypeEnumValue);
 
                     spec = new RecordTypeSpec();
                 } catch (IllegalArgumentException e) {
@@ -138,8 +138,8 @@ public class MetaDataModelGen {
                 String recordTypeNameCapitalized = toInitialUpper(recordTypeName);
                 if (standardEntityTypes.contains(recordTypeNameCapitalized)) {
                     try {
-                        Enum<?> searchRecordType = searchRecordTypeEnumAccessor.mapFromString(recordTypeName);
-                        searchRecordTypeName = searchRecordTypeEnumAccessor.mapToString(searchRecordType);
+                        Enum<?> searchRecordType = searchRecordTypeEnumAccessor.getEnumValue(recordTypeName);
+                        searchRecordTypeName = searchRecordTypeEnumAccessor.getStringValue(searchRecordType);
                     } catch (IllegalArgumentException e) {
                         logger.warn("Couldn't automatically determine search record type: '" + recordTypeName + "'");
                     }
@@ -189,7 +189,7 @@ public class MetaDataModelGen {
 
         Set<String> searchRecordTypeSet = new HashSet<>();
         for (Enum value : searchRecordTypeEnumClass.getEnumConstants()) {
-            String searchRecordTypeName = searchRecordTypeEnumAccessor.mapToString(value);
+            String searchRecordTypeName = searchRecordTypeEnumAccessor.getStringValue(value);
             searchRecordTypeSet.add(searchRecordTypeName);
         }
         searchRecordTypeSet.addAll(additionalSearchRecordTypes.keySet());
@@ -225,7 +225,7 @@ public class MetaDataModelGen {
                 Enum<?> searchRecordEnumValue = null;
                 String searchRecordTypeEnumConstantName = null;
                 try {
-                    searchRecordEnumValue = searchRecordTypeEnumAccessor.mapFromString(searchRecordType);
+                    searchRecordEnumValue = searchRecordTypeEnumAccessor.getEnumValue(searchRecordType);
                     searchRecordTypeEnumConstantName = searchRecordEnumValue.name();
                 } catch (IllegalArgumentException e) {
                     searchRecordTypeEnumConstantName = additionalSearchRecordTypes.get(searchRecordType);

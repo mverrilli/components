@@ -1,4 +1,4 @@
-package org.talend.components.netsuite.beans;
+package org.talend.components.netsuite.client.model.beans;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -13,21 +13,21 @@ import java.util.Set;
 /**
  *
  */
-public class ReflectionBeanIntrospector implements BeanIntrospector {
+public class BeanIntrospector {
 
-    private static final ReflectionBeanIntrospector instance = new ReflectionBeanIntrospector();
+    private static final BeanIntrospector instance = new BeanIntrospector();
 
-    public static ReflectionBeanIntrospector getInstance() {
+    public static BeanIntrospector getInstance() {
         return instance;
     }
 
-    public List<PropertyInfo> getProperties(String className) throws Exception {
+    public List<PropertyInfo> getProperties(String className) throws ClassNotFoundException {
         Class clazz = Class.forName(className);
         Collection<PropertyInfo> propertyInfos = getProperties(getMethods(clazz));
         return new ArrayList<>(propertyInfos);
     }
 
-    protected Set<PropertyInfo> getProperties(Set<Method> methods) throws Exception {
+    protected Set<PropertyInfo> getProperties(Set<Method> methods) {
         Map<String, Method> getters = new HashMap<>();
         Map<String, List<Method>> setters = new HashMap<>();
         if (methods.isEmpty() == false) {
@@ -95,7 +95,7 @@ public class ReflectionBeanIntrospector implements BeanIntrospector {
         return properties;
     }
 
-    protected static boolean isGetter(Method minfo) throws Exception {
+    protected static boolean isGetter(Method minfo) {
         String name = minfo.getName();
         if ((name.length() > 3 && name.startsWith("get")) || (name.length() > 2 && name.startsWith("is"))) {
             Class returnType = minfo.getReturnType();
@@ -111,7 +111,7 @@ public class ReflectionBeanIntrospector implements BeanIntrospector {
         return false;
     }
 
-    protected static boolean isSetter(Method minfo) throws Exception {
+    protected static boolean isSetter(Method minfo) {
         String name = minfo.getName();
         if ((name.length() > 3 && name.startsWith("set"))) {
             Class returnType = minfo.getReturnType();
@@ -147,19 +147,19 @@ public class ReflectionBeanIntrospector implements BeanIntrospector {
         return buffer.toString();
     }
 
-    protected Class getPropertyReadType(Method getter) throws Exception {
+    protected Class getPropertyReadType(Method getter) {
         if (getter == null)
             throw new IllegalArgumentException("Getter should not be null!");
         return getter.getReturnType();
     }
 
-    protected Class getPropertyWriteType(Method setter) throws Exception {
+    protected Class getPropertyWriteType(Method setter) {
         if (setter == null)
             return null;
         return setter.getParameterTypes()[0];
     }
 
-    protected Set<Method> getMethods(Class classInfo) throws Exception {
+    protected Set<Method> getMethods(Class classInfo) {
         Set<Method> result = new HashSet<>();
 
         while (classInfo != null) {

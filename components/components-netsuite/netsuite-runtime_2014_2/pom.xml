@@ -26,11 +26,6 @@
 
         <dependency>
             <groupId>org.talend.components</groupId>
-            <artifactId>netsuite-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.talend.components</groupId>
             <artifactId>netsuite-definition</artifactId>
             <version>${project.version}</version>
         </dependency>

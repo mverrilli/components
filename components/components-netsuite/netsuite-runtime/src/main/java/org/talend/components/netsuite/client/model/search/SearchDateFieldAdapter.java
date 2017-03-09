@@ -13,7 +13,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.model.BasicMetaData;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.setProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.setProperty;
 
 /**
  *

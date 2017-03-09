@@ -1,6 +1,6 @@
 package org.talend.components.netsuite.v2014_2.client.model;
 
-import static org.talend.components.netsuite.client.model.BeanUtils.toInitialUpper;
+import static org.talend.components.netsuite.client.model.beans.Beans.toInitialUpper;
 
 import java.util.Arrays;
 import java.util.Collection;
