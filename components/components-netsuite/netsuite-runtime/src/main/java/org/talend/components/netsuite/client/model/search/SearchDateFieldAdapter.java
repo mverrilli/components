@@ -1,5 +1,8 @@
 package org.talend.components.netsuite.client.model.search;
 
+import static org.talend.components.netsuite.client.model.beans.Beans.setProperty;
+import static org.talend.components.netsuite.client.model.beans.Beans.setSimpleProperty;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,10 +13,9 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 
+import org.apache.commons.lang3.StringUtils;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.model.BasicMetaData;
-
-import static org.talend.components.netsuite.client.model.beans.Beans.setProperty;
 
 /**
  *
@@ -21,6 +23,8 @@ import static org.talend.components.netsuite.client.model.beans.Beans.setPropert
 public class SearchDateFieldAdapter<T> extends SearchFieldAdapter<T> {
 
     private DatatypeFactory datatypeFactory;
+    private String dateFormatPattern = "yyyy-MM-dd";
+    private String timeFormatPattern = "HH:mm:ss";
 
     public SearchDateFieldAdapter(BasicMetaData metaData, SearchFieldType fieldType, Class<T> fieldClass) {
         super(metaData, fieldType, fieldClass);
@@ -39,28 +43,25 @@ public class SearchDateFieldAdapter<T> extends SearchFieldAdapter<T> {
         SearchFieldOperatorName operatorQName =
                 new SearchFieldOperatorName(operatorName);
 
-        if (operatorQName.getDataType().equals("PredefinedDate")) {
-            setProperty(nsObject, "predefinedSearchValue",
+        if (SearchFieldOperatorType.PREDEFINED_DATE.dataTypeEquals(operatorQName.getDataType())) {
+            setSimpleProperty(nsObject, "predefinedSearchValue",
                     metaData.getSearchFieldOperatorByName(fieldType.getFieldTypeName(), operatorName));
         } else {
             if (values != null && values.size() != 0) {
                 Calendar calValue = Calendar.getInstance();
 
-                String dateFormat = "yyyy-MM-dd";
-                String timeFormat = "HH:mm:ss";
+                String formatPattern = dateFormatPattern + " " + timeFormatPattern;
 
-                String format = dateFormat + " " + timeFormat;
-
-                if (values.get(0).length() == dateFormat.length()) {
-                    format = dateFormat;
+                if (values.get(0).length() == dateFormatPattern.length()) {
+                    formatPattern = dateFormatPattern;
                 }
 
-                if (values.get(0).length() == timeFormat.length()) {
-                    values.set(0, new SimpleDateFormat(dateFormat)
+                if (values.get(0).length() == timeFormatPattern.length()) {
+                    values.set(0, new SimpleDateFormat(dateFormatPattern)
                             .format(calValue.getTime()) + " " + values.get(0));
                 }
 
-                DateFormat df = new SimpleDateFormat(format);
+                DateFormat df = new SimpleDateFormat(formatPattern);
 
                 try {
                     calValue.setTime(df.parse(values.get(0)));
@@ -80,7 +81,7 @@ public class SearchDateFieldAdapter<T> extends SearchFieldAdapter<T> {
 
                 setProperty(nsObject,"searchValue", xts);
 
-                if (values.size() > 1) {
+                if (values.size() > 1 && StringUtils.isNotEmpty(values.get(1))) {
                     try {
                         calValue.setTime(df.parse(values.get(1)));
                     } catch (ParseException e) {
@@ -97,11 +98,12 @@ public class SearchDateFieldAdapter<T> extends SearchFieldAdapter<T> {
                     xts2.setMillisecond(calValue.get(Calendar.MILLISECOND));
                     xts2.setTimezone(calValue.get(Calendar.ZONE_OFFSET) / 60000);
 
-                    setProperty(nsObject, "searchValue2", xts2);
+                    setSimpleProperty(nsObject, "searchValue2", xts2);
                 }
             }
 
-            setProperty(nsObject, "operator", metaData.getSearchFieldOperatorByName(fieldType.getFieldTypeName(), operatorName));
+            setSimpleProperty(nsObject, "operator",
+                    metaData.getSearchFieldOperatorByName(fieldType.getFieldTypeName(), operatorName));
         }
 
         return nsObject;

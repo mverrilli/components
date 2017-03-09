@@ -3,6 +3,7 @@ package org.talend.components.netsuite.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Objects;
 import java.util.Properties;
 
 import org.apache.cxf.helpers.IOUtils;
@@ -168,6 +169,24 @@ public class NetSuiteCredentials {
         credentials.setAccount(properties.getProperty(prefix + "account"));
         credentials.setApplicationId(properties.getProperty(prefix + "applicationId"));
         return credentials;
+    }
+
+    @Override public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        NetSuiteCredentials that = (NetSuiteCredentials) o;
+        return numberOfSeats == that.numberOfSeats && useSsoLogin == that.useSsoLogin && Objects.equals(email, that.email)
+                && Objects.equals(account, that.account) && Objects.equals(roleId, that.roleId) && Objects
+                .equals(applicationId, that.applicationId) && Objects.equals(id, that.id) && Objects
+                .equals(companyId, that.companyId) && Objects.equals(userId, that.userId) && Objects
+                .equals(partnerId, that.partnerId) && Objects.equals(privateKey, that.privateKey);
+    }
+
+    @Override public int hashCode() {
+        return Objects.hash(email, account, roleId, applicationId, numberOfSeats, id, companyId, userId, partnerId, privateKey,
+                useSsoLogin);
     }
 
     @Override public String toString() {

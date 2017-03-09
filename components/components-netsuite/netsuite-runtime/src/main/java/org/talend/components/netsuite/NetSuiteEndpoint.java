@@ -2,6 +2,7 @@ package org.talend.components.netsuite;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.netsuite.client.NetSuiteClientFactory;
@@ -72,6 +73,10 @@ public class NetSuiteEndpoint {
         return clientService;
     }
 
+    public ConnectionConfig getConnectionConfig() {
+        return connectionConfig;
+    }
+
     public NetSuiteClientService getClientService() throws NetSuiteException {
         if (clientService == null) {
             clientService = connect();
@@ -117,6 +122,30 @@ public class NetSuiteEndpoint {
 
         public void setCredentials(NetSuiteCredentials credentials) {
             this.credentials = credentials;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            ConnectionConfig that = (ConnectionConfig) o;
+            return Objects.equals(endpointUrl, that.endpointUrl) && Objects.equals(credentials, that.credentials);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(endpointUrl, credentials);
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("ConnectionConfig{");
+            sb.append("endpointUrl=").append(endpointUrl);
+            sb.append(", credentials=").append(credentials);
+            sb.append('}');
+            return sb.toString();
         }
     }
 }

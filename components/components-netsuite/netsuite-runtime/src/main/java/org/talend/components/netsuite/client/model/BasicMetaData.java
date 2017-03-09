@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.client.model.beans.BeanInfo;
 import org.talend.components.netsuite.client.model.beans.Beans;
 import org.talend.components.netsuite.client.model.beans.PropertyInfo;
@@ -58,7 +59,7 @@ public abstract class BasicMetaData {
         bindCustomFieldAdapters();
     }
 
-    protected void bindTypeTree(Class<?> baseClass) {
+    protected void bindTypeHierarchy(Class<?> baseClass) {
         Set<Class<?>> classes = new HashSet<>();
         collectXmlTypes(baseClass, baseClass, classes);
         for (Class<?> clazz : classes) {
@@ -279,6 +280,14 @@ public abstract class BasicMetaData {
             return true;
         }
         return false;
+    }
+
+    public <T> T createInstance(String typeName) {
+        Class<?> clazz = getTypeClass(typeName);
+        if (clazz == null) {
+            throw new NetSuiteException("Unknown type: " + typeName);
+        }
+        return (T) TypeUtils.createInstance(clazz);
     }
 
 }

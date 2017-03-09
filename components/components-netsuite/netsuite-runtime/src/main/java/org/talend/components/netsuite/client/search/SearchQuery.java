@@ -197,8 +197,7 @@ public class SearchQuery<SearchT, RecT> {
             CustomRecordTypeInfo customRecordTypeInfo = (CustomRecordTypeInfo) recordTypeInfo;
             NsRef customizationRef = customRecordTypeInfo.getRef();
 
-            Object recType = TypeUtils.createInstance(
-                    clientService.getBasicMetaData(), RefType.CUSTOMIZATION_REF.getTypeName());
+            Object recType = clientService.getBasicMetaData().createInstance(RefType.CUSTOMIZATION_REF.getTypeName());
             setProperty(recType, "scriptId", customizationRef.getScriptId());
             setProperty(recType, "internalId", customizationRef.getInternalId());
 
@@ -207,8 +206,8 @@ public class SearchQuery<SearchT, RecT> {
 
 
         if (!customFieldList.isEmpty()) {
-            Object customFieldListWrapper = TypeUtils.createInstance(
-                    clientService.getBasicMetaData(),"SearchCustomFieldList");
+            Object customFieldListWrapper = clientService.getBasicMetaData()
+                    .createInstance("SearchCustomFieldList");
             List<Object> customFields = (List<Object>) getProperty(customFieldListWrapper, "customField");
             for (Object customField : customFieldList) {
                 customFields.add(customField);

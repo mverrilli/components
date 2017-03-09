@@ -47,13 +47,13 @@ public class SearchQueryTest {
         SearchQuery s1 = clientService.newSearch();
         s1.target("Account");
         s1.condition(new SearchCondition("Type", "List.anyOf", Arrays.asList("bank")));
-        s1.condition(new SearchCondition("Balance", "Double.greaterThanOrEqualTo", Arrays.asList("10000.0")));
+        s1.condition(new SearchCondition("Balance", "Double.greaterThanOrEqualTo", Arrays.asList("10000.0", "")));
         s1.condition(new SearchCondition("LegalName", "String.contains", Arrays.asList("Acme")));
         s1.condition(new SearchCondition("IsInactive", "Boolean", Arrays.asList("true")));
 
         s1.condition(new SearchCondition("CustomBooleanField1", "Boolean", Arrays.asList("true")));
         s1.condition(new SearchCondition("CustomStringField1", "String.doesNotContain", Arrays.asList("Foo")));
-        s1.condition(new SearchCondition("CustomLongField1", "Long.lessThan", Arrays.asList("100")));
+        s1.condition(new SearchCondition("CustomLongField1", "Long.lessThan", Arrays.asList("100", "")));
 
         SearchRecord sr1 = (SearchRecord) s1.toNativeQuery();
         assertNotNull(sr1);

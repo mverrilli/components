@@ -3,7 +3,7 @@ package org.talend.components.netsuite;
 import java.util.List;
 
 import org.apache.avro.Schema;
-import org.talend.components.netsuite.schema.NsSchema;
+import org.talend.components.netsuite.schema.SearchInfo;
 import org.talend.daikon.NamedThing;
 
 /**
@@ -17,11 +17,11 @@ public interface NetSuiteDatasetRuntime {
 
     Schema getSchema(String typeName);
 
-    NsSchema getSchemaForSearch(String typeName);
+    SearchInfo getSearchInfo(String typeName);
 
-    NsSchema getSchemaForUpdate(String typeName);
+    Schema getSchemaForUpdate(String typeName);
 
-    NsSchema getSchemaForDelete(String typeName);
+    Schema getSchemaForDelete(String typeName);
 
     List<String> getSearchFieldOperators();
 

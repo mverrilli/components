@@ -8,7 +8,16 @@ import org.talend.daikon.properties.ValidationResult;
  */
 public interface NetSuiteRuntime {
 
-    NetSuiteDatasetRuntime getDatasetRuntime(NetSuiteConnectionProperties properties);
+    NetSuiteDatasetRuntime getDatasetRuntime(Context context, NetSuiteConnectionProperties properties);
 
-    ValidationResult validateConnection(NetSuiteConnectionProperties properties);
+    ValidationResult validateConnection(Context context, NetSuiteConnectionProperties properties);
+
+    interface Context {
+
+        boolean isCachingEnabled();
+
+        Object getAttribute(String key);
+
+        void setAttribute(String key, Object value);
+    }
 }

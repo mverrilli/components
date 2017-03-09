@@ -64,8 +64,8 @@ public class BasicMetaDataImpl extends BasicMetaData {
     }
 
     public BasicMetaDataImpl() {
-        bindTypeTree(BaseRef.class);
-        bindTypeTree(CustomFieldRef.class);
+        bindTypeHierarchy(BaseRef.class);
+        bindTypeHierarchy(CustomFieldRef.class);
 
         bindType(NullField.class, null);
         bindType(ListOrRecordRef.class, null);

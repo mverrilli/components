@@ -20,8 +20,8 @@ import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
 import org.talend.components.netsuite.client.model.search.SearchFieldOperatorName;
-import org.talend.components.netsuite.schema.NsField;
-import org.talend.components.netsuite.schema.NsSchema;
+import org.talend.components.netsuite.schema.SearchFieldInfo;
+import org.talend.components.netsuite.schema.SearchInfo;
 import org.talend.daikon.NamedThing;
 import org.talend.daikon.SimpleNamedThing;
 import org.talend.daikon.avro.AvroUtils;
@@ -96,53 +96,51 @@ public class NetSuiteDatasetRuntimeImpl implements NetSuiteDatasetRuntime {
     }
 
     @Override
-    public NsSchema getSchemaForSearch(String typeName) {
+    public SearchInfo getSearchInfo(String typeName) {
         try {
             final SearchRecordTypeDesc searchInfo = clientService.getSearchRecordType(typeName);
             final TypeDesc searchRecordInfo = clientService.getBasicMetaData()
                     .getTypeInfo(searchInfo.getSearchBasicClass());
-            return toNsSchema(searchRecordInfo);
+
+            List<FieldDesc> fieldDescList = searchRecordInfo.getFields();
+
+            List<SearchFieldInfo> fields = new ArrayList<>(fieldDescList.size());
+            for (FieldDesc fieldDesc : fieldDescList) {
+                SearchFieldInfo field = new SearchFieldInfo(fieldDesc.getName(), fieldDesc.getValueType());
+                fields.add(field);
+            }
+            // Sort by name alphabetically
+            Collections.sort(fields, new Comparator<SearchFieldInfo>() {
+                @Override public int compare(SearchFieldInfo o1, SearchFieldInfo o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
+
+            return new SearchInfo(searchRecordInfo.getTypeName(), fields);
+
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }
     }
 
     @Override
-    public NsSchema getSchemaForUpdate(String typeName) {
+    public Schema getSchemaForUpdate(String typeName) {
         try {
             final TypeDesc typeDesc = clientService.getTypeInfo(typeName);
-            return toNsSchema(typeDesc);
+            return NetSuiteDatasetRuntimeImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }
     }
 
     @Override
-    public NsSchema getSchemaForDelete(String typeName) {
+    public Schema getSchemaForDelete(String typeName) {
         try {
             final TypeDesc typeDesc = clientService.getTypeInfo(RefType.RECORD_REF.getTypeName());
-            return toNsSchema(typeDesc);
+            return NetSuiteDatasetRuntimeImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
         } catch (NetSuiteException e) {
             throw new ComponentException(e);
         }
-    }
-
-    public static NsSchema toNsSchema(final TypeDesc typeDesc) {
-        List<FieldDesc> fieldDescList = typeDesc.getFields();
-
-        List<NsField> fields = new ArrayList<>(fieldDescList.size());
-        for (FieldDesc fieldDesc : fieldDescList) {
-            NsField field = new NsField(fieldDesc.getName(), fieldDesc.getValueType());
-            fields.add(field);
-        }
-        // Sort by name alphabetically
-        Collections.sort(fields, new Comparator<NsField>() {
-            @Override public int compare(NsField o1, NsField o2) {
-                return o1.getName().compareTo(o2.getName());
-            }
-        });
-
-        return new NsSchema(typeDesc.getTypeName(), fields);
     }
 
     @Override

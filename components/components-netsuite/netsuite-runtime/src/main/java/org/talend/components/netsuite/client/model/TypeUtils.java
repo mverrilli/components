@@ -33,14 +33,6 @@ public abstract class TypeUtils {
         }
     }
 
-    public static <T> T createInstance(BasicMetaData basicMetaData, String typeName) throws NetSuiteException {
-        Class<?> clazz = basicMetaData.getTypeClass(typeName);
-        if (clazz == null) {
-            throw new NetSuiteException("Unknown type: " + typeName);
-        }
-        return (T) createInstance(clazz);
-    }
-
     public static <T> T createInstance(Class<T> clazz) throws NetSuiteException {
         try {
             T target = clazz.cast(clazz.newInstance());

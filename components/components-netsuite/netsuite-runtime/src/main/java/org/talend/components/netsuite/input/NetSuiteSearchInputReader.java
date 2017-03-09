@@ -8,6 +8,7 @@ import java.util.NoSuchElementException;
 
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
+import org.apache.commons.lang3.StringUtils;
 import org.talend.components.api.component.runtime.AbstractBoundedReader;
 import org.talend.components.api.component.runtime.Result;
 import org.talend.components.api.container.RuntimeContainer;
@@ -108,8 +109,8 @@ public class NetSuiteSearchInputReader extends AbstractBoundedReader<IndexedReco
                 String value1 = properties.searchConditionTable.value1.getValue().get(i);
                 String value2 = properties.searchConditionTable.value2.getValue().get(i);
                 List<String> values = null;
-                if (value1 != null) {
-                    values = value2 != null ? Arrays.asList(value1, value2) : Arrays.asList(value1);
+                if (StringUtils.isNotEmpty(value1)) {
+                    values = StringUtils.isNotEmpty(value2) ? Arrays.asList(value1, value2) : Arrays.asList(value1);
                 }
                 search.condition(new SearchCondition(fieldName, operator, values));
             }

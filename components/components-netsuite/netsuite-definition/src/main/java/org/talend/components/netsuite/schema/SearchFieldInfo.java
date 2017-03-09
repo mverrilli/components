@@ -3,11 +3,11 @@ package org.talend.components.netsuite.schema;
 /**
  *
  */
-public class NsField {
+public class SearchFieldInfo {
     private String name;
     private Class<?> valueType;
 
-    public NsField(String name, Class<?> valueType) {
+    public SearchFieldInfo(String name, Class<?> valueType) {
         this.name = name;
         this.valueType = valueType;
     }
@@ -22,7 +22,7 @@ public class NsField {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("NsField{");
+        final StringBuilder sb = new StringBuilder("SearchFieldInfo{");
         sb.append("name='").append(name).append('\'');
         sb.append(", valueType=").append(valueType);
         sb.append('}');

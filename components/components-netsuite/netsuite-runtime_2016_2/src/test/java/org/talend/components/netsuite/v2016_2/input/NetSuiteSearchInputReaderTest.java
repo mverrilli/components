@@ -65,7 +65,9 @@ public class NetSuiteSearchInputReaderTest extends NetSuiteMockTestBase {
         properties.module.moduleName.setValue("Account");
 
         NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
-        NetSuiteDatasetRuntime dataSetRuntime = netSuiteRuntime.getDatasetRuntime(properties.getConnectionProperties());
+        NetSuiteDatasetRuntime dataSetRuntime = netSuiteRuntime.getDatasetRuntime(
+                properties.getConnectionProperties().getDesignRuntimeContext(),
+                properties.getConnectionProperties());
 
         Schema schema = dataSetRuntime.getSchema(properties.module.moduleName.getValue());
         properties.module.main.schema.setValue(schema);

@@ -258,7 +258,7 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
 
         Map<String, CustomFieldRef> map = new HashMap<>();
         for (CustomFieldSpec spec : customFieldSpecs.values()) {
-            CustomFieldRef fieldRef = TypeUtils.createInstance(clientService.getBasicMetaData(),
+            CustomFieldRef fieldRef = clientService.getBasicMetaData().createInstance(
                     spec.getFieldRefType().getTypeName());
 
             fieldRef.setScriptId(spec.getScriptId());

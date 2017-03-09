@@ -7,6 +7,8 @@ import static org.talend.daikon.properties.property.PropertyFactory.newProperty;
 import static org.talend.daikon.properties.property.PropertyFactory.newString;
 
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.talend.components.api.properties.ComponentPropertiesImpl;
 import org.talend.components.api.properties.ComponentReferenceProperties;
@@ -30,7 +32,7 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
     public static final String DEFAULT_ENDPOINT_URL =
             "https://webservices.netsuite.com/services/NetSuitePort_2016_2";
 
-//    public Property<String> name = newString("name").setRequired();
+    public Property<String> name = newString("name").setRequired();
 
     public Property<String> endpoint = newString("endpoint").setRequired();
 
@@ -49,6 +51,8 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
 
     public ComponentReferenceProperties<NetSuiteConnectionProperties> referencedComponent =
             new ComponentReferenceProperties("referencedComponent", NetSuiteConnectionDefinition.COMPONENT_NAME);
+
+    protected transient NetSuiteRuntime.Context designRuntimeContext;
 
     public NetSuiteConnectionProperties(String name) {
         super(name);
@@ -87,7 +91,7 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
 
         // Wizard
         Form wizardForm = Form.create(this, FORM_WIZARD);
-//        wizardForm.addRow(name);
+        wizardForm.addRow(name);
         wizardForm.addRow(endpoint);
         wizardForm.addRow(email);
         wizardForm.addRow(widget(password)
@@ -143,7 +147,8 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
     public ValidationResult validateTestConnection() throws Exception {
         ValidationResult vr = withRuntime(this, new Function<NetSuiteRuntime, ValidationResult>() {
             @Override public ValidationResult apply(NetSuiteRuntime runtimeService) {
-                return runtimeService.validateConnection(NetSuiteConnectionProperties.this);
+                return runtimeService.validateConnection(
+                        getDesignRuntimeContext(), NetSuiteConnectionProperties.this);
             }
         });
         if (vr.getStatus() == ValidationResult.Result.OK) {
@@ -153,5 +158,35 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
             getForm(FORM_WIZARD).setAllowForward(false);
         }
         return vr;
+    }
+
+    public NetSuiteRuntime.Context getDesignRuntimeContext() {
+        NetSuiteConnectionProperties refProps = referencedComponent.getReference();
+        if (refProps != null) {
+            return refProps.getDesignRuntimeContext();
+        }
+        if (designRuntimeContext == null) {
+            designRuntimeContext = new DesignRuntimeContext();
+        }
+        return designRuntimeContext;
+    }
+
+    protected static class DesignRuntimeContext implements NetSuiteRuntime.Context {
+        private Map<String, Object> attributes = new HashMap<>();
+
+        @Override
+        public boolean isCachingEnabled() {
+            return true;
+        }
+
+        @Override
+        public Object getAttribute(String key) {
+            return attributes.get(key);
+        }
+
+        @Override
+        public void setAttribute(String key, Object value) {
+            attributes.put(key, value);
+        }
     }
 }

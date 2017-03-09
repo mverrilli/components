@@ -59,11 +59,13 @@ public abstract class NetSuiteComponentDefinition extends AbstractComponentDefin
         return new Property[] { RETURN_ERROR_MESSAGE_PROP, RETURN_TOTAL_RECORD_COUNT_PROP };
     }
 
-    public static <R> R withDataSetRuntime(final NetSuiteProvideConnectionProperties properties,
+    public static <R> R withDatasetRuntime(final NetSuiteProvideConnectionProperties properties,
             final Function<NetSuiteDatasetRuntime, R> func) {
         return withRuntime(properties, new Function<NetSuiteRuntime, R>() {
             @Override public R apply(NetSuiteRuntime runtime) {
-                NetSuiteDatasetRuntime dataSetRuntime = runtime.getDatasetRuntime(properties.getConnectionProperties());
+                NetSuiteConnectionProperties connectionProperties = properties.getConnectionProperties();
+                NetSuiteDatasetRuntime dataSetRuntime = runtime.getDatasetRuntime(
+                        connectionProperties.getDesignRuntimeContext(), connectionProperties);
                 return func.apply(dataSetRuntime);
             }
         });

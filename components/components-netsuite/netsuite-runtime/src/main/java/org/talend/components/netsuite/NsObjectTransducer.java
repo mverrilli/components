@@ -201,14 +201,15 @@ public abstract class NsObjectTransducer {
 
                 Object customFieldListWrapper = getSimpleProperty(nsObject, "customFieldList");
                 if (customFieldListWrapper == null) {
-                    customFieldListWrapper = TypeUtils.createInstance(
-                            clientService.getBasicMetaData(), "CustomFieldList");
+                    customFieldListWrapper = clientService.getBasicMetaData()
+                            .createInstance("CustomFieldList");
                     setSimpleProperty(nsObject, "customFieldList", customFieldListWrapper);
                 }
-                List<Object> customFieldList = (List<Object>) getSimpleProperty(customFieldListWrapper, "customField");
+                List<Object> customFieldList = (List<Object>) getSimpleProperty(
+                        customFieldListWrapper, "customField");
 
-                Object customField = TypeUtils.createInstance(
-                        clientService.getBasicMetaData(), customFieldRefType.getTypeName());
+                Object customField = clientService.getBasicMetaData()
+                        .createInstance(customFieldRefType.getTypeName());
                 setSimpleProperty(customField, "scriptId", customFieldInfo.getRef().getScriptId());
                 setSimpleProperty(customField, "internalId", customFieldInfo.getRef().getInternalId());
 

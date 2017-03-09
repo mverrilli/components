@@ -74,8 +74,7 @@ public class NsObjectOutputTransducer extends NsObjectTransducer {
         Schema schema = indexedRecord.getSchema();
 
         try {
-            Object nsObject = TypeUtils.createInstance(
-                    clientService.getBasicMetaData(), typeDesc.getTypeName());
+            Object nsObject = clientService.getBasicMetaData().createInstance(typeDesc.getTypeName());
 
             Set<String> nullFieldNames = new HashSet<>();
 
@@ -97,8 +96,8 @@ public class NsObjectOutputTransducer extends NsObjectTransducer {
             if (!nullFieldNames.isEmpty() && beanInfo.getProperty("nullFieldList") != null) {
                 Object nullFieldListWrapper = getSimpleProperty(nsObject, "nullFieldList");
                 if (nullFieldListWrapper == null) {
-                    nullFieldListWrapper = TypeUtils.createInstance(
-                            clientService.getBasicMetaData(),"NullField");
+                    nullFieldListWrapper = clientService.getBasicMetaData()
+                            .createInstance("NullField");
                     setSimpleProperty(nsObject, "nullFieldList", nullFieldListWrapper);
                 }
                 List<String> nullFields = (List<String>) getSimpleProperty(nullFieldListWrapper, "name");

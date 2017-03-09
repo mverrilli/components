@@ -1,6 +1,6 @@
 package org.talend.components.netsuite.input;
 
-import static org.talend.components.netsuite.NetSuiteComponentDefinition.withDataSetRuntime;
+import static org.talend.components.netsuite.NetSuiteComponentDefinition.withDatasetRuntime;
 import static org.talend.daikon.properties.presentation.Widget.widget;
 
 import java.util.ArrayList;
@@ -15,8 +15,8 @@ import org.talend.components.netsuite.NetSuiteModuleProperties;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
 import org.talend.components.netsuite.NetSuiteDatasetRuntime;
 import org.talend.components.netsuite.connection.NetSuiteConnectionProperties;
-import org.talend.components.netsuite.schema.NsField;
-import org.talend.components.netsuite.schema.NsSchema;
+import org.talend.components.netsuite.schema.SearchFieldInfo;
+import org.talend.components.netsuite.schema.SearchInfo;
 import org.talend.daikon.java8.Function;
 import org.talend.daikon.properties.ValidationResult;
 import org.talend.daikon.properties.presentation.Form;
@@ -84,7 +84,7 @@ public class NetSuiteInputProperties extends FixedConnectorsComponentProperties
     }
 
     protected List<String> getSearchFieldOperators() {
-        return withDataSetRuntime(this, new Function<NetSuiteDatasetRuntime, List<String>>() {
+        return withDatasetRuntime(this, new Function<NetSuiteDatasetRuntime, List<String>>() {
             @Override public List<String> apply(NetSuiteDatasetRuntime dataSetRuntime) {
                 return dataSetRuntime.getSearchFieldOperators();
             }
@@ -101,11 +101,12 @@ public class NetSuiteInputProperties extends FixedConnectorsComponentProperties
         public ValidationResult afterModuleName() throws Exception {
             ValidationResult validationResult = super.afterModuleName();
 
-            NsSchema searchSchema = getSchemaForSearch(moduleName.getValue());
+            SearchInfo searchSchema = getSearchInfo(moduleName.getValue());
             List<String> fieldNames = new ArrayList<>(searchSchema.getFields().size());
-            for (NsField field : searchSchema.getFields()) {
+            for (SearchFieldInfo field : searchSchema.getFields()) {
                 fieldNames.add(field.getName());
             }
+
             searchConditionTable.field.setPossibleValues(fieldNames);
             searchConditionTable.field.setValue(new ArrayList<String>());
 

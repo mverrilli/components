@@ -110,7 +110,9 @@ public class NetSuiteOutputWriterTest extends NetSuiteOutputMockTestBase {
         properties.action.setValue(NetSuiteOutputProperties.OutputAction.UPDATE);
 
         NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
-        NetSuiteDatasetRuntime dataSetRuntime = netSuiteRuntime.getDatasetRuntime(properties.getConnectionProperties());
+        NetSuiteDatasetRuntime dataSetRuntime = netSuiteRuntime.getDatasetRuntime(
+                properties.getConnectionProperties().getDesignRuntimeContext(),
+                properties.getConnectionProperties());
 
         Schema schema = dataSetRuntime.getSchema(properties.module.moduleName.getValue());
 
@@ -173,7 +175,9 @@ public class NetSuiteOutputWriterTest extends NetSuiteOutputMockTestBase {
         });
 
         NetSuiteRuntime netSuiteRuntime = new NetSuiteRuntimeImpl();
-        NetSuiteDatasetRuntime dataSetRuntime = netSuiteRuntime.getDatasetRuntime(properties.getConnectionProperties());
+        NetSuiteDatasetRuntime dataSetRuntime = netSuiteRuntime.getDatasetRuntime(
+                properties.getConnectionProperties().getDesignRuntimeContext(),
+                properties.getConnectionProperties());
 
         Schema schema = dataSetRuntime.getSchema(RefType.RECORD_REF.getTypeName());
 
