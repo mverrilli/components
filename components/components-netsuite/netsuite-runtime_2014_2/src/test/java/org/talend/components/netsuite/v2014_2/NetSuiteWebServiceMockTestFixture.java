@@ -37,7 +37,7 @@ public class NetSuiteWebServiceMockTestFixture implements TestFixture {
     public void setUp() throws Exception {
         System.setProperty("com.sun.xml.bind.v2.bytecode.ClassTailor.noOptimize", "true");
 
-        URL endpointAddress = new URL("http://localhost:8088/NetSuitePort_2014_2");
+        URL endpointAddress = new URL("http://localhost:8088/services/NetSuitePort_2014_2");
 
         portMockAdapter = new NetSuitePortTypeMockAdapter();
         portMockAdapter.setEndpointAddress(endpointAddress);

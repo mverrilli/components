@@ -16,7 +16,7 @@
 
     <modules>
         <module>components-azurestorage</module>
-        <!--<module>components-fileio</module>-->
+        <module>components-fileio</module>
         <module>components-jms</module>
         <module>components-kafka</module>
         <module>components-localio</module>
@@ -30,6 +30,7 @@
         <module>components-elasticsearch</module>
         <module>components-filterrow</module>
         <module>components-bigquery</module>
+        <module>components-pubsub</module>
         <module>components-netsuite</module>
     </modules>
 </project>
