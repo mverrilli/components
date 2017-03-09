@@ -6,7 +6,14 @@ import static org.junit.Assert.assertNull;
 
 import java.util.Arrays;
 
+import javax.xml.datatype.DatatypeFactory;
+
+import org.joda.time.Instant;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.junit.Before;
 import org.junit.Test;
+import org.talend.components.netsuite.NsObjectTransducer;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.search.SearchCondition;
 import org.talend.components.netsuite.client.search.SearchQuery;
@@ -28,6 +35,7 @@ import com.netsuite.webservices.v2016_2.platform.core.SearchStringCustomField;
 import com.netsuite.webservices.v2016_2.platform.core.SearchStringField;
 import com.netsuite.webservices.v2016_2.platform.core.types.RecordType;
 import com.netsuite.webservices.v2016_2.platform.core.types.SearchDate;
+import com.netsuite.webservices.v2016_2.platform.core.types.SearchDateFieldOperator;
 import com.netsuite.webservices.v2016_2.platform.core.types.SearchDoubleFieldOperator;
 import com.netsuite.webservices.v2016_2.platform.core.types.SearchEnumMultiSelectFieldOperator;
 import com.netsuite.webservices.v2016_2.platform.core.types.SearchLongFieldOperator;
@@ -40,6 +48,13 @@ import com.netsuite.webservices.v2016_2.transactions.sales.TransactionSearch;
 public class SearchQueryTest {
 
     private NetSuiteClientService clientService = new NetSuiteClientServiceImpl();
+
+    private NsObjectTransducer.XMLGregorianCalendarValueConverter calendarValueConverter;
+
+    @Before
+    public void setUp() throws Exception {
+        calendarValueConverter = new NsObjectTransducer.XMLGregorianCalendarValueConverter(DatatypeFactory.newInstance());
+    }
 
     @Test
     public void testBasics() throws Exception {
@@ -129,6 +144,48 @@ public class SearchQueryTest {
         assertEquals(SearchStringFieldOperator.CONTAINS, customField1.getOperator());
         assertNotNull(customField1.getSearchValue());
         assertEquals("abc", customField1.getSearchValue());
+    }
+
+    @Test
+    public void testSearchDateField() throws Exception {
+        DateTimeFormatter dateFormatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+
+        String currentDateFormatted = dateFormatter.print(Instant.now().getMillis());
+
+        SearchQuery s1 = clientService.newSearch();
+        s1.target("Check");
+        s1.condition(new SearchCondition("TranDate", "Date.onOrAfter", Arrays.asList("2017-01-01 12:00:00")));
+        s1.condition(new SearchCondition("CustomDateField1", "Date.onOrAfter", Arrays.asList("14:00:00")));
+
+        SearchRecord sr1 = (SearchRecord) s1.toNativeQuery();
+        assertNotNull(sr1);
+        assertEquals(TransactionSearch.class, sr1.getClass());
+
+        TransactionSearch search = (TransactionSearch) sr1;
+        assertNotNull(search.getBasic());
+
+        TransactionSearchBasic searchBasic = search.getBasic();
+        assertNotNull(searchBasic.getTranDate());
+
+        SearchDateField field1 = searchBasic.getTranDate();
+        assertEquals(SearchDateFieldOperator.ON_OR_AFTER, field1.getOperator());
+        assertNotNull(field1.getSearchValue());
+        assertNull(field1.getSearchValue2());
+        assertEquals("2017-01-01 12:00:00",
+                dateTimeFormatter.print(calendarValueConverter.convertInput(field1.getSearchValue())));
+
+        SearchCustomFieldList customFieldList = searchBasic.getCustomFieldList();
+        assertNotNull(customFieldList);
+        assertNotNull(customFieldList.getCustomField());
+        assertEquals(1, customFieldList.getCustomField().size());
+
+        SearchDateCustomField customField1 = (SearchDateCustomField) customFieldList.getCustomField().get(0);
+        assertEquals(SearchDateFieldOperator.ON_OR_AFTER, customField1.getOperator());
+        assertNotNull(customField1.getSearchValue());
+        assertNull(customField1.getSearchValue2());
+        assertEquals(currentDateFormatted + " 14:00:00",
+                dateTimeFormatter.print(calendarValueConverter.convertInput(customField1.getSearchValue())));
     }
 
     @Test

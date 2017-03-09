@@ -9,7 +9,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.talend.components.netsuite.client.model.beans.Beans.toInitialUpper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -25,10 +29,14 @@ import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
+import org.talend.components.netsuite.client.model.search.SearchFieldOperatorName;
+import org.talend.components.netsuite.client.model.search.SearchFieldOperatorType;
 import org.talend.components.netsuite.test.AssertMatcher;
 import org.talend.components.netsuite.test.MessageContextHolder;
 import org.talend.components.netsuite.v2016_2.NetSuiteMockTestBase;
 import org.talend.components.netsuite.v2016_2.NetSuiteWebServiceMockTestFixture;
+import org.talend.daikon.i18n.TranslatableImpl;
+import org.talend.daikon.properties.property.Property;
 
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
 import com.netsuite.webservices.v2016_2.platform.core.types.RecordType;
@@ -94,7 +102,7 @@ public class NetSuiteClientServiceTest extends NetSuiteMockTestBase {
     }
 
     @Test
-    public void testStandardMetaData() throws Exception {
+    public void testBasicMetaData() throws Exception {
         NetSuiteClientService clientService = webServiceTestFixture.getClientService();
 
         Set<SearchRecordType> searchRecordTypeSet = new HashSet<>(Arrays.asList(SearchRecordType.values()));
@@ -130,6 +138,37 @@ public class NetSuiteClientServiceTest extends NetSuiteMockTestBase {
         for (String recordType : recordTypeNameSet) {
             RecordTypeInfo recordTypeInfo = clientService.getRecordType(recordType);
             assertNotNull("Record type def found: " + recordType, recordTypeInfo);
+        }
+
+        Collection<SearchFieldOperatorName> searchOperatorNames =
+                clientService.getBasicMetaData().getSearchOperatorNames();
+        List<SearchFieldOperatorName> searchFieldOperatorNameList = new ArrayList<>(searchOperatorNames);
+        Collections.sort(searchFieldOperatorNameList, new Comparator<SearchFieldOperatorName>() {
+            @Override public int compare(SearchFieldOperatorName o1, SearchFieldOperatorName o2) {
+                return o1.getQualifiedName().compareTo(o2.getQualifiedName());
+            }
+        });
+        for (SearchFieldOperatorName operatorName : searchFieldOperatorNameList) {
+            assertNotNull(operatorName.getDataType());
+
+            String i18nEntry = Property.I18N_PROPERTY_POSSIBLE_VALUE_PREFIX;
+            if (SearchFieldOperatorType.BOOLEAN.dataTypeEquals(operatorName.getDataType())) {
+                i18nEntry += operatorName.getQualifiedName() + ".displayName=" +
+                        operatorName.getDataType() +
+                        " (true | false)";
+            } else {
+                if (SearchFieldOperatorType.DATE.dataTypeEquals(operatorName.getDataType())) {
+                    i18nEntry += operatorName.getQualifiedName() + ".displayName=" +
+                            operatorName.getDataType() + " - " + operatorName.getName() +
+                            " (yyyy-MM-dd HH:mm:ss)";
+                } else {
+                    i18nEntry += operatorName.getQualifiedName() + ".displayName=" +
+                            operatorName.getDataType() + " - " + operatorName.getName();
+                }
+
+                assertNotNull(operatorName.getName());
+            }
+            System.out.println(i18nEntry);
         }
     }
 

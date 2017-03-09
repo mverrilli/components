@@ -464,11 +464,15 @@ public class NetSuiteClientServiceImpl extends NetSuiteClientService<NetSuitePor
         nsResult.setTotalRecords(result.getTotalRecords());
         nsResult.setPageIndex(result.getPageIndex());
         nsResult.setPageSize(result.getPageSize());
-        List<Record> nsRecordList = new ArrayList<>(result.getRecordList().getRecord().size());
-        for (Record record : result.getRecordList().getRecord()) {
-            nsRecordList.add(record);
+        if (result.getRecordList() != null) {
+            List<Record> nsRecordList = new ArrayList<>(result.getRecordList().getRecord().size());
+            for (Record record : result.getRecordList().getRecord()) {
+                nsRecordList.add(record);
+            }
+            nsResult.setRecordList(nsRecordList);
+        } else {
+            nsResult.setRecordList(Collections.emptyList());
         }
-        nsResult.setRecordList(nsRecordList);
         return nsResult;
     }
 

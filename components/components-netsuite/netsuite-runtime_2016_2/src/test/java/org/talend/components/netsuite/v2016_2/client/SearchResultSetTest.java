@@ -19,6 +19,7 @@ import com.netsuite.webservices.v2016_2.platform.messages.SearchMoreWithIdRespon
 import com.netsuite.webservices.v2016_2.platform.messages.SearchResponse;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -28,6 +29,35 @@ import static org.mockito.Mockito.when;
  *
  */
 public class SearchResultSetTest {
+
+    @Test
+    public void testEmptyResult() throws Exception {
+        NetSuiteClientService conn = mock(NetSuiteClientService.class);
+
+        SearchResult result1 = new SearchResult();
+        Status status = new Status();
+        status.setIsSuccess(true);
+        result1.setStatus(status);
+        result1.setSearchId("abc123");
+        result1.setPageIndex(1);
+        result1.setTotalRecords(0);
+        result1.setTotalPages(0);
+
+        SearchResponse response1 = new SearchResponse();
+        response1.setSearchResult(result1);
+
+        AccountSearch nsSearchRecord1 = new AccountSearch();
+        NsSearchResult nsSearchResult1 = NetSuiteClientServiceImpl.toNsSearchResult(result1);
+
+        when(conn.search(eq(nsSearchRecord1))).thenReturn(nsSearchResult1);
+
+        NetSuiteClientService clientService = new NetSuiteClientServiceImpl();
+        SearchRecordTypeDesc searchInfo = clientService.getSearchRecordType("Account");
+
+        SearchResultSet<Record> resultSet = new SearchResultSet<>(conn, searchInfo, nsSearchResult1);
+
+        assertFalse(resultSet.next());
+    }
 
     @Test
     public void testPaging() throws Exception {

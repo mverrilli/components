@@ -32,7 +32,7 @@ public class SearchResultSet<R> extends ResultSet<R> {
         this.result = result;
 
         searchId = result.getSearchId();
-        recordList = filterRecordList();
+        recordList = getRecordListFromResult();
         recordIterator = recordList.iterator();
     }
 
@@ -72,27 +72,18 @@ public class SearchResultSet<R> extends ResultSet<R> {
             int nextPageIndex = result.getPageIndex().intValue() + 1;
             result = clientService.searchMoreWithId(searchId, nextPageIndex);
             if (result.isSuccess()) {
-                return filterRecordList();
+                return getRecordListFromResult();
             }
         }
         return Collections.emptyList();
     }
 
-    protected List<R> filterRecordList() {
+    protected List<R> getRecordListFromResult() {
         List<R> recordList = result.getRecordList();
-        List<R> list = null;
         if (recordList == null) {
-            list = Collections.emptyList();
+            return Collections.emptyList();
         }
-        if (!recordList.isEmpty()) {
-            list = new ArrayList<>(recordList.size());
-            Iterator<R> recordIterator = recordList.iterator();
-            while (recordIterator.hasNext()) {
-                R record = recordIterator.next();
-                list.add(record);
-            }
-        }
-        return list;
+        return recordList;
     }
 
 }
