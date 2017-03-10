@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.talend.components.netsuite.client.model.beans.Beans.toInitialUpper;
+import static org.talend.components.netsuite.v2016_2.NetSuitePortTypeMockAdapterImpl.createSuccessStatus;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,6 +26,7 @@ import org.apache.cxf.headers.Header;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.talend.components.netsuite.NetSuiteWebServiceMockTestFixture;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.client.model.RecordTypeInfo;
@@ -34,8 +36,6 @@ import org.talend.components.netsuite.client.model.search.SearchFieldOperatorTyp
 import org.talend.components.netsuite.test.AssertMatcher;
 import org.talend.components.netsuite.test.MessageContextHolder;
 import org.talend.components.netsuite.v2016_2.NetSuiteMockTestBase;
-import org.talend.components.netsuite.v2016_2.NetSuiteWebServiceMockTestFixture;
-import org.talend.daikon.i18n.TranslatableImpl;
 import org.talend.daikon.properties.property.Property;
 
 import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
@@ -49,12 +49,10 @@ import com.netsuite.webservices.v2016_2.platform.messages.SessionResponse;
  *
  */
 public class NetSuiteClientServiceTest extends NetSuiteMockTestBase {
-    private static NetSuiteWebServiceMockTestFixture webServiceTestFixture;
 
     @BeforeClass
     public static void classSetUp() throws Exception {
-        webServiceTestFixture = new NetSuiteWebServiceMockTestFixture();
-        classScopedTestFixtures.add(webServiceTestFixture);
+        installWebServiceTestFixture();
         setUpClassScopedTestFixtures();
     }
 
@@ -68,8 +66,8 @@ public class NetSuiteClientServiceTest extends NetSuiteMockTestBase {
      */
     @Test
     public void testConnectAndLogin() throws Exception {
-        final NetSuiteCredentials credentials = webServiceTestFixture.getCredentials();
-        final NetSuitePortType port = webServiceTestFixture.getPortMock();
+        final NetSuiteCredentials credentials = webServiceMockTestFixture.getCredentials();
+        final NetSuitePortType port = webServiceMockTestFixture.getPortMock();
 
         SessionResponse sessionResponse = new SessionResponse();
         sessionResponse.setStatus(createSuccessStatus());
@@ -94,7 +92,7 @@ public class NetSuiteClientServiceTest extends NetSuiteMockTestBase {
             }
         }))).thenReturn(response);
 
-        NetSuiteClientService clientService = webServiceTestFixture.getClientService();
+        NetSuiteClientService clientService = webServiceMockTestFixture.getClientService();
 
         clientService.login();
 
@@ -103,7 +101,7 @@ public class NetSuiteClientServiceTest extends NetSuiteMockTestBase {
 
     @Test
     public void testBasicMetaData() throws Exception {
-        NetSuiteClientService clientService = webServiceTestFixture.getClientService();
+        NetSuiteClientService clientService = webServiceMockTestFixture.getClientService();
 
         Set<SearchRecordType> searchRecordTypeSet = new HashSet<>(Arrays.asList(SearchRecordType.values()));
 

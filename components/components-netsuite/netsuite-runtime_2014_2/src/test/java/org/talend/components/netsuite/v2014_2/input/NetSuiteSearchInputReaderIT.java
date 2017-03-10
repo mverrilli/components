@@ -14,26 +14,28 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.api.container.RuntimeContainer;
+import org.talend.components.netsuite.AbstractNetSuiteTestBase;
+import org.talend.components.netsuite.NetSuiteDatasetRuntime;
 import org.talend.components.netsuite.NetSuiteSource;
+import org.talend.components.netsuite.NetSuiteWebServiceTestFixture;
 import org.talend.components.netsuite.input.NetSuiteInputProperties;
 import org.talend.components.netsuite.input.NetSuiteSearchInputReader;
-import org.talend.components.netsuite.v2014_2.NetSuiteSourceImpl;
-import org.talend.components.netsuite.v2014_2.NetSuiteTestBase;
 import org.talend.components.netsuite.v2014_2.NetSuiteRuntimeImpl;
-import org.talend.components.netsuite.NetSuiteDatasetRuntime;
-import org.talend.components.netsuite.v2014_2.NetSuiteWebServiceTestFixture;
+import org.talend.components.netsuite.v2014_2.NetSuiteSourceImpl;
+import org.talend.components.netsuite.v2014_2.client.NetSuiteClientFactoryImpl;
 
 import com.netsuite.webservices.v2014_2.lists.accounting.types.AccountType;
 
 /**
  *
  */
-public class NetSuiteSearchInputReaderIT extends NetSuiteTestBase {
+public class NetSuiteSearchInputReaderIT extends AbstractNetSuiteTestBase {
     private static NetSuiteWebServiceTestFixture webServiceTestFixture;
 
     @BeforeClass
     public static void classSetUp() throws Exception {
-        webServiceTestFixture = new NetSuiteWebServiceTestFixture();
+        webServiceTestFixture = new NetSuiteWebServiceTestFixture(
+                NetSuiteClientFactoryImpl.INSTANCE, "2014_2");
         classScopedTestFixtures.add(webServiceTestFixture);
         setUpClassScopedTestFixtures();
     }

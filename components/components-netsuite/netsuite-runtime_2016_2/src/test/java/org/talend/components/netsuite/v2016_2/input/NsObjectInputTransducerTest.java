@@ -1,5 +1,7 @@
 package org.talend.components.netsuite.v2016_2.input;
 
+import static org.talend.components.netsuite.NetSuiteWebServiceMockTestFixture.assertIndexedRecord;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.talend.components.netsuite.CustomFieldSpec;
 import org.talend.components.netsuite.NetSuiteDatasetRuntimeImpl;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.RefType;
@@ -66,7 +69,8 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
 
         TypeDesc typeDesc = connection.getTypeInfo("Opportunity");
 
-        final Map<String, CustomFieldSpec> customFieldSpecs = createCustomFieldSpecs();
+        final Map<String, CustomFieldSpec<RecordType, CustomizationFieldType>> customFieldSpecs =
+                createCustomFieldSpecs();
         mockCustomizationRequestResults(customFieldSpecs);
 
         final List<Opportunity> recordList = makeNsObjects(
@@ -115,7 +119,8 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
 
         TypeDesc basicTypeDesc = connection.getTypeInfo("Opportunity");
 
-        final Map<String, CustomFieldSpec> customFieldSpecs = createCustomFieldSpecs();
+        final Map<String, CustomFieldSpec<RecordType, CustomizationFieldType>> customFieldSpecs =
+                createCustomFieldSpecs();
         mockCustomizationRequestResults(customFieldSpecs);
 
         final List<Opportunity> recordList = makeNsObjects(
@@ -236,28 +241,33 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
         }
     }
 
-    protected Map<String, CustomFieldSpec> createCustomFieldSpecs() {
-        CustomFieldSpec customBodyField1 = new CustomFieldSpec("custbody_field1", "1001",
+    protected Map<String, CustomFieldSpec<RecordType, CustomizationFieldType>> createCustomFieldSpecs() {
+        CustomFieldSpec<RecordType, CustomizationFieldType> customBodyField1 = new CustomFieldSpec(
+                "custbody_field1", "1001",
                 RecordType.TRANSACTION_BODY_CUSTOM_FIELD, TransactionBodyCustomField.class,
                 CustomizationFieldType.CHECK_BOX, CustomFieldRefType.BOOLEAN,
                 Arrays.asList("bodyOpportunity")
         );
 
-        CustomFieldSpec customBodyField2 = new CustomFieldSpec("custbody_field2", "1002",
+        CustomFieldSpec<RecordType, CustomizationFieldType> customBodyField2 = new CustomFieldSpec(
+                "custbody_field2", "1002",
                 RecordType.TRANSACTION_BODY_CUSTOM_FIELD, TransactionBodyCustomField.class,
                 CustomizationFieldType.FREE_FORM_TEXT, CustomFieldRefType.STRING,
                 Arrays.asList("bodyOpportunity")
         );
 
-        CustomFieldSpec customBodyField3 = new CustomFieldSpec("custbody_field3", "1003",
+        CustomFieldSpec<RecordType, CustomizationFieldType> customBodyField3 = new CustomFieldSpec(
+                "custbody_field3", "1003",
                 RecordType.TRANSACTION_BODY_CUSTOM_FIELD, TransactionBodyCustomField.class,
                 CustomizationFieldType.DATETIME, CustomFieldRefType.DATE,
                 Arrays.asList("bodyOpportunity")
         );
 
-        Collection<CustomFieldSpec> specs = Arrays.asList(customBodyField1, customBodyField2, customBodyField3);
-        Map<String, CustomFieldSpec> specMap = new HashMap<>();
-        for (CustomFieldSpec spec : specs) {
+        Collection<CustomFieldSpec<RecordType, CustomizationFieldType>> specs = Arrays.asList(
+                customBodyField1, customBodyField2, customBodyField3
+        );
+        Map<String, CustomFieldSpec<RecordType, CustomizationFieldType>> specMap = new HashMap<>();
+        for (CustomFieldSpec<RecordType, CustomizationFieldType> spec : specs) {
             specMap.put(spec.getScriptId(), spec);
         }
         return specMap;

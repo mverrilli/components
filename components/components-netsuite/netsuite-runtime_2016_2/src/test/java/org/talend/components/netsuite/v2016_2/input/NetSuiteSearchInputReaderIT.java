@@ -14,17 +14,17 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.talend.components.api.container.RuntimeContainer;
+import org.talend.components.netsuite.AbstractNetSuiteTestBase;
+import org.talend.components.netsuite.NetSuiteDatasetRuntime;
 import org.talend.components.netsuite.NetSuiteSource;
+import org.talend.components.netsuite.NetSuiteWebServiceTestFixture;
 import org.talend.components.netsuite.client.NetSuiteClientFactory;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteException;
 import org.talend.components.netsuite.input.NetSuiteInputProperties;
 import org.talend.components.netsuite.input.NetSuiteSearchInputReader;
-import org.talend.components.netsuite.v2016_2.NetSuiteSourceImpl;
-import org.talend.components.netsuite.v2016_2.NetSuiteTestBase;
 import org.talend.components.netsuite.v2016_2.NetSuiteRuntimeImpl;
-import org.talend.components.netsuite.NetSuiteDatasetRuntime;
-import org.talend.components.netsuite.v2016_2.NetSuiteWebServiceTestFixture;
+import org.talend.components.netsuite.v2016_2.NetSuiteSourceImpl;
 import org.talend.components.netsuite.v2016_2.client.NetSuiteClientFactoryImpl;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
@@ -33,7 +33,7 @@ import com.netsuite.webservices.v2016_2.platform.NetSuitePortType;
 /**
  *
  */
-public class NetSuiteSearchInputReaderIT extends NetSuiteTestBase {
+public class NetSuiteSearchInputReaderIT extends AbstractNetSuiteTestBase {
     private static NetSuiteWebServiceTestFixture webServiceTestFixture;
 
     private final NetSuiteClientFactory<NetSuitePortType> clientFactory = new NetSuiteClientFactoryImpl() {
@@ -46,7 +46,8 @@ public class NetSuiteSearchInputReaderIT extends NetSuiteTestBase {
 
     @BeforeClass
     public static void classSetUp() throws Exception {
-        webServiceTestFixture = new NetSuiteWebServiceTestFixture();
+        webServiceTestFixture = new NetSuiteWebServiceTestFixture(
+                NetSuiteClientFactoryImpl.INSTANCE, "2016_2");
         classScopedTestFixtures.add(webServiceTestFixture);
         setUpClassScopedTestFixtures();
     }

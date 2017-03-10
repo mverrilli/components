@@ -6,6 +6,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.talend.components.netsuite.v2014_2.MockTestHelper.makeIndexedRecords;
+import static org.talend.components.netsuite.v2014_2.NetSuitePortTypeMockAdapterImpl.createSuccessStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +32,7 @@ import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.output.NetSuiteOutputProperties;
 import org.talend.components.netsuite.output.NetSuiteOutputWriter;
 import org.talend.components.netsuite.output.NetSuiteWriteOperation;
+import org.talend.components.netsuite.v2014_2.NetSuiteMockTestBase;
 import org.talend.components.netsuite.v2014_2.NetSuiteRuntimeImpl;
 import org.talend.components.netsuite.v2014_2.NetSuiteSinkImpl;
 import org.talend.components.netsuite.v2014_2.client.model.RecordTypeEnum;
@@ -47,7 +50,7 @@ import com.netsuite.webservices.v2014_2.transactions.sales.Opportunity;
 /**
  *
  */
-public class NetSuiteOutputWriterTest extends NetSuiteOutputMockTestBase {
+public class NetSuiteOutputWriterTest extends NetSuiteMockTestBase {
     protected NetSuiteOutputProperties properties;
 
     @BeforeClass

@@ -1,24 +1,31 @@
-package org.talend.components.netsuite.v2014_2;
+package org.talend.components.netsuite;
 
 import static org.talend.components.netsuite.client.NetSuiteClientService.MESSAGE_LOGGING_ENABLED_PROPERTY_NAME;
 
 import java.util.Arrays;
 import java.util.Properties;
 
+import org.talend.components.netsuite.client.NetSuiteClientFactory;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.NetSuiteCredentials;
 import org.talend.components.netsuite.test.TestFixture;
 import org.talend.components.netsuite.test.TestUtils;
-import org.talend.components.netsuite.v2014_2.client.NetSuiteClientServiceImpl;
 
 /**
  *
  */
-public class NetSuiteWebServiceTestFixture implements TestFixture {
+public class NetSuiteWebServiceTestFixture<T> implements TestFixture {
 
+    protected NetSuiteClientFactory<T> clientFactory;
+    protected String apiVersion;
     protected Properties properties;
     protected NetSuiteCredentials credentials;
     protected NetSuiteClientService clientService;
+
+    public NetSuiteWebServiceTestFixture(NetSuiteClientFactory<T> clientFactory, String apiVersion) {
+        this.clientFactory = clientFactory;
+        this.apiVersion = apiVersion;
+    }
 
     @Override
     public void setUp() throws Exception {
@@ -26,8 +33,7 @@ public class NetSuiteWebServiceTestFixture implements TestFixture {
 
         properties = TestUtils.loadProperties(System.getProperties(), Arrays.asList(
                 "netsuite.endpoint.url",
-                "netsuite.endpoint.2016_2.url",
-                "netsuite.endpoint.2014_2.url",
+                "netsuite.endpoint." + apiVersion + ".url",
                 "netsuite.email", "netsuite.password",
                 "netsuite.account", "netsuite.roleId",
                 "netsuite.applicationId"
@@ -35,7 +41,7 @@ public class NetSuiteWebServiceTestFixture implements TestFixture {
 
         credentials = NetSuiteCredentials.loadFromProperties(properties, "netsuite.");
 
-        clientService = new NetSuiteClientServiceImpl();
+        clientService = clientFactory.createClient();
         clientService.setEndpointUrl(getEndpointUrl());
         clientService.setCredentials(credentials);
 
@@ -58,7 +64,7 @@ public class NetSuiteWebServiceTestFixture implements TestFixture {
     }
 
     public String getEndpointUrl() {
-        return properties.getProperty("netsuite.endpoint.2016_2.url",
+        return properties.getProperty("netsuite.endpoint." + apiVersion + ".url",
                 properties.getProperty("netsuite.endpoint.url"));
     }
 

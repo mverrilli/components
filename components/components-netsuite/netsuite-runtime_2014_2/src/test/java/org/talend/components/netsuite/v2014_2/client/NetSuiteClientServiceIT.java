@@ -11,12 +11,12 @@ import java.util.Collection;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.talend.components.netsuite.AbstractNetSuiteTestBase;
+import org.talend.components.netsuite.NetSuiteWebServiceTestFixture;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.SearchRecordTypeDesc;
 import org.talend.components.netsuite.client.search.SearchCondition;
 import org.talend.components.netsuite.client.search.SearchResultSet;
-import org.talend.components.netsuite.v2014_2.NetSuiteTestBase;
-import org.talend.components.netsuite.v2014_2.NetSuiteWebServiceTestFixture;
 import org.talend.daikon.NamedThing;
 
 import com.netsuite.webservices.v2014_2.lists.accounting.types.AccountType;
@@ -25,12 +25,13 @@ import com.netsuite.webservices.v2014_2.platform.core.Record;
 /**
  *
  */
-public class NetSuiteClientServiceIT extends NetSuiteTestBase {
+public class NetSuiteClientServiceIT extends AbstractNetSuiteTestBase {
     protected static NetSuiteWebServiceTestFixture webServiceTestFixture;
 
     @BeforeClass
     public static void classSetUp() throws Exception {
-        webServiceTestFixture = new NetSuiteWebServiceTestFixture();
+        webServiceTestFixture = new NetSuiteWebServiceTestFixture(
+                NetSuiteClientFactoryImpl.INSTANCE, "2014_2");
         classScopedTestFixtures.add(webServiceTestFixture);
         setUpClassScopedTestFixtures();
     }

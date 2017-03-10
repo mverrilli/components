@@ -7,6 +7,7 @@ import javax.jws.WebService;
 import javax.xml.ws.WebServiceContext;
 import javax.xml.ws.handler.MessageContext;
 
+import org.talend.components.netsuite.NetSuitePortTypeMockAdapter;
 import org.talend.components.netsuite.test.MessageContextHolder;
 
 import com.netsuite.webservices.v2016_2.platform.AsyncFault;
@@ -122,7 +123,7 @@ import com.netsuite.webservices.v2016_2.platform.messages.UpsertResponse;
 @WebService(endpointInterface = "com.netsuite.webservices.v2016_2.platform.NetSuitePortType",
         targetNamespace = "urn:platform_2016_2.webservices.netsuite.com",
         serviceName = "NetSuiteService", portName = "NetSuitePort")
-public class NetSuitePortTypeMockAdapter {
+public class NetSuitePortTypeMockAdapterImpl implements NetSuitePortTypeMockAdapter<NetSuitePortType> {
 
     private NetSuitePortType port;
 
@@ -136,7 +137,7 @@ public class NetSuitePortTypeMockAdapter {
     }
 
     public void setEndpointAddress(URL endpointAddress) {
-        NetSuitePortTypeMockAdapter.this.endpointAddress = endpointAddress;
+        NetSuitePortTypeMockAdapterImpl.this.endpointAddress = endpointAddress;
     }
 
     public NetSuitePortType getPort() {

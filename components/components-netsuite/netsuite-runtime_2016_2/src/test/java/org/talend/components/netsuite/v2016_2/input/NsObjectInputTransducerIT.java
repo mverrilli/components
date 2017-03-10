@@ -8,26 +8,28 @@ import org.apache.avro.generic.IndexedRecord;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.talend.components.netsuite.AbstractNetSuiteTestBase;
 import org.talend.components.netsuite.NetSuiteDatasetRuntimeImpl;
+import org.talend.components.netsuite.NetSuiteWebServiceTestFixture;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.client.search.SearchResultSet;
 import org.talend.components.netsuite.input.NsObjectInputTransducer;
-import org.talend.components.netsuite.v2016_2.NetSuiteTestBase;
-import org.talend.components.netsuite.v2016_2.NetSuiteWebServiceTestFixture;
+import org.talend.components.netsuite.v2016_2.client.NetSuiteClientFactoryImpl;
 
 import com.netsuite.webservices.v2016_2.platform.core.Record;
 
 /**
  *
  */
-public class NsObjectInputTransducerIT extends NetSuiteTestBase {
+public class NsObjectInputTransducerIT extends AbstractNetSuiteTestBase {
     private static NetSuiteWebServiceTestFixture webServiceTestFixture;
 
     @BeforeClass
     public static void classSetUp() throws Exception {
-        webServiceTestFixture = new NetSuiteWebServiceTestFixture();
+        webServiceTestFixture = new NetSuiteWebServiceTestFixture(
+                NetSuiteClientFactoryImpl.INSTANCE, "2016_2");
         classScopedTestFixtures.add(webServiceTestFixture);
         setUpClassScopedTestFixtures();
     }

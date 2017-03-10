@@ -1,32 +1,24 @@
 package org.talend.components.netsuite.v2014_2;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.talend.components.netsuite.client.model.beans.Beans.getProperty;
+import static org.talend.components.netsuite.v2014_2.MockTestHelper.makeRecordPages;
+import static org.talend.components.netsuite.v2014_2.NetSuitePortTypeMockAdapterImpl.createSuccessStatus;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.xml.datatype.XMLGregorianCalendar;
-
-import org.apache.avro.Schema;
-import org.apache.avro.generic.IndexedRecord;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.talend.components.netsuite.AbstractNetSuiteTestBase;
+import org.talend.components.netsuite.CustomFieldSpec;
+import org.talend.components.netsuite.NetSuiteWebServiceMockTestFixture;
 import org.talend.components.netsuite.client.NetSuiteClientService;
-import org.talend.components.netsuite.client.model.CustomFieldDesc;
-import org.talend.components.netsuite.client.model.FieldDesc;
-import org.talend.components.netsuite.client.model.TypeDesc;
-import org.talend.components.netsuite.client.model.TypeUtils;
 import org.talend.components.netsuite.client.model.beans.BeanInfo;
 import org.talend.components.netsuite.client.model.beans.Beans;
 import org.talend.components.netsuite.client.model.beans.PropertyInfo;
-import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
-import org.talend.components.netsuite.util.Mapper;
 
 import com.netsuite.webservices.v2014_2.platform.NetSuitePortType;
 import com.netsuite.webservices.v2014_2.platform.core.BaseRef;
@@ -55,12 +47,12 @@ import com.netsuite.webservices.v2014_2.setup.customization.types.CustomizationF
 /**
  *
  */
-public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
-    protected static NetSuiteWebServiceMockTestFixture webServiceMockTestFixture;
+public abstract class NetSuiteMockTestBase extends AbstractNetSuiteTestBase {
+    protected static NetSuiteWebServiceMockTestFixture<NetSuitePortType, NetSuitePortTypeMockAdapterImpl> webServiceMockTestFixture;
     protected NetSuiteComponentMockTestFixture mockTestFixture;
 
     protected static void installWebServiceTestFixture() throws Exception {
-        webServiceMockTestFixture = new NetSuiteWebServiceMockTestFixture();
+        webServiceMockTestFixture = MockTestHelper.createWebServiceMockTestFixture();
         classScopedTestFixtures.add(webServiceMockTestFixture);
     }
 
@@ -68,86 +60,6 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
         mockTestFixture = new NetSuiteComponentMockTestFixture(webServiceMockTestFixture);
         mockTestFixture.setReinstall(true);
         testFixtures.add(mockTestFixture);
-    }
-
-    protected void assertIndexedRecord(TypeDesc typeDesc, IndexedRecord indexedRecord) throws Exception {
-        assertNotNull(indexedRecord);
-
-        Schema recordSchema = indexedRecord.getSchema();
-        assertEquals(typeDesc.getFields().size(), recordSchema.getFields().size());
-
-        for (FieldDesc fieldDesc : typeDesc.getFields()) {
-            String fieldName = fieldDesc.getName();
-            Schema.Field field = recordSchema.getField(fieldName);
-            assertNotNull(field);
-
-            Object value = indexedRecord.get(field.pos());
-
-            if (fieldDesc instanceof CustomFieldDesc) {
-                CustomFieldDesc customFieldDesc = fieldDesc.asCustom();
-                switch (customFieldDesc.getCustomFieldType()) {
-                case BOOLEAN:
-                case LONG:
-                case DOUBLE:
-                case STRING:
-                case DATE:
-                    assertNotNull(value);
-                    break;
-                }
-            } else {
-                Class<?> datumClass = fieldDesc.getValueType();
-
-                if (datumClass == Boolean.class ||
-                        datumClass == Long.class ||
-                        datumClass == Double.class ||
-                        datumClass == String.class ||
-                        datumClass == XMLGregorianCalendar.class) {
-                    assertNotNull(value);
-                } else if (datumClass.isEnum()) {
-                    assertNotNull(value);
-                    Mapper<String, Enum> enumAccessor = Beans.getEnumFromStringMapper((Class<Enum>) datumClass);
-                    Enum modelValue = enumAccessor.map((String) value);
-                    assertNotNull(modelValue);
-                }
-            }
-        }
-    }
-
-    protected void assertNsObject(TypeDesc typeDesc, Object nsObject) throws Exception {
-        assertNotNull(nsObject);
-        assertEquals(typeDesc.getTypeClass(), nsObject.getClass());
-
-        for (FieldDesc fieldDesc : typeDesc.getFields()) {
-            String fieldName = fieldDesc.getName();
-            String propertyName = fieldDesc.getInternalName();
-
-            Object value = getProperty(nsObject, propertyName);
-
-            if (fieldDesc instanceof CustomFieldDesc) {
-                CustomFieldDesc customFieldDesc = fieldDesc.asCustom();
-                switch (customFieldDesc.getCustomFieldType()) {
-                case BOOLEAN:
-                case LONG:
-                case DOUBLE:
-                case STRING:
-                case DATE:
-                    assertNotNull(value);
-                    break;
-                }
-            } else {
-                Class<?> datumClass = fieldDesc.getValueType();
-
-                if (datumClass == Boolean.class ||
-                        datumClass == Long.class ||
-                        datumClass == Double.class ||
-                        datumClass == String.class ||
-                        datumClass == XMLGregorianCalendar.class) {
-                    assertNotNull(value);
-                } else if (datumClass.isEnum()) {
-                    assertNotNull(value);
-                }
-            }
-        }
     }
 
     protected <T extends Record> void mockSearchRequestResults(List<T> recordList, int pageSize) throws Exception {
@@ -171,7 +83,8 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
         });
     }
 
-    protected void mockCustomizationRequestResults(final Map<String, CustomFieldSpec> customFieldSpecs) throws Exception {
+    protected void mockCustomizationRequestResults(
+            final Map<String, CustomFieldSpec<RecordType, CustomizationFieldType>> customFieldSpecs) throws Exception {
         final NetSuitePortType port = webServiceMockTestFixture.getPortMock();
 
         when(port.getCustomizationId(any(GetCustomizationIdRequest.class))).then(new Answer<GetCustomizationIdResponse>() {
@@ -230,9 +143,9 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
     }
 
     protected class RecordComposer<T extends Record> extends SimpleObjectComposer<T> {
-        Map<String, CustomFieldSpec> customFieldSpecs;
+        Map<String, CustomFieldSpec<RecordType, CustomizationFieldType>> customFieldSpecs;
 
-        public RecordComposer(Class<T> clazz, Map<String, CustomFieldSpec> customFieldSpecs) {
+        public RecordComposer(Class<T> clazz, Map<String, CustomFieldSpec<RecordType, CustomizationFieldType>> customFieldSpecs) {
             super(clazz);
             this.customFieldSpecs = customFieldSpecs;
         }
@@ -252,12 +165,12 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
     }
 
     protected Map<String, CustomFieldRef> createCustomFieldRefs(
-            Map<String, CustomFieldSpec> customFieldSpecs) throws Exception {
+            Map<String, CustomFieldSpec<RecordType, CustomizationFieldType>> customFieldSpecs) throws Exception {
 
         NetSuiteClientService clientService = webServiceMockTestFixture.getClientService();
 
         Map<String, CustomFieldRef> map = new HashMap<>();
-        for (CustomFieldSpec spec : customFieldSpecs.values()) {
+        for (CustomFieldSpec<RecordType, CustomizationFieldType> spec : customFieldSpecs.values()) {
             CustomFieldRef fieldRef = clientService.getBasicMetaData().createInstance(
                     spec.getFieldRefType().getTypeName());
 
@@ -279,10 +192,10 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
     }
 
     protected Map<String, CustomizationRef> createCustomFieldCustomizationRefs(
-            Map<String, CustomFieldSpec> customFieldSpecs) throws Exception {
+            Map<String, CustomFieldSpec<RecordType, CustomizationFieldType>> customFieldSpecs) throws Exception {
 
         Map<String, CustomizationRef> map = new HashMap<>();
-        for (CustomFieldSpec spec : customFieldSpecs.values()) {
+        for (CustomFieldSpec<RecordType, CustomizationFieldType> spec : customFieldSpecs.values()) {
             CustomizationRef ref = new CustomizationRef();
 
             ref.setScriptId(spec.getScriptId());
@@ -296,10 +209,10 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
     }
 
     protected Map<String, CustomFieldType> createCustomFieldTypes(
-            Map<String, CustomFieldSpec> customFieldSpecs) throws Exception {
+            Map<String, CustomFieldSpec<RecordType, CustomizationFieldType>> customFieldSpecs) throws Exception {
 
         Map<String, CustomFieldType> customFieldTypeMap = new HashMap<>();
-        for (CustomFieldSpec spec : customFieldSpecs.values()) {
+        for (CustomFieldSpec<RecordType, CustomizationFieldType> spec : customFieldSpecs.values()) {
             CustomFieldType fieldRecord = (CustomFieldType) spec.getFieldTypeClass().newInstance();
 
             Beans.setProperty(fieldRecord, "internalId", spec.getInternalId());
@@ -314,86 +227,6 @@ public abstract class NetSuiteMockTestBase extends NetSuiteTestBase {
         }
 
         return customFieldTypeMap;
-    }
-
-    public static class CustomFieldSpec {
-        protected Class<?> fieldTypeClass;
-        protected String scriptId;
-        protected String internalId;
-        protected RecordType recordType;
-        protected CustomizationFieldType fieldType;
-        protected CustomFieldRefType fieldRefType;
-        protected Collection<String> appliesTo;
-
-        public CustomFieldSpec() {
-        }
-
-        public CustomFieldSpec(String scriptId, String internalId, RecordType recordType, Class<?> fieldTypeClass,
-                CustomizationFieldType fieldType, CustomFieldRefType fieldRefType, Collection<String> appliesTo) {
-            this.setFieldTypeClass(fieldTypeClass);
-            this.setScriptId(scriptId);
-            this.setInternalId(internalId);
-            this.setRecordType(recordType);
-            this.setFieldType(fieldType);
-            this.setFieldRefType(fieldRefType);
-            this.setAppliesTo(appliesTo);
-        }
-
-        public Class<?> getFieldTypeClass() {
-            return fieldTypeClass;
-        }
-
-        public void setFieldTypeClass(Class<?> fieldTypeClass) {
-            this.fieldTypeClass = fieldTypeClass;
-        }
-
-        public String getScriptId() {
-            return scriptId;
-        }
-
-        public void setScriptId(String scriptId) {
-            this.scriptId = scriptId;
-        }
-
-        public String getInternalId() {
-            return internalId;
-        }
-
-        public void setInternalId(String internalId) {
-            this.internalId = internalId;
-        }
-
-        public RecordType getRecordType() {
-            return recordType;
-        }
-
-        public void setRecordType(RecordType recordType) {
-            this.recordType = recordType;
-        }
-
-        public CustomizationFieldType getFieldType() {
-            return fieldType;
-        }
-
-        public void setFieldType(CustomizationFieldType fieldType) {
-            this.fieldType = fieldType;
-        }
-
-        public CustomFieldRefType getFieldRefType() {
-            return fieldRefType;
-        }
-
-        public void setFieldRefType(CustomFieldRefType fieldRefType) {
-            this.fieldRefType = fieldRefType;
-        }
-
-        public Collection<String> getAppliesTo() {
-            return appliesTo;
-        }
-
-        public void setAppliesTo(Collection<String> appliesTo) {
-            this.appliesTo = appliesTo;
-        }
     }
 
 }

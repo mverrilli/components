@@ -1,5 +1,7 @@
 package org.talend.components.netsuite.v2014_2.input;
 
+import static org.talend.components.netsuite.NetSuiteWebServiceMockTestFixture.assertIndexedRecord;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -12,6 +14,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.talend.components.netsuite.CustomFieldSpec;
 import org.talend.components.netsuite.NetSuiteDatasetRuntimeImpl;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.RefType;
@@ -21,6 +24,8 @@ import org.talend.components.netsuite.input.NsObjectInputTransducer;
 import org.talend.components.netsuite.v2014_2.NetSuiteMockTestBase;
 
 import com.netsuite.webservices.v2014_2.platform.core.Record;
+import com.netsuite.webservices.v2014_2.platform.core.types.RecordType;
+import com.netsuite.webservices.v2014_2.setup.customization.types.CustomizationFieldType;
 import com.netsuite.webservices.v2014_2.transactions.sales.Opportunity;
 
 /**
@@ -57,8 +62,8 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
 
         TypeDesc typeDesc = connection.getTypeInfo("Opportunity");
 
-        final List<Opportunity> recordList = makeNsObjects(
-                new RecordComposer<>(Opportunity.class, Collections.<String, CustomFieldSpec>emptyMap()), 10);
+        final List<Opportunity> recordList = makeNsObjects(new RecordComposer<>(Opportunity.class,
+                Collections.<String, CustomFieldSpec<RecordType, CustomizationFieldType>>emptyMap()), 10);
 
         Schema schema = NetSuiteDatasetRuntimeImpl.inferSchemaForType(typeDesc.getTypeName(), typeDesc.getFields());
 
@@ -100,8 +105,8 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
 
         TypeDesc basicTypeDesc = connection.getTypeInfo("Opportunity");
 
-        final List<Opportunity> recordList = makeNsObjects(
-                new RecordComposer<>(Opportunity.class, Collections.<String, CustomFieldSpec>emptyMap()), 10);
+        final List<Opportunity> recordList = makeNsObjects(new RecordComposer<>(Opportunity.class,
+                Collections.<String, CustomFieldSpec<RecordType, CustomizationFieldType>>emptyMap()), 10);
         mockSearchRequestResults(recordList, 100);
 
         TypeDesc typeDesc = connection.getTypeInfo(basicTypeDesc.getTypeName());

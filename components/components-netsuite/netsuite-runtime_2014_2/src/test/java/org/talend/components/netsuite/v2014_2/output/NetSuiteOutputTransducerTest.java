@@ -1,6 +1,8 @@
 package org.talend.components.netsuite.v2014_2.output;
 
 import static org.junit.Assert.assertEquals;
+import static org.talend.components.netsuite.NetSuiteWebServiceMockTestFixture.assertNsObject;
+import static org.talend.components.netsuite.v2014_2.MockTestHelper.makeIndexedRecords;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,6 +21,7 @@ import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.RefType;
 import org.talend.components.netsuite.client.model.TypeDesc;
 import org.talend.components.netsuite.output.NsObjectOutputTransducer;
+import org.talend.components.netsuite.v2014_2.NetSuiteMockTestBase;
 import org.talend.components.netsuite.v2014_2.NetSuiteRuntimeImpl;
 
 import com.netsuite.webservices.v2014_2.platform.NetSuitePortType;
@@ -29,7 +32,7 @@ import com.netsuite.webservices.v2014_2.transactions.sales.Opportunity;
 /**
  *
  */
-public class NetSuiteOutputTransducerTest extends NetSuiteOutputMockTestBase {
+public class NetSuiteOutputTransducerTest extends NetSuiteMockTestBase {
     protected NetSuitePortType port;
     protected NetSuiteClientService clientService;
 

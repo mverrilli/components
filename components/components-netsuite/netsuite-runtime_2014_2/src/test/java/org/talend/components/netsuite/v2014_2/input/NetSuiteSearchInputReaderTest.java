@@ -3,6 +3,7 @@ package org.talend.components.netsuite.v2014_2.input;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.talend.components.netsuite.NetSuiteWebServiceMockTestFixture.assertIndexedRecord;
 
 import java.util.List;
 import java.util.Map;
