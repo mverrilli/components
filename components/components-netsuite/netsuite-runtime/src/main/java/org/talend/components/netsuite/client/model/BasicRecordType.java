@@ -14,6 +14,7 @@ public enum BasicRecordType {
     TRANSACTION_COLUMN_CUSTOM_FIELD("transactionColumnCustomField", null),
     CUSTOM_RECORD_CUSTOM_FIELD("customRecordCustomField", null),
     TRANSACTION("transaction", "transaction"),
+    ITEM("item", "item"),
     CUSTOM_LIST("customList", "customList"),
     CUSTOM_RECORD("customRecord", "customRecord"),
     CUSTOM_RECORD_TYPE("customRecordType", "customRecord"),

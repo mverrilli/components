@@ -14,8 +14,8 @@ import org.talend.components.netsuite.NsObjectTransducer;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
-import org.talend.components.netsuite.v2016_2.client.NetSuiteClientServiceImpl;
 import org.talend.components.netsuite.input.NsObjectInputTransducer;
+import org.talend.components.netsuite.v2016_2.client.NetSuiteClientServiceImpl;
 
 import com.netsuite.webservices.v2016_2.lists.accounting.types.AccountType;
 import com.netsuite.webservices.v2016_2.lists.accounting.types.ConsolidatedRate;
@@ -83,7 +83,6 @@ public class ValueConverterTest extends NetSuiteMockTestBase {
 
         NsObjectTransducer.ValueConverter<XMLGregorianCalendar, Long> converter1 =
                 (NsObjectTransducer.ValueConverter<XMLGregorianCalendar, Long>) transducer.getValueConverter(fieldInfo);
-        System.out.println(controlValue1);
         assertEquals(controlValue1,
                 converter1.convertInput(xmlCalendar1));
         assertEquals(xmlCalendar1,
