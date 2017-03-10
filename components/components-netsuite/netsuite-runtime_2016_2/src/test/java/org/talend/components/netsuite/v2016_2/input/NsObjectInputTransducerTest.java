@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.avro.Schema;
+import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.IndexedRecord;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -21,11 +22,14 @@ import org.talend.components.netsuite.client.model.customfield.CustomFieldRefTyp
 import org.talend.components.netsuite.client.search.SearchResultSet;
 import org.talend.components.netsuite.input.NsObjectInputTransducer;
 import org.talend.components.netsuite.v2016_2.NetSuiteMockTestBase;
+import org.talend.daikon.avro.AvroUtils;
+import org.talend.daikon.di.DiSchemaConstants;
 
 import com.netsuite.webservices.v2016_2.platform.core.Record;
 import com.netsuite.webservices.v2016_2.platform.core.types.RecordType;
 import com.netsuite.webservices.v2016_2.setup.customization.TransactionBodyCustomField;
 import com.netsuite.webservices.v2016_2.setup.customization.types.CustomizationFieldType;
+import com.netsuite.webservices.v2016_2.transactions.bank.Check;
 import com.netsuite.webservices.v2016_2.transactions.sales.Opportunity;
 
 /**
@@ -121,6 +125,102 @@ public class NsObjectInputTransducerTest extends NetSuiteMockTestBase {
         TypeDesc typeDesc = connection.getTypeInfo(basicTypeDesc.getTypeName());
 
         Schema schema = getDynamicSchema();
+
+        NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema, typeDesc.getTypeName());
+
+        SearchResultSet<Record> rs = connection.newSearch()
+                .target(basicTypeDesc.getTypeName())
+                .search();
+
+        while (rs.next()) {
+            Record record = rs.get();
+
+            IndexedRecord indexedRecord = transducer.read(record);
+            assertIndexedRecord(typeDesc, indexedRecord);
+        }
+    }
+
+    @Test
+    public void testDynamicSchemaWithDynamicColumnMiddle() throws Exception {
+        NetSuiteClientService connection = webServiceMockTestFixture.getClientService();
+        connection.login();
+
+        TypeDesc basicTypeDesc = connection.getTypeInfo("Check");
+
+        final List<Check> recordList = makeNsObjects(
+                new SimpleObjectComposer<>(Check.class), 10);
+        mockSearchRequestResults(recordList, 100);
+
+        TypeDesc typeDesc = connection.getTypeInfo(basicTypeDesc.getTypeName());
+
+        Schema designSchema = SchemaBuilder.record(typeDesc.getTypeName())
+                .fields()
+                // Field 1
+                .name("InternalId")
+                .type(NetSuiteDatasetRuntimeImpl.inferSchemaForField(typeDesc.getField("InternalId")))
+                .noDefault()
+                // Field 2
+                .name("TranId")
+                .type(NetSuiteDatasetRuntimeImpl.inferSchemaForField(typeDesc.getField("TranId")))
+                .noDefault()
+                // Field 3
+                .name("LastModifiedDate")
+                .type(NetSuiteDatasetRuntimeImpl.inferSchemaForField(typeDesc.getField("LastModifiedDate")))
+                .noDefault()
+                //
+                .endRecord();
+        designSchema.addProp(DiSchemaConstants.TALEND6_DYNAMIC_COLUMN_POSITION, "1");
+        designSchema.addProp(DiSchemaConstants.TALEND6_DYNAMIC_COLUMN_ID, "dynamic");
+
+        Schema schema = AvroUtils.setIncludeAllFields(designSchema, true);
+
+        NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema, typeDesc.getTypeName());
+
+        SearchResultSet<Record> rs = connection.newSearch()
+                .target(basicTypeDesc.getTypeName())
+                .search();
+
+        while (rs.next()) {
+            Record record = rs.get();
+
+            IndexedRecord indexedRecord = transducer.read(record);
+            assertIndexedRecord(typeDesc, indexedRecord);
+        }
+    }
+
+    @Test
+    public void testDynamicSchemaWithDynamicColumnLast() throws Exception {
+        NetSuiteClientService connection = webServiceMockTestFixture.getClientService();
+        connection.login();
+
+        TypeDesc basicTypeDesc = connection.getTypeInfo("Check");
+
+        final List<Check> recordList = makeNsObjects(
+                new SimpleObjectComposer<>(Check.class), 10);
+        mockSearchRequestResults(recordList, 100);
+
+        TypeDesc typeDesc = connection.getTypeInfo(basicTypeDesc.getTypeName());
+
+        Schema designSchema = SchemaBuilder.record(typeDesc.getTypeName())
+                .fields()
+                // Field 1
+                .name("InternalId")
+                .type(NetSuiteDatasetRuntimeImpl.inferSchemaForField(typeDesc.getField("InternalId")))
+                .noDefault()
+                // Field 2
+                .name("TranId")
+                .type(NetSuiteDatasetRuntimeImpl.inferSchemaForField(typeDesc.getField("TranId")))
+                .noDefault()
+                // Field 3
+                .name("LastModifiedDate")
+                .type(NetSuiteDatasetRuntimeImpl.inferSchemaForField(typeDesc.getField("LastModifiedDate")))
+                .noDefault()
+                //
+                .endRecord();
+        designSchema.addProp(DiSchemaConstants.TALEND6_DYNAMIC_COLUMN_POSITION, "3");
+        designSchema.addProp(DiSchemaConstants.TALEND6_DYNAMIC_COLUMN_ID, "dynamic");
+
+        Schema schema = AvroUtils.setIncludeAllFields(designSchema, true);
 
         NsObjectInputTransducer transducer = new NsObjectInputTransducer(connection, schema, typeDesc.getTypeName());
 

@@ -7,8 +7,10 @@ import static org.talend.components.netsuite.client.model.beans.Beans.setSimpleP
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
@@ -20,12 +22,11 @@ import org.joda.time.MutableDateTime;
 import org.talend.components.api.exception.ComponentException;
 import org.talend.components.netsuite.client.NetSuiteClientService;
 import org.talend.components.netsuite.client.model.CustomFieldDesc;
-import org.talend.components.netsuite.client.model.beans.EnumAccessor;
 import org.talend.components.netsuite.client.model.FieldDesc;
 import org.talend.components.netsuite.client.model.TypeDesc;
-import org.talend.components.netsuite.client.model.TypeUtils;
 import org.talend.components.netsuite.client.model.beans.BeanInfo;
 import org.talend.components.netsuite.client.model.beans.Beans;
+import org.talend.components.netsuite.client.model.beans.EnumAccessor;
 import org.talend.components.netsuite.client.model.customfield.CustomFieldRefType;
 import org.talend.daikon.di.DiSchemaConstants;
 
@@ -65,15 +66,22 @@ public abstract class NsObjectTransducer {
         List<Schema.Field> fields = new ArrayList<>();
 
         if (dynamicPosProp != null) {
-            List<FieldDesc> designFields = new ArrayList<>(designSchema.getFields().size());
+            Set<String> designFieldNames = new HashSet<>(designSchema.getFields().size());
             for (Schema.Field field : designSchema.getFields()) {
                 String fieldName = field.name();
-                FieldDesc fieldDesc = fieldMap.get(fieldName);
-                designFields.add(fieldDesc);
+                designFieldNames.add(fieldName);
             }
 
             int dynPos = Integer.parseInt(dynamicPosProp);
             int dynamicColumnSize = fieldMap.size() - designSchema.getFields().size();
+
+            List<FieldDesc> dynaFieldDescList = new ArrayList<>(dynamicColumnSize);
+            for (FieldDesc fieldDesc : fieldMap.values()) {
+                String fieldName = fieldDesc.getName();
+                if (!designFieldNames.contains(fieldName)) {
+                    dynaFieldDescList.add(fieldDesc);
+                }
+            }
 
             if (designSchema.getFields().size() > 0) {
                 for (Schema.Field field : designSchema.getFields()) {
@@ -81,7 +89,7 @@ public abstract class NsObjectTransducer {
                     if (dynPos == field.pos()) {
                         for (int i = 0; i < dynamicColumnSize; i++) {
                             // Add dynamic schema fields
-                            FieldDesc fieldDesc = designFields.get(i + dynPos);
+                            FieldDesc fieldDesc = dynaFieldDescList.get(i);
                             fields.add(createSchemaField(fieldDesc));
                         }
                     }
@@ -102,7 +110,7 @@ public abstract class NsObjectTransducer {
                     if (field.pos() == (designSchema.getFields().size() - 1) && dynPos == (field.pos() + 1)) {
                         for (int i = 0; i < dynamicColumnSize; i++) {
                             // Add dynamic schema fields
-                            FieldDesc fieldDesc = designFields.get(i + dynPos);
+                            FieldDesc fieldDesc = dynaFieldDescList.get(i);
                             fields.add(createSchemaField(fieldDesc));
                         }
                     }
