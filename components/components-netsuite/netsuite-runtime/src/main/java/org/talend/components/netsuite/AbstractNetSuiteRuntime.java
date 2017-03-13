@@ -11,6 +11,17 @@ import org.talend.daikon.properties.ValidationResult;
  */
 public abstract class AbstractNetSuiteRuntime implements NetSuiteRuntime {
     protected NetSuiteClientFactory clientFactory;
+    protected NetSuiteRuntime.Context context;
+
+    @Override
+    public void setContext(Context context) {
+        this.context = context;
+    }
+
+    @Override
+    public Context getContext() {
+        return context;
+    }
 
     public NetSuiteClientFactory getClientFactory() {
         return clientFactory;
@@ -21,8 +32,7 @@ public abstract class AbstractNetSuiteRuntime implements NetSuiteRuntime {
     }
 
     @Override
-    public NetSuiteDatasetRuntime getDatasetRuntime(NetSuiteRuntime.Context context,
-            NetSuiteConnectionProperties properties) {
+    public NetSuiteDatasetRuntime getDatasetRuntime(NetSuiteConnectionProperties properties) {
         try {
             NetSuiteEndpoint endpoint = getEndpoint(context, properties);
             return new NetSuiteDatasetRuntimeImpl(endpoint.getClientService());
@@ -32,8 +42,7 @@ public abstract class AbstractNetSuiteRuntime implements NetSuiteRuntime {
     }
 
     @Override
-    public ValidationResult validateConnection(NetSuiteRuntime.Context context,
-            NetSuiteConnectionProperties properties) {
+    public ValidationResult validateConnection(NetSuiteConnectionProperties properties) {
         try {
             NetSuiteEndpoint endpoint = getEndpoint(context, properties);
             endpoint.connect();
@@ -52,7 +61,7 @@ public abstract class AbstractNetSuiteRuntime implements NetSuiteRuntime {
         NetSuiteEndpoint.ConnectionConfig connectionConfig = NetSuiteEndpoint.createConnectionConfig(properties);
 
         NetSuiteEndpoint endpoint = null;
-        if (context.isCachingEnabled()) {
+        if (context != null && context.isCachingEnabled()) {
             NetSuiteEndpoint.ConnectionConfig cachedConnectionConfig =
                     (NetSuiteEndpoint.ConnectionConfig) context.getAttribute(NetSuiteEndpoint.ConnectionConfig.class.getName());
             if (cachedConnectionConfig != null && connectionConfig.equals(cachedConnectionConfig)) {
@@ -61,7 +70,7 @@ public abstract class AbstractNetSuiteRuntime implements NetSuiteRuntime {
         }
         if (endpoint == null) {
             endpoint = new NetSuiteEndpoint(clientFactory, NetSuiteEndpoint.createConnectionConfig(properties));
-            if (context.isCachingEnabled()) {
+            if (context != null && context.isCachingEnabled()) {
                 context.setAttribute(NetSuiteEndpoint.class.getName(), endpoint);
                 context.setAttribute(NetSuiteEndpoint.ConnectionConfig.class.getName(), endpoint.getConnectionConfig());
             }

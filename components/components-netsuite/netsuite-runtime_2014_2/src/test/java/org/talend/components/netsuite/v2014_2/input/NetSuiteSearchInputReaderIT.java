@@ -59,9 +59,8 @@ public class NetSuiteSearchInputReaderIT extends AbstractNetSuiteTestBase {
         properties.connection.applicationId.setValue(webServiceTestFixture.getCredentials().getApplicationId());
         properties.module.moduleName.setValue("Account");
 
-        NetSuiteDatasetRuntime dataSetRuntime = new NetSuiteRuntimeImpl()
-                .getDatasetRuntime(properties.getConnectionProperties().getDesignRuntimeContext(),
-                        properties.getConnectionProperties());
+        NetSuiteRuntimeImpl runtime = new NetSuiteRuntimeImpl();
+        NetSuiteDatasetRuntime dataSetRuntime = runtime.getDatasetRuntime(properties.getConnectionProperties());
         Schema schema = dataSetRuntime.getSchema(properties.module.moduleName.getValue());
         properties.module.main.schema.setValue(schema);
 

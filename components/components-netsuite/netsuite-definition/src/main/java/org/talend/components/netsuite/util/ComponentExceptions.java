@@ -15,7 +15,6 @@ public abstract class ComponentExceptions {
         }
         if (vr == null) {
             vr = new ValidationResult();
-            // FIXME - do a better job here
             vr.setMessage(ex.getMessage());
             vr.setStatus(ValidationResult.Result.ERROR);
         }

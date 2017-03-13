@@ -8,9 +8,13 @@ import org.talend.daikon.properties.ValidationResult;
  */
 public interface NetSuiteRuntime {
 
-    NetSuiteDatasetRuntime getDatasetRuntime(Context context, NetSuiteConnectionProperties properties);
+    void setContext(Context context);
 
-    ValidationResult validateConnection(Context context, NetSuiteConnectionProperties properties);
+    Context getContext();
+
+    NetSuiteDatasetRuntime getDatasetRuntime(NetSuiteConnectionProperties properties);
+
+    ValidationResult validateConnection(NetSuiteConnectionProperties properties);
 
     interface Context {
 

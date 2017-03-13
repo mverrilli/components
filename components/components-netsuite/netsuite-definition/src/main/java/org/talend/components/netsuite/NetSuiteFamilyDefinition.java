@@ -19,9 +19,9 @@ public class NetSuiteFamilyDefinition extends AbstractComponentFamilyDefinition
 
     public NetSuiteFamilyDefinition() {
         super(NAME,
-//                new NetSuiteConnectionDefinition(),
                 new NetSuiteInputDefinition(),
-                new NetSuiteOutputDefinition());
+                new NetSuiteOutputDefinition()
+        );
     }
 
     @Override

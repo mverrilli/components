@@ -7,11 +7,10 @@ import static org.talend.daikon.properties.property.PropertyFactory.newProperty;
 import static org.talend.daikon.properties.property.PropertyFactory.newString;
 
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.talend.components.api.properties.ComponentPropertiesImpl;
 import org.talend.components.api.properties.ComponentReferenceProperties;
+import org.talend.components.netsuite.NetSuiteComponentDefinition;
 import org.talend.components.netsuite.NetSuiteProvideConnectionProperties;
 import org.talend.components.netsuite.NetSuiteRuntime;
 import org.talend.daikon.java8.Function;
@@ -52,7 +51,7 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
     public ComponentReferenceProperties<NetSuiteConnectionProperties> referencedComponent =
             new ComponentReferenceProperties("referencedComponent", NetSuiteConnectionDefinition.COMPONENT_NAME);
 
-    protected transient NetSuiteRuntime.Context designRuntimeContext;
+    protected transient NetSuiteRuntime.Context designTimeContext;
 
     public NetSuiteConnectionProperties(String name) {
         super(name);
@@ -147,8 +146,7 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
     public ValidationResult validateTestConnection() throws Exception {
         ValidationResult vr = withRuntime(this, new Function<NetSuiteRuntime, ValidationResult>() {
             @Override public ValidationResult apply(NetSuiteRuntime runtimeService) {
-                return runtimeService.validateConnection(
-                        getDesignRuntimeContext(), NetSuiteConnectionProperties.this);
+                return runtimeService.validateConnection(NetSuiteConnectionProperties.this);
             }
         });
         if (vr.getStatus() == ValidationResult.Result.OK) {
@@ -160,33 +158,14 @@ public class NetSuiteConnectionProperties extends ComponentPropertiesImpl
         return vr;
     }
 
-    public NetSuiteRuntime.Context getDesignRuntimeContext() {
+    public NetSuiteRuntime.Context getDesignTimeContext() {
         NetSuiteConnectionProperties refProps = referencedComponent.getReference();
         if (refProps != null) {
-            return refProps.getDesignRuntimeContext();
+            return refProps.getDesignTimeContext();
         }
-        if (designRuntimeContext == null) {
-            designRuntimeContext = new DesignRuntimeContext();
+        if (designTimeContext == null) {
+            designTimeContext = new NetSuiteComponentDefinition.DesignTimeContext();
         }
-        return designRuntimeContext;
-    }
-
-    protected static class DesignRuntimeContext implements NetSuiteRuntime.Context {
-        private Map<String, Object> attributes = new HashMap<>();
-
-        @Override
-        public boolean isCachingEnabled() {
-            return true;
-        }
-
-        @Override
-        public Object getAttribute(String key) {
-            return attributes.get(key);
-        }
-
-        @Override
-        public void setAttribute(String key, Object value) {
-            attributes.put(key, value);
-        }
+        return designTimeContext;
     }
 }

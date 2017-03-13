@@ -170,5 +170,4 @@ public class NetSuiteOutputProperties extends FixedConnectorsComponentProperties
             return validationResult;
         }
     }
-
 }

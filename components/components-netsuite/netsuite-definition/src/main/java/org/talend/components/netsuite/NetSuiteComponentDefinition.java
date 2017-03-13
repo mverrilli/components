@@ -1,6 +1,8 @@
 package org.talend.components.netsuite;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.talend.components.api.component.AbstractComponentDefinition;
@@ -64,8 +66,7 @@ public abstract class NetSuiteComponentDefinition extends AbstractComponentDefin
         return withRuntime(properties, new Function<NetSuiteRuntime, R>() {
             @Override public R apply(NetSuiteRuntime runtime) {
                 NetSuiteConnectionProperties connectionProperties = properties.getConnectionProperties();
-                NetSuiteDatasetRuntime dataSetRuntime = runtime.getDatasetRuntime(
-                        connectionProperties.getDesignRuntimeContext(), connectionProperties);
+                NetSuiteDatasetRuntime dataSetRuntime = runtime.getDatasetRuntime(connectionProperties);
                 return func.apply(dataSetRuntime);
             }
         });
@@ -76,8 +77,10 @@ public abstract class NetSuiteComponentDefinition extends AbstractComponentDefin
         RuntimeInfo runtimeInfo = getRuntimeInfo(properties, RUNTIME_CLASS);
         try (SandboxedInstance sandboxI = RuntimeUtil.createRuntimeClass(runtimeInfo,
                 NetSuiteComponentDefinition.class.getClassLoader())) {
-            NetSuiteRuntime netSuiteRuntime = (NetSuiteRuntime) sandboxI.getInstance();
-            return func.apply(netSuiteRuntime);
+            NetSuiteConnectionProperties connectionProperties = properties.getConnectionProperties();
+            NetSuiteRuntime runtime = (NetSuiteRuntime) sandboxI.getInstance();
+            runtime.setContext(connectionProperties.getDesignTimeContext());
+            return func.apply(runtime);
         }
     }
 
@@ -109,4 +112,24 @@ public abstract class NetSuiteComponentDefinition extends AbstractComponentDefin
                 .setStatus(ValidationResult.Result.ERROR)
                 .setMessage("Failed to detect NetSuite API version: " + nsEndpointUrl));
     }
+
+    public static class DesignTimeContext implements NetSuiteRuntime.Context {
+        protected Map<String, Object> attributes = new HashMap<>();
+
+        @Override
+        public boolean isCachingEnabled() {
+            return true;
+        }
+
+        @Override
+        public Object getAttribute(String key) {
+            return attributes.get(key);
+        }
+
+        @Override
+        public void setAttribute(String key, Object value) {
+            attributes.put(key, value);
+        }
+    }
+
 }
