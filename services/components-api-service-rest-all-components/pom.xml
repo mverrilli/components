@@ -21,7 +21,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<spring.boot.version>1.4.1.RELEASE</spring.boot.version>
+		<spring.boot.version>1.5.1.RELEASE</spring.boot.version>
 		<hadoop.version>2.7.0</hadoop.version>
 		<beam.version>0.6.0-tlnd</beam.version>
 		<!-- Used for Docker images name -->
@@ -104,6 +104,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.talend.components</groupId>
+			<artifactId>pubsub-definition</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.talend.components</groupId>
 			<artifactId>components-api-full-example</artifactId>
 			<version>${project.version}</version>
 		</dependency>
@@ -159,6 +164,18 @@
 			<artifactId>bigquery-runtime</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.talend.components</groupId>
+			<artifactId>pubsub-runtime</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.beam</groupId>
@@ -175,6 +192,10 @@
 				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>servlet-api</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -283,6 +304,7 @@
 								<extraArtifact>org.talend.components:components-jdbc-runtime:0.18.0-SNAPSHOT:jar</extraArtifact>
 								<extraArtifact>org.talend.components:processing-runtime:0.18.0-SNAPSHOT:jar</extraArtifact>
 								<extraArtifact>org.talend.components:bigquery-runtime:0.18.0-SNAPSHOT:jar</extraArtifact>
+								<extraArtifact>org.talend.components:pubsub-runtime:0.18.0-SNAPSHOT:jar</extraArtifact>
 								<extraArtifact>org.talend.libraries:mysql-connector-java-5.1.30-bin:6.0.0:jar</extraArtifact>
 								<extraArtifact>org.apache.derby:derby:10.12.1.1:jar</extraArtifact>
 								<extraArtifact>org.apache.beam:beam-sdks-java-io-hdfs:${beam.version}:jar</extraArtifact>

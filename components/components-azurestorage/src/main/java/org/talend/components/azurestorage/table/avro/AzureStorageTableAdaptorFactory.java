@@ -20,7 +20,7 @@ import org.apache.avro.generic.IndexedRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.api.exception.ComponentException;
-import org.talend.components.azurestorage.table.avro.AzureStorageAvroRegistry.DTEConverter;
+import org.talend.components.azurestorage.table.avro.AzureStorageDTEConverters.DTEConverter;
 import org.talend.daikon.avro.converter.AvroConverter;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
 
@@ -93,7 +93,7 @@ public class AzureStorageTableAdaptorFactory implements IndexedRecordConverter<D
                     values[i] = fieldConverter[i].convertToAvro(record);
                 }
             } catch (Exception e) {
-                LOGGER.error(e.getMessage());
+                LOGGER.error(e.getLocalizedMessage());
                 throw new ComponentException(e);
             }
         }

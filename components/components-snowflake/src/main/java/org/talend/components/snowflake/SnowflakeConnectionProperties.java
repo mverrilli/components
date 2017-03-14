@@ -15,6 +15,10 @@ package org.talend.components.snowflake;
 import static org.talend.daikon.properties.presentation.Widget.widget;
 import static org.talend.daikon.properties.property.PropertyFactory.newEnum;
 import static org.talend.daikon.properties.property.PropertyFactory.newString;
+import static org.talend.daikon.properties.property.PropertyFactory.newInteger;
+
+
+import java.util.Properties;
 
 import org.talend.components.api.properties.ComponentPropertiesImpl;
 import org.talend.components.api.properties.ComponentReferenceProperties;
@@ -27,8 +31,7 @@ import org.talend.daikon.properties.presentation.Form;
 import org.talend.daikon.properties.presentation.Widget;
 import org.talend.daikon.properties.property.Property;
 
-public class SnowflakeConnectionProperties extends ComponentPropertiesImpl
-        implements SnowflakeProvideConnectionProperties{
+public class SnowflakeConnectionProperties extends ComponentPropertiesImpl implements SnowflakeProvideConnectionProperties {
 
     private static final String USERPASSWORD = "userPassword";
 
@@ -55,6 +58,8 @@ public class SnowflakeConnectionProperties extends ComponentPropertiesImpl
         }
     }
 
+    public Property<Integer> loginTimeout = newInteger("loginTimeout");
+
     public Property<String> account = newString("account").setRequired(); //$NON-NLS-1$
 
     public UserPasswordProperties userPassword = new UserPasswordProperties(USERPASSWORD);
@@ -74,8 +79,6 @@ public class SnowflakeConnectionProperties extends ComponentPropertiesImpl
 
     public PresentationItem advanced = new PresentationItem("advanced", "Advanced...");
 
-    // protected transient PropertyPathConnector mainConnector = new PropertyPathConnector(Connector.MAIN_NAME, "schema");
-
     public ComponentReferenceProperties<SnowflakeConnectionProperties> referencedComponent = new ComponentReferenceProperties<>(
             "referencedComponent", TSnowflakeConnectionDefinition.COMPONENT_NAME);
 
@@ -86,8 +89,7 @@ public class SnowflakeConnectionProperties extends ComponentPropertiesImpl
     @Override
     public void setupProperties() {
         super.setupProperties();
-        // Code for property initialization goes here
-
+        loginTimeout.setValue(1);
         tracing.setValue(Tracing.OFF);
     }
 
@@ -113,6 +115,7 @@ public class SnowflakeConnectionProperties extends ComponentPropertiesImpl
         mainForm.addRow(db);
 
         Form advancedForm = Form.create(this, Form.ADVANCED);
+        advancedForm.addRow(loginTimeout);
         advancedForm.addRow(widget(tracing).setWidgetType(Widget.ENUMERATION_WIDGET_TYPE));
         advancedForm.addRow(role);
         advanced.setFormtoShow(advancedForm);
@@ -190,6 +193,58 @@ public class SnowflakeConnectionProperties extends ComponentPropertiesImpl
             return refProps;
         }
         return null;
+    }
+
+    public Properties getJdbcProperties() {
+        String user = userPassword.userId.getStringValue();
+        String password = userPassword.password.getStringValue();
+        String loginTimeout = String.valueOf(this.loginTimeout.getValue());
+
+        Properties properties = new Properties();
+
+        if (user != null) {
+            properties.put("user", user);
+        }
+
+        if (password != null) {
+            properties.put("password", password);
+        }
+
+        if (loginTimeout != null) {
+            properties.put("loginTimeout", String.valueOf(this.loginTimeout.getValue()));
+        }
+
+        return properties;
+    }
+
+    public String getConnectionUrl() {
+        String queryString = "";
+        String account = this.account.getStringValue();
+
+        String warehouse = this.warehouse.getStringValue();
+        String db = this.db.getStringValue();
+        String schema = this.schemaName.getStringValue();
+
+        String role = this.role.getStringValue();
+        String tracing = this.tracing.getStringValue();
+
+        if (null != warehouse && !"".equals(warehouse)) {
+            queryString = queryString + "warehouse=" + warehouse;
+        }
+        if (null != db && !"".equals(db)) {
+            queryString = queryString + "&db=" + db;
+        }
+        if (null != schema && !"".equals(schema)) {
+            queryString = queryString + "&schema=" + schema;
+        }
+
+        if (null != role && !"".equals(role)) {
+            queryString = queryString + "&role=" + role;
+        }
+        if (null != tracing && !"".equals(tracing)) {
+            queryString = queryString + "&tracing=" + tracing;
+        }
+        return "jdbc:snowflake://" + account + ".snowflakecomputing.com" + "/?" + queryString;
     }
 
 }
