@@ -21,6 +21,6 @@ import org.talend.components.service.spring.SpringTestApp;
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = SpringTestApp.class)
 @Ignore
-public class SpringNetSuiteInputTestIT extends NetSuiteInputTestBase {
+public class SpringNetSuiteComponentTestIT extends NetSuiteComponentTestBase {
 
 }

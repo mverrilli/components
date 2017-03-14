@@ -53,6 +53,8 @@ public abstract class NetSuiteComponentDefinition extends AbstractComponentDefin
     public static final String RUNTIME_CLASS =
             "org.talend.components.netsuite.v${version}.NetSuiteRuntimeImpl";
 
+    protected static RuntimeInvoker runtimeInvoker = new SandboxRuntimeInvoker();
+
     protected NetSuiteComponentDefinition(String componentName, ExecutionEngine engine1, ExecutionEngine... engines) {
         super(componentName, engine1, engines);
     }
@@ -87,14 +89,10 @@ public abstract class NetSuiteComponentDefinition extends AbstractComponentDefin
 
     public static <R> R withRuntime(final NetSuiteProvideConnectionProperties properties,
             final Function<NetSuiteRuntime, R> func) {
-        RuntimeInfo runtimeInfo = getRuntimeInfo(properties, RUNTIME_CLASS);
-        try (SandboxedInstance sandboxI = RuntimeUtil.createRuntimeClass(runtimeInfo,
-                NetSuiteComponentDefinition.class.getClassLoader())) {
-            NetSuiteConnectionProperties connectionProperties = properties.getConnectionProperties();
-            NetSuiteRuntime runtime = (NetSuiteRuntime) sandboxI.getInstance();
-            runtime.setContext(connectionProperties.getDesignTimeContext());
-            return func.apply(runtime);
-        }
+
+        NetSuiteConnectionProperties connectionProperties = properties.getConnectionProperties();
+        return runtimeInvoker.invokeRuntime(connectionProperties.getDesignTimeContext(),
+                properties.getConnectionProperties(), func);
     }
 
     public static RuntimeInfo getRuntimeInfo(final NetSuiteProvideConnectionProperties properties,
@@ -111,6 +109,17 @@ public abstract class NetSuiteComponentDefinition extends AbstractComponentDefin
         return new JarRuntimeInfo("mvn:" + MAVEN_GROUP_ID + "/" + artifactId,
                 DependenciesReader.computeDependenciesFilePath(MAVEN_GROUP_ID, artifactId),
                 className);
+    }
+
+    public static RuntimeInvoker getRuntimeInvoker() {
+        return runtimeInvoker;
+    }
+
+    public static void setRuntimeInvoker(RuntimeInvoker runtimeInvoker) {
+        if (runtimeInvoker == null) {
+            throw new IllegalArgumentException("Runtime invoker can't be null");
+        }
+        NetSuiteComponentDefinition.runtimeInvoker = runtimeInvoker;
     }
 
     public static String detectApiVersion(String nsEndpointUrl) {
@@ -145,4 +154,27 @@ public abstract class NetSuiteComponentDefinition extends AbstractComponentDefin
         }
     }
 
+    public interface RuntimeInvoker {
+
+        <R> R invokeRuntime(NetSuiteRuntime.Context context,
+                NetSuiteConnectionProperties properties,
+                Function<NetSuiteRuntime, R> func);
+    }
+
+    public static class SandboxRuntimeInvoker implements RuntimeInvoker {
+
+        @Override
+        public <R> R invokeRuntime(final NetSuiteRuntime.Context context,
+                final NetSuiteConnectionProperties properties,
+                final Function<NetSuiteRuntime, R> func) {
+
+            RuntimeInfo runtimeInfo = getRuntimeInfo(properties, RUNTIME_CLASS);
+            try (SandboxedInstance sandboxI = RuntimeUtil.createRuntimeClass(runtimeInfo,
+                    NetSuiteComponentDefinition.class.getClassLoader())) {
+                NetSuiteRuntime runtime = (NetSuiteRuntime) sandboxI.getInstance();
+                runtime.setContext(context);
+                return func.apply(runtime);
+            }
+        }
+    }
 }
