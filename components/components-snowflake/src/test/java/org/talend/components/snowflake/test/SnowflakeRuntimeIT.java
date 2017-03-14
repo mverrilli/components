@@ -125,7 +125,7 @@ public abstract class SnowflakeRuntimeIT extends SnowflakeTestIT {
 
     public Schema getMakeRowSchema() {
         SchemaBuilder.FieldAssembler<Schema> fa = SchemaBuilder.builder().record("MakeRowRecord").fields() //
-                .name("ID").type().nullable().intType().noDefault() //
+                .name("ID").type(AvroUtils._decimal()).noDefault() //
                 .name("C1").type().nullable().stringType().noDefault() //
                 .name("C2").type().nullable().booleanType().noDefault() //
                 .name("C3").type().nullable().doubleType().noDefault() //
@@ -328,6 +328,16 @@ public abstract class SnowflakeRuntimeIT extends SnowflakeTestIT {
         handleProperties.outputAction.setValue(action);
         LOGGER.debug(action + ": " + rows.size() + " rows");
         return writeRows(makeWriter(handleProperties), rows);
+    }
+
+    protected void setupTableWithStaticValues(SnowflakeConnectionTableProperties props) throws Throwable {
+        Form f = props.table.getForm(Form.REFERENCE);
+        SnowflakeTableProperties tableProps = (SnowflakeTableProperties) f.getProperties();
+        tableProps.tableName.setValue(testTable);
+        Schema mainSchema = getMakeRowSchema();
+        tableProps.main.schema.setValue(mainSchema);
+        Form schemaForm = tableProps.main.getForm(Form.REFERENCE);
+        PropertiesTestUtils.checkAndAfter(getComponentService(), schemaForm, tableProps.main.schema.getName(), tableProps.main);
     }
 
     protected void checkAndSetupTable(SnowflakeConnectionTableProperties props) throws Throwable {

@@ -87,7 +87,7 @@ public class SnowflakeWritersTestIT extends SnowflakeRuntimeIT {
         setupProps(outputProps.connection);
 
         outputProps.outputAction.setValue(TSnowflakeOutputProperties.OutputAction.DELETE);
-        checkAndSetupTable(outputProps);
+        setupTableWithStaticValues(outputProps);
 
         ComponentTestUtils.checkSerialize(outputProps, errorCollector);
         List<IndexedRecord> rows = new ArrayList<>();
@@ -107,7 +107,7 @@ public class SnowflakeWritersTestIT extends SnowflakeRuntimeIT {
                 .getComponentProperties(TSnowflakeOutputDefinition.COMPONENT_NAME);
         setupProps(outputProps.connection);
 
-        checkAndSetupTable(outputProps);
+        setupTableWithStaticValues(outputProps);
 
         SnowflakeTableProperties tableProps = outputProps.table;
         Form f = tableProps.getForm(Form.REFERENCE);
@@ -171,7 +171,7 @@ public class SnowflakeWritersTestIT extends SnowflakeRuntimeIT {
         TSnowflakeOutputProperties props = (TSnowflakeOutputProperties) getComponentService()
                 .getComponentProperties(TSnowflakeOutputDefinition.COMPONENT_NAME);
         setupProps(props.getConnectionProperties());
-        checkAndSetupTable(props);
+        setupTableWithStaticValues(props);
         props.outputAction.setStoredValue(TSnowflakeOutputProperties.OutputAction.INSERT);
 
         DefaultComponentRuntimeContainerImpl container = new DefaultComponentRuntimeContainerImpl();

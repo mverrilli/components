@@ -75,7 +75,8 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
                 props.manualQuery.getName(), props);
 
         props.condition.setValue("ID > 80");
-        checkAndSetupTable(props);
+        setupTableWithStaticValues(props);
+        // checkAndSetupTable(props);
         List<IndexedRecord> rows = readRows(props);
         assertEquals(19, rows.size());
         assertEquals(BigDecimal.valueOf(81), rows.get(0).get(0));
@@ -92,7 +93,7 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
                 props.manualQuery.getName(), props);
 
         props.query.setValue("select ID, C7 from " + testTable + " where ID > 80");
-        checkAndSetupTable(props);
+        setupTableWithStaticValues(props);
         List<IndexedRecord> rows = readRows(props);
         assertEquals(19, rows.size());
         Schema schema = rows.get(0).getSchema();
@@ -123,7 +124,7 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
         TSnowflakeOutputProperties props = (TSnowflakeOutputProperties) getComponentService()
                 .getComponentProperties(TSnowflakeOutputDefinition.COMPONENT_NAME);
         setupProps(props.getConnectionProperties());
-        checkAndSetupTable(props);
+        setupTableWithStaticValues(props);
 
         props.connection.referencedComponent.componentInstanceId.setValue(currentComponentName);
 
@@ -247,7 +248,7 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
         resetUser();
         setupProps(cProps);
 
-        checkAndSetupTable(props);
+        setupTableWithStaticValues(props);
 
         // Back to using the connection props of the Snowflake input component
         props.connection.referencedComponent.referenceType.setValue(ComponentReferenceProperties.ReferenceType.THIS_COMPONENT);
