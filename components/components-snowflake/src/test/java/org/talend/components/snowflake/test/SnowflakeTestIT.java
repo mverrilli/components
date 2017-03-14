@@ -14,17 +14,12 @@
 package org.talend.components.snowflake.test;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.avro.Schema;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -180,45 +175,6 @@ public abstract class SnowflakeTestIT extends AbstractComponentTest {
     }
 
     class TestRuntimeContainer extends DefaultComponentRuntimeContainerImpl {
-    }
-
-    @BeforeClass
-    public static void setupDatabase() throws Exception {
-        Class.forName("com.snowflake.client.jdbc.SnowflakeDriver");
-
-        if (accountStr == null) {
-            throw new Exception(
-                    "This test expects snowflake.* system properties to be set. See the top of this class for the list of properties");
-        }
-
-        try {
-
-            String connectionUrl = "jdbc:snowflake://" + accountStr + ".snowflakecomputing.com";
-
-            connectionUrl += "/?user=" + user + "&password=" + password + "&testSchema=" + testSchema + "&db=" + db
-                    + "&warehouse=" + warehouse;
-
-            Properties properties = new Properties();
-
-            testConnection = DriverManager.getConnection(connectionUrl, properties);
-            testConnection.createStatement().execute("CREATE OR REPLACE SCHEMA " + testSchema);
-            testConnection.createStatement().execute("USE SCHEMA " + testSchema);
-            testConnection.createStatement().execute("DROP TABLE IF EXISTS " + testSchema + "." + testTable + " CASCADE");
-            testConnection.createStatement()
-                    .execute("CREATE TABLE " + testSchema + "." + testTable + " (" + "ID int PRIMARY KEY, " + "C1 varchar(255), "
-                            + "C2 boolean, " + "C3 double, " + "C4 date, " + "C5 time, " + "C6 timestamp, " + "C7 variant)");
-        } catch (Exception ex) {
-            throw new Exception("Make sure the system properties are correctly set as they might have caused this error", ex);
-        }
-    }
-
-    @AfterClass
-    public static void teardownDatabase() throws SQLException {
-        if (!false) {
-            testConnection.createStatement().execute("DROP TABLE IF EXISTS " + testSchema + "." + testTable);
-            testConnection.createStatement().execute("DROP SCHEMA IF EXISTS " + testSchema);
-            testConnection.close();
-        }
     }
 
 }

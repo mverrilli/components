@@ -19,12 +19,14 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.Random;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -34,7 +36,9 @@ import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.GenericData;
 import org.apache.avro.generic.IndexedRecord;
 import org.hamcrest.Matchers;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.talend.components.api.component.runtime.BoundedReader;
@@ -383,6 +387,45 @@ public abstract class SnowflakeRuntimeIT extends SnowflakeTestIT {
         long elapsed = System.currentTimeMillis() - time;
         System.out.println("time (ms): " + elapsed + " rows/sec: " + ((float) count / (float) (elapsed / 1000)));
         return props;
+    }
+
+    @BeforeClass
+    public static void setupDatabase() throws Exception {
+        Class.forName("com.snowflake.client.jdbc.SnowflakeDriver");
+
+        if (accountStr == null) {
+            throw new Exception(
+                    "This test expects snowflake.* system properties to be set. See the top of this class for the list of properties");
+        }
+
+        try {
+
+            String connectionUrl = "jdbc:snowflake://" + accountStr + ".snowflakecomputing.com";
+
+            connectionUrl += "/?user=" + user + "&password=" + password + "&testSchema=" + testSchema + "&db=" + db
+                    + "&warehouse=" + warehouse;
+
+            Properties properties = new Properties();
+
+            testConnection = DriverManager.getConnection(connectionUrl, properties);
+            testConnection.createStatement().execute("CREATE OR REPLACE SCHEMA " + testSchema);
+            testConnection.createStatement().execute("USE SCHEMA " + testSchema);
+            testConnection.createStatement().execute("DROP TABLE IF EXISTS " + testSchema + "." + testTable + " CASCADE");
+            testConnection.createStatement()
+                    .execute("CREATE TABLE " + testSchema + "." + testTable + " (" + "ID int PRIMARY KEY, " + "C1 varchar(255), "
+                            + "C2 boolean, " + "C3 double, " + "C4 date, " + "C5 time, " + "C6 timestamp, " + "C7 variant)");
+        } catch (Exception ex) {
+            throw new Exception("Make sure the system properties are correctly set as they might have caused this error", ex);
+        }
+    }
+
+    @AfterClass
+    public static void teardownDatabase() throws SQLException {
+        if (!false) {
+            testConnection.createStatement().execute("DROP TABLE IF EXISTS " + testSchema + "." + testTable);
+            testConnection.createStatement().execute("DROP SCHEMA IF EXISTS " + testSchema);
+            testConnection.close();
+        }
     }
 
 }

@@ -55,7 +55,7 @@ import org.talend.daikon.properties.test.PropertiesTestUtils;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = SpringTestApp.class)
-public class SpringSnowflakeTestIT extends SnowflakeTestIT {
+public class SpringSnowflakeTestIT extends SnowflakeRuntimeIT {
 
     @Inject
     ComponentService componentService;
