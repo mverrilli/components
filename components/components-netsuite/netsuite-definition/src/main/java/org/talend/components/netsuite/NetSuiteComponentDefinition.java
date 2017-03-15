@@ -17,7 +17,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.talend.components.api.component.AbstractComponentDefinition;
 import org.talend.components.api.component.runtime.DependenciesReader;
 import org.talend.components.api.component.runtime.ExecutionEngine;
@@ -100,7 +99,7 @@ public abstract class NetSuiteComponentDefinition extends AbstractComponentDefin
 
         NetSuiteConnectionProperties connectionProperties = properties.getConnectionProperties();
 
-        String endpointUrl = StringUtils.strip(connectionProperties.endpoint.getStringValue(), "\"");
+        String endpointUrl = connectionProperties.endpoint.getStringValue();
         String apiVersion = detectApiVersion(endpointUrl);
 
         String artifactId = MAVEN_ARTIFACT_ID.replace("${version}", apiVersion);
