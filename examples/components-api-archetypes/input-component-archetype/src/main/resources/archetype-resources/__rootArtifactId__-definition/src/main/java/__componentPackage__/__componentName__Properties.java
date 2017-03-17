@@ -28,7 +28,6 @@ import org.talend.daikon.properties.presentation.Widget;
 import org.talend.daikon.properties.property.EnumProperty;
 import org.talend.daikon.properties.property.Property;
 import org.talend.daikon.properties.property.PropertyFactory;
-import org.talend.daikon.properties.property.StringProperty;
 
 /**
  * The ComponentProperties subclass provided by a component stores the 
@@ -71,7 +70,7 @@ public class ${componentName}Properties extends FixedConnectorsComponentProperti
      * Specify i18n messages for all {@link Property} defined in this class in
      * ${componentName}Properties.properties file
      */
-    public final StringProperty filename = PropertyFactory.newString("filename"); //$NON-NLS-1$
+    public final Property<String> filename = PropertyFactory.newString("filename"); //$NON-NLS-1$
     
     /**
      * Design schema of input component. Design schema defines data fields which
@@ -98,7 +97,7 @@ public class ${componentName}Properties extends FixedConnectorsComponentProperti
      * it will be hidden. See {@link this#refreshLayout(Form)} method for
      * details
      */
-    public final StringProperty customDelimiter = PropertyFactory.newString("customDelimiter"); //$NON-NLS-1$
+    public final Property<String> customDelimiter = PropertyFactory.newString("customDelimiter"); //$NON-NLS-1$
     
     /**
      * This field specifies path {@link SchemaProperties} associated with some
@@ -216,11 +215,15 @@ public class ${componentName}Properties extends FixedConnectorsComponentProperti
      */
     @Override
     public Schema getSchema(Connector connector, boolean isOutputConnection) {
-        // design-time main schema associated with specified connector
-        Schema mainSchema = super.getSchema(connector, isOutputConnection);
-        
-        // constructs design-time Root schema
-        Schema rootSchema = RootSchemaUtils.createRootSchema(mainSchema, outOfBandSchema);
-        return rootSchema;
+        if (isOutputConnection) {
+            // design-time main schema associated with specified connector
+            Schema mainSchema = super.getSchema(connector, isOutputConnection);
+
+            // constructs design-time Root schema
+            Schema rootSchema = RootSchemaUtils.createRootSchema(mainSchema, outOfBandSchema);
+            return rootSchema;
+        } else {
+            throw new IllegalArgumentException("${componentName} component has no incoming connection");
+        }
     }
 }
