@@ -46,6 +46,8 @@ public class ${componentName}Source implements BoundedSource {
     /** Default serial version UID. */
     private static final long serialVersionUID = 1L;
     
+    private ${componentName}Properties inputProperties;
+    
     private String filePath;
     
     private Schema designSchema;
@@ -56,14 +58,7 @@ public class ${componentName}Source implements BoundedSource {
 
     @Override
     public ValidationResult initialize(RuntimeContainer container, ComponentProperties properties) {
-        ${componentName}Properties componentProperties = (${componentName}Properties) properties;
-        designSchema = componentProperties.schema.schema.getValue();
-        filePath = componentProperties.filename.getValue();
-        if (componentProperties.useCustomDelimiter.getValue()) {
-            delimiter = componentProperties.customDelimiter.getValue();
-        } else {
-            delimiter = componentProperties.delimiter.getValue().getDelimiter();
-        }
+        this.inputProperties = (${componentName}Properties) properties;
         return ValidationResult.OK;
     }
 
@@ -73,7 +68,7 @@ public class ${componentName}Source implements BoundedSource {
      */
     @Override
     public ValidationResult validate(RuntimeContainer container) {
-        File file = new File(filePath);
+        File file = new File(getFilePath());
         if (file.exists()) {
             return ValidationResult.OK;
         } else {
@@ -128,7 +123,7 @@ public class ${componentName}Source implements BoundedSource {
      */
     AvroConverter<String, IndexedRecord> createConverter(String delimitedString) {
         Schema runtimeSchema = getRuntimeSchema(delimitedString);
-        AvroConverter<String, IndexedRecord> converter = new DelimitedStringConverter(runtimeSchema, delimiter);
+        AvroConverter<String, IndexedRecord> converter = new DelimitedStringConverter(runtimeSchema, getDelimiter());
         return converter;
     }
     
@@ -146,15 +141,19 @@ public class ${componentName}Source implements BoundedSource {
 	}
 
     Schema getDesignSchema() {
-        return this.designSchema;
+        return inputProperties.schema.schema.getValue();
     }
     
     String getFilePath() {
-        return this.filePath;
+        return inputProperties.filename.getValue();
     }
     
     String getDelimiter() {
-        return this.delimiter;
+        if (inputProperties.useCustomDelimiter.getValue()) {
+            return inputProperties.customDelimiter.getValue();
+        } else {
+            return inputProperties.delimiter.getValue().getDelimiter();
+        }
     }
     
     /**
@@ -167,7 +166,7 @@ public class ${componentName}Source implements BoundedSource {
 	 */
 	private Schema getRuntimeSchema(String delimitedString) {
 		if (runtimeSchema == null) {
-			runtimeSchema = new DelimitedStringSchemaInferrer(delimiter).inferSchema(designSchema, delimitedString);
+			runtimeSchema = new DelimitedStringSchemaInferrer(getDelimiter()).inferSchema(getDesignSchema(), delimitedString);
 		}
 		return runtimeSchema;
 	}    

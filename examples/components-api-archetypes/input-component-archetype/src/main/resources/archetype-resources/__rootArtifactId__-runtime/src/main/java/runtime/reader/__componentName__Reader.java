@@ -35,8 +35,6 @@ public class ${componentName}Reader extends AbstractBoundedReader<IndexedRecord>
 
     private static final Logger LOGGER = LoggerFactory.getLogger(${componentName}Reader.class);
 
-    private final String filePath;
-
     private boolean started = false;
     
     private boolean hasMore = false;
@@ -62,14 +60,13 @@ public class ${componentName}Reader extends AbstractBoundedReader<IndexedRecord>
 
     public ${componentName}Reader(${componentName}Source source) {
         super(source);
-        this.filePath = source.getFilePath();
     }
 
     @Override
     public boolean start() throws IOException {
-        reader = new BufferedReader(new FileReader(filePath));
+        reader = new BufferedReader(new FileReader(getCurrentSource().getFilePath()));
         result = new Result();
-        LOGGER.debug("open: " + filePath); //$NON-NLS-1$
+        LOGGER.debug("open: " + getCurrentSource().getFilePath()); //$NON-NLS-1$
         started = true;
         return advance();
     }
@@ -110,7 +107,7 @@ public class ${componentName}Reader extends AbstractBoundedReader<IndexedRecord>
             throw new IllegalStateException("Reader wasn't started");
         }
         reader.close();
-        LOGGER.debug("close: " + filePath); //$NON-NLS-1$
+        LOGGER.debug("close: " + getCurrentSource().getFilePath()); //$NON-NLS-1$
         reader = null;
         started = false;
         hasMore = false;

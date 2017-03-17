@@ -28,7 +28,7 @@ public class DelimitedStringSchemaInferrer {
     /**
      * Default schema for dynamic fields are of type String
      */
-    private static final Schema DEFAULT_SCHEMA = AvroUtils._string();
+    private static final Schema STRING_SCHEMA = AvroUtils._string();
 
     /**
      * Field delimiter which is used in string line
@@ -79,7 +79,7 @@ public class DelimitedStringSchemaInferrer {
         int size = fields.length;
         List<Field> schemaFields = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            Field designField = new Field("dynamic" + i, DEFAULT_SCHEMA, null, (Object) null);
+            Field designField = new Field("column" + i, STRING_SCHEMA, null, (Object) null);
             schemaFields.add(i, designField);
         }
         Schema schema = Schema.createRecord("Runtime", null, null, false, schemaFields);
