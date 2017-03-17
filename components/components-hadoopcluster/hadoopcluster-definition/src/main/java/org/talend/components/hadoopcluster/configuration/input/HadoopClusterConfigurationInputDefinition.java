@@ -52,7 +52,7 @@ public class HadoopClusterConfigurationInputDefinition extends AbstractComponent
     public RuntimeInfo getRuntimeInfo(ExecutionEngine engine, ComponentProperties properties,
             ConnectorTopology connectorTopology) {
         assertEngineCompatibility(engine);
-        assertConnectorTopologyCompatibility(connectorTopology);
+        //assertConnectorTopologyCompatibility(connectorTopology); not work on Studio
         try {
             HadoopClusterConfigurationInputProperties inputProperties = (HadoopClusterConfigurationInputProperties) properties;
             switch (inputProperties.clusterManagerType.getValue()) {
