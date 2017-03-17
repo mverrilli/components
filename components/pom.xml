@@ -33,5 +33,6 @@
         <module>components-pubsub</module>
 		    <module>components-marketo</module>
         <module>components-netsuite</module>
+        <module>components-hadoopcluster</module>
     </modules>
 </project>
