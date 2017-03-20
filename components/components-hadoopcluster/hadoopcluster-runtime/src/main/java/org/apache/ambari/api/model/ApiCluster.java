@@ -17,10 +17,6 @@ import javax.xml.bind.annotation.XmlElement;
 import com.google.common.base.Objects;
 
 /**
- * created by bchen on Jun 2, 2015 Detailled comment
- *
- */
-/**
  * A cluster represents a set of interdependent services running on a set of hosts. All services on a given cluster are
  * of the same software version.
  */

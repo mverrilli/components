@@ -31,10 +31,6 @@ import org.apache.ambari.api.model.ApiServiceList;
 import org.apache.ambari.api.v1.ClusterResource;
 import org.apache.ambari.api.v1.ServicesResource;
 
-/**
- * created by bchen on Jun 3, 2015 Detailled comment
- *
- */
 public class HadoopAmbariCluster implements HadoopCluster {
 
     ClusterResource cluster;
@@ -46,9 +42,6 @@ public class HadoopAmbariCluster implements HadoopCluster {
     // if the server support service_config_versions
     boolean supportSCV = true;
 
-    /**
-     * DOC bchen HadoopAmbariCluster constructor comment.
-     */
     public HadoopAmbariCluster(ClusterResource cluster) {
         this.cluster = cluster;
         this.services = cluster.getServicesResource();
@@ -59,11 +52,6 @@ public class HadoopAmbariCluster implements HadoopCluster {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.talend.components.hadoopcluster.runtime.configuration.HadoopCluster#getHostedServices()
-     */
     @Override
     public Map<HadoopHostedService, HadoopClusterService> getHostedServices() {
         Map<HadoopHostedService, HadoopClusterService> hostedServices = null;

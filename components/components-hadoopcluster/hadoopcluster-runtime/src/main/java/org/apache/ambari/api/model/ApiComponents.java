@@ -18,18 +18,10 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-/**
- * created by bchen on Jun 10, 2015 Detailled comment
- *
- */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiComponents extends ApiListBase<ApiHostComponents> {
 
-    /**
-     * DOC bchen ApiComponents constructor comment.
-     */
     public ApiComponents() {
-        // TODO Auto-generated constructor stub
     }
 
     @XmlElement(name = "host_components")

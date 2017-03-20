@@ -25,10 +25,6 @@ import org.joda.time.format.PeriodFormatter;
 import com.google.common.base.Preconditions;
 
 /**
- * created by bchen on Jun 2, 2015 Detailled comment
- *
- */
-/**
  * A collection of utility methods and common constants used by API code.
  */
 public final class ApiUtils {

@@ -24,10 +24,6 @@ import org.apache.ambari.api.model.ApiClusterList;
 import org.apache.ambari.api.v1.ClusterResource;
 import org.apache.ambari.api.v1.RootResourceV1;
 
-/**
- * created by bchen on Jun 3, 2015 Detailled comment
- *
- */
 public class HadoopAmbariConfigurator implements HadoopConfigurator {
 
     private RootResourceV1 api;
@@ -39,11 +35,6 @@ public class HadoopAmbariConfigurator implements HadoopConfigurator {
         api = amBuilder.build().getRootV1();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.talend.components.hadoopcluster.runtime.configuration.HadoopConfigurator#getAllClusters()
-     */
     @Override
     public List<String> getAllClusters() {
         ApiClusterList clusters = api.getClustersResource().readClusters();
@@ -54,11 +45,6 @@ public class HadoopAmbariConfigurator implements HadoopConfigurator {
         return names;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.talend.components.hadoopcluster.runtime.configuration.HadoopConfigurator#getCluster(java.lang.String)
-     */
     @Override
     public HadoopCluster getCluster(String name) {
         ClusterResource cluster = api.getClustersResource().getClusterResource(name);

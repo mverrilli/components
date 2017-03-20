@@ -17,10 +17,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.google.common.base.Objects;
 
-/**
- * created by bchen on Jun 2, 2015 Detailled comment
- *
- */
 @XmlRootElement(name = "Clusters")
 public class ApiClusterInfo {
 

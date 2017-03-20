@@ -21,10 +21,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import com.google.common.base.Objects;
 
 /**
- * created by bchen on Jun 2, 2015 Detailled comment
- *
- */
-/**
  * A list of clusters.
  */
 @XmlRootElement(name = "clusterList")
@@ -34,7 +30,7 @@ public class ApiClusterList extends ApiListBase<ApiCluster> {
 
     /**
      * Getter for href.
-     * 
+     *
      * @return the href
      */
     @XmlElement

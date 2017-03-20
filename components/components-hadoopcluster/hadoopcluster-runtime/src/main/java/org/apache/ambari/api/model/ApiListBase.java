@@ -21,10 +21,6 @@ import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
 /**
- * created by bchen on Jun 2, 2015 Detailled comment
- *
- */
-/**
  * A generic list.
  */
 abstract class ApiListBase<T> implements Iterable<T> {

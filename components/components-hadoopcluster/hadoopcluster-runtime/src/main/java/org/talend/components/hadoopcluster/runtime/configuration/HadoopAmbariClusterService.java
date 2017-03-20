@@ -29,10 +29,6 @@ import org.apache.ambari.api.model.ApiConfigFile;
 import org.apache.hadoop.conf.Configuration;
 import org.talend.components.api.exception.ComponentException;
 
-/**
- * created by bchen on Jun 3, 2015 Detailled comment
- *
- */
 public class HadoopAmbariClusterService implements HadoopClusterService {
 
     private static final String SUPPORT_FILE = "site"; //$NON-NLS-1$
@@ -41,9 +37,6 @@ public class HadoopAmbariClusterService implements HadoopClusterService {
 
     private List<ApiConfigFile> configFiles;
 
-    /**
-     * DOC bchen HadoopAmbariClusterService constructor comment.
-     */
     public HadoopAmbariClusterService(List<ApiConfigFile> configFiles, List<String> blacklistParams) {
         this.configFiles = configFiles;
         init(blacklistParams);
@@ -68,11 +61,6 @@ public class HadoopAmbariClusterService implements HadoopClusterService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.talend.components.hadoopcluster.runtime.configuration.HadoopClusterService#getConfiguration()
-     */
     @Override
     public Map<String, String> getConfiguration() {
         Map<String, String> confMapping = new HashMap<>();
@@ -84,26 +72,12 @@ public class HadoopAmbariClusterService implements HadoopClusterService {
         return confMapping;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.talend.components.hadoopcluster.runtime.configuration.HadoopClusterService#getConfigurationByRegex(java.lang.
-     * String)
-     */
     @Override
     public String getConfigurationValue(String key) {
         Map<String, String> confMapping = getConfiguration();
         return confMapping.get(key);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.talend.components.hadoopcluster.runtime.configuration.HadoopClusterService#exportConfigurationToXml(java.lang
-     * .String)
-     */
     @Override
     public void exportConfigurationToXml(String folderPath) {
         for (String key : confs.keySet()) {
@@ -130,13 +104,6 @@ public class HadoopAmbariClusterService implements HadoopClusterService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.talend.components.hadoopcluster.runtime.configuration.HadoopClusterService#exportConfigurationToXml(java.lang
-     * .String, java.lang.String)
-     */
     private void exportConfigurationToXml(String folderPath, String confName) {
         Configuration conf = confs.get(confName);
         if (conf == null) {
@@ -157,11 +124,6 @@ public class HadoopAmbariClusterService implements HadoopClusterService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.talend.components.hadoopcluster.runtime.configuration.HadoopClusterService#getConfFiles()
-     */
     @Override
     public Set<String> getConfFiles() {
         Set<String> fileNames = new HashSet<>();
@@ -171,11 +133,6 @@ public class HadoopAmbariClusterService implements HadoopClusterService {
         return fileNames;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.talend.components.hadoopcluster.runtime.configuration.HadoopClusterService#hasConfigurations()
-     */
     @Override
     public boolean hasConfigurations() {
         return confs.size() > 0;

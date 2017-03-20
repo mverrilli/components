@@ -17,10 +17,6 @@ import javax.ws.rs.Path;
 import org.apache.ambari.api.v1.RootResourceV1;
 
 /**
- * created by bchen on Jun 2, 2015 Detailled comment
- *
- */
-/**
  * Root resource for the API. Provides access to the version-specific resources.
  */
 @Path("/")

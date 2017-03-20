@@ -16,15 +16,8 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
 
-/**
- * created by bchen on Jun 10, 2015 Detailled comment
- *
- */
 public class ApiActualConfigsList extends ApiListBase<ApiActualConfigs> {
 
-    /**
-     * DOC bchen ApiActualConfigsList constructor comment.
-     */
     public ApiActualConfigsList() {
         // TODO Auto-generated constructor stub
     }

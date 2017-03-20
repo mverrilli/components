@@ -36,10 +36,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-/**
- * created by bchen on Jun 2, 2015 Detailled comment
- *
- */
 public class AmbariClientBuilder {
 
     public static final int DEFAULT_TCP_PORT = 7180;

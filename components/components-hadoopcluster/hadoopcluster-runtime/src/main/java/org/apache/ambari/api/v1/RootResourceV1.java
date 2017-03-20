@@ -12,14 +12,11 @@
 // ============================================================================
 package org.apache.ambari.api.v1;
 
-/**
- * created by bchen on Jun 2, 2015 Detailled comment
- *
- */
 import javax.ws.rs.Path;
 
 /**
- * The root of the Cloudera API. Provides access to all sub-resources available in version 1 of the API.
+ * The root of the Ambari API. Provides access to all sub-resources available in version 1 of the
+ * API.
  */
 public interface RootResourceV1 {
 

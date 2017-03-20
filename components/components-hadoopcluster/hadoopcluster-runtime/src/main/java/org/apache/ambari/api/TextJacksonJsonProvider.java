@@ -18,10 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.jaxrs.json.Annotations;
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 
-/**
- * created by bchen on Jun 3, 2015 Detailled comment
- *
- */
 /*
  * for the bug https://issues.apache.org/jira/browse/AMBARI-9016, have to use this workaroud
  */

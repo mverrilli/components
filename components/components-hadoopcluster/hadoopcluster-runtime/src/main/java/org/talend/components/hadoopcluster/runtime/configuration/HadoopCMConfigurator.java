@@ -25,10 +25,6 @@ import com.cloudera.api.model.ApiClusterList;
 import com.cloudera.api.v3.RootResourceV3;
 import com.cloudera.api.v3.ServicesResourceV3;
 
-/**
- * created by bchen on May 28, 2015 Detailled comment
- *
- */
 public class HadoopCMConfigurator implements HadoopConfigurator {
 
     RootResourceV3 api;
@@ -40,11 +36,6 @@ public class HadoopCMConfigurator implements HadoopConfigurator {
         api = cmBuilder.build().getRootV3();
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.talend.components.hadoopcluster.runtime.configuration.HadoopConfigurator#getAllClusters()
-     */
     @Override
     public List<String> getAllClusters() {
         ApiClusterList clusters = api.getClustersResource().readClusters(DataView.SUMMARY);
@@ -55,11 +46,6 @@ public class HadoopCMConfigurator implements HadoopConfigurator {
         return names;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see org.talend.components.hadoopcluster.runtime.configuration.HadoopConfigurator#getCluster(java.lang.String)
-     */
     @Override
     public HadoopCluster getCluster(String name) {
         ServicesResourceV3 cluster = api.getClustersResource().getServicesResource(name);

@@ -24,10 +24,6 @@ import javax.ws.rs.core.MediaType;
 import org.apache.ambari.api.model.ApiConfigList;
 import org.apache.ambari.api.model.ApiConfigFileList2;
 
-/**
- * created by bchen on Jun 3, 2015 Detailled comment
- *
- */
 @Produces({ MediaType.TEXT_PLAIN })
 public interface ConfigsResource {
 

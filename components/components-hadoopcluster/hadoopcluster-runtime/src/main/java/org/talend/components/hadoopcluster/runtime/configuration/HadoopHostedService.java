@@ -14,10 +14,6 @@ package org.talend.components.hadoopcluster.runtime.configuration;
 
 import com.google.common.base.Joiner;
 
-/**
- * created by bchen on Jun 1, 2015 Detailled comment
- *
- */
 public enum HadoopHostedService {
     YARN,
     HDFS,

@@ -19,10 +19,6 @@ import javax.ws.rs.core.MediaType;
 
 import org.apache.ambari.api.model.ApiServiceList;
 
-/**
- * created by bchen on Jun 3, 2015 Detailled comment
- *
- */
 @Produces({ MediaType.TEXT_PLAIN })
 public interface ServicesResource {
 

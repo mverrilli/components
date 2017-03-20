@@ -16,15 +16,10 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-/**
- * created by bchen on Jun 3, 2015 Detailled comment
- *
- */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiConfigFile {
 
     public ApiConfigFile() {
-
     }
 
     private String type;

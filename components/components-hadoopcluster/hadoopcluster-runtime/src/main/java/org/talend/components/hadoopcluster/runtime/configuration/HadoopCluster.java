@@ -15,10 +15,6 @@ package org.talend.components.hadoopcluster.runtime.configuration;
 import java.util.List;
 import java.util.Map;
 
-/**
- * created by bchen on May 28, 2015 Detailled comment
- *
- */
 public interface HadoopCluster {
 
 	public void setBlacklistParams(List<String> names);

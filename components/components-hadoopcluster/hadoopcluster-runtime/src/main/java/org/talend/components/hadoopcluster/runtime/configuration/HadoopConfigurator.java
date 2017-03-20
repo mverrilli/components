@@ -17,10 +17,6 @@ import java.util.List;
 
 import javax.net.ssl.TrustManager;
 
-/**
- * created by bchen on May 27, 2015 Detailled comment
- *
- */
 public interface HadoopConfigurator {
 
     public List<String> getAllClusters();

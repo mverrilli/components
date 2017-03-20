@@ -40,10 +40,6 @@ import org.talend.components.api.exception.ComponentException;
 
 import com.cloudera.api.v3.ServicesResourceV3;
 
-/**
- * created by bchen on May 28, 2015 Detailled comment
- *
- */
 public class HadoopCMClusterService implements HadoopClusterService {
 
     private static final String SUPPORT_FILE = "site.xml"; //$NON-NLS-1$
@@ -54,20 +50,12 @@ public class HadoopCMClusterService implements HadoopClusterService {
 
     private Map<String, Configuration> confs;// only contains *-site.xml
 
-    /**
-     * DOC bchen HadoopCMClusterService constructor comment.
-     * 
-     * @param cluster
-     */
     public HadoopCMClusterService(String serviceName, ServicesResourceV3 cluster, List<String> blacklistParams) {
         this.serviceName = serviceName;
         this.cluster = cluster;
         init(blacklistParams);
     }
 
-    /**
-     * DOC bchen Comment method "init".
-     */
     private void init(List<String> blacklistParams) {
         confs = new HashMap<>();
         InputStreamDataSource clientConfig = null;
@@ -132,11 +120,6 @@ public class HadoopCMClusterService implements HadoopClusterService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.talend.components.hadoopcluster.runtime.configuration.HadoopClusterService#getConfiguration()
-     */
     @Override
     public Map<String, String> getConfiguration() {
         Map<String, String> confMapping = new HashMap<>();
@@ -146,37 +129,17 @@ public class HadoopCMClusterService implements HadoopClusterService {
         return confMapping;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.talend.components.hadoopcluster.runtime.configuration.HadoopClusterService#getConfigurationByRegex(java.lang.
-     * String)
-     */
     @Override
     public String getConfigurationValue(String key) {
         Map<String, String> confMapping = getConfiguration();
         return confMapping.get(key);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.talend.components.hadoopcluster.runtime.configuration.HadoopClusterService#getConfiguration(java.lang.String)
-     */
     private Map<String, String> getConfiguration(String confName) {
         Configuration conf = confs.get(confName);
         return conf.getValByRegex(".*"); //$NON-NLS-1$ ;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.talend.components.hadoopcluster.runtime.configuration.HadoopClusterService#exportConfigurationToXml(java.lang
-     * .String)
-     */
     @Override
     public void exportConfigurationToXml(String folderPath) {
         for (String key : confs.keySet()) {
@@ -203,13 +166,6 @@ public class HadoopCMClusterService implements HadoopClusterService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see
-     * org.talend.components.hadoopcluster.runtime.configuration.HadoopClusterService#exportConfigurationToXml(java.lang
-     * .String, java.lang.String)
-     */
     private void exportConfigurationToXml(String folderPath, String confName) {
         Configuration conf = confs.get(confName);
         if (conf == null) {
@@ -230,21 +186,11 @@ public class HadoopCMClusterService implements HadoopClusterService {
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.talend.components.hadoopcluster.runtime.configuration.HadoopClusterService#getConfFiles()
-     */
     @Override
     public Set<String> getConfFiles() {
         return confs.keySet();
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.talend.components.hadoopcluster.runtime.configuration.HadoopClusterService#hasConfigurations()
-     */
     @Override
     public boolean hasConfigurations() {
         return confs.size() > 0;

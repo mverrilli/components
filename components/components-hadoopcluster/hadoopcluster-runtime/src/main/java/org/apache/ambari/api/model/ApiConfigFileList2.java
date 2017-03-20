@@ -20,10 +20,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.google.common.base.Objects;
 
-/**
- * created by bchen on Jun 3, 2015 Detailled comment
- *
- */
 @XmlRootElement(name = "configList")
 public class ApiConfigFileList2 extends ApiListBase<ApiConfigFile> {
 
@@ -31,7 +27,7 @@ public class ApiConfigFileList2 extends ApiListBase<ApiConfigFile> {
 
     /**
      * Getter for href.
-     * 
+     *
      * @return the href
      */
     @XmlElement
