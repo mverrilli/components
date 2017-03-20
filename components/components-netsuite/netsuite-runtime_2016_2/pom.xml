@@ -138,6 +138,13 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <excludePackageNames>com.netsuite.webservices.*</excludePackageNames>
+                </configuration>
+            </plugin>
 
             <!-- Add Apache CXF generated sources to sources set. -->
             <plugin>
