@@ -51,6 +51,7 @@ public class HadoopClusterConfigurationInputProperties extends FixedConnectorsCo
 
     @Override
     public void setupProperties() {
+        clusterManagerType.setValue(ClusterManagerType.CLOUDERA_MANAGER);
         schema.schema.setValue(HadoopClusterConfiguration.schema);
     }
 
