@@ -40,7 +40,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.talend.components.api.component.runtime.BoundedReader;
 import org.talend.components.api.component.runtime.Result;
 import org.talend.components.api.component.runtime.Writer;
@@ -63,9 +62,7 @@ import org.talend.daikon.properties.test.PropertiesTestUtils;
 
 public abstract class SnowflakeRuntimeIT extends SnowflakeTestIT {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
-
-    protected RuntimeContainer adaptor;
+    protected RuntimeContainer container;
 
     protected static Date testTimestamp = new Date();
 
@@ -83,20 +80,21 @@ public abstract class SnowflakeRuntimeIT extends SnowflakeTestIT {
 
     protected Schema componentSchema = null;
 
-    static {
+    protected static void initTestData(Logger LOGGER) {
         try {
             dateFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
             testDate = dateFormatter.parse("2008-11-04");
-            System.out.println("testDate: " + testDate + " ms: " + testDate.getTime());
+            LOGGER.info("testDate: " + testDate + " ms: " + testDate.getTime());
             testTime = timeParser.parse(testTimeString + "-0000");
-            System.out.println("testTime: " + testTime.getTime());
+            LOGGER.info("testTime: " + testTime.getTime());
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
     }
 
     public SnowflakeRuntimeIT() {
-        adaptor = new DefaultComponentRuntimeContainerImpl();
+        container = new DefaultComponentRuntimeContainerImpl();
+        initTestData(LOGGER);
     }
 
     public <T> BoundedReader<T> createBoundedReader(ComponentProperties tsip) {
@@ -113,7 +111,7 @@ public abstract class SnowflakeRuntimeIT extends SnowflakeTestIT {
     protected void resetUser() throws SQLException {
         // Make sure the user is unlocked if locked. Snowflake will lock the user if too many logins
         // So this unlocks it
-        testConnection.createStatement().execute("alter user " + user + " set mins_to_unlock=0");
+        testConnection.createStatement().execute("alter user " + USER + " set mins_to_unlock=0");
     }
 
     @Before
@@ -121,7 +119,7 @@ public abstract class SnowflakeRuntimeIT extends SnowflakeTestIT {
         resetUser();
     }
 
-    public void tearDown() throws SQLException {
+    public void tearDownTable() throws SQLException {
         if (!false) {
             testConnection.createStatement().execute("DELETE FROM " + testSchema + "." + testTable);
         }
@@ -148,7 +146,7 @@ public abstract class SnowflakeRuntimeIT extends SnowflakeTestIT {
         return "{\"key\":" + (i * 1000) + "," + "\"bar\":" + i + "}";
     }
 
-    public IndexedRecord makeRow(int i, Random rnd) {
+    public IndexedRecord makeRow(int i) {
         GenericData.Record row = new GenericData.Record(getMakeRowSchema());
 
         row.put("ID", i);
@@ -167,7 +165,7 @@ public abstract class SnowflakeRuntimeIT extends SnowflakeTestIT {
         List<IndexedRecord> outputRows = new ArrayList<>();
         Random rnd = new Random();
         for (int i = 0; i < count; i++) {
-            GenericData.Record row = (GenericData.Record) makeRow(i, rnd);
+            GenericData.Record row = (GenericData.Record) makeRow(i);
             outputRows.add(row);
         }
         return outputRows;
@@ -288,7 +286,7 @@ public abstract class SnowflakeRuntimeIT extends SnowflakeTestIT {
         writer.open("foo");
         try {
             for (int i = 0; i < count; i++) {
-                IndexedRecord row = makeRow(i, rnd);
+                IndexedRecord row = makeRow(i);
                 writer.write(row);
             }
         } finally {
@@ -300,10 +298,10 @@ public abstract class SnowflakeRuntimeIT extends SnowflakeTestIT {
     // Returns the rows written (having been re-read so they have their Ids)
     protected Writer<Result> makeWriter(SnowflakeConnectionTableProperties props) throws Exception {
         SnowflakeSink SnowflakeSink = new SnowflakeSink();
-        SnowflakeSink.initialize(adaptor, props);
-        SnowflakeSink.validate(adaptor);
+        SnowflakeSink.initialize(container, props);
+        SnowflakeSink.validate(container);
         SnowflakeWriteOperation writeOperation = SnowflakeSink.createWriteOperation();
-        return writeOperation.createWriter(adaptor);
+        return writeOperation.createWriter(container);
     }
 
     protected TSnowflakeOutputProperties getRightProperties(SnowflakeConnectionTableProperties props) {
@@ -380,12 +378,12 @@ public abstract class SnowflakeRuntimeIT extends SnowflakeTestIT {
         props.afterOutputAction();
 
         long time = System.currentTimeMillis();
-        System.out.println("Start loading: " + count + " rows");
+        LOGGER.info("Start loading: " + count + " rows");
         Result result = makeAndWriteRows(makeWriter(props), count);
         assertEquals(count, result.getSuccessCount());
         assertEquals(0, result.getRejectCount());
         long elapsed = System.currentTimeMillis() - time;
-        System.out.println("time (ms): " + elapsed + " rows/sec: " + ((float) count / (float) (elapsed / 1000)));
+        LOGGER.info("time (ms): " + elapsed + " rows/sec: " + ((float) count / (float) (elapsed / 1000)));
         return props;
     }
 
@@ -393,17 +391,17 @@ public abstract class SnowflakeRuntimeIT extends SnowflakeTestIT {
     public static void setupDatabase() throws Exception {
         Class.forName("com.snowflake.client.jdbc.SnowflakeDriver");
 
-        if (accountStr == null) {
+        if (ACCOUNT_STR == null) {
             throw new Exception(
                     "This test expects snowflake.* system properties to be set. See the top of this class for the list of properties");
         }
 
         try {
 
-            String connectionUrl = "jdbc:snowflake://" + accountStr + ".snowflakecomputing.com";
+            String connectionUrl = "jdbc:snowflake://" + ACCOUNT_STR + ".snowflakecomputing.com";
 
-            connectionUrl += "/?user=" + user + "&password=" + password + "&testSchema=" + testSchema + "&db=" + db
-                    + "&warehouse=" + warehouse;
+            connectionUrl += "/?user=" + USER + "&password=" + PASSWORD + "&testSchema=" + testSchema + "&db=" + DB
+                    + "&warehouse=" + WAREHOUSE;
 
             Properties properties = new Properties();
 

@@ -43,28 +43,30 @@ public abstract class SnowflakeTestIT extends AbstractComponentTest {
 
     protected static Connection testConnection;
 
-    protected final static String accountStr = System.getProperty("snowflake.account");
+    private DefinitionRegistry testComponentRegistry;
 
-    protected final static String user = System.getProperty("snowflake.user");
+    protected static final String ACCOUNT_STR = System.getProperty("snowflake.account");
 
-    protected final static String password = System.getProperty("snowflake.password");
+    protected static final String USER = System.getProperty("snowflake.user");
 
-    protected final static String warehouse = System.getProperty("snowflake.warehouse");
+    protected static final String PASSWORD = System.getProperty("snowflake.password");
 
-    protected final static String schema = System.getProperty("snowflake.schema");
+    protected static final String WAREHOUSE = System.getProperty("snowflake.warehouse");
 
-    protected final static String db = System.getProperty("snowflake.db");
+    protected static final String SCHEMA = System.getProperty("snowflake.schema");
 
-    protected final static String TEST_TABLE = "LOADER_TEST_TABLE";
+    protected static final String DB = System.getProperty("snowflake.db");
+
+    protected static final String TEST_TABLE = "LOADER_TEST_TABLE";
 
     // So that multiple tests can run at the same time
     protected static String testNumber = Integer.toString(ThreadLocalRandom.current().nextInt(1, 100000));
 
     protected static String testTable = TEST_TABLE + "_" + testNumber;
 
-    protected static String testSchema = schema + "_" + testNumber;
+    protected static String testSchema = SCHEMA + "_" + testNumber;
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(SnowflakeTestIT.class);
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     @Rule
     public ErrorCollector errorCollector = new ErrorCollector();
@@ -74,18 +76,17 @@ public abstract class SnowflakeTestIT extends AbstractComponentTest {
     protected static final int NUM_COLUMNS = 8;
 
     public SnowflakeTestIT() {
-        // adaptor = new DefaultComponentRuntimeContainerImpl();
     }
 
     public ComponentProperties setupProps(SnowflakeConnectionProperties props) {
         if (props == null) {
             props = (SnowflakeConnectionProperties) new SnowflakeConnectionProperties("foo").init();
         }
-        props.userPassword.userId.setStoredValue(user);
-        props.userPassword.password.setStoredValue(password);
-        props.account.setStoredValue(accountStr);
-        props.warehouse.setStoredValue(warehouse);
-        props.db.setStoredValue(db);
+        props.userPassword.userId.setStoredValue(USER);
+        props.userPassword.password.setStoredValue(PASSWORD);
+        props.account.setStoredValue(ACCOUNT_STR);
+        props.warehouse.setStoredValue(WAREHOUSE);
+        props.db.setStoredValue(DB);
         props.schemaName.setStoredValue(testSchema);
         return props;
     }

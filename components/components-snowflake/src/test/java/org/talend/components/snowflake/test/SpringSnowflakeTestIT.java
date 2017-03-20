@@ -141,7 +141,7 @@ public class SpringSnowflakeTestIT extends SnowflakeRuntimeIT {
         List<NamedThing> all = mlProps.selectedTableNames.getValue();
         assertNull(all);
         List<NamedThing> possibleValues = (List<NamedThing>) mlProps.selectedTableNames.getPossibleValues();
-        System.out.println("possibleValues: " + possibleValues);
+        LOGGER.info("possibleValues: " + possibleValues);
         assertEquals(1, possibleValues.size());
         List<NamedThing> selected = new ArrayList<>();
         selected.add(possibleValues.get(0));
@@ -155,8 +155,8 @@ public class SpringSnowflakeTestIT extends SnowflakeRuntimeIT {
             if (i == 0) {
                 assertEquals("connName", rp.name);
                 SnowflakeConnectionProperties storedConnProps = (SnowflakeConnectionProperties) rp.props;
-                assertEquals(user, storedConnProps.userPassword.userId.getValue());
-                assertEquals(password, storedConnProps.userPassword.password.getValue());
+                assertEquals(USER, storedConnProps.userPassword.userId.getValue());
+                assertEquals(PASSWORD, storedConnProps.userPassword.password.getValue());
             } else {
                 SnowflakeTableProperties storedModule = (SnowflakeTableProperties) rp.props;
                 assertEquals(selected.get(i - 1).getName(), storedModule.tableName.getValue());
@@ -197,7 +197,7 @@ public class SpringSnowflakeTestIT extends SnowflakeRuntimeIT {
     @Test
     public void testLogin() throws Throwable {
         SnowflakeConnectionProperties props = (SnowflakeConnectionProperties) setupProps(null);
-        System.out.println(props);
+        LOGGER.debug(String.valueOf(props));
         Form f = props.getForm(SnowflakeConnectionProperties.FORM_WIZARD);
         props = (SnowflakeConnectionProperties) PropertiesTestUtils.checkAndValidate(getComponentService(), f, "testConnection",
                 props);

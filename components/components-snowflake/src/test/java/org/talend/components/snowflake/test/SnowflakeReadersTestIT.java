@@ -14,10 +14,8 @@ package org.talend.components.snowflake.test;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.talend.daikon.properties.presentation.Form.MAIN;
 
 import java.io.IOException;
@@ -28,7 +26,6 @@ import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
 import org.junit.Before;
 import org.junit.Test;
-import org.talend.components.api.component.ComponentDefinition;
 import org.talend.components.api.container.DefaultComponentRuntimeContainerImpl;
 import org.talend.components.api.container.RuntimeContainer;
 import org.talend.components.api.properties.ComponentReferenceProperties;
@@ -46,7 +43,6 @@ import org.talend.components.snowflake.tsnowflakeoutput.TSnowflakeOutputDefiniti
 import org.talend.components.snowflake.tsnowflakeoutput.TSnowflakeOutputProperties;
 import org.talend.daikon.properties.ValidationResult;
 import org.talend.daikon.properties.presentation.Form;
-import org.talend.daikon.properties.property.Property;
 import org.talend.daikon.properties.test.PropertiesTestUtils;
 
 /**
@@ -76,7 +72,6 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
 
         props.condition.setValue("ID > 80");
         setupTableWithStaticValues(props);
-        // checkAndSetupTable(props);
         List<IndexedRecord> rows = readRows(props);
         assertEquals(19, rows.size());
         assertEquals(BigDecimal.valueOf(81), rows.get(0).get(0));
@@ -97,12 +92,12 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
         List<IndexedRecord> rows = readRows(props);
         assertEquals(19, rows.size());
         Schema schema = rows.get(0).getSchema();
-        System.out.println(schema.toString());
+        LOGGER.debug(schema.toString());
         assertEquals(BigDecimal.valueOf(81), rows.get(0).get(0));
         assertThat((String) rows.get(0).get(1), containsString("\"bar\": 81"));
     }
 
-    @Test
+    @Test(expected = IOException.class)
     public void testSameConnectionForSeveralReaders() throws Throwable {
         SnowflakeConnectionProperties connProps = (SnowflakeConnectionProperties) getComponentService()
                 .getComponentProperties(TSnowflakeConnectionDefinition.COMPONENT_NAME);
@@ -144,11 +139,7 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
         assertEquals(ValidationResult.Result.OK, snowflakeCloseSourceOrSink.validate(connContainer).getStatus());
 
         // After close, exception should be thrown by the reader, if we try to read with the same connection.
-        try {
-            rows = readRows(props, connContainer);
-            fail();
-        } catch (IOException e) {
-        }
+        rows = readRows(props, connContainer);
     }
 
     @Test
@@ -170,8 +161,6 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
         snowflakeSourceOrSink.initialize(connContainer, connProps);
         assertEquals(ValidationResult.Result.OK, snowflakeSourceOrSink.validate(connContainer).getStatus());
 
-        ComponentDefinition closeDefinition = getComponentService()
-                .getComponentDefinition(TSnowflakeCloseDefinition.COMPONENT_NAME);
         TSnowflakeCloseProperties closeProps = (TSnowflakeCloseProperties) getComponentService()
                 .getComponentProperties(TSnowflakeCloseDefinition.COMPONENT_NAME);
         closeProps.referencedComponent.componentInstanceId.setValue(currentComponentName);
@@ -201,8 +190,6 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
         assertEquals(ValidationResult.Result.OK, SnowflakeSourceOrSink.validate(connContainer).getStatus());
 
         // Input component get connection from the tSnowflakeConnection
-        ComponentDefinition inputDefinition = getComponentService()
-                .getComponentDefinition(TSnowflakeInputDefinition.COMPONENT_NAME);
         TSnowflakeInputProperties inProps = (TSnowflakeInputProperties) getComponentService()
                 .getComponentProperties(TSnowflakeInputDefinition.COMPONENT_NAME);
         inProps.connection.referencedComponent.componentInstanceId.setValue(currentComponentName);
@@ -214,7 +201,6 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
 
     @Test
     public void testInputConnectionRef() throws Throwable {
-        ComponentDefinition definition = getComponentService().getComponentDefinition(TSnowflakeInputDefinition.COMPONENT_NAME);
         TSnowflakeInputProperties props = (TSnowflakeInputProperties) getComponentService()
                 .getComponentProperties(TSnowflakeInputDefinition.COMPONENT_NAME);
         setupProps(props.connection);
@@ -263,7 +249,7 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
         SnowflakeSourceOrSink = new SnowflakeSourceOrSink();
         SnowflakeSourceOrSink.initialize(null, props);
         ValidationResult result = SnowflakeSourceOrSink.validate(null);
-        System.out.println(result);
+        LOGGER.info(String.valueOf(result));
         assertEquals(ValidationResult.Result.OK, result.getStatus());
     }
 
@@ -291,38 +277,6 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
     }
 
     @Test
-    public void testConnectionProps() throws Throwable {
-        SnowflakeConnectionProperties props = (SnowflakeConnectionProperties) new TSnowflakeConnectionDefinition()
-                .createProperties();
-        assertTrue(props.userPassword.userId.isRequired());
-        assertTrue(props.userPassword.password.isRequired());
-        assertFalse(props.warehouse.isRequired());
-        assertTrue(props.schemaName.isRequired());
-        assertTrue(props.db.isRequired());
-    }
-
-    @Test
-    public void testInputProps() throws Throwable {
-        TSnowflakeInputProperties props = (TSnowflakeInputProperties) new TSnowflakeInputDefinition().createProperties();
-        assertFalse(props.manualQuery.getValue());
-        Property[] returns = new TSnowflakeInputDefinition().getReturnProperties();
-        assertEquals(ComponentDefinition.RETURN_TOTAL_RECORD_COUNT, returns[1].getName());
-
-        Form f = props.getForm(MAIN);
-        props.manualQuery.setValue(true);
-        props = (TSnowflakeInputProperties) PropertiesTestUtils.checkAndAfter(getComponentService(), f,
-                props.manualQuery.getName(), props);
-        assertFalse(f.getWidget(props.query.getName()).isHidden());
-        assertTrue(f.getWidget(props.condition.getName()).isHidden());
-
-        props.manualQuery.setValue(false);
-        props = (TSnowflakeInputProperties) PropertiesTestUtils.checkAndAfter(getComponentService(), f,
-                props.manualQuery.getName(), props);
-        assertTrue(f.getWidget(props.query.getName()).isHidden());
-        assertFalse(f.getWidget(props.condition.getName()).isHidden());
-    }
-
-    @Test
     public void testTableNamesInput() throws Throwable {
         TSnowflakeInputProperties props = (TSnowflakeInputProperties) getComponentService()
                 .getComponentProperties(TSnowflakeInputDefinition.COMPONENT_NAME);
@@ -331,7 +285,7 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
         checkAndSetupTable(props);
     }
 
-    @Test
+    @Test(expected = IOException.class)
     public void testInputManualError() throws Throwable {
         TSnowflakeInputProperties props = (TSnowflakeInputProperties) new TSnowflakeInputDefinition().createProperties();
         setupProps(props.getConnectionProperties());
@@ -341,12 +295,7 @@ public class SnowflakeReadersTestIT extends SnowflakeRuntimeIT {
                 props.manualQuery.getName(), props);
 
         props.query.setValue("bad query");
-        try {
-            readRows(props);
-            fail("No expected exception");
-        } catch (IOException ex) {
-            assertThat(ex.getMessage(), containsString("bad query"));
-        }
+        readRows(props);
     }
 
 }

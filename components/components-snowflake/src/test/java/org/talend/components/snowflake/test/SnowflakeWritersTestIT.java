@@ -55,9 +55,9 @@ public class SnowflakeWritersTestIT extends SnowflakeRuntimeIT {
 
     public Writer<Result> createSnowflakeOutputWriter(TSnowflakeOutputProperties props) {
         SnowflakeSink SnowflakeSink = new SnowflakeSink();
-        SnowflakeSink.initialize(adaptor, props);
+        SnowflakeSink.initialize(container, props);
         SnowflakeWriteOperation writeOperation = SnowflakeSink.createWriteOperation();
-        Writer<Result> writer = writeOperation.createWriter(adaptor);
+        Writer<Result> writer = writeOperation.createWriter(container);
         return writer;
     }
 
@@ -114,7 +114,7 @@ public class SnowflakeWritersTestIT extends SnowflakeRuntimeIT {
         tableProps.tableName.setValue("BADONE");
         tableProps = (SnowflakeTableProperties) PropertiesTestUtils.checkAndAfter(getComponentService(), f,
                 tableProps.tableName.getName(), tableProps);
-        System.out.println(tableProps.getValidationResult());
+        LOGGER.info(String.valueOf(tableProps.getValidationResult()));
         assertEquals(ValidationResult.Result.ERROR, tableProps.getValidationResult().getStatus());
         assertThat(tableProps.getValidationResult().getMessage(), containsString("BADONE"));
     }
@@ -130,7 +130,7 @@ public class SnowflakeWritersTestIT extends SnowflakeRuntimeIT {
         tableProps.tableName.setValue("BADONE");
         tableProps = (SnowflakeTableProperties) PropertiesTestUtils.checkAndAfter(getComponentService(), f,
                 tableProps.tableName.getName(), tableProps);
-        System.out.println(tableProps.getValidationResult());
+        LOGGER.info(String.valueOf(tableProps.getValidationResult()));
         assertEquals(ValidationResult.Result.ERROR, tableProps.getValidationResult().getStatus());
         assertThat(tableProps.getValidationResult().getMessage(), containsString("Missing user name"));
     }
@@ -338,7 +338,7 @@ public class SnowflakeWritersTestIT extends SnowflakeRuntimeIT {
 
     @After
     public void clean() throws SQLException {
-        tearDown();
+        tearDownTable();
     }
 
     @Test
