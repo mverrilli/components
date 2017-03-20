@@ -18,9 +18,7 @@
 
     <modules>
         <module>hadoopcluster-definition</module>
-        <module>hadoopcluster-runtime_ambari</module>
-        <module>hadoopcluster-runtime_cm</module>
-        <module>hadoopcluster-common</module>
+        <module>hadoopcluster-runtime</module>
     </modules>
 
 </project>

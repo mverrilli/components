@@ -39,7 +39,8 @@ public interface ConfigsResource {
     @GET
     @Path("/service_config_versions")
     public ApiConfigList readConfig(@QueryParam(SERVICE_NAME) String serviceName,
-                                    @DefaultValue("true") @QueryParam("is_current") boolean isCurrent);
+                                    @DefaultValue("true") @QueryParam("is_current") boolean
+                                            isCurrent);
 
     @GET
     @Path("/service_config_versions")

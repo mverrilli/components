@@ -52,19 +52,19 @@ public class HadoopClusterConfigurationInputDefinition extends AbstractComponent
     public RuntimeInfo getRuntimeInfo(ExecutionEngine engine, ComponentProperties properties,
             ConnectorTopology connectorTopology) {
         assertEngineCompatibility(engine);
-        //assertConnectorTopologyCompatibility(connectorTopology); not work on Studio
+        //assertConnectorTopologyCompatibility(connectorTopology); TODO not work on Studio
         try {
             HadoopClusterConfigurationInputProperties inputProperties = (HadoopClusterConfigurationInputProperties) properties;
             switch (inputProperties.clusterManagerType.getValue()) {
             case AMBARI:
-                return new JarRuntimeInfo(new URL(HadoopClusterFamilyDefinition.MAVEN_RUNTIME_URI_AMBARI),
+                return new JarRuntimeInfo(new URL(HadoopClusterFamilyDefinition.MAVEN_RUNTIME_URI),
                         DependenciesReader.computeDependenciesFilePath(HadoopClusterFamilyDefinition.MAVEN_GROUP_ID,
-                                HadoopClusterFamilyDefinition.MAVEN_RUNTIME_ARTIFACT_ID_AMBARI),
+                                HadoopClusterFamilyDefinition.MAVEN_RUNTIME_ARTIFACT_ID),
                         RUNTIME_AMBARI);
             case CLOUDERA_MANAGER:
-                return new JarRuntimeInfo(new URL(HadoopClusterFamilyDefinition.MAVEN_RUNTIME_URI_CM),
+                return new JarRuntimeInfo(new URL(HadoopClusterFamilyDefinition.MAVEN_RUNTIME_URI),
                         DependenciesReader.computeDependenciesFilePath(HadoopClusterFamilyDefinition.MAVEN_GROUP_ID,
-                                HadoopClusterFamilyDefinition.MAVEN_RUNTIME_ARTIFACT_ID_CM),
+                                HadoopClusterFamilyDefinition.MAVEN_RUNTIME_ARTIFACT_ID),
                         RUNTIME_CM);
             default:
                 throw new ComponentException(new RuntimeException("Do not support"));

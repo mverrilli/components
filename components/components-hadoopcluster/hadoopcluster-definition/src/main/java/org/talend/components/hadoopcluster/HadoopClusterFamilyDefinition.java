@@ -17,7 +17,8 @@ import static org.talend.components.api.Constants.COMPONENT_INSTALLER_PREFIX;
 
 import org.talend.components.api.AbstractComponentFamilyDefinition;
 import org.talend.components.api.ComponentInstaller;
-import org.talend.components.hadoopcluster.configuration.input.HadoopClusterConfigurationInputDefinition;
+import org.talend.components.hadoopcluster.configuration.input
+        .HadoopClusterConfigurationInputDefinition;
 
 import com.google.auto.service.AutoService;
 
@@ -31,13 +32,19 @@ public class HadoopClusterFamilyDefinition extends AbstractComponentFamilyDefini
 
     public static final String MAVEN_GROUP_ID = "org.talend.components";
 
-    public static final String MAVEN_RUNTIME_ARTIFACT_ID_AMBARI = "hadoopcluster-runtime_ambari";
+    public static final String MAVEN_RUNTIME_ARTIFACT_ID = "hadoopcluster-runtime";
 
-    public static final String MAVEN_RUNTIME_ARTIFACT_ID_CM = "hadoopcluster-runtime_cm";
+    public static final String MAVEN_RUNTIME_URI = "mvn:" + MAVEN_GROUP_ID + "/" + MAVEN_RUNTIME_ARTIFACT_ID;
 
-    public static final String MAVEN_RUNTIME_URI_AMBARI = "mvn:" + MAVEN_GROUP_ID + "/" + MAVEN_RUNTIME_ARTIFACT_ID_AMBARI;
-
-    public static final String MAVEN_RUNTIME_URI_CM = "mvn:" + MAVEN_GROUP_ID + "/" + MAVEN_RUNTIME_ARTIFACT_ID_CM;
+    // TODO For TUP-17240, use one runtime module instead of independent runtime module
+    // public static final String MAVEN_RUNTIME_ARTIFACT_ID_AMBARI = "hadoopcluster-runtime_ambari";
+    //
+    // public static final String MAVEN_RUNTIME_ARTIFACT_ID_CM = "hadoopcluster-runtime_cm";
+    //
+    // public static final String MAVEN_RUNTIME_URI_AMBARI = "mvn:" + MAVEN_GROUP_ID + "/" +
+    // MAVEN_RUNTIME_ARTIFACT_ID_AMBARI;
+    //
+    // public static final String MAVEN_RUNTIME_URI_CM = "mvn:" + MAVEN_GROUP_ID + "/" + MAVEN_RUNTIME_ARTIFACT_ID_CM;
 
     public HadoopClusterFamilyDefinition() {
         super(NAME, new HadoopClusterConfigurationInputDefinition());
