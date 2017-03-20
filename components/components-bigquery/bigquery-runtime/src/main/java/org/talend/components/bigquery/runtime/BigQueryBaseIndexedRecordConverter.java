@@ -18,13 +18,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.api.client.util.Base64;
 import org.apache.avro.Schema;
 import org.apache.avro.generic.IndexedRecord;
 import org.talend.daikon.avro.AvroUtils;
 import org.talend.daikon.avro.converter.AvroConverter;
+import org.talend.daikon.avro.converter.ComparableIndexedRecordBase;
 import org.talend.daikon.avro.converter.IndexedRecordConverter;
 
+import com.google.api.client.util.Base64;
 import com.google.api.services.bigquery.model.TableRow;
 
 /**
@@ -64,7 +65,7 @@ public abstract class BigQueryBaseIndexedRecordConverter<T extends Map> implemen
         return new BigQueryIndexedRecord(row);
     }
 
-    public class BigQueryIndexedRecord implements IndexedRecord {
+    public class BigQueryIndexedRecord extends ComparableIndexedRecordBase {
 
         private Object[] values;
 
@@ -74,8 +75,8 @@ public abstract class BigQueryBaseIndexedRecordConverter<T extends Map> implemen
                 Object v = row.get(field.name());
                 // Need to decode base64 for bytes type, use avro bytes type is ok as only one bigquery bytes type mapping for avro bytes type.
                 // But can be better if there is db type in avro schema.
-                if(AvroUtils.isSameType(AvroUtils.unwrapIfNullable(field.schema()), AvroUtils._bytes())) {
-                    v = ByteBuffer.wrap(Base64.decodeBase64((String) v));
+                if (AvroUtils.isSameType(AvroUtils.unwrapIfNullable(field.schema()), AvroUtils._bytes())) {
+                    v = v == null ? null : ByteBuffer.wrap(Base64.decodeBase64((String) v));
                 }
                 values[field.pos()] = fieldConverters.get(field.name()).convertToAvro(v);
             }
