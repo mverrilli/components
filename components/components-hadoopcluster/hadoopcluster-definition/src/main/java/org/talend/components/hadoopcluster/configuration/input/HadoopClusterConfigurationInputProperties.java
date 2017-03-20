@@ -23,6 +23,7 @@ import org.talend.components.common.SchemaProperties;
 import org.talend.components.common.SslProperties;
 import org.talend.components.common.UserPasswordProperties;
 import org.talend.daikon.properties.presentation.Form;
+import org.talend.daikon.properties.presentation.Widget;
 import org.talend.daikon.properties.property.Property;
 import org.talend.daikon.properties.property.PropertyFactory;
 
@@ -59,10 +60,11 @@ public class HadoopClusterConfigurationInputProperties extends FixedConnectorsCo
         Form mainForm = new Form(this, Form.MAIN);
         mainForm.addRow(clusterManagerType);
         mainForm.addRow(url);
-        mainForm.addRow(basicAuth);
-        mainForm.addRow(ssl);
-        mainForm.addRow(schema);
-        mainForm.addRow(blackList);
+        mainForm.addRow(basicAuth.getForm(Form.MAIN));
+        mainForm.addRow(ssl.getForm(Form.MAIN));
+        // use Schema Form.Reference here, as studio has not support Form.MAIN yet
+        mainForm.addRow(schema.getForm(Form.REFERENCE));
+        mainForm.addRow(Widget.widget(blackList).setWidgetType(Widget.TABLE_WIDGET_TYPE));
     }
 
     @Override

@@ -14,14 +14,16 @@
 package org.talend.components.hadoopcluster.configuration.input;
 
 import org.apache.commons.lang3.reflect.TypeLiteral;
+import org.talend.components.api.properties.ComponentPropertiesImpl;
 import org.talend.daikon.properties.PropertiesImpl;
 import org.talend.daikon.properties.presentation.Form;
 import org.talend.daikon.properties.property.Property;
 import org.talend.daikon.properties.property.PropertyFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class HadoopClusterConfigurationBlackListTableProperties extends PropertiesImpl {
+public class HadoopClusterConfigurationBlackListTableProperties extends ComponentPropertiesImpl {
 
     private static final TypeLiteral<List<String>> LIST_STRING_TYPE = new TypeLiteral<List<String>>() {// empty
     };
