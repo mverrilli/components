@@ -35,23 +35,4 @@ public class ClouderaManagerConfigurationReader extends HadoopClusterConfigurati
         builder = new HadoopCMConfigurator.Builder();
     }
 
-    public static void main(String[] args) throws IOException {
-        HadoopClusterConfigurationInputProperties properties = new
-                HadoopClusterConfigurationInputProperties("properties");
-        properties.init();
-        properties.clusterManagerType.setValue(HadoopClusterConfigurationInputProperties
-                .ClusterManagerType.CLOUDERA_MANAGER);
-        properties.url.setValue("http://192.168.31.52:7180/");
-        properties.basicAuth.useAuth.setValue(true);
-        properties.basicAuth.userId.setValue("admin");
-        properties.basicAuth.password.setValue("admin");
-
-        ClouderaManagerConfigurationSource source = new ClouderaManagerConfigurationSource();
-        source.initialize(null, properties);
-        BoundedReader reader = source.createReader(null);
-        for (boolean available = reader.start(); available; available = reader.advance()) {
-            Object current = reader.getCurrent();
-            System.out.println(current);
-        }
-    }
 }

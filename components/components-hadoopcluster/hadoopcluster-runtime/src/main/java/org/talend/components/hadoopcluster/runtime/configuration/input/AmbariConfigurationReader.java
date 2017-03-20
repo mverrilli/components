@@ -35,24 +35,4 @@ public class AmbariConfigurationReader extends HadoopClusterConfigurationReader 
         builder = new HadoopAmbariConfigurator.Builder();
     }
 
-    public static void main(String[] args) throws IOException {
-        HadoopClusterConfigurationInputProperties properties = new
-                HadoopClusterConfigurationInputProperties("properties");
-        properties.init();
-        properties.clusterManagerType.setValue(HadoopClusterConfigurationInputProperties
-                .ClusterManagerType.AMBARI);
-        properties.url.setValue("http://tal-qa139.talend.lan:8080");
-        properties.basicAuth.useAuth.setValue(true);
-        properties.basicAuth.userId.setValue("admin");
-        properties.basicAuth.password.setValue("admin");
-
-        AmbariConfigurationSource source = new AmbariConfigurationSource();
-        source.initialize(null, properties);
-        BoundedReader reader = source.createReader(null);
-        for (boolean available = reader.start(); available; available = reader.advance()) {
-            Object current = reader.getCurrent();
-            System.out.println(current);
-        }
-    }
-
 }
