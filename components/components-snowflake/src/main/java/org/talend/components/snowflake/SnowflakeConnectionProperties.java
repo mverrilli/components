@@ -221,6 +221,10 @@ public class SnowflakeConnectionProperties extends ComponentPropertiesImpl imple
         String queryString = "";
         String account = this.account.getStringValue();
 
+        if (account == null || account.isEmpty() || account.equalsIgnoreCase("null")) {
+            throw new IllegalArgumentException(" Missing user name");
+        }
+
         String warehouse = this.warehouse.getStringValue();
         String db = this.db.getStringValue();
         String schema = this.schemaName.getStringValue();
