@@ -17,12 +17,16 @@ import org.apache.avro.Schema;
 import org.apache.avro.SchemaBuilder;
 import org.apache.avro.generic.IndexedRecord;
 
+/**
+ * This class represent hadoop configuration for hadoop cluster manager API, which include
+ * cluster name, service name, configuration file name and the content in xml format.
+ */
 public class HadoopClusterConfiguration implements IndexedRecord {
 
     public static final Schema schema;
 
     static {
-        schema = SchemaBuilder.record("hadoopcluster").fields() //
+        schema = SchemaBuilder.record("hadoopconfiguration").fields() //
                 .name("clusterName").type().stringType().noDefault() //
                 .name("serviceName").type().stringType().noDefault() //
                 .name("confFileName").type().stringType().noDefault() //

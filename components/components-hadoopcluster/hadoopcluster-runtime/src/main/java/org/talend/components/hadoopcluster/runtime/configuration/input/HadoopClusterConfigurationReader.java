@@ -15,6 +15,9 @@ package org.talend.components.hadoopcluster.runtime.configuration.input;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -66,26 +69,31 @@ public abstract class HadoopClusterConfigurationReader extends AbstractBoundedRe
                 String filePath = properties.ssl.trustStorePath.getValue();
                 String type = properties.ssl.trustStoreType.getValue().toString();
                 String pwd = properties.ssl.trustStorePassword.getValue();
-                TrustManager[] tms = null;
-                if (filePath != null && type != null) {
-                    char[] password = null;
-                    if (pwd != null) {
-                        password = pwd.toCharArray();
-                    }
-                    java.security.KeyStore trustStore;
-                    trustStore = java.security.KeyStore.getInstance(type);
-                    trustStore.load(new java.io.FileInputStream(filePath), password);
-                    javax.net.ssl.TrustManagerFactory tmf = javax.net.ssl.TrustManagerFactory
-                            .getInstance(javax.net.ssl.KeyManagerFactory.getDefaultAlgorithm());
-                    tmf.init(trustStore);
-                    tms = tmf.getTrustManagers();
-                }
-                this.builder = this.builder.withTrustManagers(tms);
+
+                this.builder = this.builder.withTrustManagers(getTrustManagers(filePath, type, pwd));
             }
             configurator = this.builder.build();
         } catch (Exception e) {
             throw new ComponentException(e);
         }
+    }
+
+    private TrustManager[] getTrustManagers(String filePath, String type, String pwd) throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException {
+        TrustManager[] tms = null;
+        if (filePath != null && type != null) {
+            char[] password = null;
+            if (pwd != null) {
+                password = pwd.toCharArray();
+            }
+            java.security.KeyStore trustStore;
+            trustStore = java.security.KeyStore.getInstance(type);
+            trustStore.load(new java.io.FileInputStream(filePath), password);
+            javax.net.ssl.TrustManagerFactory tmf = javax.net.ssl.TrustManagerFactory
+                    .getInstance(javax.net.ssl.KeyManagerFactory.getDefaultAlgorithm());
+            tmf.init(trustStore);
+            tms = tmf.getTrustManagers();
+        }
+        return tms;
     }
 
     @Override

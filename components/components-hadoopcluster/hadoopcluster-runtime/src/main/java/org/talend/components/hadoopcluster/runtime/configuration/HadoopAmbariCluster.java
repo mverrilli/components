@@ -36,7 +36,7 @@ public class HadoopAmbariCluster implements HadoopCluster {
     ClusterResource cluster;
 
     ServicesResource services;
-    
+
     List<String> blacklistParams;
 
     // if the server support service_config_versions
@@ -78,14 +78,15 @@ public class HadoopAmbariCluster implements HadoopCluster {
         if (service == HadoopHostedService.HIVE) {
             ApiConfigFile hcatalogConfig = null;
             for (ApiConfigFile file : configs) {
-                if ("webhcat-site".equals(file.getType())) { //$NON-NLS-1$
+                if ("webhcat-site".equals(file.getType())) {
                     hcatalogConfig = file;
                     break;
                 }
             }
             if (hcatalogConfig != null) {
                 configs.remove(hcatalogConfig);
-                servicesMapping.put(HadoopHostedService.WEBHCAT, new HadoopAmbariClusterService(Arrays.asList(hcatalogConfig), blacklistParams));
+                servicesMapping.put(HadoopHostedService.WEBHCAT,
+                        new HadoopAmbariClusterService(Arrays.asList(hcatalogConfig), blacklistParams));
             }
         }
         servicesMapping.put(service, new HadoopAmbariClusterService(configs, blacklistParams));
@@ -105,8 +106,8 @@ public class HadoopAmbariCluster implements HadoopCluster {
         Map<String, Map<String, String>> actualConfigVersion = getActualConfigVersion();
         Map<HadoopHostedService, HadoopClusterService> servicesMapping = new HashMap<>();
         for (String serviceName : servicesName) {
-            servicesMapping.put(HadoopHostedService.fromString(serviceName), new HadoopAmbariClusterService(
-                    getConfigFiles(actualConfigVersion.get(serviceName)), blacklistParams));
+            servicesMapping.put(HadoopHostedService.fromString(serviceName),
+                    new HadoopAmbariClusterService(getConfigFiles(actualConfigVersion.get(serviceName)), blacklistParams));
         }
         return servicesMapping;
     }
@@ -125,8 +126,8 @@ public class HadoopAmbariCluster implements HadoopCluster {
 
     private Map<String, Map<String, String>> getActualConfigVersion() {
         Map<String, Map<String, String>> serviceConfigVersion = new HashMap<>();
-        List<ApiActualConfigs> actualConfigs = cluster
-                .readActucalConfigs("components/host_components/HostRoles/actual_configs").getActualConfigs(); //$NON-NLS-1$
+        List<ApiActualConfigs> actualConfigs = cluster.readActucalConfigs("components/host_components/HostRoles/actual_configs")
+                .getActualConfigs();
         for (ApiActualConfigs actualConfig : actualConfigs) {
             String serviceName = actualConfig.getServiceInfo().getServiceName();
             Map<String, String> actualConfigVersions = new HashMap<>();
@@ -134,12 +135,11 @@ public class HadoopAmbariCluster implements HadoopCluster {
                 for (ApiHostComponents hostComponent : component.getHostComponents()) {
                     Map<String, Map<String, String>> actualConfigFiles = hostComponent.getHostRoles().getActualConfigs();
                     for (String configFileType : actualConfigFiles.keySet()) {
-                        String version = ""; //$NON-NLS-1$
                         // tag for HDP 2.0
-                        version = actualConfigFiles.get(configFileType).get("tag"); //$NON-NLS-1$
-                        if (version == null || "".equals(version)) { //$NON-NLS-1$
+                        String version = actualConfigFiles.get(configFileType).get("tag");
+                        if (version == null || "".equals(version)) {
                             // default for HDP 2.1
-                            version = actualConfigFiles.get(configFileType).get("default"); //$NON-NLS-1$
+                            version = actualConfigFiles.get(configFileType).get("default");
                         }
                         actualConfigVersions.put(configFileType, version);
                     }
@@ -168,9 +168,9 @@ public class HadoopAmbariCluster implements HadoopCluster {
         return configFiles;
     }
 
-	@Override
-	public void setBlacklistParams(List<String> names) {
-		blacklistParams = names;
-	}
+    @Override
+    public void setBlacklistParams(List<String> names) {
+        blacklistParams = names;
+    }
 
 }

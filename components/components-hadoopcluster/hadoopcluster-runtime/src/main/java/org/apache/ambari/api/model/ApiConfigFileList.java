@@ -18,6 +18,10 @@ import javax.xml.bind.annotation.XmlElement;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+/**
+ * This is for new way to get configurations, when the server support service_config_versions
+ * Then call get method on /configurations/service_config_versions with service_name parameter
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiConfigFileList extends ApiListBase<ApiConfigFile> {
 

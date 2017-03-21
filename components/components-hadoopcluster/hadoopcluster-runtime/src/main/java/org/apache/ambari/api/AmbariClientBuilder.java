@@ -38,13 +38,13 @@ import com.google.common.cache.LoadingCache;
 
 public class AmbariClientBuilder {
 
-    public static final int DEFAULT_TCP_PORT = 7180;
+    public static final int DEFAULT_TCP_PORT = 8080;
 
-    public static final long DEFAULT_CONNECTION_TIMEOUT = 0;
+    public static final long DEFAULT_CONNECTION_TIMEOUT = 30000L;
 
     public static final TimeUnit DEFAULT_CONNECTION_TIMEOUT_UNITS = TimeUnit.MILLISECONDS;
 
-    public static final long DEFAULT_RECEIVE_TIMEOUT = 0;
+    public static final long DEFAULT_RECEIVE_TIMEOUT = 60000L;
 
     public static final TimeUnit DEFAULT_RECEIVE_TIMEOUT_UNITS = TimeUnit.MILLISECONDS;
 

@@ -20,6 +20,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.google.common.base.Objects;
 
+/**
+ * This is for old way to get configurations, when the server do not support service_config_versions
+ * Then call get method on /configurations with type and tag parameters
+ */
 @XmlRootElement(name = "configList")
 public class ApiConfigFileList2 extends ApiListBase<ApiConfigFile> {
 
