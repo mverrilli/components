@@ -17,16 +17,21 @@ import static org.talend.daikon.properties.property.PropertyFactory.newEnum;
 import static org.talend.daikon.properties.property.PropertyFactory.newString;
 
 import java.util.EnumSet;
+import java.util.List;
 
 import org.talend.components.api.properties.ComponentPropertiesImpl;
 import org.talend.components.api.properties.ComponentReferenceProperties;
 import org.talend.components.azurestorage.AzureStorageProvideConnectionProperties;
 import org.talend.components.azurestorage.blob.runtime.AzureStorageSourceOrSink;
+import org.talend.components.azurestorage.queue.runtime.AzureStorageQueueSourceOrSink;
+import org.talend.components.azurestorage.table.runtime.AzureStorageTableSourceOrSink;
+import org.talend.daikon.NamedThing;
 import org.talend.daikon.i18n.GlobalI18N;
 import org.talend.daikon.i18n.I18nMessages;
 import org.talend.daikon.properties.PresentationItem;
 import org.talend.daikon.properties.Properties;
 import org.talend.daikon.properties.ValidationResult;
+import org.talend.daikon.properties.ValidationResult.Result;
 import org.talend.daikon.properties.presentation.Form;
 import org.talend.daikon.properties.presentation.Widget;
 import org.talend.daikon.properties.property.Property;
@@ -75,6 +80,8 @@ public class TAzureStorageConnectionProperties extends ComponentPropertiesImpl
             "referencedComponent", TAzureStorageConnectionDefinition.COMPONENT_NAME);
 
     public PresentationItem testConnection = new PresentationItem("testConnection", "Test connection");
+    
+    public List<NamedThing> BlobSchema = null,QueueSchema = null,TableSchema = null;
 
     public TAzureStorageConnectionProperties(String name) {
         super(name);
@@ -152,6 +159,41 @@ public class TAzureStorageConnectionProperties extends ComponentPropertiesImpl
 
     public ValidationResult validateTestConnection() throws Exception {
         ValidationResult vr = AzureStorageSourceOrSink.validateConnection(this);
+        try {
+            if (useSharedAccessSignature.getValue()) {
+                String[] SAS = sharedAccessSignature.getValue().split("&");
+                boolean allowedBlob = true,allowedQueue = true,allowedtable = true;
+                for (String string : SAS) {
+                    if (string.indexOf("ss=") != -1) {
+                        allowedBlob = string.indexOf("b") == -1 ? false : true;
+                        allowedQueue = string.indexOf("q") == -1 ? false : true;
+                        allowedtable = string.indexOf("t") == -1 ? false : true;
+                    }
+                }
+                if (allowedBlob) {
+                    BlobSchema = AzureStorageSourceOrSink.getSchemaNames(null, this);
+                }
+                if (allowedQueue) {
+                    QueueSchema = AzureStorageQueueSourceOrSink.getSchemaNames(null, this);
+                }
+                if (allowedtable) {
+                    TableSchema = AzureStorageTableSourceOrSink.getSchemaNames(null, this);
+                }
+            } else {
+                BlobSchema = AzureStorageSourceOrSink.getSchemaNames(null, this);
+                QueueSchema = AzureStorageQueueSourceOrSink.getSchemaNames(null, this);
+                TableSchema = AzureStorageTableSourceOrSink.getSchemaNames(null, this);
+            }
+        } catch (Exception e) {
+            vr.setStatus(Result.ERROR);
+            String errorMessage = e.getLocalizedMessage()+'\n';
+            Throwable throwable = e.getCause();
+            while(throwable!=null){
+                errorMessage+=throwable.getLocalizedMessage()+'\n';
+                throwable = throwable.getCause();
+            }
+            vr.setMessage(errorMessage);
+        }
         if (vr.getStatus() == ValidationResult.Result.OK) {
             vr.setMessage(i18nMessages.getMessage("message.success"));
             getForm(FORM_WIZARD).setAllowForward(true);
