@@ -218,37 +218,44 @@ public class SnowflakeConnectionProperties extends ComponentPropertiesImpl imple
     }
 
     public String getConnectionUrl() {
-        String queryString = "";
+        StringBuilder stringBuilder = new StringBuilder();
         String account = this.account.getStringValue();
 
-        if (account == null || account.isEmpty() || account.equalsIgnoreCase("null")) {
+        if (account == null || account.isEmpty()) {
             throw new IllegalArgumentException(" Missing user name");
         }
 
         String warehouse = this.warehouse.getStringValue();
         String db = this.db.getStringValue();
         String schema = this.schemaName.getStringValue();
-
         String role = this.role.getStringValue();
         String tracing = this.tracing.getStringValue();
 
-        if (null != warehouse && !"".equals(warehouse)) {
-            queryString = queryString + "warehouse=" + warehouse;
+        if (warehouse != null && !warehouse.isEmpty()) {
+            appendProperty("warehouse", warehouse, stringBuilder);
         }
-        if (null != db && !"".equals(db)) {
-            queryString = queryString + "&db=" + db;
+        if (db != null && !db.isEmpty()) {
+            appendProperty("db", db, stringBuilder);
         }
-        if (null != schema && !"".equals(schema)) {
-            queryString = queryString + "&schema=" + schema;
+        if (schema != null && !schema.isEmpty()) {
+            appendProperty("schema", schema, stringBuilder);
+        }
+        if (role != null && !role.isEmpty()) {
+            appendProperty("role", role, stringBuilder);
+        }
+        if (tracing != null && !tracing.isEmpty()) {
+            appendProperty("tracing", tracing, stringBuilder);
         }
 
-        if (null != role && !"".equals(role)) {
-            queryString = queryString + "&role=" + role;
+        return new StringBuilder().append("jdbc:snowflake://").append(account)
+                .append(".snowflakecomputing.com").append("/?").append(stringBuilder).toString();
+    }
+
+    private void appendProperty(String propertyName, String propertyValue, StringBuilder builder) {
+        if (builder.length() > 0) {
+            builder.append("&");
         }
-        if (null != tracing && !"".equals(tracing)) {
-            queryString = queryString + "&tracing=" + tracing;
-        }
-        return "jdbc:snowflake://" + account + ".snowflakecomputing.com" + "/?" + queryString;
+        builder.append(propertyName).append("=").append(propertyValue);
     }
 
 }
